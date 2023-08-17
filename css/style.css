@@ -1,0 +1,855 @@
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Josefin+Sans:ital,wght@1,700&family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@500&display=swap');
+
+body{
+    display: flex;
+    border: none;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: 0px;
+    background-color: #FFFFFF;
+        /* 画像を常に天地左右の中央に配置 */
+    background-position: center center;
+    
+    /* 画像をタイル状に繰り返し表示しない */
+    background-repeat: no-repeat;
+    
+    /* コンテンツの高さが画像の高さより大きい時、動かないように固定 */
+    background-attachment: fixed;
+    
+    /* 表示するコンテナの大きさに基づいて、背景画像を調整 */
+    background-size: cover;
+}
+
+.leftbox{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background-color: #FFC832;
+    width: 35%;
+    height: 100%;
+    margin-left: 0px;
+    padding: 32px;
+}
+
+.leftbox h1{
+    margin-left: 20px;
+    color:#fff;
+    font-size: 2em;
+}
+.leftbox .logo{
+    display: flex;
+}
+
+.leftbox .logo img{
+
+    margin-left: 16px;
+    margin-top: 16px;
+    width: 200px;
+    
+}
+.leftbox .logo p{
+    color:#fff;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 32px;
+    margin-left: 8px;
+    margin-top: auto;
+    margin-bottom: -4px;
+}
+
+.leftbox2{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background-color: #FFC832;
+    width: 35%;
+    height: 100vh;
+    margin-left: 0px;
+    padding: 32px;
+}
+
+.leftbox2 h1{
+    margin-left: 20px;
+    color:#fff;
+    font-size: 2em;
+}
+.leftbox2 .logo{
+    display: flex;
+}
+
+.leftbox2 .logo img{
+
+    margin-left: 16px;
+    margin-top: 16px;
+    width: 200px;
+    
+}
+.leftbox2 .logo p{
+    color:#fff;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 32px;
+    margin-left: 8px;
+    margin-top: auto;
+    margin-bottom: -4px;
+}
+
+.textbox{
+    padding: 32px;
+    width: auto;
+    margin-left: 24px;
+    margin-right: 24px;
+    margin-top: 64px;
+    margin-bottom: 100px;
+    border-radius: 25px;
+    background-color: #fff;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+
+.textbox h1{
+    word-wrap: break-word;
+    margin: 0px;
+    color: #FFC832;
+    font-size: 32px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+}
+
+.textbox h2{
+    word-wrap: break-word;
+    margin: 0px;
+    color: #252525;
+    text-align: center;
+    font-size: 32px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+}
+
+.textbox h3{
+    word-wrap: break-word;
+    margin: 0px;
+    color: #252525;
+    text-align: center;
+    font-size: 18px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+}
+
+.textbox p{
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #252525;
+    font-size: 16px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.textbox .p2{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.textbox .p2c{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    text-align: center;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.textbox .p3{
+    margin-top: 24px;
+    text-align: center;
+    word-wrap: break-word;
+    line-height: 24px;
+    color: #252525;
+    font-size: 22px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.textbox .maillink{
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #4e4428;
+    text-decoration: none;
+    font-size: 16px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.textbox .cntzone{
+    display: flex;
+    width: 100%;
+    padding: 0px;
+}
+
+.textbox .cntzone .usercnt{
+    margin-top: 24px;
+    margin-left: 12px;
+    margin-right: 12px;
+    width: 43%;
+    height: 5dvh;
+    border-radius: 15px;
+    background-color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    padding: 18px;
+}
+
+.textbox .cntzone .usercnt .p1{
+    display: block;
+    margin-top: 0px;
+    margin-bottom: 6px;
+    text-align: left;
+    word-wrap: break-word;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.textbox .cntzone .usercnt p{
+    margin-top: 0px;
+    margin-bottom: 8px;
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 24px;
+    color: #252525;
+    font-size: 20px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.btnbox{
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 32px;
+    padding-right: 32px;
+    border-radius: 15px;
+    background-color: #f7f7f7;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    margin-top: 32px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+
+}
+
+label > input {
+    display:none; /* アップロードボタンのスタイルを無効にする */
+}
+
+.irobutton{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:40%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #FFC832;
+
+    text-align: center;
+    border-radius: 50px;
+    color:#fff;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.irobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:45%;
+}
+.irobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:35%;
+}
+
+.sirobutton{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:40%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    text-align: center;
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.sirobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:45%;
+}
+.sirobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+.formarea{
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 32px;
+    padding-right: 32px;
+    border-radius: 15px;
+    background-color: #f7f7f7;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    margin-top: 64px;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.formarea .iconimg{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.formarea .iconimg img{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 100px;
+    height:100px;
+    border-radius: 50%;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+
+.myarea{
+    padding-top: 16px;
+    padding-bottom: 32px;
+    padding-left: 32px;
+    padding-right: 32px;
+    border-radius: 15px;
+    background-color: #f7f7f7;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    margin-top: 64px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.myarea img{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 100px;
+    height:100px;
+    border-radius: 50%;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+
+.myarea p{
+    margin-top: 32px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.inbox {
+    width: 96%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 10px;
+    background: #fff;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: rgb(32,32,32);
+    font-size: 1em;
+    line-height: 1.5;
+    white-space: nowrap;
+    box-shadow:0px 0px 25px rgba(0,0,0,0.05) inset;
+    box-shadow:0px 0px 25px rgba(0,0,0,0.07);
+    overflow-x: scroll; 
+    overflow-y : scroll ;
+    transition: border 350ms ease-in-out;
+    transition: border-bottom 150ms ease-out;
+    border: 1px solid #f1f1f1;
+  }
+  
+.inbox::placeholder {
+    color: #999;
+}
+
+.inbox:hover {
+    outline: none;
+    border: 1px solid #FFC832;
+}
+
+.inbox:focus {
+    outline: none;
+    border: 1px solid #FFC832;
+    border-bottom: 3px solid #FFC832;
+}
+
+
+.errmsg{
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 32px;
+    padding-right: 32px;
+    border-radius: 15px;
+    background-color: #ffebeb;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    margin-top: 64px;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    color:#ff4848;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    word-wrap: break-word;
+    line-height: 20px;
+    border: 1px solid #FF4848;
+}
+
+.flexbtn{
+    display: flex;
+}
+
+.flexbtn .irobutton{
+    border: none;
+    display: block;
+    width:20%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#fff;
+    font-size: 26px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.flexbtn.irobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:55%;
+}
+.flexbtn.irobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+.flexbtn.sirobutton{
+    border: none;
+    display: block;
+    width:50%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 26px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.flexbtn.sirobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:55%;
+}
+.flexbtn.sirobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+.rolebox{
+
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 120px;
+    padding-left: auto;
+    padding-right: auto;
+
+    background-color: #fff;
+    border: 1px solid #FFC832;
+
+    border-radius: 25px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+
+}
+
+.rolebox p{
+
+    color:#FFC832;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 10px;
+    margin-right: 10px;
+
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+
+}
+
+
+.userleftbox{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background-color: #FFC832;
+    width: 10%;
+    height: 100%;
+    margin-left: 0px;
+    padding: 32px;
+}
+
+.userleftbox h1{
+    font-family: 'Zen Maru Gothic', sans-serif;
+    margin-left: 20px;
+    color:#fff;
+    font-size: 32px;
+}
+.userleftbox .logo{
+    display: flex;
+}
+
+.userleftbox .logo img{
+
+    margin-left: 16px;
+    margin-top: 16px;
+    width: 72%;
+    
+}
+.userleftbox .logo p{
+    color:#fff;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 32px;
+    margin-left: 8px;
+    margin-top: auto;
+    margin-bottom: -4px;
+}
+
+.leftbutton{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:70%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 20px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.leftbutton:hover{
+    background-color: #FFFAE6;
+    color: #FFC832;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:75%;
+}
+.leftbutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:65%;
+}
+
+main{
+    border-radius: 25px;
+    margin-top: 24px;
+    margin-left: 24px;
+    margin-right: 24px;
+    width: 80%;
+    background-color: #fff;
+    padding: 24px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+
+main h1{
+    color:#252525;
+    font-size: 32px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+}
+
+
+.btn_area{
+    display: flex;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.fbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:50%;
+    padding: 8px auto;
+
+    margin-top: 12px;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 0px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    text-align: center;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.fbtn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:55%;
+}
+.fbtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+/*------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------スマホ向け--------------------------------------------------*/
+/*--------------------------------------------------ここから--------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------*/
+
+@media screen and (max-width:1010px) {
+
+    body{
+        backdrop-filter: blur(10px);
+    }
+
+    .leftbox{
+        margin-top: 0px;
+        margin-bottom: 0px;
+        background-color: transparent;
+        width: 100%;
+        height: 100%;
+        margin-left: 0px;
+        padding: 16px;
+    }
+
+    .leftbox h1{
+        margin-left: 20px;
+        color:#fff;
+        font-size: 2em;
+    }
+    .leftbox .logo{
+        display: flex;
+        background-color: #FFC832;
+        border-radius: 15px;
+    }
+
+    .leftbox .logo img{
+
+        margin-left: 16px;
+        margin-top: 16px;
+        width: 200px;
+        
+    }
+    .leftbox .logo p{
+        color:#fff;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 32px;
+        margin-left: 8px;
+        margin-top: auto;
+        margin-bottom: -4px;
+    }
+
+
+    .textbox{
+        padding: 32px;
+        width: auto;
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-top: 64px;
+        margin-bottom: 8px;
+        border-radius: 25px;
+        background-color: #fff;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    }
+    
+    .textbox h1{
+        word-wrap: break-word;
+        margin: 0px;
+        color: #FFC832;
+        font-size: 32px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+    }
+
+    
+    .btnbox{
+        padding-top: 12px;
+        padding-bottom: 12px;
+        padding-left: 12px;
+        padding-right: 12px;
+        border-radius: 15px;
+        background-color: #f7f7f7;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+        margin-top: 32px;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+
+    }
+
+    .irobutton{
+        width:60%;
+    }
+    .irobutton:hover{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:65%;
+    }
+    .irobutton:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:55%;
+    }
+    
+    .sirobutton{
+        width:60%;
+    }
+    .sirobutton:hover{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:65%;
+    }
+    .sirobutton:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:55%;
+    }
+
+    
+    .btn_area{
+        display: block;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+        
+    .fbtn{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:50%;
+        padding: 8px auto;
+
+        margin-top: 12px;
+        margin-left: 12px;
+        margin-right: 12px;
+        margin-bottom: 0px;
+
+        padding-top: 12px;
+        padding-bottom: 12px;
+
+
+        background-color: #FFC832;
+
+        border-radius: 50px;
+        color:#FFFAE6;
+        font-size: 16px;
+        text-align: center;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    .fbtn:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:55%;
+    }
+    .fbtn:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:45%;
+    }
+
+    .leftbox2{
+        margin-top: 0px;
+        margin-bottom: 0px;
+        background-color: #FFC832;
+        width: 100%;
+        height: 100vh;
+        margin-left: 0px;
+        padding: 32px;
+    }
+}

@@ -1,0 +1,3501 @@
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Josefin+Sans:ital,wght@1,700&family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@500&display=swap');
+
+
+::-webkit-scrollbar{
+    display:none;
+}
+::-webkit-scrollbar:hover{
+    overflow: scroll; 
+    margin-right: 10px;
+    border-radius: 25px;
+}
+body{
+    width: 70%;
+    display: flex;
+    border: none;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 12px;
+    background-color: #f7f7f7;
+        /* 画像を常に天地左右の中央に配置 */
+    background-position: center center;
+    
+    /* 画像をタイル状に繰り返し表示しない */
+    background-repeat: no-repeat;
+    
+    /* コンテンツの高さが画像の高さより大きい時、動かないように固定 */
+    background-attachment: fixed;
+    
+    /* 表示するコンテナの大きさに基づいて、背景画像を調整 */
+    background-size: cover;
+}
+
+.irobutton{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:50%;
+    margin: 32px;
+    padding: 8px 5%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #FFC832;
+
+    text-align: center;
+    border-radius: 50px;
+    color:#fff;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.irobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:55%;
+}
+.irobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+.sirobutton{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:40%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    text-align: center;
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.sirobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:45%;
+}
+.sirobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+.inbox {
+    width: 96%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 10px;
+    background: #fff;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: rgb(32,32,32);
+    font-size: 1em;
+    line-height: 1.5;
+    white-space: nowrap;
+    box-shadow:0px 0px 25px rgba(0,0,0,0.05) inset;
+    box-shadow:0px 0px 25px rgba(0,0,0,0.07);
+    overflow-x: scroll; 
+    overflow-y : scroll ;
+    transition: border 350ms ease-in-out;
+    transition: border-bottom 150ms ease-out;
+    border: 1px solid #f1f1f1;
+  }
+  
+.inbox::placeholder {
+    color: #999;
+}
+
+.inbox:hover {
+    outline: none;
+    border: 1px solid #FFC832;
+}
+
+.inbox:focus {
+    outline: none;
+    border: 1px solid #FFC832;
+    border-bottom: 3px solid #FFC832;
+}
+
+
+.errmsg{
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 32px;
+    padding-right: 32px;
+    border-radius: 10px;
+    background-color: #ffebeb;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    margin: 12px;
+    text-align: left;
+    color:#ff4848;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    word-wrap: break-word;
+    line-height: 20px;
+    border: 1px solid #FF4848;
+}
+
+.flexbtn{
+    display: flex;
+}
+
+.flexbtn .irobutton{
+    border: none;
+    display: block;
+    width:20%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#fff;
+    font-size: 26px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.flexbtn.irobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:55%;
+}
+.flexbtn.irobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+.flexbtn.sirobutton{
+    border: none;
+    display: block;
+    width:50%;
+    margin: 32px;
+    padding: 8px 10%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 26px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.flexbtn.sirobutton:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:55%;
+}
+.flexbtn.sirobutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:45%;
+}
+
+
+.rolebox{
+
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 120px;
+    padding-left: auto;
+    padding-right: auto;
+
+    background-color: #fff;
+    border: 1px solid #FFC832;
+
+    border-radius: 25px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+
+}
+
+.rolebox p{
+
+    color:#FFC832;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 10px;
+    margin-right: 10px;
+
+    text-align: center;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+
+}
+
+
+.userleftbox{
+    border-radius: 17px;
+    margin-top: 12px;
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-bottom: 12px;
+    background-color: #FFFFFF;
+    width: 18%;
+    height: 100%;
+    margin-left: 0px;
+    padding: 32px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    border: 1px solid #FFC832;
+}
+
+.userleftbox h1{
+    font-family: 'Zen Maru Gothic', sans-serif;
+    margin-left: 20px;
+    color:#fff;
+    font-size: 32px;
+}
+.userleftbox .logo{
+    display: flex;
+}
+
+.userleftbox .logo img{
+
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 16px;
+    width: 72%;
+
+    
+}
+.userleftbox .logo p{
+    color:#FFC832;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 32px;
+    margin-left: 8px;
+    margin-top: auto;
+    margin-bottom: -4px;
+}
+
+.leftbutton_on{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:70%;
+    margin: 16px;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-left: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 20px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: left;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.leftbutton_on:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:75%;
+}
+.leftbutton_on:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:65%;
+}
+
+.leftbutton{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:70%;
+    margin: 16px;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-left: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+
+    background-color: #FFFFFF;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 20px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: left;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.leftbutton:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:75%;
+}
+.leftbutton:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:65%;
+}
+
+main{
+    height: 95dvh;
+    overflow: auto;
+    border-radius: 17px;
+    margin-top: 12px;
+    margin-left: 12px;
+    margin-right: 12px;
+    width: 62%;
+    background-color: #fff;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    border: 1px solid #FFC832;
+}
+
+main h1{
+    color:#252525;
+    font-size: 32px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+}
+
+.userheader{
+    margin: 12px;
+    border-radius: 10px;
+    width: auto;
+    height:auto;
+    margin-bottom: 12px;
+}
+
+.userheader .hed img{
+    object-fit: cover;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height:25vh;
+    border-radius: 10px;
+}
+
+.userheader .icon{
+    margin-left: 24px;
+    display: flex;
+    width: auto;
+}
+
+.userheader .icon img{
+    object-fit: cover;
+    margin-top: -90px;
+    text-align: left;
+    width: 148px;
+    height:148px;
+    border-radius: 50%;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+
+.userheader h2{
+    margin-left: 12px;
+    margin-top: auto;
+    margin-bottom: auto;
+    color:#252525;
+    font-size: 32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+
+.userheader p{
+    margin-left: 12px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 14px;
+    color: #999;
+    font-size: 18px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+
+.userheader .profile p{
+    text-align: left;
+    margin-top: 12px;
+    margin-bottom: auto;
+    margin-left: 24px;
+    margin-right: 24px;
+    word-wrap: break-word;
+    font-size: 18px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.userheader .roleboxes{
+    margin-left: 180px;
+    display: flex;
+    padding: 0px;
+    flex-wrap : wrap;
+}
+
+
+.userheader .rolebox{
+
+    margin-top: 0px;
+    margin-bottom: 12px;
+
+    margin-left: 0px;
+    margin-right: 12px;
+
+    width: auto;
+    padding-left: auto;
+    padding-right: auto;
+
+    background-color: #fff;
+    border: 1px solid #FFC832;
+
+    border-radius: 25px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+
+}
+
+
+.userheader .rolebox p{
+
+    color:#FFC832;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 10px;
+    margin-right: 10px;
+
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+
+}
+
+.fzone{
+    margin-left: 24px;
+    margin-right: 24px;
+    margin-bottom: 24px;
+    width: auto;
+    height: 48px;
+    display: flex;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.fzone .follow .fbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:120px;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 0px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.fzone .follow .fbtn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:125px;
+}
+.fzone .follow .fbtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:115px;
+}
+
+.fzone .follow .fbtn_no{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:120px;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 0px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    border: 1px solid #FFC832;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.fzone .follow .fbtn_no:hover{
+    background-color: #FFFAE6;
+    color: #FFC832;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:125px;
+}
+.fzone .follow .fbtn_no:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:115px;
+}
+
+.fzone .follow .fbtn_un{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:120px;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 0px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#4e4428;
+    border: none;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.fzone .follow .fbtn_un:hover{
+    background-color: #FFFAE6;
+    color: #FFC832;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:125px;
+}
+.fzone .follow .fbtn_un:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:115px;
+}
+
+.fzone .time{
+    margin-top: auto;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: auto;
+}
+.fzone .time p{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.fzone .time a{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.fzone .follow_yes{
+    margin-top: auto;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #FFFAE6;
+    border-radius: 10px;
+    padding: 12px;
+}
+.fzone .follow_yes p{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    font-size: 12px;
+    color:#252525;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+
+
+.ueuse{
+    animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    margin: 12px;
+    border-radius: 10px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+}
+@keyframes slideInY {
+    0% {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0px);
+    }
+    40%,100% {
+      opacity: 1;
+    }
+}
+.ueuse .flebox{
+    display: flex;
+}
+.ueuse .flebox img{
+    object-fit: cover;
+    margin-left: -12px;
+
+    text-align: center;
+    width: 48px;
+    height:48px;
+    border-radius: 50%;
+}
+.ueuse .flebox a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 18px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+
+
+
+.ueuse .flebox .idbox{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: #FFF;
+    border: 1px solid #EEE;
+}
+.ueuse .flebox .idbox a{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 8px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 12px;
+    color:#999;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.ueuse p{
+    line-height:20px;
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 60px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+.ueuse h1{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 60px;
+    font-size: 48px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.ueuse h2{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 60px;
+    font-size: 32px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.ueuse h3{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 60px;
+    font-size: 24px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.ueuse center{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.ueuse a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    font-size: 16px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse p img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.ueuse h1 img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 64px;
+    vertical-align: middle;
+}
+
+.ueuse h2 img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 48px;
+    vertical-align: middle;
+}
+
+.ueuse h3 img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 48px;
+    vertical-align: middle;
+}
+
+.ueuse img{
+    margin-left: 60px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-right: 4px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.ueuse .flebox .time{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 12px;
+    text-align: right;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.ueuse .photo1 img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 350px;
+    border: 1px solid #EEE;
+}
+
+.ueuse .photo2{
+    display: flex;
+}
+
+.ueuse .photo2 img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 47%;
+    height: 350px;
+    border: 1px solid #EEE;
+}
+
+.ueuse .video1 video{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 350px;
+    border: 1px solid #EEE;
+}
+
+.ueuse .abi{
+    margin-left:auto;
+    margin-right: auto;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: #FFFFFF;
+    border: 1px solid #EEE;
+    width: auto;
+}
+
+
+.ueuse .abi p{
+    line-height:20px;
+    overflow-wrap:  break-word;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    margin-left: auto;
+    font-size: 14px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.ueuse .abi .back{
+    background-color: #FFFAE6;
+    padding: 12px;
+    border-radius: 7px;
+    border: 1px solid #EEE;
+}
+
+.ueuse .abi .back h1{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .abi h3{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    font-size: 12px;
+    color:#999;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .favbox{
+    display: flex;
+    margin-left: 0px;
+    width: 100%;
+}
+.ueuse .favbox .favbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: 0px;
+    margin-right: 12px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: all 250ms ease-out;
+}
+
+.ueuse .favbox .favbtn_after{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: 0px;
+    margin-right: 12px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: all 250ms ease-out
+}
+
+
+.ueuse .favbox .tuduki{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: 0px;
+    margin-right: 12px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+.ueuse .favbox .tuduki:hover{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: 0px;
+    margin-right: 12px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+.ueuse .favbox .delbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:60px;
+    padding: 8px auto;
+
+    margin-left: 6px;
+    margin-right: 0px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+
+    background-color: #F5F5F5;
+
+    border-radius: 50px;
+    color:#FF4848;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+.ueuse .favbox .delbtn:hover{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:60px;
+    padding: 8px auto;
+
+    margin-left: 6px;
+    margin-right: 0px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+
+    background-color: #FF4848;
+
+    border-radius: 50px;
+    color: #f5f5f5;;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+
+
+.ueuse .favbox .addabi{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+.ueuse .favbox .addabi:hover{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+
+    margin-left: auto;
+    margin-right: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color: #FFFAE6;;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+
+.ueuse .favbox img{
+    margin-left: 0px;
+    width: 24px;
+}
+
+.ueuse hr{
+    height: 0;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #999;
+}
+
+
+
+.tokonone p{
+    text-align: center;
+    margin-top: 64px;
+    margin-bottom: 64px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.sendbox{
+    margin: 12px;
+    border-radius: 10px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+}
+
+.sendbox .fx{
+    display: flex;
+    width: 100%;
+}
+
+.sendbox .fx img{
+    object-fit: cover;
+    margin-left: -12px;
+    text-align: center;
+    width: 58px;
+    height:58px;
+    border-radius: 50%;
+}
+
+.sendbox p{
+    line-height:20px;
+    text-align: left;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.sendbox textarea{
+    background-color: #F5F5F5;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    width:100%;
+    height:90px;
+    border-radius: 10px;
+    outline: none;
+    border: none;
+    resize: none;
+    font-size: 18px;
+}
+
+.sendbox .fxbox{
+    display: flex;
+}
+
+.sendbox label > input {
+    display:none; /* アップロードボタンのスタイルを無効にする */
+}
+
+.sendbox label{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:6%;
+    padding: 8px auto;
+    margin-left: 6px;
+    margin-right: 6px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.sendbox label:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:7%;
+}
+.sendbox label:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:5%;
+}
+.sendbox label img{
+    vertical-align:bottom;
+    width: 24px;
+}
+.sendbox .fxbox p{
+    line-height:20px;
+    text-align: left;
+    margin-top: auto;
+    margin-bottom: auto;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+
+.ueusebtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:20%;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: 0px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.ueusebtn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:21%;
+}
+.ueusebtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:19%;
+}
+/*--------------------------*/
+
+.ueuse2{
+    margin: 12px;
+    border-radius: 10px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+}
+.ueuse2 .flebox{
+    display: flex;
+}
+.ueuse2 .flebox img{
+    object-fit: cover;
+    margin-left: -12px;
+
+    text-align: center;
+    width: 64px;
+    height:64px;
+    border-radius: 50%;
+}
+.ueuse2 .flebox a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 26px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.ueuse2 .flebox .idbox{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: #FFF;
+    border: 1px solid #EEE;
+}
+.ueuse2 .flebox .idbox a{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 8px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 16px;
+    color:#999;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.ueuse2 p{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 80px;
+    font-size: 22px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse2 a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    font-size: 16px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse2 p img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.ueuse2 .flebox .time{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 12px;
+    text-align: right;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.ueuse2 .photo1 img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 25dvh;
+    border: 1px solid #EEE;
+}
+
+.ueuse2 .photo2{
+    display: flex;
+}
+
+.ueuse2 .photo2 img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 47%;
+    height: 350px;
+    border: 1px solid #EEE;
+}
+
+.ueuse2 .video1 video{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 350px;
+    border: 1px solid #EEE;
+}
+
+.formarea{
+    padding-top: 16px;
+    padding-bottom: 16px;
+    padding-left: 32px;
+    padding-right: 32px;
+    border-radius: 15px;
+    background-color: #f7f7f7;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    text-align: left;
+}
+
+.formarea p{
+    overflow-wrap:  break-word;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.formarea .iconimg{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.formarea .iconimg img{
+    object-fit: cover;
+    margin-top: -64px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: 100px;
+    height:100px;
+    border-radius: 50%;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+.formarea .hed img{
+    object-fit: cover;
+    object-fit: cover;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height:25vh;
+    border-radius: 10px;
+}
+
+.formarea .sub{
+    display: flex;
+    margin: 48px;
+    margin-left: auto;
+    margin-right: auto;
+}
+label>input {
+    display:none; /* アップロードボタンのスタイルを無効にする */
+}
+.imgbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:25%;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.imgbtn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:19%;
+}
+.imgebtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:21%;
+}
+
+.imgbtn2{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:20%;
+    padding: 8px auto;
+    margin-top: -64px;
+    margin-left: 12px;
+    margin-right: auto;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.imgbtn2:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:19%;
+}
+.imgebtn2:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:21%;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+.show {
+    display: block;
+}
+.modal-content {
+    background-color: #fff;
+    padding: 16px;
+    border-radius: 10px;
+    width: 60%;
+    max-width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+
+.modal-content textarea{
+    background-color: #F5F5F5;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+    width:100%;
+    height:90px;
+    border-radius: 10px;
+    outline: none;
+    border: none;
+    resize: none;
+    font-size: 18px;
+}
+.modal-content p{
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.modal-content h1{
+    font-size: 24px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.modal-content .btn_area{
+    display: flex;
+    width: 70%;
+    margin-left: auto;
+    margin-right: 0px;
+}
+
+.modal-content .fbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:120px;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 6px;
+    margin-bottom: 0px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.modal-content .fbtn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:125px;
+}
+.modal-content .fbtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:115px;
+}
+
+.modal-content .fbtn_no{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:120px;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 0px;
+    margin-bottom: 0px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    border: 1px solid #FFC832;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.modal-content .fbtn_no:hover{
+    background-color: #FFFAE6;
+    color: #FFC832;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:125px;
+}
+.modal-content .fbtn_no:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:115px;
+}
+
+.topbox {
+    position: fixed;
+    
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 44px;
+    padding-top: 0.0%;
+    padding-bottom: 0.2%;
+    padding-left: 23%;
+    
+    background-color: #FFC832;
+    box-shadow: 0px 0px 30px rgba(0,0,0,0.1);
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 2em;
+    text-align: left;
+    color: #fff;
+  
+}
+
+.topbox .logo img{
+    margin-left: 0px;
+    margin-right: auto;
+    margin-top: 2px;
+    width: 120px;
+}
+
+.terms{
+    overflow-wrap:  break-word;
+    margin-left: auto;
+    margin-right: auto;
+    width: 77%;
+    margin-top: 64px;
+    margin-bottom: 64px;
+    background-color: #f7f7f7;
+}
+
+.terms h1{
+    line-height:32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 48px;
+    text-align: left;
+    color: #252525;
+}
+
+.terms h2{
+    line-height:32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 48px;
+    text-align: left;
+    color: #252525;
+}
+
+.terms h3{
+    line-height:28px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 32px;
+    text-align: left;
+    color: #252525;
+}
+
+.terms h4{
+    line-height:24px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    text-align: left;
+    color: #252525;
+}
+
+.terms p{
+    margin-top: 2px;
+    margin-bottom: 2px;
+    line-height:24px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+    text-align: left;
+    color: #252525;
+}
+
+.terms img{
+    background-color: #FFF;
+    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
+              linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    object-fit: cover;
+    width: auto;
+    height: 40dvh;
+    margin: 12px;
+    border-radius: 15px;
+}
+.terms .code{
+    background-color: #252525;
+    border-radius: 15px;
+    padding: 12px;
+}
+
+.terms .code p{
+    line-height:24px;
+    margin-right: 12px;
+    margin-left: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+    text-align: left;
+    color: #FFFFFF;
+}
+
+
+.terms .p2c{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.terms .p3{
+    margin-top: 24px;
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 24px;
+    color: #252525;
+    font-size: 22px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.terms ul{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    line-height: 20px;
+}
+
+.terms .err404 h1{
+    margin-top: 256px;
+    line-height:64px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 64px;
+    text-align: center;
+    color: #252525;
+}
+
+.terms .err404 p{
+    margin-top: 2px;
+    margin-bottom: 2px;
+    line-height:32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+    text-align: center;
+    color: #252525;
+}
+
+
+.rightbox{
+    position: relative;
+    border-radius: 17px;
+    margin-top: 12px;
+    margin-left: 12px;
+    margin-right: 12px;
+    width: 24%;
+    background-color: #fff;
+    padding: 12px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    border: 1px solid #FFC832;
+}
+
+.rightbox h1{
+
+    margin-top: 12px;
+    margin-bottom: 0px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 28px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .noticearea{
+    width: auto;
+    height: 52dvh;
+    overflow: scroll;
+    border-radius: 10px;
+}
+
+.rightbox .noticebox{
+    overflow-wrap:  break-word;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+    padding: 12px;
+}
+
+.rightbox .noticebox h4{
+    margin-top: 2px;
+    margin-bottom: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .noticebox p{
+    line-height: 20px;
+    margin-top: 2px;
+    margin-bottom: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .noticebox img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 32px;
+    vertical-align: middle;
+}
+
+.rightbox .noticebox .makeup p{
+    line-height: 20px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .noticebox .makeup a{
+    margin-top: 24px;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 16px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.rightbox .noticebox .time{
+    margin-top: 4px;
+    margin-bottom: auto;
+    margin-left: 0px;
+    margin-right: auto;
+}
+.rightbox .noticebox .time p{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+
+
+.rightbox .btmbox{
+    position: absolute;
+    bottom: 12px; /*下に固定*/
+    height: 31dvh;
+    width: 90%;
+}
+
+.rightbox .btmbox h2{
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .btmbox h3{
+    margin-top: 2px;
+    margin-bottom: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 20px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .btmbox p{
+    
+    line-height: 20px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 14px;
+    text-align: left;
+    color: #252525;
+}
+
+.rightbox .btmbox a{
+    margin-top: 24px;
+    margin-bottom: auto;
+    margin-left: 0px;
+    margin-right: 6px;
+    font-size: 14px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+
+.loading {
+    text-align: center;
+    font-size: 48px; /* 絵文字のサイズ */
+    animation: rotate 0.5s infinite linear; /* アニメーションを適用 */
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+  
+.emojibox{
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 12px;
+    width: auto;
+}
+
+.emojizone{
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 12px;
+}
+
+.emjtex{
+    background-color: #F5F5F5;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #EEE;
+}
+
+.emjtex .fx{
+    display: flex;
+}
+
+.emjtex img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 64px;
+}
+
+.emjtex h3{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 24px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.emjtex p{
+    overflow-wrap:  break-word;
+    margin-top: 12px;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.rp p{
+    overflow-wrap:  break-word;
+    margin-top: 0px;
+    margin-bottom: 6px;
+    margin-left: 12px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+
+.notification{
+    animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    margin: 12px;
+    border-radius: 10px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+}
+@keyframes slideInY {
+    0% {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0px);
+    }
+    40%,100% {
+      opacity: 1;
+    }
+}
+.notification .flebox{
+    display: flex;
+}
+
+.notification .flebox a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 18px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification .flebox .idbox{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: #FFF;
+    border: 1px solid #EEE;
+}
+.notification .flebox .idbox a{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 8px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 12px;
+    color:#999;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.notification p{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification h3{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: 6px;
+    margin-left: 12px;
+    font-size: 24px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+.notification .flebox .time{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 12px;
+    text-align: right;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.notification a{
+    overflow-wrap:  break-word;
+    margin-top: 24px;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 16px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+hr{
+    height: 0;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #FFC832;
+}
+
+
+.search_btn{
+    margin-top: 24px;
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:20%;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: 0px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: #FFC832;
+
+    border-radius: 50px;
+    color:#FFFAE6;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.search_btn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:21%;
+}
+.search_btn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:19%;
+}
+
+.botbox{
+    display: none;
+}
+
+/*------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------スマホ向け--------------------------------------------------*/
+/*--------------------------------------------------ここから--------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------*/
+
+@media screen and (max-width:1010px) {
+    body{
+        width: 100%;
+        display: block;
+        border: none;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 0px;
+    }
+
+    .userleftbox{
+        display: none;
+    }
+
+    .userheader .icon{
+        margin-left: 24px;
+        display: block;
+        width: auto;
+    }
+
+    main{
+        height: 88dvh;
+        overflow: auto;
+        border-radius: 0px;
+        margin-top: 0px;
+        margin-left: 0px;
+        margin-right: 0px;
+        width: auto;
+        background-color: #fff;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        border: none;
+        border-bottom: 1px solid #FFC832;
+    }
+
+    main h1{
+        color:#252525;
+        font-size: 32px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+    }
+
+    .sendbox .fx img{
+        object-fit: cover;
+        margin-left: -12px;
+        text-align: center;
+        width: 58px;
+        height:58px;
+        border-radius: 50%;
+    }
+
+    .sendbox p{
+        line-height:20px;
+        text-align: left;
+        margin-top: 12px;
+        margin-bottom: 12px;
+        font-size: 14px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+
+    .sendbox .fxbox{
+        display: flex;
+    }
+
+    .sendbox label > input {
+        display:none; /* アップロードボタンのスタイルを無効にする */
+    }
+
+    .sendbox label{
+        width:10%;
+        padding: 8px auto;
+        margin-left: 6px;
+        margin-right: 6px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+    .sendbox label:hover{
+        width:11%;
+    }
+    .sendbox label:active{
+        width:9%;
+    }
+    .sendbox label img{
+        vertical-align:bottom;
+        width: 24px;
+    }
+    .sendbox .fxbox p{
+        line-height:20px;
+        text-align: left;
+        margin-top: auto;
+        margin-bottom: auto;
+        font-size: 16px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+
+    .ueusebtn{
+        width:30%;
+    }
+    .ueusebtn:hover{
+        width:31%;
+    }
+    .ueusebtn:active{
+        width:29%;
+    }
+
+    .rightbox{
+        display: none;
+    }
+
+    .botbox{
+        display: block;
+    }
+
+    .botbox .lbtnzone{
+        display: flex;
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        
+    .btmbutton{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:28%;
+        margin: 16px;
+        padding: 8px auto;
+        height: auto;
+        margin-left: 12px;
+        margin-right: 12px;
+
+        padding-top: 14px;
+        padding-bottom: 14px;
+        background-color: #FFFFFF;
+
+        border-radius: 50px;
+        color:#FFC832;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        border: 1px solid #FFC832;
+    }
+    .btmbutton:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:29%;
+    }
+    .btmbutton:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:27%;
+    }
+
+    .ueuse .favbox .tuduki{
+    
+        display: block;
+        width:26%;
+        padding: 8px auto;
+
+        margin-left: 0px;
+        margin-right: 12px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+
+        padding-top: 8px;
+        padding-bottom: 8px;
+        padding-left: 6px;
+        padding-right: 6px;
+
+
+        background-color: #FFFAE6;
+
+        border-radius: 50px;
+        color:#FFC832;
+        font-size: 12px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+    }
+
+    .ueuse .favbox .tuduki:hover{
+        background-color: #FFC832;
+        
+        margin-left: 0px;
+        margin-right: 12px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+
+        padding-top: 8px;
+        padding-bottom: 8px;
+        padding-left: 6px;
+        padding-right: 6px;
+
+        width:28%;
+        border-radius: 50px;
+        color:#FFFAE6;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        font-size: 12px;
+        text-decoration:none;
+        text-align: center;
+    }
+
+    .ueuse .favbox .delbtn{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:60px;
+        padding: 8px auto;
+
+        margin-left: 6px;
+        margin-right: 0px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+
+
+        background-color: #F5F5F5;
+
+        border-radius: 50px;
+        color:#FF4848;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+
+    .ueuse .favbox .delbtn:hover{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:60px;
+        padding: 8px auto;
+
+        margin-left: 6px;
+        margin-right: 0px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+
+
+        background-color: #FF4848;
+
+        border-radius: 50px;
+        color: #f5f5f5;;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+
+
+
+    .ueuse .favbox .addabi{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:auto;
+        padding: 8px auto;
+
+        margin-left: auto;
+        margin-right: 6px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 12px;
+        padding-right: 12px;
+
+
+        background-color: #FFFAE6;
+
+        border-radius: 50px;
+        color:#FFC832;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+
+    .ueuse .favbox .addabi:hover{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:auto;
+
+        margin-left: auto;
+        margin-right: 6px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 12px;
+        padding-right: 12px;
+
+
+        background-color: #FFC832;
+
+        border-radius: 50px;
+        color: #FFFAE6;;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+
+
+    .ueuse .favbox img{
+        margin-left: 0px;
+        width: 24px;
+    }
+        
+    .leftbox{
+        display: block;
+        border-radius: 17px;
+        margin-top: 12px;
+        margin-left: 12px;
+        margin-right: 12px;
+        margin-bottom: 12px;
+        background-color: #FFFFFF;
+        width: 18%;
+        height: 100%;
+        margin-left: 0px;
+        padding: 32px;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        border: 1px solid #FFC832;
+    }
+
+    .leftbox h1{
+        font-family: 'Zen Maru Gothic', sans-serif;
+        margin-left: 20px;
+        color:#fff;
+        font-size: 32px;
+    }
+    .leftbox .logo{
+        display: flex;
+    }
+
+    .leftbox .logo img{
+
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 16px;
+        width: 72%;
+
+        
+    }
+    .leftbox .logo p{
+        color:#FFC832;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 32px;
+        margin-left: 8px;
+        margin-top: auto;
+        margin-bottom: -4px;
+    }
+
+    .imgbtn{
+        width:40%;
+    }
+    .imgbtn:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:35%;
+    }
+    .imgebtn:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:45%;
+    }
+
+    .imgbtn2{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:20%;
+        padding: 8px auto;
+        margin-top: -64px;
+        margin-left: 12px;
+        margin-right: auto;
+
+        padding-top: 6px;
+        padding-bottom: 6px;
+
+
+        background-color: #FFC832;
+
+        border-radius: 50px;
+        color:#FFFAE6;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    .imgbtn2:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:19%;
+    }
+    .imgebtn2:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:21%;
+    }
+ 
+    .topbox {
+        position: absolute;
+        
+        top: 0;
+        left: 0;
+        width: 90%;
+        margin-left: 0px;
+        margin-right: 0px;
+        height: 44px;
+        padding-top: 0.0%;
+        padding-bottom: 0.2%;
+        padding-left: 10%;
+    }
+
+    .topbox .logo img{
+        margin-left: 0px;
+        margin-right: auto;
+        margin-top: 2px;
+        width: 120px;
+    }
+
+    .terms{
+        overflow-wrap:  break-word;
+        margin-left: auto;
+        margin-right: auto;
+        width: 90%;
+        margin-top: 64px;
+        margin-bottom: 64px;
+        background-color: #f7f7f7;
+    }
+
+    .terms h1{
+        line-height:52px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 48px;
+        text-align: left;
+        color: #252525;
+    }
+
+    .terms h2{
+        line-height:52px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 48px;
+        text-align: left;
+        color: #252525;
+    }
+
+    .terms h3{
+        line-height:36px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 32px;
+        text-align: left;
+        color: #252525;
+    }
+
+    .terms h4{
+        line-height:24px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 24px;
+        text-align: left;
+        color: #252525;
+    }
+
+    .terms p{
+        margin-top: 2px;
+        margin-bottom: 2px;
+        line-height:24px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: normal;
+        font-size: 16px;
+        text-align: left;
+        color: #252525;
+    }
+
+    .terms img{
+
+        object-fit: cover;
+        width: auto;
+        height: auto;
+        margin-top: 12px;
+        margin-bottom: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 15px;
+    }
+
+    .terms .code{
+        background-color: #252525;
+        border-radius: 15px;
+        padding: 12px;
+    }
+
+    .terms .code p{
+        line-height:24px;
+        margin-right: 12px;
+        margin-left: 12px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: normal;
+        font-size: 16px;
+        text-align: left;
+        color: #FFFFFF;
+    }
+
+
+    .terms .p2c{
+        margin-top: 0px;
+        margin-bottom: 10px;
+        text-align: left;
+        word-wrap: break-word;
+        line-height: 20px;
+        color: #868686;
+        font-size: 12px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: normal;
+    }
+
+    .terms .p3{
+        margin-top: 24px;
+        text-align: left;
+        word-wrap: break-word;
+        line-height: 24px;
+        color: #252525;
+        font-size: 22px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+
+    .terms .err404 h1{
+        margin-top: 128px;
+        line-height:64px;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+        font-size: 64px;
+        text-align: center;
+        color: #252525;
+    }
+
+
+    .ueuse .photo1 img{
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        height: auto;
+        border: 1px solid #EEE;
+    }
+    
+    .ueuse .photo2{
+        display: flex;
+    }
+    
+    .ueuse .photo2 img{
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 47%;
+        height: auto;
+        border: 1px solid #EEE;
+    }
+    
+    .ueuse .video1 video{
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        height: auto;
+        border: 1px solid #EEE;
+    }
+
+}
+
+/*------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------ダークモード--------------------------------------------------*/
+/*--------------------------------------------------ここから--------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------*/
+
+@media (prefers-color-scheme: dark) {
+
+    body{
+        background-color: #0c0c0c;
+    }
+    .errmsg{
+        background-color: #3a3333;
+        color:#ff4848;
+        border: 1px solid #FF4848;
+    }
+    .rolebox{
+        background-color: #0c0c0c;
+        border: 1px solid #FFC832;
+    }
+
+    .userleftbox{
+        background-color: #181616;
+        border: none;
+    }
+
+    .leftbutton{
+        background-color: #181616;
+        color:#FFFAE6;
+    }
+    .leftbutton:hover{
+        background-color: #FFFAE6;
+        color: #0c0c0c;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:75%;
+    }
+    .leftbutton:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:65%;
+    }
+
+    main{
+        background-color: #0c0c0c;
+        border: none;
+    }
+    
+    main h1{
+        color:#FFFAE6;
+        font-size: 32px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+    }
+
+
+    .ueuse{
+        background-color: #181616;
+        border: none;
+    }
+    .ueuse .flebox a{
+        color:#FFFAE6;
+    }
+
+    .ueuse .flebox .idbox{
+        background-color: #302c2c;
+        border: none;
+    }
+    .ueuse .flebox .idbox a{
+        color:#CCC;
+    }
+    
+    .ueuse p{
+        color:#FFF;
+    }
+    
+    
+    .ueuse h1{
+        color:#FFF;
+    }
+    
+    .ueuse h2{
+        color:#FFF;
+    }
+    
+    .ueuse h3{
+        color:#FFF;
+    }
+    
+    .ueuse center{
+        color:#FFF;
+    }
+    
+    .ueuse a{
+        color:#FFC832;
+    }
+    
+    .ueuse .flebox .time{
+        color:#CCC;
+    }
+    
+    .ueuse .photo1 img{
+        border: none;
+    }
+    
+    .ueuse .photo2{
+        display: flex;
+    }
+    
+    .ueuse .photo2 img{
+        border: none;
+    }
+    
+    .ueuse .video1 video{
+        border: none;
+    }
+    
+    .ueuse .abi{
+        background-color: #0c0c0c;
+        border: none;
+    }
+
+    .ueuse .abi p{
+        color:#FFFAE6;
+    }
+    
+    .ueuse .abi .back{
+        background-color: #FFC832;
+        border: none;
+    }
+    
+    .ueuse .abi .back h1{
+        color:#252525;
+    }
+    .ueuse .abi h3{
+        color:#CCC;
+    }
+    .ueuse .favbox .favbtn{
+        background-color: #0c0c0c;
+        color:#FFC832;
+    }
+    .ueuse .favbox .favbtn_after{
+        background-color: #FFC832;
+        color:#FFFAE6;
+    }
+    .ueuse .favbox .tuduki{
+        background-color: #0c0c0c;
+        color:#FFC832;
+    }
+    .ueuse .favbox .tuduki:hover{
+        background-color: #FFC832;
+        color:#FFFAE6;
+    }
+    .ueuse .favbox .delbtn{
+        background-color: #0c0c0c;
+        color:#FF4848;
+    }
+    .ueuse .favbox .delbtn:hover{
+        background-color: #FF4848;
+        color: #f5f5f5;;
+    }
+    .ueuse .favbox .addabi{
+        background-color: #0c0c0c;
+        color:#FFC832;
+    }
+    .ueuse .favbox .addabi:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;;
+    }
+    .ueuse hr{
+        border-top: 1px solid #CCC;
+    }
+
+    .userheader h2{
+        color:#FFFAE6;
+    }
+    
+    .userheader p{
+        color: #CCC;
+    }
+    
+    .userheader .profile p{
+        color:#FFFAE6;
+    }
+    
+    .userheader .rolebox{
+        background-color: #181616;
+        border: 1px solid #FFC832;
+    }
+    
+    .fzone .follow .fbtn{
+        background-color: #FFC832;
+        color:#FFFAE6;
+    }
+    .fzone .follow .fbtn:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+    }
+
+    .fzone .follow .fbtn_no{
+        background-color: #181616;
+        color:#FFC832;
+        border: 1px solid #FFC832;
+    }
+    .fzone .follow .fbtn_no:hover{
+        background-color: #181616;
+        color: #FFC832;
+    }
+    .fzone .time p{
+        color:#CCC;
+    }
+    .fzone .time a{
+        color:#CCC;
+    }
+    .fzone .follow_yes{
+        background-color: #181616;
+    }
+    .fzone .follow_yes p{
+        color:#FFFAE6;
+    }
+    
+
+    .rightbox{
+        background-color: #0c0c0c;
+        border:none;
+    }
+    
+    .rightbox h1{
+        color: #CCC;
+    }
+
+    .rightbox .noticebox{
+        background-color: #181616;
+        border: none;
+    }
+    
+    .rightbox .noticebox h4{
+        color: #FFF;
+    }
+    
+    .rightbox .noticebox p{
+        color: #FFF;
+    }
+
+    .rightbox .noticebox .makeup p{
+        color:#FFFAE6;;
+    }
+    
+    .rightbox .noticebox .makeup a{
+        color:#FFC832;
+    }
+    .rightbox .noticebox .time p{
+        color:#CCC;
+    }
+    .rightbox .btmbox h2{
+        color: #CCC;
+    }
+    
+    .rightbox .btmbox h3{
+        color: #CCC;
+    }
+    
+    .rightbox .btmbox p{
+        color: #FFF;
+    }
+    
+    .rightbox .btmbox a{
+        color:#FFC832;
+    }
+
+    .sendbox{
+        background-color: #181616;
+        border:none;
+    }
+    
+    .sendbox p{
+        color: #FFF;;
+    }
+    
+    .sendbox textarea{
+        background-color: #181616;
+        color:#CCC;
+    }
+    .sendbox .fxbox p{
+        color:#FFFAE6;
+    }
+    
+
+    .emjtex{
+        background-color: #181616;
+        border: none;
+    }
+    
+    .emjtex h3{
+        color:#FFF;
+    }
+    
+    .emjtex p{
+        color:#CCC;
+    }
+
+    .formarea{
+        background-color: #181616;
+    }
+    
+    .formarea p{
+        color:#CCC;
+    }
+    
+
+    .modal-content {
+        background-color: #181616;
+    }
+    
+    .modal-content textarea{
+        background-color: #181616;
+        color:#CCC;
+    }
+    .modal-content p{
+        color:#CCC;
+    }
+    
+    .modal-content h1{
+        color:#FFF;
+    }
+
+    .modal-content .fbtn_no{
+        background-color: #181616;
+        color:#FFC832;
+        border: 1px solid #FFC832;
+    }
+    .modal-content .fbtn_no:hover{
+        background-color: #181616;
+        color: #FFC832;
+    }
+
+    .inbox {
+        background: #0c0c0c;
+        color: #FFF;
+        border: none;
+      }
+      
+    .inbox::placeholder {
+        color: #999;
+    }
+    
+    .inbox:hover {
+        outline: none;
+        border: 1px solid #FFC832;
+    }
+    
+    .inbox:focus {
+        outline: none;
+        border: 1px solid #FFC832;
+        border-bottom: 3px solid #FFC832;
+    }
+
+    .btmbutton{
+        background-color: #FFC832;
+        color:#FFFAE6;
+        border: none;
+    }
+    .btmbutton:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+    }
+
+
+    .terms{
+        background-color: #0c0c0c;
+    }
+    
+    .terms h1{
+        color: #CCC;
+    }
+    
+    .terms h2{
+        color: #FFF;
+    }
+    
+    .terms h3{
+        color: #FFF;
+    }
+    
+    .terms h4{
+        color: #FFF;
+    }
+    
+    .terms p{
+        color: #FFF;
+    }
+    
+    .terms .code{
+        background-color: #CCC;
+    }
+    
+    .terms .code p{
+        color: #252525;
+    }
+    
+    .terms ul{
+        color: #FFF;
+    }
+    
+    .terms .p2c{
+        color: #CCC;
+    }
+    
+    .terms .p3{
+        color: #FFF;
+    }
+    
+    .terms .err404 h1{
+        color: #CCC;
+    }
+    
+    .terms .err404 p{
+        color: #FFF;
+    }
+
+    .notification{
+        background-color: #181616;
+        border: none;
+    }
+
+    .notification .flebox a{
+        color:#CCC5;
+    }
+    
+    .notification p{
+        color:#FFF;
+    }
+    
+    .notification h3{
+        color:#CCC;
+    }
+    
+    
+    .notification .flebox .time{
+        color:#CCC;
+    }
+    
+    .notification a{
+        color:#FFC832;
+    }
+    .tokonone p{
+        color:#CCC;
+    }
+}
