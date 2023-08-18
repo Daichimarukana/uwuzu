@@ -35,6 +35,7 @@ AGPLライセンスです！！！
 - follow(text) アカウントがフォローしている人保存用
 - follower(text) アカウントがフォローされている人保存用
 - admin(varchar(25)) 管理者アカウントなら「yes」、それ以外なら「none」と入力。
+- authcode(varchar(256)) 二段階認証用キー保存用
 
 ### emoji
 - sysid(INT)(AUTO_INCREMENT) アカウントが追加されるとカウントされるシステム用ID
