@@ -7,8 +7,8 @@ AGPLライセンスです！！！
 
 導入方法は以下のとおりです！
 
-## uwuzuサーバーの建て方
-※MySQLの設定結構めんどいです。
+## 5. サーバーの建て方
+※MySQLの設定結構めんどいです。脆弱です。
 まず、Apache2とPHP 8とmysql Ver 15が導入されているサーバーを準備します！
 次にSQLを設定します。(InnoDB)
 まず、お好きな名前でDBを作成し、その中に、account,emoji,notice,role,ueuse,notificationとテーブルを作成します。
@@ -80,6 +80,28 @@ AGPLライセンスです！！！
 - msg(text) 通知の内容
 - datetime(datetime) 通知日時
 - userchk(varchar(25)) 通知の既読確認
+
+### invitation
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- code(varchar(512)) 招待コード
+- used(varchar(25)) 使用済みかそうでないか
+- datetime(datetime) 招待コード仕様日時更新用
+
+すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、あとはApacheとphpとMy SQLを起動するだけ！
+起動したらまずDBのroleにphpmyadminから「user」ロールを追加権限は「user」でOK。ロール名はとりあえず「一般ユーザー」ロールの色はHEXコード(#を除く)で000000のように指定。
+そしたら普通にuwuzuにアクセスして自分のアカウントを登録。
+それが終わったら一度サーバーを止め、uwuzuの動作ディレクトリ内のserverフォルダ内のファイルを各自設定
+ファイルの機能は以下の通り！
+- admininfo.txt : 管理者名(てすとまる/@sampledayo)
+- contact.txt : 管理者への連絡用メアド(sample@test.com)
+- info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
+- privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
+- servername.txt : サーバー名(てすとさば)
+- terms.txt : 利用規約(サーバーの利用規約を記載)
+- uwuzuabout.txt : このファイル(uwuzuを改造した場合は書き換え)
+- uwuzuinfo.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
+- uwuzurelease.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
+- onlyuser.txt : 招待コード機能をオンにするかどうか、「true」でオン、「false」でオフ。招待コードはDBに直接追加。
 
 
 すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、あとはApacheとphpとMy SQLを起動するだけ！
