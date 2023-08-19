@@ -41,6 +41,18 @@ if (!empty($pdo)) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
+	// トランザクション開始
+	$pdo->beginTransaction();
+
+    // SQL作成
+    $stmt = $pdo->prepare("UPDATE notification SET userchk = 'done' WHERE touserid = :userid;");
+
+    $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+
+    $res = $stmt->execute();
+    $res = $pdo->commit();
+
+
     $messageQuery = $dbh->prepare("SELECT title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
 	$messageQuery->bindValue(':userid', $userid);
 	$messageQuery->execute();

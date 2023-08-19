@@ -111,6 +111,12 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 } 
+$notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
+$notiQuery->bindValue(':userid', $userid);
+$notiQuery->execute();
+$notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
+
+$notificationcount = $notiData['notification_count'];
 
 if( !empty($_POST['logout']) ) {
 	if (isset($_SERVER['HTTP_COOKIE'])) {
@@ -139,11 +145,12 @@ $pdo = null;
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<link rel="stylesheet" href="../css/home.css">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
 <title>通知 - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>

@@ -40,7 +40,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
 	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
 	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
-    header("Location: home/index.php");
+    header("Location: home/");
 	exit;
 	}
 
@@ -52,7 +52,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
-		header("Location: ../login.php");
+		header("Location: login.php");
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"]){
 	// セッションに値をセット
@@ -66,7 +66,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
 	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
 	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
-    header("Location: home/index.php");
+    header("Location: home/");
     exit;
 	}
 

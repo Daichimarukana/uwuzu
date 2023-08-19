@@ -32,7 +32,6 @@ $option = null;
 $userid = $_SESSION['userid'];
 
 
-// データベースに接続
 try {
 
     $option = array(
@@ -45,6 +44,12 @@ try {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
+}
+// 管理者としてログインしているか確認
+if( empty($_SESSION['admin_login']) || $_SESSION['admin_login'] !== true ) {
+	// ログインページへリダイレクト
+	header("Location: ./login.php");
+	exit;
 }
 
 require_once 'authcode/GoogleAuthenticator.php';

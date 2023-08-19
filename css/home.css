@@ -349,9 +349,10 @@ body{
 }
 
 .leftbutton{
+
     cursor: pointer;
     border: none;
-    display: block;
+    display: flex;
     width:70%;
     margin: 16px;
     padding: 8px auto;
@@ -385,6 +386,39 @@ body{
 .leftbutton:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:65%;
+}
+
+.leftbutton .notipod{
+    width: 25px;
+    height: 25px;
+    margin-left: auto;
+    margin-right: 20px;
+    margin-top: auto;
+    margin-bottom: auto;
+    background-color: #FF4444;
+    border-radius: 50%;
+    transition: all 250ms ease-out;
+}
+.leftbutton .notipod p{
+    margin-top: -1px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    color:#FFFFFF;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: all 250ms ease-out;
+}
+
+.leftbutton:hover .notipod {
+    background-color:#FFFFFF;
+}
+
+.leftbutton:hover .notipod p{
+    color:#FF4444;
 }
 
 main{
@@ -2616,6 +2650,35 @@ hr{
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         width:27%;
     }
+
+    .btmbutton_on{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:28%;
+        margin: 16px;
+        padding: 8px auto;
+        height: auto;
+        margin-left: 12px;
+        margin-right: 12px;
+
+        padding-top: 14px;
+        padding-bottom: 14px;
+        background-color: #FFFFFF;
+        border-radius: 50px;
+        color:#FF4444;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        border: 1px solid #FFC832;
+    }
+
 
     .ueuse .favbox .tuduki{
     

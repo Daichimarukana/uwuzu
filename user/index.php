@@ -111,7 +111,12 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 } 
+$notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
+$notiQuery->bindValue(':userid', $userid);
+$notiQuery->execute();
+$notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
+$notificationcount = $notiData['notification_count'];
 
 function customStripTags($html, $allowedTags) {
     $allowedTagsString = '<' . implode('><', $allowedTags) . '>';

@@ -30,15 +30,73 @@ $_SESSION["password"]="";
 session_start();
 
 $userid = $_SESSION['userid'];
+
 try {
-    $options = array(
+
+    $option = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
     );
-    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $options);
+    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+
 } catch(PDOException $e) {
+
     // 接続エラーのときエラー内容を取得する
-    $error_message[] = 'データベース接続エラー: ' . $e->getMessage();
+    $error_message[] = $e->getMessage();
+}
+
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: login.php");
+		exit;
+	}elseif($_SESSION['loginid'] === $res["loginid"]){
+	// セッションに値をセット
+	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
+	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
+	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
+	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
+	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+    header("Location: home/");
+	exit;
+	}
+
+		
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: login.php");
+		exit;
+	}elseif($_COOKIE['loginid'] === $res["loginid"]){
+	// セッションに値をセット
+	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
+	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
+	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
+	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
+	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+    header("Location: home/");
+    exit;
+	}
+
+
 }
 
 
@@ -144,7 +202,7 @@ $pdo = null;
                 <div>
                     <p>二段階認証コード</p>
                     <div class="p2">6桁のコードを入力してください。</div>
-                    <input id="profile" type="text" placeholder="123456" class="inbox" name="usercode" value="">
+                    <input id="profile" type="number" placeholder="123456" class="inbox" name="usercode" value="">
                 </div>
                     <input type="submit" class = "irobutton" name="btn_submit" value="次へ">
             </form>

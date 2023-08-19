@@ -7,7 +7,11 @@
     <div class="lbtnzone">
         <a href="/home" class="leftbutton">🏠ホーム</a>
         <a href="/search" class="leftbutton">検索</a>
-        <a href="/notification" class="leftbutton">通知</a>
+        <?php if($notificationcount > 0){?>
+            <a href="/notification" class="leftbutton">通知<div class="notipod"><p><?php echo $notificationcount?></p></div></a>
+        <?php }else{?>
+            <a href="/notification" class="leftbutton">通知</a>
+        <?php }?>
         <a href="/emoji" class="leftbutton">絵文字</a>
         <a href="/@<?php echo $userid; ?>" class="leftbutton">プロフィール</a>
         <a href="/settings" class="leftbutton">設定</a>
