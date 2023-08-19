@@ -26,8 +26,8 @@ $option = null;
 
 session_start();
 
-$userid = $_SESSION['userid'];
-$username = $_SESSION['username'];
+$userid = htmlentities($_SESSION['userid']);
+$username = htmlentities($_SESSION['username']);
 
 
 try {

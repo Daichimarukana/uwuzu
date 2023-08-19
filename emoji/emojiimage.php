@@ -33,7 +33,7 @@ $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, 
 
 //$row['userid'] = "daichimarukn";
 
-$emojiname = $_GET['emoji'];
+$emojiname = htmlentities($_GET['emoji']);
 
 
 $options = array(

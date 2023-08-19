@@ -1,9 +1,9 @@
 <?php
 require('../db.php');
 
-if (isset($_POST['uniqid']) && isset($_POST['abitext'])) {
-    $postUniqid = $_POST['uniqid'];
-    $abitext = $_POST['abitext'];
+if (htmlentities(isset($_POST['uniqid'])) && htmlentities(isset($_POST['abitext']))) {
+    $postUniqid = htmlentities($_POST['uniqid']);
+    $abitext = htmlentities($_POST['abitext']);
     $abidate = date("Y-m-d H:i:s");
 
     try {

@@ -1612,12 +1612,31 @@ main h1{
     border-radius: 10px;
 }
 
+.formarea .authzone{
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
 .formarea .sub{
     display: flex;
     margin: 48px;
     margin-left: auto;
     margin-right: auto;
 }
+
+.formarea .p2{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
 label>input {
     display:none; /* アップロードボタンのスタイルを無効にする */
 }
@@ -2444,6 +2463,13 @@ hr{
         margin-left: 24px;
         display: block;
         width: auto;
+    }
+
+    .userheader .roleboxes{
+        margin-left: 24px;
+        display: flex;
+        padding: 0px;
+        flex-wrap : wrap;
     }
 
     main{

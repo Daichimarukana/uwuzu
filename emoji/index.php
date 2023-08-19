@@ -23,8 +23,10 @@ $res = null;
 $option = null;
 
 session_start();
+session_regenerate_id(true);
 
 //------------------------------------------
+
 try {
 
     $option = array(
@@ -106,6 +108,7 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 } 
+
 
 if (!empty($pdo)) {
     $sql = "SELECT emojiname,emojiinfo,emojidate FROM emoji ORDER BY emojidate DESC";

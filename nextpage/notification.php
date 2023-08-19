@@ -25,10 +25,10 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-$userid = $_GET['userid'];
+$userid = htmlentities($_GET['userid']);
 
 $itemsPerPage = 30; // 1ページあたりの投稿数
-$pageNumber = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
 $offset = ($pageNumber - 1) * $itemsPerPage;
 
 $messages = array();

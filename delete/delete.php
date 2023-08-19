@@ -2,10 +2,10 @@
 require('../db.php');
 
 if (isset($_POST['uniqid'])){
-    $postUniqid = $_POST['uniqid'];
+    $postUniqid = htmlentities($_POST['uniqid']);
 
     try {
-        $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
 
         // 削除クエリを実行
         $deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE uniqid = :uniqid");

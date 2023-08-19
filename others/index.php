@@ -25,8 +25,8 @@ $option = null;
 
 session_start();
 
-$userid = $_SESSION['userid'];
-$username = $_SESSION['username'];
+$userid = htmlentities($_SESSION['userid']);
+$username = htmlentities($_SESSION['username']);
 
 // 管理者としてログインしているか確認
 if( empty($_SESSION['admin_login']) || $_SESSION['admin_login'] !== true ) {
@@ -136,7 +136,7 @@ if( !empty($pdo) ) {
 
 if( !empty($_POST['btn_submit']) ) {
 
-	$chkuserid = $_POST['chkuserid'];
+	$chkuserid = htmlentities($_POST['chkuserid']);
 
 	if( empty($chkuserid) ) {
 		$error_message[] = '確認用ユーザーIDを入力してください。';
@@ -233,6 +233,51 @@ if( !empty($_POST['btn_submit']) ) {
 }
 
 
+if( !empty($_POST['session_submit']) ) {
+	$loginid = sha1(uniqid(mt_rand(), true));
+	$pdo->beginTransaction();
+		try {
+			
+            $stmt = $pdo->prepare("UPDATE account SET loginid = :loginid WHERE userid = :userid;");
+
+            $stmt->bindParam(':loginid', $loginid, PDO::PARAM_STR);
+
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+
+                // SQLクエリの実行
+            $res = $stmt->execute();
+
+            // コミット
+            $res = $pdo->commit();
+		} catch (Exception $e) {
+
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+		}
+	
+		if ($res) {
+			if (isset($_SERVER['HTTP_COOKIE'])) {
+				$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+				foreach($cookies as $cookie) {
+					$parts = explode('=', $cookie);
+					$name = trim($parts[0]);
+					setcookie($name, '', time()-1000);
+					setcookie($name, '', time()-1000, '/');
+				}
+			}
+			// リダイレクト先のURLへ転送する
+			$url = '../index.php';
+			header('Location: ' . $url, true, 303);
+		
+			// すべての出力を終了
+			exit;
+		} else {
+			$error_message[] = '登録に失敗しました。';
+		}
+
+}
+
+
 if( !empty($_POST['logout']) ) {
 	if (isset($_SERVER['HTTP_COOKIE'])) {
 		$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
@@ -259,7 +304,9 @@ if( !empty($_POST['logout']) ) {
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>アカウント削除ページ - <?php echo file_get_contents($servernamefile);?></title>
+<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
+<title>その他の項目 - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
@@ -275,7 +322,11 @@ if( !empty($_POST['logout']) ) {
 		</ul>
 	<?php endif; ?>
         <form class="formarea" method="post">
-		<h1>アカウント削除ページ</h1>
+		<h1>セッション終了</h1>
+		<p>下のセッションを終了ボタンを押すと全てのログイン中のデバイスからログアウトされます。<br>再度uwuzu使用するにはログインが必須になります。</p>
+		<input type="submit" class = "irobutton" name="session_submit" value="セッションを終了">
+			<hr>
+		<h1>アカウント削除</h1>
 			<p>アカウント誤削除を防ぐため下の入力ボックスにご自身のユーザーIDを入力する必要があります。</p>
 
 			<?php if($res["admin"] === "yes"){?>

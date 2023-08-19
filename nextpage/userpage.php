@@ -26,11 +26,11 @@ try {
 }
 
 
-$uwuzuid = isset($_GET['id']) ? $_GET['id'] : '';
-$userid = $_GET['userid'];
+$uwuzuid = htmlentities(isset($_GET['id'])) ? htmlentities($_GET['id']) : '';
+$userid = htmlentities($_GET['userid']);
 
 $itemsPerPage = 30; // 1ページあたりのユーズ数
-$pageNumber = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
 $offset = ($pageNumber - 1) * $itemsPerPage;
 
 $messages = array();
@@ -52,13 +52,6 @@ if (!empty($pdo)) {
 	$messageQuery->bindValue(':userid', $uwuzuid);
 	$messageQuery->execute();
 	$message_array = $messageQuery->fetchAll();
-    
-    function customStripTags($html, $allowedTags) {
-        $allowedTagString = implode('|', $allowedTags);
-        $pattern = "/<(?!$allowedTagString)[^>]+>/";
-        return preg_replace($pattern, '', $html);
-    }    
-    $allowedTags = array('h1', 'h2', 'h3', 'center', 'font');
     
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
@@ -93,8 +86,6 @@ if (!empty($pdo)) {
 	}
 
     
-
-    
 	$messages = array();
 	foreach ($message_array as $row) {
 		$messages[] = $row;
@@ -109,12 +100,6 @@ if (!empty($pdo)) {
         if ($userData) {
             $message['username'] = $userData['username'];
         }
-    }
-
-    // ユーズ内のHTMLコードに指定のタグを有効化する関数
-    function replaceUnescapedHTMLTags($html) {
-        $allowedTags = array('h1', 'h2', 'h3', 'center', 'font'); // 有効化するタグ
-        return customStripTags($html, $allowedTags);
     }
 
     if(!empty($messages)){

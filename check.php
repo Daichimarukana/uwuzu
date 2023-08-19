@@ -167,7 +167,7 @@ $pdo = null;
     <div class="textbox">
         <h1>確認</h1>
 
-        <p>あなたは <?php if( !empty($row["username"]) ){ echo htmlspecialchars( $row["username"], ENT_QUOTES, 'UTF-8'); } ?> ですか？</p>
+        <p>あなたは <?php if( !empty($row["username"]) ){ echo htmlentities( $row["username"], ENT_QUOTES, 'UTF-8'); } ?> ですか？</p>
 
             <?php if( !empty($error_message) ): ?>
                 <ul class="errmsg">
@@ -180,20 +180,20 @@ $pdo = null;
             <div class="myarea">
                 <img src="image.php">
                 <p>名前</p>
-                <h2><?php if( !empty($row["username"]) ){ echo htmlspecialchars( $row["username"], ENT_QUOTES, 'UTF-8'); } ?></h2>
+                <h2><?php if( !empty($row["username"]) ){ echo htmlentities( $row["username"], ENT_QUOTES, 'UTF-8'); } ?></h2>
                 <div class="roleboxes">
                     <?php foreach ($roles as $roleId): ?>
                         <?php $roleData = $roleDataArray[$roleId]; ?>
                         <div class="rolebox" style="border: 1px solid <?php echo '#' . $roleData["rolecolor"]; ?>;">
                             <p style="color: <?php echo '#' . $roleData["rolecolor"]; ?>;">
-                                <?php if (!empty($roleData["rolename"])) { echo htmlspecialchars($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
+                                <?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
                             </p>
                         </div>
                     <?php endforeach; ?>
                 </div>
                 <hr>
                 <p>プロフィール</p>
-                <h3><?php if( !empty($row["profile"]) ){ echo htmlspecialchars( $row["profile"], ENT_QUOTES, 'UTF-8'); } ?></h3>
+                <h3><?php if( !empty($row["profile"]) ){ echo htmlentities( $row["profile"], ENT_QUOTES, 'UTF-8'); } ?></h3>
                 
             </div>
 

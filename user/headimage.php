@@ -37,7 +37,7 @@ $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, 
 
 //$row['userid'] = "daichimarukn";
 
-$userid = $_GET['account'];
+$userid = htmlentities($_GET['account']);
 
 
 $options = array(

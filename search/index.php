@@ -200,7 +200,7 @@ $pdo = null;
 			<h1>ユーズに追記しますか？</h1>
 			<p>※追記は削除出来ません。</p>
 			<form method="post" id="AbiForm">
-			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlspecialchars( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 			<div class="btn_area">
 				<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
 				<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">

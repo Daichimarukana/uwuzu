@@ -112,7 +112,7 @@ if(empty($username)){
 
 if( !empty($_POST['btn_submit']) ) {
 
-	$ueuse = $_POST['ueuse'];
+	$ueuse = htmlentities($_POST['ueuse']);
 
 	// メッセージの入力チェック
 	if( empty($ueuse) ) {
@@ -146,7 +146,15 @@ if( !empty($_POST['btn_submit']) ) {
 		if ($result) {
 			$photo1 = $uploadedPath; // 保存されたファイルのパスを使用
 		} else {
-			$error_message[] = 'アップロード失敗！(1)エラーコード：' . $uploadedFile['error'].'<br>'.var_dump($_FILES['upload_images']);
+			$errnum = $uploadedFile['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 		}
 	}
 
@@ -178,7 +186,15 @@ if( !empty($_POST['btn_submit']) ) {
 		if ($result2) {
 			$photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
 		} else {
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' . $uploadedFile2['error'].'<br>'.var_dump($_FILES['upload_images']);
+			$errnum = $uploadedFile2['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 		}
 	}
 
@@ -206,7 +222,15 @@ if( !empty($_POST['btn_submit']) ) {
 			if ($result3) {
 				$video1 = $uploadedPath3; // 保存されたファイルのパスを使用
 			} else {
-				$error_message[] = 'アップロード失敗！エラーコード：' . $uploadedFile3['error'];
+				$errnum = $uploadedFile3['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 			}
 		} else {
 			$error_message[] = '対応していないファイル形式です！';

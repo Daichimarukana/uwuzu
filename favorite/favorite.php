@@ -1,9 +1,9 @@
 <?php
 require('../db.php');
 
-if (isset($_POST['uniqid']) && isset($_POST['userid'])) {
-    $postUniqid = $_POST['uniqid'];
-    $userId = $_POST['userid'];
+if (htmlentities(isset($_POST['uniqid'])) && htmlentities(isset($_POST['userid']))) {
+    $postUniqid = htmlentities($_POST['uniqid']);
+    $userId = htmlentities($_POST['userid']);
 
     try {
         $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);

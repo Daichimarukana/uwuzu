@@ -26,10 +26,10 @@ while ($row = $notice_array->fetch(PDO::FETCH_ASSOC)) {
 
 if(!empty($notices)){
     foreach ($notices as $value) {
-        $uneinoticenote = $value['note'];
-        $uneinoticetitle = $value['title'];
-        $uneinoticeaccount = $value['account'];
-        $uneinoticedatetime = $value['datetime'];
+        $uneinoticenote = htmlentities($value['note']);
+        $uneinoticetitle = htmlentities($value['title']);
+        $uneinoticeaccount = htmlentities($value['account']);
+        $uneinoticedatetime = htmlentities($value['datetime']);
     }
 }else{
     $uneinoticenote = "";

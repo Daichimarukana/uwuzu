@@ -11,20 +11,20 @@ class MessageDisplay {
         echo '    <div class="flebox">';
             
         echo '        <div class="time">';
-        $day = date("Ymd", strtotime(htmlspecialchars($this->value['datetime'])));
+        $day = date("Ymd", strtotime(htmlentities($this->value['datetime'])));
         if ($day == date("Ymd")) {
-            echo date("今日 H:i", strtotime(htmlspecialchars($this->value['datetime'])));
+            echo date("今日 H:i", strtotime(htmlentities($this->value['datetime'])));
         } else {
-            echo date("Y年m月d日 H:i", strtotime(htmlspecialchars($this->value['datetime'])));
+            echo date("Y年m月d日 H:i", strtotime(htmlentities($this->value['datetime'])));
         }
         echo '        </div>';
             
         echo '    </div>';
             
         // 投稿内のHTMLコードを表示する部分
-        echo '    <h3>' . htmlspecialchars($this->value['title']) . '</h3>';
-        echo '    <p>' . htmlspecialchars($this->value['msg']) . '</p>';
-        echo '    <a href="' . htmlspecialchars($this->value['url']) . '">続きをみる</a>';
+        echo '    <h3>' . htmlentities($this->value['title']) . '</h3>';
+        echo '    <p>' . htmlentities($this->value['msg']) . '</p>';
+        echo '    <a href="' . htmlentities($this->value['url']) . '">続きをみる</a>';
             
         echo '</div>';
     }

@@ -1,19 +1,78 @@
 <!DOCTYPE html>
 
 <?php
-
 require('db.php');
 
 session_start();
-if (empty($_SESSION['admin_login'])){
 
-}else{
-    if($_SESSION['admin_login'] == true) {
-    // ログインページへリダイレクト
-        header("Location: /home/index.php");
-        exit;
-    }
+try {
+
+    $option = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+    );
+    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+
+} catch(PDOException $e) {
+
+    // 接続エラーのときエラー内容を取得する
+    $error_message[] = $e->getMessage();
 }
+
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: login.php");
+		exit;
+	}elseif($_SESSION['loginid'] === $res["loginid"]){
+	// セッションに値をセット
+	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
+	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
+	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
+	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
+	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+    header("Location: home/index.php");
+	exit;
+	}
+
+		
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: ../login.php");
+		exit;
+	}elseif($_COOKIE['loginid'] === $res["loginid"]){
+	// セッションに値をセット
+	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
+	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
+	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
+	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
+	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+    header("Location: home/index.php");
+    exit;
+	}
+
+
+}
+
 
 $servernamefile = "server/servername.txt";
 
@@ -31,6 +90,9 @@ $domain = $_SERVER['HTTP_HOST'];
 $contactfile = "server/contact.txt";
 
 //------------------------
+
+$onlyuserfile = "server/onlyuser.txt";
+$onlyuser = file_get_contents($onlyuserfile);
 
 try {
 
@@ -120,6 +182,13 @@ if ("serviceWorker" in navigator) {
 
         <a class="maillink" href="mailto:<?php echo file_get_contents($contactfile);?>">お問い合わせ : <?php echo file_get_contents($contactfile);?></a>
 
+        <?php if($onlyuser === "true"){?>
+            <p>このサーバーには招待コードがないと登録できません。<br>招待コードはお手元にありますか？</p>
+            <div class="btnbox">
+                <a href="new.php" class="irobutton">アカウント登録</a>
+                <a href="login.php" class="sirobutton">ログイン</a>
+            </div>
+        <?php }else{?>
         <div class="cntzone">
             <div class="usercnt">
                 <div class="p1">ユーザー数</div>
@@ -131,12 +200,11 @@ if ("serviceWorker" in navigator) {
             </div>
         </div>
 
-
-
         <div class="btnbox">
             <a href="new.php" class="irobutton">アカウント登録</a>
             <a href="login.php" class="sirobutton">ログイン</a>
         </div>
+        <?php }?>
     </div>
 </div>
 

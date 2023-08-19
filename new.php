@@ -13,6 +13,9 @@ require('db.php');
 
 $servernamefile = "server/servername.txt";
 
+$onlyuserfile = "server/onlyuser.txt";
+$onlyuser = file_get_contents($onlyuserfile);
+
 session_start();
 
 // 変数の初期化
@@ -97,6 +100,9 @@ if( !empty($_POST['btn_submit']) ) {
 
     $profile = $_POST['profile'];
 
+    if($onlyuser === "true"){
+        $invitationcode = $_POST['invitationcode'];
+    }
 
     //cookieに保存
     setcookie("username",$username,time()+60*60*24*14);
@@ -142,6 +148,28 @@ if( !empty($_POST['btn_submit']) ) {
     );
 
     $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+
+    if($onlyuser === "true"){
+        $query = $dbh->prepare('SELECT * FROM invitation WHERE code = :code limit 1');
+
+        $query->execute(array(':code' => $invitationcode));
+    
+        $result = $query->fetch();
+
+        // 招待コードの入力チェック
+        if( empty($invitationcode) ) {
+            $error_message[] = '招待コードを入力してください。';
+        } else {
+            if($result > 0){
+                if($result["used"] === "true"){
+                    $error_message[] = 'この招待コード('.$invitationcode.')は既に使用されています。';
+                }
+            }else{
+                $error_message[] = 'この招待コード('.$invitationcode.')は使えません。';
+            }
+
+        }
+    }
 
 
     $query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
@@ -333,6 +361,24 @@ if( !empty($_POST['btn_submit']) ) {
         // コミット
         $res = $pdo->commit();
 
+        if($onlyuser === "true"){
+            $pdo->beginTransaction();
+
+            $stmt = $pdo->prepare("UPDATE invitation SET used = :used, datetime = :datetime WHERE code = :code;");
+
+            $true = "true";
+            $stmt->bindParam(':used', $true, PDO::PARAM_STR);
+            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+            $stmt->bindValue(':code', $invitationcode, PDO::PARAM_STR);
+
+                // SQLクエリの実行
+            $res = $stmt->execute();
+
+            // コミット
+            $res = $pdo->commit();
+        }
+
     } catch (Exception $e) {
 
         // エラーが発生した時はロールバック
@@ -341,7 +387,8 @@ if( !empty($_POST['btn_submit']) ) {
 
     if ($res) {
         // リダイレクト先のURLへ転送する
-        $url = 'success.php';
+        $_SESSION['userid'] = $userid;
+        $url = 'authcodechk';
         header('Location: ' . $url, true, 303);
 
         // すべての出力を終了
@@ -448,9 +495,16 @@ $pdo = null;
             </div>
 
             <p>登録を押すと利用規約とプライバシーポリシーに同意したこととなります。<br>未確認の場合は上のボタンよりお読みください。</p>
-            
-            <input type="submit" class = "irobutton" name="btn_submit" value="登録">
-
+            <?php if($onlyuser === "true"){?>
+                <div>
+                    <p>招待コード</p>
+                    <div class="p2">招待コードがないとこのサーバーには登録できません。</div>
+                    <input id="profile" type="text" placeholder="" class="inbox" name="invitationcode" value="<?php if( !empty($_SESSION['invitationcode']) ){ echo htmlspecialchars( $_SESSION['invitationcode'], ENT_QUOTES, 'UTF-8'); } ?>">
+                </div>
+                <input type="submit" class = "irobutton" name="btn_submit" value="登録">
+            <?php }else{?>
+                <input type="submit" class = "irobutton" name="btn_submit" value="登録">
+            <?php }?>
         </form>
 
         <div class="btnbox">

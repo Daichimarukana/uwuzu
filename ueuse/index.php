@@ -28,8 +28,8 @@ $option = null;
 
 session_start();
 
-$userid = $_SESSION['userid'];
-$username = $_SESSION['username'];
+$userid = htmlentities($_SESSION['userid']);
+$username = htmlentities($_SESSION['username']);
 
 try {
 
@@ -113,19 +113,19 @@ if(empty($username)){
 	exit;
 } 
 
-$ueuseid = str_replace('!', '', $_GET['ueuseid']);
-$touserid = str_replace('~', '', $_GET['touser']);
+$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
+$touserid = htmlentities(str_replace('~', '', $_GET['touser']));
 
 
 if( !empty($_POST['btn_submit']) ) {
 
-	$ueuse = $_POST['ueuse'];
+	
+	$ueuse = htmlentities($_POST['ueuse']);
 
 	// メッセージの入力チェック
 	if( empty($ueuse) ) {
 		$error_message[] = '内容を入力してください。';
 	} else {
-
         // 文字数を確認
         if( 1024 < mb_strlen($ueuse, 'UTF-8') ) {
 			$error_message[] = '内容は1024文字以内で入力してください。';
@@ -154,7 +154,15 @@ if( !empty($_POST['btn_submit']) ) {
 		if ($result) {
 			$photo1 = $uploadedPath; // 保存されたファイルのパスを使用
 		} else {
-			$error_message[] = 'アップロード失敗！(1)エラーコード：' . $uploadedFile['error'].'<br>'.var_dump($_FILES['upload_images']);
+			$errnum = $uploadedFile['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 		}
 	}
 
@@ -186,10 +194,17 @@ if( !empty($_POST['btn_submit']) ) {
 		if ($result2) {
 			$photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
 		} else {
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' . $uploadedFile2['error'].'<br>'.var_dump($_FILES['upload_images']);
+			$errnum = $uploadedFile2['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 		}
 	}
-
 
 	if (empty($_FILES['upload_videos1']['name'])) {
 		$video1 = "none";
@@ -215,11 +230,20 @@ if( !empty($_POST['btn_submit']) ) {
 			if ($result3) {
 				$video1 = $uploadedPath3; // 保存されたファイルのパスを使用
 			} else {
-				$error_message[] = 'アップロード失敗！エラーコード：' . $uploadedFile3['error'];
+				$errnum = $uploadedFile3['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 			}
 		} else {
 			$error_message[] = '対応していないファイル形式です！';
 		}
+		
 		
 		
 	}
@@ -334,7 +358,7 @@ $pdo = null;
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ID <?php echo htmlspecialchars($ueuseid, ENT_QUOTES, 'UTF-8'); ?> のユーズ - uwuzu</title>
+<title>ID <?php echo htmlentities($ueuseid, ENT_QUOTES, 'UTF-8'); ?> のユーズ - uwuzu</title>
 
 </head>
 
@@ -355,7 +379,7 @@ $pdo = null;
 
 	<form method="post" enctype="multipart/form-data">
 			<div class="sendbox">
-				<textarea id="ueuse" placeholder="へんし～ん！！！" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlspecialchars( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+				<textarea id="ueuse" placeholder="へんし～ん！！！" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlentities( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 				<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
 				<div class="fxbox">
 					<label for="upload_images" id="images">
@@ -433,7 +457,7 @@ $pdo = null;
 			<p>ユーズに追記しますか？</p>
 			<p>※追記は削除出来ません。</p>
 			<form method="post" id="AbiForm">
-			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlspecialchars( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 			<div class="btn_area">
 				<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
 				<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">

@@ -65,7 +65,7 @@ if( !empty($_POST['btn_submit']) ) {
     $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
 
-    $result = $dbh->prepare("SELECT userid, password, loginid FROM account WHERE userid = :userid");
+    $result = $dbh->prepare("SELECT userid, password, loginid, authcode FROM account WHERE userid = :userid");
 
     $result->bindValue(':userid', $userid);
     // SQL実行
@@ -88,16 +88,25 @@ if( !empty($_POST['btn_submit']) ) {
 
                 if($row["userid"] == $userid){
                     if(password_verify($password,$row["password"])){
-                        $_SESSION['admin_login'] = true;
+                        if(empty($row["authcode"])){
+                            $_SESSION['admin_login'] = true;
 
-                        $_SESSION['userid'] = $userid;
-                        $_SESSION['loginid'] = $row["loginid"];
-                        // リダイレクト先のURLへ転送する
-                        $url = 'check.php';
-                        header('Location: ' . $url, true, 303);
+                            $_SESSION['userid'] = $userid;
+                            $_SESSION['loginid'] = $row["loginid"];
+                            // リダイレクト先のURLへ転送する
+                            $url = 'check.php';
+                            header('Location: ' . $url, true, 303);
 
-                        // すべての出力を終了
-                        exit;
+                            // すべての出力を終了
+                            exit;
+                        }else{
+                            $_SESSION['userid'] = $userid;
+                            $url = 'authlogin.php';
+                            header('Location: ' . $url, true, 303);
+
+                            // すべての出力を終了
+                            exit;
+                        }
                     }
                     else{
                         $error_message[] = 'IDまたはパスワードが違います'; 
@@ -159,14 +168,14 @@ $pdo = null;
                 <!--ユーザーネーム関係-->
                 <div>
                     <label for="userid">ユーザーID</label>
-                    <input onInput="checkForm(this)" id="userid" class="inbox" type="text" name="userid" value="<?php if( !empty($_SESSION['userid']) ){ echo htmlspecialchars( $_SESSION['userid'], ENT_QUOTES, 'UTF-8'); } ?>">
+                    <input onInput="checkForm(this)" id="userid" class="inbox" type="text" name="userid" value="<?php if( !empty($_SESSION['userid']) ){ echo htmlentities( $_SESSION['userid'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
                 <!--個人情報関係-->
 
                 <!--アカウント関連-->
                 <div>
                     <label for="password">パスワード</label>
-                    <input onInput="checkForm(this)" id="password" class="inbox" type="password" name="password" value="<?php if( !empty($_SESSION['password']) ){ echo htmlspecialchars( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
+                    <input onInput="checkForm(this)" id="password" class="inbox" type="password" name="password" value="<?php if( !empty($_SESSION['password']) ){ echo htmlentities( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
                 
                 <input type="submit" name="btn_submit" class="irobutton" value="ログイン">
@@ -174,6 +183,7 @@ $pdo = null;
 
             <div class="btnbox">
                 <a href="index.php" class="sirobutton">戻る</a>
+                <a href="passrecovery" class="sirobutton">パスワード復元</a>
             </div>
         </div>
     </div>

@@ -14,8 +14,8 @@
         <a href="/others" class="leftbutton">その他</a>
         <?php if($res["admin"] === "yes"){?>
             <hr>
-            <a href="/emoji/addemoji.php" class="leftbutton">絵文字登録</a>
-            <a href="/notice/addnotice.php" class="leftbutton">お知らせ配信</a>
+            <a href="/emoji/addemoji" class="leftbutton">絵文字登録</a>
+            <a href="/notice/addnotice" class="leftbutton">お知らせ配信</a>
             <hr>
         <?php }?>
         <form method="post">

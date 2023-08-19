@@ -25,8 +25,8 @@ $option = null;
 
 session_start();
 
-$userid = $_SESSION['userid'];
-$username = $_SESSION['username'];
+$userid = htmlentities($_SESSION['userid']);
+$username = htmlentities($_SESSION['username']);
 
 try {
 
@@ -128,7 +128,7 @@ if( !empty($pdo) ) {
 
 	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
-	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, iconcontent, icontype, iconsize, headname, headcontent, headtype, headsize, role, datetime FROM account WHERE userid = :userid");
+	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, iconcontent, icontype, iconsize, headname, headcontent, headtype, headsize, role, datetime, authcode FROM account WHERE userid = :userid");
 
     $rerole->bindValue(':userid', $userid);
     // SQL実行
@@ -580,6 +580,57 @@ if( !empty($_POST['logout']) ) {
     exit;
 }
 
+if( !empty($_POST['auth_on_submit']) ) {
+	$_SESSION['userid'] = $userid;
+    // リダイレクト先のURLへ転送する
+    $url = 'addauthcode.php';
+    header('Location: ' . $url, true, 303);
+
+    // すべての出力を終了
+    exit;
+}
+
+if( !empty($_POST['auth_off_submit']) ) {
+	if( empty($error_message) ) {
+		$secret = "";
+		// トランザクション開始
+		$pdo->beginTransaction();
+	
+		try {
+	
+					// SQL作成
+			$stmt = $pdo->prepare("UPDATE account SET authcode = :authcode WHERE userid = :userid");
+	
+			$stmt->bindValue(':authcode', $secret, PDO::PARAM_STR);
+	
+			// ユーザーIDのバインド（WHERE句に必要）
+			$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+	
+			// SQLクエリの実行
+			$res = $stmt->execute();
+	
+			// コミット
+			$res = $pdo->commit();
+	
+	
+		} catch (Exception $e) {
+	
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+		}
+	
+		if ($res) {
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:".$url."");
+			exit; 
+		} else {
+			$error_message[] = '更新に失敗しました。';
+		}
+	
+		// プリペアドステートメントを削除
+		$stmt = null;
+	}
+}
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -647,6 +698,7 @@ $pdo = null;
 			            
             <input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
 
+			<hr>
 			<div>
                 <p>パスワード</p>
                 <input id="password" type="text" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" style="-webkit-text-security:disc;" value="">
@@ -654,6 +706,15 @@ $pdo = null;
 
 			<input type="submit" class = "irobutton" name="pass_submit" value="パスワード更新">
 
+			<hr>
+			<?php 
+			if(empty($userdata['authcode'])){
+			?>
+				<input type="submit" class = "irobutton" name="auth_on_submit" value="二段階認証の設定">
+			<?php }else{ ?>
+				<p>下のボタンを押すとすぐに解除されます。確認などはありません。気をつけてください。</p>
+				<input type="submit" class = "irobutton" name="auth_off_submit" value="二段階認証の解除">
+			<?php } ?>
 
         </form>
 	</main>

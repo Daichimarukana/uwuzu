@@ -26,8 +26,8 @@ try {
 }
 
 
-$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
-$userid = $_GET['userid'];
+$keyword = htmlentities(isset($_GET['keyword'])) ? htmlentities($_GET['keyword']) : '';
+$userid = htmlentities($_GET['userid']);
 
 $messages = array();
 
@@ -43,13 +43,6 @@ if (!empty($pdo)) {
 	$messageQuery->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
 	$messageQuery->execute();
 	$message_array = $messageQuery->fetchAll();
-    
-    function customStripTags($html, $allowedTags) {
-        $allowedTagString = implode('|', $allowedTags);
-        $pattern = "/<(?!$allowedTagString)[^>]+>/";
-        return preg_replace($pattern, '', $html);
-    }    
-    $allowedTags = array('h1', 'h2', 'h3', 'center', 'font');
     
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
@@ -100,12 +93,6 @@ if (!empty($pdo)) {
         if ($userData) {
             $message['username'] = $userData['username'];
         }
-    }
-
-    // ユーズ内のHTMLコードに指定のタグを有効化する関数
-    function replaceUnescapedHTMLTags($html) {
-        $allowedTags = array('h1', 'h2', 'h3', 'center', 'font'); // 有効化するタグ
-        return customStripTags($html, $allowedTags);
     }
 
     if(!empty($messages)){

@@ -2,7 +2,7 @@
 
 if(isset($_GET['userid'])) { 
 
-$search = $_GET['userid'];
+$search = htmlentities($_GET['userid']);
 
 
 require('../db.php');
@@ -52,16 +52,16 @@ if (empty($userdata)){
     $userdata["follower_cnt"] = count($followercnts)-1;
 
     $response = array(
-        'user_name' => $userdata["username"],
-        'profile' => $userdata["profile"],
-        'registered_date' => $userdata["datetime"],
-        'follow' => $userdata["follow"],
-        'follow_cnt' => $userdata["follow_cnt"],
-        'follower' => $userdata["follower"],
-        'follower_cnt' => $userdata["follower_cnt"],
+        'user_name' => htmlentities($userdata["username"]),
+        'profile' => htmlentities($userdata["profile"]),
+        'registered_date' => htmlentities($userdata["datetime"]),
+        'follow' => htmlentities($userdata["follow"]),
+        'follow_cnt' => htmlentities($userdata["follow_cnt"]),
+        'follower' => htmlentities($userdata["follower"]),
+        'follower_cnt' => htmlentities($userdata["follower_cnt"]),
     );
 }
-echo json_encode($response);
+echo json_encode($response, JSON_UNESCAPED_UNICODE);;
 
 }else{
 
@@ -70,6 +70,6 @@ echo json_encode($response);
         'error_code' => $err,
     );
      
-    echo json_encode($response);
+    echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }
 ?>

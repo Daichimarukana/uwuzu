@@ -26,8 +26,8 @@ $option = null;
 
 session_start();
 
-$userid = $_SESSION['userid'];
-$username = $_SESSION['username'];
+$userid = htmlentities($_SESSION['userid']);
+$username = htmlentities($_SESSION['username']);
 
 
 try {
@@ -129,7 +129,7 @@ if( !empty($pdo) ) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
-	$uwuzuid = str_replace('@', '', $_GET['uwuzuid']);
+	$uwuzuid = htmlentities(str_replace('@', '', $_GET['uwuzuid']));
 
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
@@ -213,7 +213,7 @@ if( !empty($pdo) ) {
 		$followerIds = explode(',', $follower);
 		$followerCount = count($followerIds)-1;
 
-		$profileText = htmlspecialchars($userData['profile'], ENT_QUOTES, 'UTF-8');
+		$profileText = htmlentities($userData['profile'], ENT_QUOTES, 'UTF-8');
 
 	}else{
 		$userData["userid"] = "none";
@@ -320,7 +320,7 @@ $pdo = null;
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title><?php echo htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんのプロフィール - <?php echo file_get_contents($servernamefile);?></title>
+<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんのプロフィール - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
@@ -345,8 +345,8 @@ $pdo = null;
 			</div>
 			<div class="icon">
 				<img src="../home/tlimage.php?account=<?php echo urlencode($userData['userid']); ?>">
-				<h2><?php echo htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8'); ?></h2>
-				<p>@<?php echo htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<h2><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?></h2>
+				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
 			</div>
 
 			<div class="roleboxes">
@@ -354,7 +354,7 @@ $pdo = null;
 					<?php $roleData = $roleDataArray[$roleId]; ?>
 					<div class="rolebox" style="border: 1px solid <?php echo '#' . $roleData["rolecolor"]; ?>;">
 						<p style="color: <?php echo '#' . $roleData["rolecolor"]; ?>;">
-							<?php if (!empty($roleData["rolename"])) { echo htmlspecialchars($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
+							<?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
 						</p>
 					</div>
 				<?php endforeach; ?>
@@ -400,7 +400,7 @@ $pdo = null;
 
 		<div id="myModal" class="modal">
 			<div class="modal-content">
-				<p><?php echo htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをフォロー解除しますか？</p>
+				<p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをフォロー解除しますか？</p>
 				<form class="btn_area" method="post">
 					<input type="submit" id="openModalButton" class="fbtn_no" name="unfollow" value="フォロー解除">
 					<input type="button" id="closeModal" class="fbtn" value="キャンセル">
@@ -436,7 +436,7 @@ $pdo = null;
 					<p>ユーズに追記しますか？</p>
 					<p>※追記は削除出来ません。</p>
 					<form method="post" id="AbiForm">
-					<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlspecialchars( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+					<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 					<div class="btn_area">
 						<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
 						<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">

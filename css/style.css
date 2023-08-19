@@ -348,6 +348,17 @@ label > input {
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
 
+.formarea label{
+    overflow-wrap:  break-word;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
 .myarea{
     padding-top: 16px;
     padding-bottom: 32px;
@@ -381,6 +392,16 @@ label > input {
     font-size: 12px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: normal;
+}
+.ueuse2 a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    font-size: 16px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
 }
 
 .inbox {
@@ -683,6 +704,17 @@ main h1{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:45%;
 }
+.textbox .authzone{
+    width: 100%;
+    margin-top: 64px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.textbox .authzone img{
+    width: 30%;
+}
 
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
@@ -851,5 +883,9 @@ main h1{
         height: 100vh;
         margin-left: 0px;
         padding: 32px;
+    }
+    
+    .textbox .authzone img{
+        width: 80%;
     }
 }
