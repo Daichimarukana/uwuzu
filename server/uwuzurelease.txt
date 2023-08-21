@@ -1,0 +1,130 @@
+## リリースノートだぜぇぇぇぇぇぇい！！！！！！！
+ここにはuwuzuの更新情報を載せてくぜぇ～！(いやまてテンションおかしいだろ...)
+
+## Version 1.2.8
+リリース日:2023/08/21
+ログイン時にリダイレクトを繰り返してしまうバグを修正しました。
+ログアウトできないバグを修正しました。
+
+## Version 1.2.7
+リリース日:2023/08/21
+通知画面のスマホ向けUIを改善しました。
+Y.Swetake様よりファイルをお借りすることによりQRコードをサーバー上で生成できるようにしました。
+それにより高速なQRコードの生成が可能となりました。
+また、Michael Kliewe様の二段階認証実装用ライブラリのコードを一部改変させていただきました。
+二段階認証のバックアップコードを生成する機能を作成しました。
+ログイン通知を送信するようにしました。
+未読の通知をわかりやすくしました。
+アカウント削除時に通知が削除されるようにしました。
+
+## Version 1.2.6.1
+リリース日:2023/08/19
+CSSの変更忘れです。
+
+## Version 1.2.6
+リリース日:2023/08/19
+ログイン時の二段階認証入力画面を数字のみに限定しました。
+通知機能を強化し、わかりやすくしました！
+
+## Version 1.2.5
+リリース日:2023/08/19
+全てのデバイスでセッションを終了する機能を実装しました！
+パスワードの復元をできるようにしました！
+
+## Version 1.2.4
+リリース日:2023/08/19
+二段階認証機能を実装しました！
+使用ライブラリ - GoogleAuthenticator.php
+ライセンス表示↓
+Copyright (c) 2012, Michael Kliewe All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1.Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2.Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+## Version 1.2.3
+リリース日:2023/08/18
+脆弱性の修正をしました。
+追記機能で二回文字列が変換されてしまうバグを修正しました。
+追記機能で絵文字とURLを使用できるようにしました！
+
+## Version 1.2.2
+リリース日:2023/08/18
+モバイル向けUIを変更しました。
+PutonFPSさんに手伝っていただきAPIの文字がUnicodeになってしまう問題を修正しました。
+
+## Version 1.2.1
+リリース日:2023/08/18
+エラーコードをわかりやすくしました。
+追記でHTMLタグが二回変換される問題を修正しました。
+
+## Version 1.2.0
+リリース日:2023/08/18
+招待コード機能を実装しました！
+開発版のテストや鯖のスペック的にこれ以上ユーザーを受け入れられない場面で使えるかもです！
+
+## Version 1.1.6
+リリース日:2023/08/18
+API利用時にプロフィールに&lt;h1&gt;などのHTMLタグが含まれていると正しくAPIが取得できない問題を修正しました。
+
+## Version 1.1.5
+リリース日:2023/08/18
+無限にログインしてしまう、またはアカウント登録が出来ない可能性のあるバグを修正しました。
+投稿に添付されているURLを新しいタブで開くようにしました。
+その他一部脆弱性を修正しました。
+無駄な処理をすこ～しだけなくしました。
+&lt;h1&gt;から&lt;h3&gt;、&lt;cernter&gt;、&lt;font&gt;を投稿内で使えてしまうと危険だと判断し、投稿の文字装飾機能を廃止しました。
+なお、投稿の文字装飾はMarkdownにし、復活予定です。
+
+## Version 1.1.4
+リリース日:2023/08/17
+脆弱性に対しての応急処置です。
+全てのHTMLコードを無効化するよう修正しました。
+
+## Version 1.1.3
+リリース日:2023/08/17
+早速脆弱性を見つけ出すとんでもない人間が出始めたので対策をしました()
+部分的にUIを変更しました。
+
+## Version 1.1.2
+リリース日:2023/08/17
+絵文字文字化けバグを修正しました。(文字コードをUTF8からUTF8mb4にしました。)
+
+## Version 1.1.1
+リリース日:2023/08/16
+小さなバグを修正しました。
+
+## Version 1.1.0
+リリース日:2023/08/16
+超極激ヤババグを修正しました。
+ユーザーIDにハイフンが使えてしまうバグを修正しました。
+
+## Version 1.0.0
+リリース日:2023/08/16
+### 初リリース！！！やったね！！！！
+機能は以下の通り！遊んでみてね！！！
+- 投稿(ユーズしよう！みんなに自分のつぶやきを見せつけるぞ！(?))
+- 投稿に画像添付(最大2枚まで画像を添付できるぞ！位置情報など漏洩しないよう写真にGPS情報が残っていないか厳重に注意しよう...)
+- 投稿に動画添付(好きな動画を載せてみよう！)
+- 投稿への追記(投稿者が追記できるよ！誤字ったりミスった時はこれを使おう！)
+- フォロー(アカウントをフォロー！周りのユーザーとの交流を増やそう！)
+- いいね(いいねを押してみよう！気軽にどのくらいの人が「いいね！」と思ったかがわかる優れものさ！)
+- 返信(返信だ！少し手抜きで作ったから見た目はよろしくないけど十分使える機能だッ！どちらかと言えばスレッドといったほうがいいかも...)
+- カスタム絵文字(自分の思うことを画像で表せるカスタム絵文字！サーバー管理者に追加してほしい絵文字を報告して追加してもらおう！)
+- カスタム絵文字総合ページ(PCの人なら左側のメニューからアクセスできるかな！自分のお気に入りの絵文字をここから見つけよう！)
+- 投稿の文字装飾(5つだけHTMLタグを開放したんだ！&lt;h1&gt;,&lt;h2&gt;,&lt;h3&gt;,&lt;center&gt;,&lt;font&gt;を使って自由に作ろう！)
+- プロフィール(無いと困る機能だけど一応書いとくね～！自分や他のユーザーのプロフィールページだよッ！)
+- 設定(無いと一番困る機能！少し操作が複雑だけど頑張って！)
+- 検索(ユーザー検索は出来ないけど投稿は検索できるよ！「あの投稿がまた見たい...」というときに使おう！)
+- 通知(今のところほぼ使い物にならないけど今後良くしていく予定！待っててくれよっ！)
+- アカウント削除(消したくなったタイミングで自分の投稿やアカウントなどの情報を全て消せるよ！)
+- API(開発者のみんな～！ちゃんとAPIを実装したよ！内容はユーザー情報の取得！それ以外はまだないけど...まぁ！<br>/api/userdata-api.php?userid=me2)
+- PWA(スマホでも快適に！※動作未確認())
+- ダークモード(暗い夜でも目に優しく！)
+他にも小さ～な機能は色々あるけどあまり気にならないだろうから今回はパスで！
+ということで最初のバージョンである<b>uwuzu 1.0.0をお楽しみください！</b>
