@@ -8,6 +8,11 @@ function createUniqId(){
 
     return base_convert($hashCreateTime,10,36);
 }
+function random($length = 32)
+{
+    return substr(str_shuffle('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
+}
+
 
 require('../db.php');
 
@@ -142,6 +147,7 @@ if( !empty($_POST['btn_submit']) ) {
     $checkResult = $chkauthcode->verifyCode($secret, $userauthcode, $discrepancy);
     if ($checkResult) {
         if( empty($error_message) ) {
+            $backupcode = random();
             $secret = $_SESSION['secretcode'];
             // トランザクション開始
             $pdo->beginTransaction();
@@ -149,10 +155,10 @@ if( !empty($_POST['btn_submit']) ) {
             try {
         
                         // SQL作成
-                $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode WHERE userid = :userid");
+                $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode,backupcode = :backupcode WHERE userid = :userid");
         
                 $stmt->bindValue(':authcode', $secret, PDO::PARAM_STR);
-        
+                $stmt->bindValue(':backupcode', $backupcode, PDO::PARAM_STR);
                 // ユーザーIDのバインド（WHERE句に必要）
                 $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
         
@@ -171,6 +177,7 @@ if( !empty($_POST['btn_submit']) ) {
         
             if ($res) {
                 // リダイレクト先のURLへ転送する
+                $_SESSION['backupcode'] = $backupcode;
                 $url = 'success.php';
                 header('Location: ' . $url, true, 303);
                 exit; 
@@ -186,7 +193,7 @@ if( !empty($_POST['btn_submit']) ) {
     }
 }
 
-
+require('../logout/logout.php');
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -232,14 +239,14 @@ $pdo = null;
 
         $name = $userid;
 
-        $qrCodeUrl = $authcode->getQRCodeGoogleUrl($name, $secret, $title);
+        $qrCodeUrl = $authcode->getQRCodeUrl($name, $secret, $title);
         ?>
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
         <p>以下の二次元コードより二段階認証をセットアップしてください。</p>
         <p>セットアップが完了したら入力ボックスにコードを入力して「次へ」ボタンを押してください！<br>注意:まだ二段階認証の設定は終わっていません。次へを押すと設定が完了します。</p>
         <div class="authzone">
-            <img src="<?php echo $qrCodeUrl;?>">
+            <img src="../qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>">
         </div>
             <div>
                 <p>二段階認証コード</p>

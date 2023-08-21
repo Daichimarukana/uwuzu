@@ -187,6 +187,11 @@ if( !empty($_POST['btn_submit']) ) {
 				$deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
 				$res = $deleteQuery->execute();
 
+				// 通知削除クエリを実行
+				$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE touserid = :touserid");
+				$deleteQuery->bindValue(':touserid', $userid, PDO::PARAM_STR);
+				$res = $deleteQuery->execute();
+
 				// フォローの更新
 				$updateFollowQuery = $pdo->prepare("UPDATE account SET follow = REPLACE(follow, :userid, '') WHERE follow LIKE :pattern");
 				$updateFollowQuery->bindValue(':userid', ",$userid", PDO::PARAM_STR);
@@ -284,23 +289,7 @@ if( !empty($_POST['session_submit']) ) {
 }
 
 
-if( !empty($_POST['logout']) ) {
-	if (isset($_SERVER['HTTP_COOKIE'])) {
-		$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-		foreach($cookies as $cookie) {
-			$parts = explode('=', $cookie);
-			$name = trim($parts[0]);
-			setcookie($name, '', time()-1000);
-			setcookie($name, '', time()-1000, '/');
-		}
-	}
-	// リダイレクト先のURLへ転送する
-    $url = '../index.php';
-    header('Location: ' . $url, true, 303);
-
-    // すべての出力を終了
-    exit;
-}
+require('../logout/logout.php');
 
 
 ?>

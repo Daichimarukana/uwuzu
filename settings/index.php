@@ -568,23 +568,7 @@ if( !empty($_POST['img2btn_submit']) ) {
     }
 }
 
-if( !empty($_POST['logout']) ) {
-	if (isset($_SERVER['HTTP_COOKIE'])) {
-		$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-		foreach($cookies as $cookie) {
-			$parts = explode('=', $cookie);
-			$name = trim($parts[0]);
-			setcookie($name, '', time()-1000);
-			setcookie($name, '', time()-1000, '/');
-		}
-	}
-	// リダイレクト先のURLへ転送する
-    $url = '../index.php';
-    header('Location: ' . $url, true, 303);
-
-    // すべての出力を終了
-    exit;
-}
+require('../logout/logout.php');
 
 if( !empty($_POST['auth_on_submit']) ) {
 	$_SESSION['userid'] = $userid;
@@ -599,15 +583,17 @@ if( !empty($_POST['auth_on_submit']) ) {
 if( !empty($_POST['auth_off_submit']) ) {
 	if( empty($error_message) ) {
 		$secret = "";
+		$backupcode = "";
 		// トランザクション開始
 		$pdo->beginTransaction();
 	
 		try {
 	
 					// SQL作成
-			$stmt = $pdo->prepare("UPDATE account SET authcode = :authcode WHERE userid = :userid");
+			$stmt = $pdo->prepare("UPDATE account SET authcode = :authcode,backupcode = :backupcode WHERE userid = :userid");
 	
 			$stmt->bindValue(':authcode', $secret, PDO::PARAM_STR);
+			$stmt->bindValue(':backupcode', $backupcode, PDO::PARAM_STR);
 	
 			// ユーザーIDのバインド（WHERE句に必要）
 			$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
@@ -716,6 +702,7 @@ $pdo = null;
 			<?php 
 			if(empty($userdata['authcode'])){
 			?>
+				<p>一時的に有効なキーを生成する二段階認証を設定することにより本人以外がログインしにくくなります。</p>
 				<input type="submit" class = "irobutton" name="auth_on_submit" value="二段階認証の設定">
 			<?php }else{ ?>
 				<p>下のボタンを押すとすぐに解除されます。確認などはありません。気をつけてください。</p>

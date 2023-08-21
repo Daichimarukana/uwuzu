@@ -22,7 +22,7 @@ $option = null;
 
 
 $userid = $_SESSION['userid'];
-
+$backupcode = $_SESSION['backupcode'];
 
 
 try {
@@ -112,6 +112,8 @@ $notiQuery->execute();
 $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
+
+require('../logout/logout.php');
 ?>
 
 
@@ -148,8 +150,11 @@ $notificationcount = $notiData['notification_count'];
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
-
+		<div class="formarea">
         <p>登録完了！セキュリティの強化にご協力いただきありがとうございます！<br>(≧∇≦)</p>
+		<p>バックアップコードは以下のものです！<br>以下のコードでスマートフォンをなくしてしまったなどのもしものときにログインいただけます。<br>絶対に大切に保管してください！<br>また、そのバックアップコードは絶対に公開しないでください。</p>
+		<p><?php echo $backupcode;?>
+		</div>
         
         <a href="index" class="irobutton">戻る</a>
     </div>

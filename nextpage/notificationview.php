@@ -7,7 +7,11 @@ class MessageDisplay {
     }
     
     public function display() {
-        echo '<div class="notification">';
+        if($this->value['userchk'] === "none"){
+            echo '<div class="notification2">';
+        }else{
+            echo '<div class="notification">';
+        }
         echo '    <div class="flebox">';
             
         echo '        <div class="time">';
@@ -24,7 +28,7 @@ class MessageDisplay {
         // 投稿内のHTMLコードを表示する部分
         echo '    <h3>' . htmlentities($this->value['title']) . '</h3>';
         echo '    <p>' . htmlentities($this->value['msg']) . '</p>';
-        echo '    <a href="' . htmlentities($this->value['url']) . '">続きをみる</a>';
+        echo '    <a href="' . htmlentities($this->value['url']) . '">詳細をみる</a>';
             
         echo '</div>';
     }

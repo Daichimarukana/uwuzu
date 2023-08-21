@@ -98,7 +98,7 @@ class PHPGangsta_GoogleAuthenticator
      *
      * @return string
      */
-    public function getQRCodeGoogleUrl($name, $secret, $title = null, $params = array())
+    public function getQRCodeUrl($name, $secret, $title = null, $params = array())
     {
         $width = !empty($params['width']) && (int) $params['width'] > 0 ? (int) $params['width'] : 200;
         $height = !empty($params['height']) && (int) $params['height'] > 0 ? (int) $params['height'] : 200;
@@ -109,7 +109,7 @@ class PHPGangsta_GoogleAuthenticator
             $urlencoded .= urlencode('&issuer='.urlencode($title));
         }
 
-        return "https://api.qrserver.com/v1/create-qr-code/?data=$urlencoded&size=${width}x${height}&ecc=$level";
+        return "$urlencoded";
     }
 
     /**

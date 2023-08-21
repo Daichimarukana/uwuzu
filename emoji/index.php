@@ -125,25 +125,7 @@ if (!empty($pdo)) {
     }
 }
 
-if( !empty($_POST['logout']) ) {
-	if (isset($_SERVER['HTTP_COOKIE'])) {
-		$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-		foreach($cookies as $cookie) {
-			$parts = explode('=', $cookie);
-			$name = trim($parts[0]);
-			setcookie($name, '', time()-1000);
-			setcookie($name, '', time()-1000, '/');
-		}
-	}
-	// リダイレクト先のURLへ転送する
-    $url = '../index.php';
-    header('Location: ' . $url, true, 303);
-
-    // すべての出力を終了
-    exit;
-}
-
-
+require('../logout/logout.php');
 
 
 // データベースの接続を閉じる

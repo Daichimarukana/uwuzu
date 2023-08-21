@@ -41,6 +41,11 @@ if (!empty($pdo)) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
+    $messageQuery = $dbh->prepare("SELECT title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
+	$messageQuery->bindValue(':userid', $userid);
+	$messageQuery->execute();
+    $message_array = $messageQuery->fetchAll();
+
 	// トランザクション開始
 	$pdo->beginTransaction();
 
@@ -51,12 +56,6 @@ if (!empty($pdo)) {
 
     $res = $stmt->execute();
     $res = $pdo->commit();
-
-
-    $messageQuery = $dbh->prepare("SELECT title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
-	$messageQuery->bindValue(':userid', $userid);
-	$messageQuery->execute();
-    $message_array = $messageQuery->fetchAll();
 
     if (!empty($message_array)) {
         foreach ($message_array as $value) {

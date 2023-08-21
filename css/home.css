@@ -2312,6 +2312,103 @@ label>input {
 }
 
 
+.notification2{
+    animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    margin: 12px;
+    border-radius: 10px;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: #FFFAE6;
+    border: 1px solid #EEE;
+    width: auto;
+}
+
+.notification2 .flebox{
+    display: flex;
+}
+
+.notification2 .flebox a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 18px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification2 .flebox .idbox{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: #FFF;
+    border: 1px solid #EEE;
+}
+.notification2 .flebox .idbox a{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 8px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 12px;
+    color:#999;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.notification2 p{
+    line-height: 20px;
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification2 h3{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: 6px;
+    margin-left: 12px;
+    font-size: 24px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+
+.notification2 .flebox .time{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 12px;
+    text-align: right;
+    font-size: 12px;
+    color:#999;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+
+.notification2 a{
+    overflow-wrap:  break-word;
+    margin-top: 24px;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 16px;
+    color:#4e4428;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
 
 .notification{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
@@ -2373,6 +2470,7 @@ label>input {
 }
 
 .notification p{
+    line-height: 20px;
     overflow-wrap:  break-word;
     margin-top: auto;
     margin-bottom: auto;
@@ -3141,6 +3239,168 @@ hr{
         border: 1px solid #EEE;
     }
 
+
+
+    .notification .flebox a{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: 12px;
+        font-size: 18px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    
+    .notification .flebox .idbox{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: 6px;
+        border-radius: 10px;
+        background-color: #FFF;
+        border: 1px solid #EEE;
+    }
+    .notification .flebox .idbox a{
+        margin-top: 6px;
+        margin-bottom: 6px;
+        margin-left: 8px;
+        margin-right: 8px;
+        text-align: center;
+        font-size: 12px;
+        color:#999;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+    }
+    
+    .notification p{
+        line-height: 20px;
+        overflow-wrap:  break-word;
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: -6px;
+        font-size: 16px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    
+    .notification h3{
+        overflow-wrap:  break-word;
+        margin-top: 12px;
+        margin-bottom: 6px;
+        margin-left: -6px;
+        font-size: 18px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    
+    
+    .notification .flebox .time{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: auto;
+        margin-right: -6px;
+        text-align: right;
+        font-size: 12px;
+        color:#999;
+        font-family: 'BIZ UDPGothic', sans-serif;
+    }
+    
+    .notification a{
+        overflow-wrap:  break-word;
+        margin-top: 32px;
+        margin-bottom: auto;
+        margin-left: -6px;
+        font-size: 16px;
+        color:#4e4428;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+
+    .notification2 .flebox a{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: 12px;
+        font-size: 18px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    
+    .notification2 .flebox .idbox{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: 6px;
+        border-radius: 10px;
+        background-color: #FFF;
+        border: 1px solid #EEE;
+    }
+    .notification2 .flebox .idbox a{
+        margin-top: 6px;
+        margin-bottom: 6px;
+        margin-left: 8px;
+        margin-right: 8px;
+        text-align: center;
+        font-size: 12px;
+        color:#999;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+    }
+    
+    .notification2 p{
+        line-height: 20px;
+        overflow-wrap:  break-word;
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: -6px;
+        font-size: 16px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    
+    .notification2 h3{
+        overflow-wrap:  break-word;
+        margin-top: 12px;
+        margin-bottom: 6px;
+        margin-left: -6px;
+        font-size: 18px;
+        color:#252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    
+    
+    .notification2 .flebox .time{
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: auto;
+        margin-right: -6px;
+        text-align: right;
+        font-size: 12px;
+        color:#999;
+        font-family: 'BIZ UDPGothic', sans-serif;
+    }
+    
+    .notification2 a{
+        overflow-wrap:  break-word;
+        margin-top: 32px;
+        margin-bottom: auto;
+        margin-left: -6px;
+        font-size: 16px;
+        color:#4e4428;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -3506,6 +3766,12 @@ hr{
         color: #FFFAE6;
     }
 
+    
+    .btmbutton_on{
+        background-color: #FFC832;
+        color:#FF4444;
+    }
+
 
     .terms{
         background-color: #0c0c0c;
@@ -3558,6 +3824,34 @@ hr{
     .terms .err404 p{
         color: #FFF;
     }
+
+    .notification2{
+        background-color: #3a3333;
+        border: none;
+    }
+
+    .notification2 .flebox a{
+        color:#CCC5;
+    }
+    
+    .notification2 p{
+        color:#FFF;
+    }
+    
+    .notification2 h3{
+        color:#CCC;
+    }
+    
+    
+    .notification2 .flebox .time{
+        color:#CCC;
+    }
+    
+    .notification2 a{
+        color:#FFC832;
+    }
+
+
 
     .notification{
         background-color: #181616;
