@@ -32,6 +32,7 @@ $userid = $_SESSION['userid'];
 
 
 // データベースに接続
+
 try {
 
     $option = array(
@@ -44,6 +45,17 @@ try {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
+}
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+
+    header("Location: home/index.php");
+	exit;
+	
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+    header("Location: home/index.php");
+    exit;
+
 }
 
 if( !empty($_POST['btn_submit']) ) {
@@ -95,7 +107,7 @@ $pdo = null;
 <body>
 
 
-<div class="leftbox">
+<div class="leftbox2">
     <div class="logo">
         <img src="img/uwuzulogo.svg">
     </div>

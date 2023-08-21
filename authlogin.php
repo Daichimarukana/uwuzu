@@ -20,12 +20,6 @@ $row["authcode"] = "";
 $ruserid = "";
 $rpassword = "";
 
-$userid = "";
-$_SESSION["userid"]="";
-
-$password = null;
-$_SESSION["password"]="";
-
 
 session_start();
 
@@ -47,60 +41,18 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: login.php");
-		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"]){
-	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
-    header("Location: home/");
+    header("Location: home/index.php");
 	exit;
-	}
-
-		
+	
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: login.php");
-		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"]){
-	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
-    header("Location: home/");
+    header("Location: home/index.php");
     exit;
-	}
-
 
 }
 
-
 if( !empty($_POST['btn_submit']) ) {
+    $userbackupcode = $_POST['userbackupcode'];
 
     $options = array(
         // SQL実行失敗時に例外をスルー
@@ -116,48 +68,135 @@ if( !empty($_POST['btn_submit']) ) {
 
     require_once 'authcode/GoogleAuthenticator.php';
 
-    $result = $dbh->prepare("SELECT authcode,loginid,username FROM account WHERE userid = :userid");
+    $result = $dbh->prepare("SELECT authcode,loginid,username,backupcode FROM account WHERE userid = :userid");
 
     $result->bindValue(':userid', $userid);
     // SQL実行
     $result->execute();
-    if($result->rowCount() > 0) {
+
+    if(!(empty($userbackupcode))){
         $row = $result->fetch();
+        if($row["backupcode"] === $userbackupcode){
+            $pdo->beginTransaction();
+            
+            try {
+                $touserid = $userid;
+                $datetime = date("Y-m-d H:i:s");
+                $msg = "バックアップコードを使用しログインされました！\nバックアップコード変更のために二段階認証を再設定することを強くおすすめします。\nまた、もしバックアップコードを利用してログインした覚えがない場合は「その他」より全てのセッションを終了し、設定画面よりパスワードを変更し、二段階認証を再設定してください！";
+                $title = '🔴バックアップコード使用のお知らせ🔴';
+                $url = '/settings';
+                $userchk = 'none';
+                // 通知用SQL作成
+                $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+        
+                $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                $stmt->bindParam(':title', $title, PDO::PARAM_STR);
 
-        $tousercode = $row["authcode"];
+                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-        $chkauthcode = new PHPGangsta_GoogleAuthenticator();
+                // SQLクエリの実行
+                $res = $stmt->execute();
 
-        $userauthcode = $_POST['usercode'];
+                // コミット
+                $res = $pdo->commit();
 
-        if(empty($userauthcode)){
-            $error_message[] = "コードを入力してください。";
+            } catch(Exception $e) {
+
+                // エラーが発生した時はロールバック
+                $pdo->rollBack();
+        	}
+
+            $_SESSION['admin_login'] = true;
+            $_SESSION['userid'] = $userid;
+            $_SESSION['loginid'] = $row["loginid"];
+        
+            $_SESSION['username'] = $row["username"];
+            $_SESSION['password'] = "";
+        
+            // リダイレクト先のURLへ転送する
+            $url = '/home';
+            header('Location: ' . $url, true, 303);
+        
+            // すべての出力を終了
+            exit;
         }else{
-
-            $discrepancy = 2;
-
-            $checkResult = $chkauthcode->verifyCode($tousercode, $userauthcode, $discrepancy);
-            if ($checkResult) {
-                $_SESSION['admin_login'] = true;
-                $_SESSION['userid'] = $userid;
-                $_SESSION['loginid'] = $row["loginid"];
-            
-                $_SESSION['username'] = $row["username"];
-                $_SESSION['password'] = "";
-            
-                // リダイレクト先のURLへ転送する
-                $url = '/home';
-                header('Location: ' . $url, true, 303);
-            
-                // すべての出力を終了
-                exit;
-                    
-            }else {
-                $error_message[] = '二段階認証が出来ませんでした。再度お試しください。';
-            }
+            $error_message[] = "そのバックアップコードは使用できません。";
         }
     }else{
-        $error_message[] = 'データの取得が出来ませんでした。再度お試しください。';
+
+        if($result->rowCount() > 0) {
+            $row = $result->fetch();
+
+            $tousercode = $row["authcode"];
+
+            $chkauthcode = new PHPGangsta_GoogleAuthenticator();
+
+            $userauthcode = $_POST['usercode'];
+
+            if(empty($userauthcode)){
+                $error_message[] = "コードを入力してください。";
+            }else{
+
+                $discrepancy = 2;
+
+                $checkResult = $chkauthcode->verifyCode($tousercode, $userauthcode, $discrepancy);
+                if ($checkResult) {
+
+                    $pdo->beginTransaction();
+                    try {
+                        $touserid = $userid;
+                        $datetime = date("Y-m-d H:i:s");
+                        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッションを終了し、パスワードを変更し、二段階認証を再設定してください。";
+                        $title = '🚪ログイン通知🚪';
+                        $url = '/settings';
+                        $userchk = 'none';
+                        // 通知用SQL作成
+                        $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+                
+                        $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                        $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                        $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                
+                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                
+                        // SQLクエリの実行
+                        $res = $stmt->execute();
+                
+                        // コミット
+                        $res = $pdo->commit();
+                
+                    } catch(Exception $e) {
+                
+                        // エラーが発生した時はロールバック
+                        $pdo->rollBack();
+                    }
+
+                    $_SESSION['admin_login'] = true;
+                    $_SESSION['userid'] = $userid;
+                    $_SESSION['loginid'] = $row["loginid"];
+                
+                    $_SESSION['username'] = $row["username"];
+                    $_SESSION['password'] = "";
+                
+                    // リダイレクト先のURLへ転送する
+                    $url = '/home';
+                    header('Location: ' . $url, true, 303);
+                
+                    // すべての出力を終了
+                    exit;
+                        
+                }else {
+                    $error_message[] = '二段階認証が出来ませんでした。再度お試しください。';
+                }
+            }
+        }else{
+            $error_message[] = 'データの取得が出来ませんでした。再度お試しください。';
+        }
     }
 
 }
@@ -203,6 +242,11 @@ $pdo = null;
                     <p>二段階認証コード</p>
                     <div class="p2">6桁のコードを入力してください。</div>
                     <input id="profile" type="number" placeholder="123456" class="inbox" name="usercode" value="">
+                </div>
+                <div>
+                    <p>バックアップコード</p>
+                    <div class="p2">もし二段階認証が出来ない場合は8桁英数字のバックアップコードを入力してください。</div>
+                    <input id="profile" type="text" placeholder="通常は入力しなくて大丈夫です。" class="inbox" name="userbackupcode" value="">
                 </div>
                     <input type="submit" class = "irobutton" name="btn_submit" value="次へ">
             </form>

@@ -27,50 +27,6 @@ $stmt = null;
 $res = null;
 $option = null;
 
-if(isset($_COOKIE["username"])){
-    $_SESSION["username"]=$_COOKIE["username"];
-}else{
-    $_SESSION["username"]="";
-}
-
-if(isset($_COOKIE["userid"])){
-    $_SESSION["userid"]=$_COOKIE["userid"];
-}else{
-    $_SESSION["userid"]="";
-}
-
-if(isset($_COOKIE["password"])){
-    $_SESSION["password"]=$_COOKIE["password"];
-}else{
-    $_SESSION["password"]="";
-}
-
-if(isset($_COOKIE["mailadds"])){
-    $_SESSION["mailadds"]=$_COOKIE["mailadds"];
-}else{
-    $_SESSION["mailadds"]="";
-}
-
-if(isset($_COOKIE["profile"])){
-    $_SESSION["profile"]=$_COOKIE["profile"];
-}else{
-    $_SESSION["profile"]="";
-}
-
-
-//$username = array();
-//$userid = array();
-
-//$realname = array();
-//$yominame = array();
-
-//$password = array();
-//$mailadds = array();
-
-//$profile = array();
-
-
-// データベースに接続
 try {
 
     $option = array(
@@ -83,6 +39,61 @@ try {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
+}
+
+
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: login.php");
+		exit;
+	}elseif($_SESSION['loginid'] === $res["loginid"]){
+	// セッションに値をセット
+	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
+	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
+	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
+	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
+	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+    header("Location: home/index.php");
+	exit;
+	}
+
+		
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: ../login.php");
+		exit;
+	}elseif($_COOKIE['loginid'] === $res["loginid"]){
+	// セッションに値をセット
+	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
+	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
+	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
+	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
+	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+    header("Location: home/index.php");
+    exit;
+	}
+
+
 }
 
 if( !empty($_POST['btn_submit']) ) {

@@ -1,5 +1,10 @@
 <?php 
 $servernamefile = "server/servername.txt";
+if(!(empty($_SESSION['backupcode']))){
+    $backupcode = $_SESSION['backupcode'];
+}else{
+    $backupcode = null;
+}
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +34,11 @@ $servernamefile = "server/servername.txt";
         <p><br>いぇ～い！</p>
         <p>88888888888</p>
         <p>アカウント登録が完了しました！</p>
+        <?php 
+        if(!(empty($backupcode))){?>
+        <p>バックアップコードは以下のものです！<br>以下のコードでスマートフォンをなくしてしまったなどのもしものときにログインいただけます。<br>絶対に大切に保管してください！<br>また、そのバックアップコードは絶対に公開しないでください。</p>
+		<p><?php echo $backupcode;?>
+        <?php }?>
 
         <div class="btnbox">
             <a href="login.php" class="sirobutton">ログイン</a>

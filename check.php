@@ -21,21 +21,7 @@ $row["password"] = array();
 $ruserid = array();
 $rpassword = array();
 
-$userid = null;
-$_SESSION["userid"]="";
-
-$password = null;
-$_SESSION["password"]="";
-
-
 session_start();
-
-// 管理者としてログインしているか確認
-if( empty($_SESSION['admin_login']) || $_SESSION['admin_login'] !== true ) {
-	// ログインページへリダイレクト
-	header("Location: ./login.php");
-	exit;
-}
 
 // データベースに接続
 try {
@@ -107,6 +93,37 @@ try {
 
 
 if( !empty($_POST['btn_submit']) ) {
+
+    $pdo->beginTransaction();
+    try {
+        $touserid = $userid;
+        $datetime = date("Y-m-d H:i:s");
+        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッションを終了し、パスワードを変更してください。";
+        $title = '🚪ログイン通知🚪';
+        $url = '/settings';
+        $userchk = 'none';
+        // 通知用SQL作成
+        $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+
+        $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+        $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+        $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+
+        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+        // SQLクエリの実行
+        $res = $stmt->execute();
+
+        // コミット
+        $res = $pdo->commit();
+
+    } catch(Exception $e) {
+
+        // エラーが発生した時はロールバック
+        $pdo->rollBack();
+    }
 
     $_SESSION['admin_login'] = true;
     $_SESSION['userid'] = $userid;

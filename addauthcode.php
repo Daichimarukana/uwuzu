@@ -9,6 +9,11 @@ function createUniqId(){
     return base_convert($hashCreateTime,10,36);
 }
 
+function random($length = 32)
+{
+    return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyz'), 0, $length);
+}
+
 require('db.php');
 
 $servernamefile = "server/servername.txt";
@@ -45,11 +50,16 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-// 管理者としてログインしているか確認
-if( empty($_SESSION['admin_login']) || $_SESSION['admin_login'] !== true ) {
-	// ログインページへリダイレクト
-	header("Location: ./login.php");
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+
+    header("Location: home/index.php");
 	exit;
+	
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+    header("Location: home/index.php");
+    exit;
+
 }
 
 require_once 'authcode/GoogleAuthenticator.php';
@@ -73,16 +83,19 @@ if( !empty($_POST['btn_submit']) ) {
     $checkResult = $chkauthcode->verifyCode($secret, $userauthcode, $discrepancy);
     if ($checkResult) {
         if( empty($error_message) ) {
+            $backupcode = random();
             $secret = $_SESSION['secretcode'];
+
             // トランザクション開始
             $pdo->beginTransaction();
         
             try {
         
                         // SQL作成
-                $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode WHERE userid = :userid");
+                $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode,backupcode = :backupcode WHERE userid = :userid");
         
                 $stmt->bindValue(':authcode', $secret, PDO::PARAM_STR);
+                $stmt->bindValue(':backupcode', $backupcode, PDO::PARAM_STR);
         
                 // ユーザーIDのバインド（WHERE句に必要）
                 $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
@@ -111,6 +124,7 @@ if( !empty($_POST['btn_submit']) ) {
                     }
                 }
                 $userid = "";
+                $_SESSION['backupcode'] = $backupcode;
                 // リダイレクト先のURLへ転送する
                 $url = 'success.php';
                 header('Location: ' . $url, true, 303);
@@ -174,10 +188,10 @@ $pdo = null;
 
         $name = $userid;
 
-        $qrCodeUrl = $authcode->getQRCodeGoogleUrl($name, $secret, $title);
+        $qrCodeUrl = $authcode->getQRCodeUrl($name, $secret, $title);
         ?>
         <div class="authzone">
-            <img src="<?php echo $qrCodeUrl;?>">
+            <img src="qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>">
         </div>
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
