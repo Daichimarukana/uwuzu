@@ -313,7 +313,7 @@ body{
     cursor: pointer;
     border: none;
     display: block;
-    width:70%;
+    width:80%;
     margin: 16px;
     padding: 8px auto;
     margin-left: auto;
@@ -341,11 +341,11 @@ body{
     background-color: #FFC832;
     color: #FFFAE6;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    width:75%;
+    width:85%;
 }
 .leftbutton_on:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:65%;
+    width:75%;
 }
 
 .leftbutton{
@@ -353,13 +353,13 @@ body{
     cursor: pointer;
     border: none;
     display: flex;
-    width:70%;
+    width:80%;
     margin: 16px;
     padding: 8px auto;
     margin-left: auto;
     margin-right: auto;
 
-    padding-left: 16px;
+    padding-left: 12px;
     padding-top: 8px;
     padding-bottom: 8px;
 
@@ -381,11 +381,11 @@ body{
     background-color: #FFC832;
     color: #FFFAE6;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    width:75%;
+    width:85%;
 }
 .leftbutton:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:65%;
+    width:75%;
 }
 
 .leftbutton .notipod{
@@ -420,6 +420,32 @@ body{
 .leftbutton:hover .notipod p{
     color:#FF4444;
 }
+
+.leftbutton img{
+    width: 32px;
+    height: 32px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: auto;
+    margin-bottom: auto;
+    vertical-align: middle;
+    background-color: #ffbc0d;
+}
+.leftbutton:hover img{
+    background-color: #FFF;
+}
+
+svg {
+    width: 32px;
+    height: 32px;
+    margin-left: 0px;
+    margin-right: 6px;
+    margin-top: auto;
+    margin-bottom: auto;
+    vertical-align: middle;
+    fill: currentColor;
+}
+
 
 main{
     height: 95dvh;
@@ -461,6 +487,7 @@ main h1{
 
 .userheader .icon{
     margin-left: 24px;
+    margin-right: 24px;
     display: flex;
     width: auto;
 }
@@ -476,9 +503,10 @@ main h1{
 }
 
 .userheader h2{
+    word-wrap: break-word;
     margin-left: 12px;
     margin-top: auto;
-    margin-bottom: auto;
+    margin-bottom: 12px;
     color:#252525;
     font-size: 32px;
     font-family: 'BIZ UDPGothic', sans-serif;
@@ -486,6 +514,7 @@ main h1{
 }
 
 .userheader p{
+    word-wrap: break-word;
     margin-left: 12px;
     margin-right: auto;
     margin-top: auto;
@@ -505,6 +534,24 @@ main h1{
     word-wrap: break-word;
     font-size: 18px;
     color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.userheader .profile p img{
+    vertical-align: middle;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 28px;
+}
+.userheader .profile p a{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    font-size: 16px;
+    color:#4e4428;
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2517,7 +2564,6 @@ label>input {
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
-
 hr{
     height: 0;
     margin-top: 12px;
@@ -2570,6 +2616,33 @@ hr{
     display: none;
 }
 
+.checkicon {
+    display: block;
+    text-align: center;
+    width: 25px;
+    height: 25px;
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-top: auto;
+    margin-bottom: auto;
+    background-color: #FFC832;
+    border-radius: 50%;
+    transition: all 250ms ease-out;
+}
+
+.check {
+    display: inline-block;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 1px;
+    content: '';
+    width: 10px;
+    height: 5px;
+    border-left: 3px solid #ffffff;
+    border-bottom: 3px solid #ffffff;
+    transform: rotate(-45deg);
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -2604,8 +2677,28 @@ hr{
         flex-wrap : wrap;
     }
 
+    .userheader .icon{
+        margin-right: 24px;
+    }
+    .userheader .icon h2{
+        word-wrap: break-word;
+        margin-left:0px;
+        display: flex;
+        padding: 0px;
+        flex-wrap : wrap;
+    }
+
+    .userheader .icon p{
+        word-wrap: break-word;
+        margin-top: 12px;
+        margin-left:0px;
+        display: flex;
+        padding: 0px;
+        flex-wrap : wrap;
+    }
+
     main{
-        height: 88dvh;
+        height: 90dvh;
         overflow: auto;
         border-radius: 0px;
         margin-top: 0px;
@@ -2700,13 +2793,17 @@ hr{
 
     .botbox{
         display: block;
+        margin-bottom: 0px;
+        margin-top: 0px;
     }
 
     .botbox .lbtnzone{
         display: flex;
-        width: 90%;
+        width: 100%;
+        margin-top: 0px;
         margin-left: auto;
         margin-right: auto;
+        margin-bottom: 0px;
     }
 
         
@@ -2714,18 +2811,19 @@ hr{
         cursor: pointer;
         border: none;
         display: block;
-        width:28%;
+        width:25%;
         margin: 16px;
         padding: 8px auto;
         height: auto;
-        margin-left: 12px;
-        margin-right: 12px;
+        margin-left: 0px;
+        margin-right: 0px;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        background-color: none;
+        padding-top: 1.9dvh;
+        padding-bottom: 1.9dvh;
 
-        padding-top: 14px;
-        padding-bottom: 14px;
-        background-color: #FFFFFF;
-
-        border-radius: 50px;
+        border-radius: 0px;
         color:#FFC832;
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
@@ -2735,46 +2833,25 @@ hr{
         transition: box-shadow 250ms ease-in-out;
         transition: width 250ms ease-out;
         transition: all 250ms ease-out;
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        border: 1px solid #FFC832;
+        box-shadow:none;
+        border: none;
     }
     .btmbutton:hover{
         background-color: #FFC832;
         color: #FFFAE6;
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-        width:29%;
+        box-shadow:none;
     }
     .btmbutton:active{
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        width:27%;
+        box-shadow:none;
     }
-
-    .btmbutton_on{
-        cursor: pointer;
-        border: none;
-        display: block;
-        width:28%;
-        margin: 16px;
-        padding: 8px auto;
-        height: auto;
-        margin-left: 12px;
-        margin-right: 12px;
-
-        padding-top: 14px;
-        padding-bottom: 14px;
-        background-color: #FFFFFF;
-        border-radius: 50px;
-        color:#FF4444;
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        border: 1px solid #FFC832;
+    svg {
+        width: 6dvh;
+        height: 6dvh;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: auto;
+        margin-bottom: auto;
+        fill: currentColor;
     }
 
 

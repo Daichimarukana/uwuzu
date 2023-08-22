@@ -350,7 +350,7 @@ $pdo = null;
 			</div>
 
 			<div class="profile">
-				<p><?php echo nl2br($profileText); ?></p>
+				<p><?php echo replaceEmojisWithImages(replaceURLsWithLinks(nl2br($profileText))); ?></p>
 			</div>
 			
 		</div>

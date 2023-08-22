@@ -27,7 +27,7 @@ try {
 
 $userid = htmlentities($_GET['userid']);
 
-$itemsPerPage = 30; // 1ページあたりの投稿数
+$itemsPerPage = 15; // 1ページあたりの投稿数
 $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
 $offset = ($pageNumber - 1) * $itemsPerPage;
 

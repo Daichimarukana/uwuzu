@@ -24,6 +24,13 @@ class MessageDisplay {
             echo '        <div class="idbox">';
             echo '            <a href="/@' . htmlentities($this->value['account']) . '">@' . htmlentities($this->value['account']) . '</a>';
             echo '        </div>';
+            if (false !== strpos($this->value['role'], 'official')) {
+                echo '      <div class="checkicon">';
+                echo '          <div class="check" />';
+                echo '      </div>';
+                echo '</div>';
+            }
+            
             echo '        <div class="time">';
             $day = date("Ymd", strtotime(htmlentities($this->value['datetime'])));
             if ($day == date("Ymd")) {

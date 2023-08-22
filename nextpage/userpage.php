@@ -99,6 +99,7 @@ if (!empty($pdo)) {
 
         if ($userData) {
             $message['username'] = $userData['username'];
+            $message['role'] = $userData['role'];
         }
     }
 
