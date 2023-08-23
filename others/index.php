@@ -1,5 +1,10 @@
 <?php
 
+function random_token($length = 64)
+{
+    return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
+}
+
 $servernamefile = "../server/servername.txt";
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -133,7 +138,7 @@ if( !empty($pdo) ) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
-	$userQuery = $dbh->prepare("SELECT userid FROM account WHERE userid = :userid");
+	$userQuery = $dbh->prepare("SELECT userid,token FROM account WHERE userid = :userid");
 	$userQuery->bindValue(':userid', $userid);
 	$userQuery->execute();
 	$userData = $userQuery->fetch();
@@ -283,7 +288,74 @@ if( !empty($_POST['session_submit']) ) {
 			// すべての出力を終了
 			exit;
 		} else {
-			$error_message[] = '登録に失敗しました。';
+			$error_message[] = 'セッションの終了に失敗しました。';
+		}
+
+}
+
+
+if( !empty($_POST['token_submit']) ) {
+	$token = random_token();
+	$pdo->beginTransaction();
+		try {
+			
+            $stmt = $pdo->prepare("UPDATE account SET token = :token WHERE userid = :userid;");
+
+            $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+
+                // SQLクエリの実行
+            $res = $stmt->execute();
+
+            // コミット
+            $res = $pdo->commit();
+		} catch (Exception $e) {
+
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+		}
+	
+		if ($res) {
+			$_SESSION['token'] = $token;
+			// リダイレクト先のURLへ転送する
+			$url = 'token.php';
+			header('Location: ' . $url, true, 303);
+			exit; 
+		} else {
+			$error_message[] = 'トークンの発行に失敗しました。';
+		}
+
+}
+
+if( !empty($_POST['token_off_submit']) ) {
+	$token = '';
+	$pdo->beginTransaction();
+		try {
+			
+            $stmt = $pdo->prepare("UPDATE account SET token = :token WHERE userid = :userid;");
+
+            $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+
+            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+
+                // SQLクエリの実行
+            $res = $stmt->execute();
+
+            // コミット
+            $res = $pdo->commit();
+		} catch (Exception $e) {
+
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+		}
+	
+		if ($res) {
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:".$url."");
+			exit; 
+		} else {
+			$error_message[] = 'トークンの削除に失敗しました。';
 		}
 
 }
@@ -317,26 +389,54 @@ require('../logout/logout.php');
 		</ul>
 	<?php endif; ?>
         <form class="formarea" method="post">
+
 		<h1>セッション終了</h1>
 		<p>下のセッションを終了ボタンを押すと全てのログイン中のデバイスからログアウトされます。<br>再度uwuzu使用するにはログインが必須になります。</p>
 		<input type="submit" class = "irobutton" name="session_submit" value="セッションを終了">
-			<hr>
+
+		<hr>
 		<h1>アカウント削除</h1>
-			<p>アカウント誤削除を防ぐため下の入力ボックスにご自身のユーザーIDを入力する必要があります。</p>
+		<p>アカウント誤削除を防ぐため下の入力ボックスにご自身のユーザーIDを入力する必要があります。</p>
+		<?php if($res["admin"] === "yes"){?>
+			<p class="errmsg">あなたはこのサーバーの管理者のようです。<br>管理者アカウントの移行は済んでいますか？<br>アカウントを削除しても大丈夫なのですか...？</p>
+		<?php }?>
+		<div>
+			<p>確認用ユーザーID</p>
+			<input id="chkuserid" placeholder="" class="inbox" type="text" name="chkuserid" value="">
+		</div>
+		<input type="submit" class = "irobutton" name="btn_submit" value="アカウント削除">
+		
+		<hr>
+		<h1>API</h1>
+		<p>APIの簡単な使用法です。</p>
+		<hr>
+		<li>ユーザー情報取得API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/userdata-api?userid=[ユーザーID]</p>
+		<p>これによりユーザーのユーザーネーム(user_name)、プロフィール(profile)、登録日時(registered_date)、フォローしている人一覧(follow)、フォロワー一覧(follower)、フォロー・フォロワー数(follow_cnt,follower_cnt)が取得できます。</p>
+		<hr>
+		<li>単独投稿取得API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/ueuse-api?ueuseid=[投稿の詳細ページのリンクより投稿のID(!より後、~より手前の文字列)]</p>
+		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。</p>
+		<hr>
+		<li>ローカルタイムライン投稿取得API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
+		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。<br>page=は指定しなくても動作します。(https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数])</p>
+		<hr>
+		<li>ローカルタイムライン投稿取得API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
+		<hr>
+		<li>投稿API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&ueuse=[投稿の内容]</p>
 
-			<?php if($res["admin"] === "yes"){?>
-				<p class="errmsg">あなたはこのサーバーの管理者のようです。<br>管理者アカウントの移行は済んでいますか？<br>アカウントを削除しても大丈夫なのですか...？</p>
-			<?php }?>
-
-			<div>
-                <p>確認用ユーザーID</p>
-                <input id="chkuserid" placeholder="" class="inbox" type="text" name="chkuserid" value="">
-            </div>
-
-            
-            <input type="submit" class = "irobutton" name="btn_submit" value="アカウント削除">
-
-
+		<?php 
+			if(empty($userData['token'])){
+		?>
+		<p>以下のボタンよりアクセストークンを取得すると使用できます。<br>アクセストークンは一度発行すると作り直すまで再度確認はできません。また、絶対に他人に知られないように保護してください。<p>
+		<input type="submit" class = "irobutton" name="token_submit" value="アクセストークン発行">
+		<?php }else{ ?>
+			<p>以下のボタンよりアクセストークンを削除できます。ボタンを押すとすぐに削除されますのでご注意ください。</p>
+			<input type="submit" class = "irobutton" name="token_off_submit" value="アクセストークン削除">
+		<?php } ?>
         </form>
 	</main>
 

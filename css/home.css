@@ -803,6 +803,7 @@ main h1{
 }
 .ueuse .flebox{
     display: flex;
+    flex-wrap: wrap;
 }
 .ueuse .flebox img{
     object-fit: cover;
@@ -813,12 +814,13 @@ main h1{
     height:48px;
     border-radius: 50%;
 }
-.ueuse .flebox a{
+.ueuse .flebox a {
+    flex-shrink: 0;
     margin-top: auto;
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 18px;
-    color:#252525;
+    color: #252525;
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1654,9 +1656,21 @@ main h1{
 }
 
 .formarea p{
+    line-height: 20px;
     overflow-wrap:  break-word;
-    margin-top: 24px;
-    margin-bottom: 24px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 16px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.formarea li{
+    line-height: 20px;
+    overflow-wrap:  break-word;
+    margin-top: 12px;
+    margin-bottom: 12px;
     font-size: 16px;
     color:#252525;
     text-decoration: none;
@@ -2618,6 +2632,7 @@ hr{
 
 .checkicon {
     display: block;
+    flex-shrink: 0;
     text-align: center;
     width: 25px;
     height: 25px;
@@ -2698,7 +2713,7 @@ hr{
     }
 
     main{
-        height: 90dvh;
+        height: 93.7dvh;
         overflow: auto;
         border-radius: 0px;
         margin-top: 0px;
@@ -2820,8 +2835,8 @@ hr{
         margin-top: 0px;
         margin-bottom: 0px;
         background-color: none;
-        padding-top: 1.9dvh;
-        padding-bottom: 1.9dvh;
+        padding-top: 0.5dvh;
+        padding-bottom: 0.5dvh;
 
         border-radius: 0px;
         color:#FFC832;
@@ -2845,8 +2860,8 @@ hr{
         box-shadow:none;
     }
     svg {
-        width: 6dvh;
-        height: 6dvh;
+        width: 5dvh;
+        height: 5dvh;
         margin-left: auto;
         margin-right: auto;
         margin-top: auto;
@@ -3038,6 +3053,19 @@ hr{
     .ueuse .favbox img{
         margin-left: 0px;
         width: 24px;
+    }
+
+    .ueuse{
+        animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+        margin: 12px;
+        border-radius: 10px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: #F5F5F5;
+        border: 1px solid #EEE;
+        width: auto;
     }
         
     .leftbox{
@@ -3832,15 +3860,18 @@ hr{
         border: 1px solid #FFC832;
         border-bottom: 3px solid #FFC832;
     }
+    .botbox{
+        border-top: 1px solid #FFC832;
+    }
 
     .btmbutton{
-        background-color: #FFC832;
-        color:#FFFAE6;
+        background-color: #0c0c0c;
+        color:#F5F5F5;
         border: none;
     }
     .btmbutton:hover{
         background-color: #FFC832;
-        color: #FFFAE6;
+        color: #f5f5f5;
     }
 
     

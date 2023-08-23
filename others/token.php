@@ -1,31 +1,29 @@
-<?php
+<?php 
 $servernamefile = "../server/servername.txt";
 
-function createUniqId(){
-    list($msec, $sec) = explode(" ", microtime());
-    $hashCreateTime = $sec.floor($msec*1000000);
-    
-    $hashCreateTime = strrev($hashCreateTime);
 
-    return base_convert($hashCreateTime,10,36);
-}
 require('../db.php');
 
+
+$onlyuserfile = "../server/onlyuser.txt";
+$onlyuser = file_get_contents($onlyuserfile);
+
+session_start();
+
 // 変数の初期化
-$datetime = array();
-$user_name = null;
-$message = array();
-$message_data = null;
+$current_date = null;
+$message_array = array();
 $error_message = array();
+$authcode = array();
 $pdo = null;
 $stmt = null;
 $res = null;
 $option = null;
 
-session_start();
-session_regenerate_id(true);
 
-//------------------------------------------
+$userid = $_SESSION['userid'];
+$token = $_SESSION['token'];
+
 
 try {
 
@@ -33,7 +31,7 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
     );
-    $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
 } catch(PDOException $e) {
 
@@ -115,74 +113,58 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-if (!empty($pdo)) {
-    $sql = "SELECT emojiname,emojiinfo,emojidate FROM emoji ORDER BY emojidate DESC";
-    $message_array = $pdo->query($sql);
-
-    while ($row = $message_array->fetch(PDO::FETCH_ASSOC)) {
-
-        $messages[] = $row;
-    }
-}
-
 require('../logout/logout.php');
-
-
-// データベースの接続を閉じる
-$pdo = null;
-
 ?>
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<link rel="stylesheet" href="../css/home.css">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<link rel="stylesheet" href="../css/home.css">
-<title>絵文字一覧 - <?php echo file_get_contents($servernamefile);?></title>
+<title>アクセストークン発行完了 - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
 <body>
-	<?php require('../require/leftbox.php');?>
+<?php require('../require/leftbox.php');?>
 	<main>
-		<?php if( !empty($error_message) ): ?>
-			<ul class="errmsg">
-				<?php foreach( $error_message as $value ): ?>
-					<p>・ <?php echo $value; ?></p>
-				<?php endforeach; ?>
-			</ul>
-		<?php endif; ?>
 
-		<section>
-            <div class="emojibox">
-            <h1>絵文字一覧</h1>
-                <div class="emojizone">
-                    <?php 
-                    if(!empty($messages)){
-                        foreach ($messages as $value) {
-                        echo '<div class="emjtex">';
-                        echo '<div class="fx">';
-                        echo '<img src="../emoji/emojiimage.php?emoji=' . urlencode($value["emojiname"]) . '">';
-                        echo '<h3>:'.$value["emojiname"].':</h3>';
-                        echo '</div>';
-                        echo '<p>'.$value["emojiinfo"].'</p>';
-                        echo '</div>';
-                        }
-                    }else{
-                        echo '<div class="tokonone" id="noueuse"><p>カスタム絵文字がありません</p></div>';
-                    }
-                    ?>
-                </div>
-            </div>
-		</section>
+	<?php if( !empty($error_message) ): ?>
+		<ul class="errmsg">
+			<?php foreach( $error_message as $value ): ?>
+				<p>・ <?php echo $value; ?></p>
+			<?php endforeach; ?>
+		</ul>
+	<?php endif; ?>
 
-	</main>
+    <div class="emojibox">
+    <h1>アクセストークン発行完了</h1>
+            <?php if( !empty($error_message) ): ?>
+                <ul class="errmsg">
+                    <?php foreach( $error_message as $value ): ?>
+                        <p>・ <?php echo $value; ?></p>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+		<div class="formarea">
+        <p>発行完了！以下のアクセストークンでこのアカウント(<?php echo $userid?>)に投稿を行えます！</p>
+		<p>アクセストークンは以下のものです！<br>
+		<ul class="errmsg">
+			<p>以下のアクセストークンは絶対に他人に知られないように大切に保管してください！</p>
+		</ul>
+		<p><?php echo $token;?>
+		</div>
+        
+        <a href="index" class="irobutton">戻る</a>
+    </div>
+    </main>
 
-	<?php require('../require/rightbox.php');?>
-	<?php require('../require/botbox.php');?>
-
+<?php require('../require/rightbox.php');?>
+<?php require('../require/botbox.php');?>
 </body>
 
 </html>
