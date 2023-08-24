@@ -177,6 +177,30 @@ if( !empty($_POST['btn_submit']) ) {
 					unlink($file2); // ファイルを削除
 				}
 			}
+
+			$folderPath3 = "../usericons/"; // フォルダのパス
+			
+			// 指定したフォルダ内でユーザーIDを含むファイルを検索
+			$filesToDelete3 = glob($folderPath3 . "*-$userId.*"); // 「-ユーザーID.拡張子」というパターンを検索
+			
+			// ファイルを順に削除
+			foreach ($filesToDelete3 as $file3) {
+				if (is_file($file3)) {
+					unlink($file3); // ファイルを削除
+				}
+			}
+
+			$folderPath4 = "../userheads/"; // フォルダのパス
+			
+			// 指定したフォルダ内でユーザーIDを含むファイルを検索
+			$filesToDelete4 = glob($folderPath4 . "*-$userId.*"); // 「-ユーザーID.拡張子」というパターンを検索
+			
+			// ファイルを順に削除
+			foreach ($filesToDelete4 as $file4) {
+				if (is_file($file4)) {
+					unlink($file4); // ファイルを削除
+				}
+			}
 			
 
 			try {
@@ -421,9 +445,6 @@ require('../logout/logout.php');
 		<li>ローカルタイムライン投稿取得API</li>
 		<p>https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
 		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。<br>page=は指定しなくても動作します。(https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数])</p>
-		<hr>
-		<li>ローカルタイムライン投稿取得API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
 		<hr>
 		<li>投稿API</li>
 		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&ueuse=[投稿の内容]</p>

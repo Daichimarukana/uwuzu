@@ -67,7 +67,7 @@ try {
 
     //--------------------------------------
 
-	$userQuery = $dbh->prepare("SELECT username, userid, loginid, profile, role FROM account WHERE userid = :userid");
+	$userQuery = $dbh->prepare("SELECT username, userid, loginid, profile, role, iconname FROM account WHERE userid = :userid");
 	$userQuery->bindValue(':userid', $userid);
 	$userQuery->execute();
 	$userData = $userQuery->fetch();
@@ -195,7 +195,7 @@ $pdo = null;
             <?php endif; ?>
 
             <div class="myarea">
-                <img src="image.php">
+                <img src="<?php echo htmlentities($userData['iconname']); ?>">
                 <p>名前</p>
                 <h2><?php if( !empty($row["username"]) ){ echo htmlentities( $row["username"], ENT_QUOTES, 'UTF-8'); } ?></h2>
                 <div class="roleboxes">

@@ -179,7 +179,7 @@ if( !empty($pdo) ) {
 	
 		$roles = explode(',', $userData["role"]); // カンマで区切られたロールを配列に分割
 
-		$rerole = $dbh->prepare("SELECT  follow, follower, username, userid, password, mailadds, profile, iconname, iconcontent, icontype, iconsize, headname, headcontent, headtype, headsize, role, datetime FROM account WHERE userid = :userid");
+		$rerole = $dbh->prepare("SELECT  follow, follower, username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
 
 		$rerole->bindValue(':userid', $uwuzuid);
 		// SQL実行
@@ -330,10 +330,10 @@ $pdo = null;
 				<div class="tokonone" id="noueuse"><p>このユーザーは存在しません</p></div>
 			<?php }else{?>
 			<div class="hed">
-				<img src="../user/headimage.php?account=<?php echo urlencode($userData['userid']); ?>">
+				<img src="<?php echo htmlentities('../'.$userdata['headname']); ?>">
 			</div>
 			<div class="icon">
-				<img src="../home/tlimage.php?account=<?php echo urlencode($userData['userid']); ?>">
+				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
 				<h2><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?></h2>
 				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
 			</div>

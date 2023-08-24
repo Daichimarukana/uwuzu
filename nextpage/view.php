@@ -1,5 +1,81 @@
 
 <?php 
+
+function processMarkdownAndWrapEmptyLines($markdownText) {
+
+    // コード（#code）をHTMLのdiv class="code"タグに変換
+    $markdownText = preg_replace('/^#code (.+)/m', '<div class="code"><p>$1</p></div>', $markdownText);
+    
+    // タイトル（#、##、###）をHTMLのhタグに変換
+    $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
+    $markdownText = preg_replace('/^## (.+)/m', '<h2>$1</h2>', $markdownText);
+    $markdownText = preg_replace('/^### (.+)/m', '<h3>$1</h3>', $markdownText);
+
+    // 箇条書き（-）をHTMLのul/liタグに変換
+    $markdownText = preg_replace('/^- (.+)/m', '<ul><li>$1</li></ul>', $markdownText);
+
+    // 空行の前に何もない行をHTMLのpタグに変換
+    $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
+
+    return $markdownText;
+}
+
+// ユーズ内の絵文字を画像に置き換える
+function replaceEmojisWithImages($postText) {
+    // ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
+    $emojiPattern = '/:(\w+):/';
+    $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
+        $emojiName = $matches[1];
+        return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt='$emojiName'>";
+    }, $postText);
+    
+    // @username を検出してリンクに置き換える
+    $usernamePattern = '/@(\w+)/';
+    $postTextWithImagesAndUsernames = preg_replace_callback($usernamePattern, function($matches) {
+        $username = $matches[1];
+
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        ));
+    
+        $mentionsuserQuery = $dbh->prepare("SELECT username, userid FROM account WHERE userid = :userid");
+        $mentionsuserQuery->bindValue(':userid', $username);
+        $mentionsuserQuery->execute();
+        $mentionsuserData = $mentionsuserQuery->fetch();   
+        
+        if(empty($mentionsuserData)){
+            return "@$username";
+        }else{
+            return "<a class = 'mta' href='/@".$mentionsuserData["userid"]."'>@".$mentionsuserData["username"]."</a>";
+        }
+    }, $postTextWithImages);
+
+    return $postTextWithImagesAndUsernames;
+}
+
+function replaceURLsWithLinks($postText) {
+    // URLを正規表現を使って検出
+    $pattern = '/(https?:\/\/[^\s]+)/';
+    preg_match_all($pattern, $postText, $matches);
+
+    // 検出したURLごとに処理を行う
+    foreach ($matches[0] as $url) {
+        // ドメイン部分を抽出
+        $parsedUrl = parse_url($url);
+        $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
+
+        // ドメインのみを表示するaタグを生成
+        $link = "<a href='$url' target='_blank'>$domain</a>";
+
+        // URLをドメインのみを表示するaタグで置き換え
+        $postText = str_replace($url, $link, $postText);
+    }
+
+    return $postText;
+}
+
 class MessageDisplay {
     private $value;
     private $userid;
@@ -10,6 +86,7 @@ class MessageDisplay {
     }
 
     public function display() {
+
         if (empty($this->value)) {
             echo '<div class="tokonone" id="noueuse"><p>ユーズがありません</p></div>';
         } else {
@@ -19,7 +96,7 @@ class MessageDisplay {
             }
             echo '    <div class="flebox">';
             
-            echo '        <a href="/@' . htmlentities($this->value['account']) . '"><img src="../home/tlimage.php?account=' . urlencode($this->value['account']) . '"></a>';
+            echo '        <a href="/@' . htmlentities($this->value['account']) . '"><img src="'. htmlentities('../'.$this->value['iconname']) . '"></a>';
             echo '        <a href="/@' . htmlentities($this->value['account']) . '">' . htmlentities($this->value['username']) . '</a>';
             echo '        <div class="idbox">';
             echo '            <a href="/@' . htmlentities($this->value['account']) . '">@' . htmlentities($this->value['account']) . '</a>';
@@ -42,7 +119,7 @@ class MessageDisplay {
             
             echo '    </div>';
             
-            echo '    <p>' . replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['ueuse']))) . '</h1></h2></h3></font></center></p>';
+            echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['ueuse'])))) . '</h1></h2></h3></font></center></p>';
             
             if (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
                 echo '    <div class="photo2">';

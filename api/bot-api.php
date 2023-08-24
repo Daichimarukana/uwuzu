@@ -10,10 +10,37 @@ function createUniqId(){
     return base_convert($hashCreateTime,10,36);
 }
 
+function get_mentions_userid($postText) {
+    // @useridを検出する
+    $usernamePattern = '/@(\w+)/';
+    $mentionedUsers = [];
+
+    preg_replace_callback($usernamePattern, function($matches) use (&$mentionedUsers) {
+        $mention_username = $matches[1];
+
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        ));
+    
+        $mention_userQuery = $dbh->prepare("SELECT username, userid FROM account WHERE userid = :userid");
+        $mention_userQuery->bindValue(':userid', $mention_username);
+        $mention_userQuery->execute();
+        $mention_userData = $mention_userQuery->fetch();   
+        
+        if (!empty($mention_userData)) {
+            $mentionedUsers[] = $mention_username;
+        }
+    }, $postText);
+
+    return $mentionedUsers;
+}
+
 if(isset($_GET['token'])&&isset($_GET['ueuse'])) { 
 
     $token = htmlentities($_GET['token']);
-    $ueuse = htmlentities($_GET['ueuse']);
+    $ueuse = nl2br(htmlentities($_GET['ueuse']));
 
     require('../db.php');
 
@@ -88,6 +115,46 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
 
                     // コミット
                     $res = $pdo->commit();
+
+                    $mentionedUsers = get_mentions_userid($ueuse);
+
+                    foreach ($mentionedUsers as $mentionedUser) {
+                    
+                        $pdo->beginTransaction();
+
+                        try {
+                            $touserid = $mentionedUser;
+                            $datetime = date("Y-m-d H:i:s");
+                            $msg = "" . $ueuse . "";
+                            $title = "" . $username . "さんにメンションされました！";
+                            $url = "/!" . $uniqid . "~" . $userid . "";
+                            $userchk = 'none';
+
+                            // 通知用SQL作成
+                            $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+
+
+                            $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                            $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                            $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                            $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                            // SQLクエリの実行
+                            $res = $stmt->execute();
+
+                            // コミット
+                            $res = $pdo->commit();
+
+                        } catch(Exception $e) {
+
+                            // エラーが発生した時はロールバック
+                            $pdo->rollBack();
+                        }
+                
+                    }
 
                 } catch(Exception $e) {
 

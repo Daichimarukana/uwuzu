@@ -410,7 +410,34 @@ if( !empty($_POST['logout']) ) {
 if( !empty($_POST['img1btn_submit']) ) {
 
     if (!empty($_FILES['image2s']['name'])) {
-        $headimg = $_FILES['image2s'];
+        // アップロードされたファイル情報
+		$uploadedFile = $_FILES['image2s'];
+
+		// アップロードされたファイルの拡張子を取得
+		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+		
+		// 新しいファイル名を生成（uniqid + 拡張子）
+		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+		
+		// 保存先のパスを生成
+		$uploadedPath = 'userheads/' . $newFilename;
+		
+		// ファイルを移動
+		$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+		
+		if ($result) {
+			$headName = $uploadedPath; // 保存されたファイルのパスを使用
+		} else {
+			$errnum = $uploadedFile['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+		}
     }else{
 		$error_message[] = 'ヘッダー画像を選択してください';
     }
@@ -444,19 +471,10 @@ if( !empty($_POST['img1btn_submit']) ) {
     try {
 
 				// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET headname = :headname, headtype = :headtype, headcontent = :headcontent, headsize = :headsize WHERE userid = :userid");
-
-		// ヘッダー画像関連の処理
-		$headName = $headimg['name'];
-		$headType = $headimg['type'];
-		$headContent = file_get_contents($headimg['tmp_name']);
-		$headSize = $headimg['size'];
+		$stmt = $pdo->prepare("UPDATE account SET headname = :headname WHERE userid = :userid");
 
 		// ヘッダー画像のバインド
 		$stmt->bindValue(':headname', $headName, PDO::PARAM_STR);
-		$stmt->bindValue(':headtype', $headType, PDO::PARAM_STR);
-		$stmt->bindValue(':headcontent', $headContent, PDO::PARAM_STR);
-		$stmt->bindValue(':headsize', $headSize, PDO::PARAM_INT);
 
 		// ユーザーIDのバインド（WHERE句に必要）
 		$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
@@ -491,7 +509,34 @@ if( !empty($_POST['img1btn_submit']) ) {
 if( !empty($_POST['img2btn_submit']) ) {
 
     if (!empty($_FILES['image']['name'])) {
-        $img = $_FILES['image'];
+        // アップロードされたファイル情報
+		$uploadedFile = $_FILES['image'];
+
+		// アップロードされたファイルの拡張子を取得
+		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+		
+		// 新しいファイル名を生成（uniqid + 拡張子）
+		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+		
+		// 保存先のパスを生成
+		$uploadedPath = 'usericons/' . $newFilename;
+		
+		// ファイルを移動
+		$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+		
+		if ($result) {
+			$iconName = $uploadedPath; // 保存されたファイルのパスを使用
+		} else {
+			$errnum = $uploadedFile['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+		}
     }else{
 		$error_message[] = 'アイコン画像を選択してください';
     }
@@ -526,18 +571,10 @@ if( !empty($_POST['img2btn_submit']) ) {
     try {
 
 				// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET iconname = :iconname, icontype = :icontype, iconcontent = :iconcontent, iconsize = :iconsize WHERE userid = :userid");
-
-		$iconName = $img['name'];
-		$iconType = $img['type'];
-		$iconContent = file_get_contents($img['tmp_name']);
-		$iconSize = $img['size'];
+		$stmt = $pdo->prepare("UPDATE account SET iconname = :iconname WHERE userid = :userid");
 
 		// アイコン画像のバインド
 		$stmt->bindValue(':iconname', $iconName, PDO::PARAM_STR);
-		$stmt->bindValue(':icontype', $iconType, PDO::PARAM_STR);
-		$stmt->bindValue(':iconcontent', $iconContent, PDO::PARAM_STR);
-		$stmt->bindValue(':iconsize', $iconSize, PDO::PARAM_INT);
 
 		// ユーザーIDのバインド（WHERE句に必要）
 		$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
@@ -654,11 +691,11 @@ $pdo = null;
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
 			<div class="hed">
-				<img src="../user/headimage.php?account=<?php echo urlencode($userdata['userid']); ?>">
+				<img src="<?php echo htmlentities('../'.$userdata['headname']); ?>">
 			</div>
 
 			<div class="iconimg">
-				<img src="../image.php">
+				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
 			</div>
 			<label class="imgbtn" for="file_upload">アイコン選択
 			<input type="file" id="file_upload" name="image" accept="image/*">

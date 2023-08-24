@@ -389,14 +389,16 @@ body{
 }
 
 .leftbutton .notipod{
-    width: 25px;
+    width: auto;
     height: 25px;
     margin-left: auto;
     margin-right: 20px;
     margin-top: auto;
     margin-bottom: auto;
+    padding-left: 9px;
+    padding-right: 9px;
     background-color: #FF4444;
-    border-radius: 50%;
+    border-radius: 25px;
     transition: all 250ms ease-out;
 }
 .leftbutton .notipod p{
@@ -909,6 +911,29 @@ main h1{
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
+}
+
+.ueuse .mta{
+    line-height: 30px;
+    background-color: #FFFAE6;
+    padding: 6px;
+    border-radius: 25px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 3px;
+    margin-right: 3px;
+    font-size: 14px;
+    color:#FFC832;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    transition: all 250ms ease-out;
+}
+.ueuse .mta:hover{
+    font-size: 14px;
+    background-color: #FFC832;
+    color:#FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
 }
 
 .ueuse a{
@@ -2680,13 +2705,15 @@ hr{
     }
 
     .userheader .icon{
-        margin-left: 24px;
+        margin-left: 12px;
+        margin-right: 12px;
         display: block;
         width: auto;
     }
 
     .userheader .roleboxes{
-        margin-left: 24px;
+        margin-left: 12px;
+        margin-right: 12px;
         display: flex;
         padding: 0px;
         flex-wrap : wrap;
@@ -2710,6 +2737,16 @@ hr{
         display: flex;
         padding: 0px;
         flex-wrap : wrap;
+    }
+
+    .userheader .profile p{
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+
+    .fzone{
+        margin-left: 12px;
+        margin-right: 12px;
     }
 
     main{
@@ -2852,12 +2889,19 @@ hr{
         border: none;
     }
     .btmbutton:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;
+        background-color: #FFFFFF;
+        color: #FFC832;
         box-shadow:none;
     }
-    .btmbutton:active{
+    .btmbutton:active svg{
         box-shadow:none;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: auto;
+        margin-bottom: auto;
+        fill: currentColor;
+        width: 4.7dvh;
+        height: 4.7dvh;
     }
     svg {
         width: 5dvh;
@@ -2867,6 +2911,7 @@ hr{
         margin-top: auto;
         margin-bottom: auto;
         fill: currentColor;
+        transition: all 250ms ease-out;
     }
 
 
@@ -3066,6 +3111,34 @@ hr{
         background-color: #F5F5F5;
         border: 1px solid #EEE;
         width: auto;
+    }
+
+    .ueuse .flebox{
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .ueuse .flebox a {
+        flex-shrink: 0;
+        margin-top: auto;
+        margin-bottom: auto;
+        margin-left: 12px;
+        font-size: 18px;
+        color: #252525;
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+
+    .ueuse .flebox .time{
+        margin-top: 6px;
+        margin-bottom: 6px;
+        margin-left: auto;
+        margin-right: 12px;
+        text-align: right;
+        font-size: 12px;
+        color:#999;
+        font-family: 'BIZ UDPGothic', sans-serif;
     }
         
     .leftbox{
@@ -3812,6 +3885,9 @@ hr{
     .formarea p{
         color:#CCC;
     }
+    .formarea li{
+        color:#CCC;
+    }
     
 
     .modal-content {
@@ -3988,5 +4064,15 @@ hr{
     }
     .tokonone p{
         color:#CCC;
+    }
+
+    .ueuse .mta{
+        background-color: #302c2c;
+    }
+    .ueuse .mta:hover{
+        font-size: 14px;
+        background-color: #FFC832;
+        color:#0c0c0c;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     }
 }

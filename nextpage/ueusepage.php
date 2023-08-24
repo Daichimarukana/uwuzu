@@ -45,38 +45,6 @@ if (!empty($pdo)) {
         PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
     ));
 
-    // 投稿内の絵文字を画像に置き換える
-    function replaceEmojisWithImages($postText) {
-        // 投稿内で絵文字名（:emoji:）を検出して画像に置き換える
-        $pattern = '/:(\w+):/';
-        $postTextWithImages = preg_replace_callback($pattern, function($matches) {
-            $emojiName = $matches[1];
-            return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt='$emojiName'>";
-        }, $postText);
-        return $postTextWithImages;
-    }
-
-    function replaceURLsWithLinks($postText) {
-        // URLを正規表現を使って検出
-        $pattern = '/(https?:\/\/[^\s]+)/';
-        preg_match_all($pattern, $postText, $matches);
-    
-        // 検出したURLごとに処理を行う
-        foreach ($matches[0] as $url) {
-            // ドメイン部分を抽出
-            $parsedUrl = parse_url($url);
-            $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
-    
-            // ドメインのみを表示するaタグを生成
-            $link = "<a href='$url' target='_blank'>$domain</a>";
-    
-            // URLをドメインのみを表示するaタグで置き換え
-            $postText = str_replace($url, $link, $postText);
-        }
-    
-        return $postText;
-    }
-
     // 投稿内容の取得（新しい順に取得）
     $messageQuery = $dbh->prepare("SELECT account, username, ueuse, uniqid, rpuniqid, datetime, photo1, photo2, video1, favorite, abi, abidate FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT $offset, $itemsPerPage");
     $messageQuery->bindValue(':ueuseid', $ueuseid);
@@ -93,12 +61,14 @@ if (!empty($pdo)) {
 	}
     // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
     foreach ($messages as &$message) {
-        $userQuery = $pdo->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
+        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname FROM account WHERE userid = :userid");
         $userQuery->bindValue(':userid', $message["account"]);
         $userQuery->execute();
         $userData = $userQuery->fetch();
 
         if ($userData) {
+            $message['iconname'] = $userData['iconname'];
+            $message['headname'] = $userData['headname'];
             $message['username'] = $userData['username'];
             $message['role'] = $userData['role'];
         }

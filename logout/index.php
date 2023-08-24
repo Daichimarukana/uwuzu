@@ -19,7 +19,6 @@ if (isset($_SERVER['HTTP_COOKIE'])) {
         setcookie($name, '', time()-1000, '/user');
     }
 }
-session_destroy();
 ?>
 
 <!DOCTYPE html>
