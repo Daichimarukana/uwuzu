@@ -23,14 +23,8 @@ AGPLライセンスです！！！
 - loginid(varchar(256)) 自動ログイン時に本人アカウントか確認
 - mailadds(varchar(500)) メールアドレス保存用
 - profile(TEXT) プロフィールテキスト保存用
-- iconname(varchar(256)) アイコン画像名保存用
-- iconcontent(mediumblob) アイコン画像保存用
-- icontype(varchar(256)) アイコン画像拡張子保存用
-- iconsize(INT) アイコン画像サイズ保存用
-- headname(varchar(256)) ヘッダー画像名保存用
-- headcontent(mediumblob) ヘッダー画像保存用
-- headtype(varchar(256)) ヘッダー画像拡張子保存用
-- headsize(INT) ヘッダー画像サイズ保存用
+- iconname(varchar(256)) アイコン画像リンク保存用
+- headname(varchar(256)) ヘッダー画像リンク保存用
 - role(varchar(1024)) 「user」のようなロール保存用
 - datetime(datetime) アカウント作成日時保存用
 - follow(text) アカウントがフォローしている人保存用
