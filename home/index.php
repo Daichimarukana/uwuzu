@@ -506,6 +506,7 @@ if ("serviceWorker" in navigator) {
 		</div>
 	</div>
 
+
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
 
@@ -603,15 +604,22 @@ $(document).ready(function() {
 	var modal = document.getElementById('myDelModal');
     var deleteButton = document.getElementById('deleteButton');
     var cancelButton = document.getElementById('cancelButton'); // 追加
+	var modalMain = $('.modal-content');
 
     $(document).on('click', '.delbtn', function (event) {
         modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
 
         var uniqid2 = $(this).attr('data-uniqid2');
 		var postElement = $(this).closest('.ueuse');
 
         deleteButton.addEventListener('click', () => {
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
 
             $.ajax({
                 url: '../delete/delete.php',
@@ -632,25 +640,54 @@ $(document).ready(function() {
         });
 
         cancelButton.addEventListener('click', () => { // 追加
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
         });
     });
 
+
+	var more_modal = document.getElementById('myMoreModal');
+    var m_cancelButton = document.getElementById('m_c_button'); // 追加
+	var modalMain = $('.modal-content');
+
+    $(document).on('click', '.more_btn', function (event) {
+        more_modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        m_cancelButton.addEventListener('click', () => {
+			modalMain.removeClass("slideUp");
+    		modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				more_modal.style.display = 'none';
+			}, 150);
+		});
+    });
 
 
 	var abimodal = document.getElementById('myAbiModal');
 	var AbiAddButton = document.getElementById('AbiAddButton');
 	var AbiCancelButton = document.getElementById('AbiCancelButton');
+	var modalMain = $('.modal-content');
 
 	$(document).on('click', '.addabi', function (event) {
 
 		abimodal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
 
 		var uniqid2 = $(this).attr('data-uniqid2');
 		var postAbiElement = $(this).closest('.addabi');
 
 		AbiCancelButton.addEventListener('click', () => {
-			abimodal.style.display = 'none';
+			modalMain.removeClass("slideUp");
+    		modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				abimodal.style.display = 'none';
+			}, 150);
 		});
 
 		$('#AbiForm').off('submit').on('submit', function (event) {
@@ -660,7 +697,11 @@ $(document).ready(function() {
 			var abitext = document.getElementById("abitexts").value;
 
 			if(abitext == ""){
-				abimodal.style.display = 'none';
+				modalMain.removeClass("slideUp");
+				modalMain.addClass("slideDown");
+				window.setTimeout(function(){
+					abimodal.style.display = 'none';
+				}, 150);
 			}else{
 				$.ajax({
 					url: '../abi/addabi.php',
@@ -684,11 +725,6 @@ $(document).ready(function() {
 			}
 		});
 	});
-
-  // 10秒後に実行
-  setTimeout(() => {
-    console.log("Execution 10sec"); // Execution 10sec
-  }, 10000);
 
 });
 

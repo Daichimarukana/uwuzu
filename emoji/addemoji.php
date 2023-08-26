@@ -139,7 +139,7 @@ if( !empty($pdo) ) {
 
 	$dbh = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
-	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, iconcontent, icontype, iconsize, headname, headcontent, headtype, headsize, role, datetime FROM account WHERE userid = :userid");
+	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
 
     $rerole->bindValue(':userid', $userid);
     // SQL実行

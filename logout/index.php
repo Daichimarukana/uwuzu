@@ -17,6 +17,10 @@ if (isset($_SERVER['HTTP_COOKIE'])) {
         setcookie($name, '', time()-1000, '/settings');
         setcookie($name, '', time()-1000, '/emoji');
         setcookie($name, '', time()-1000, '/user');
+        setcookie('admin_login', '', time()-1000, '');
+        setcookie('loginid', '', time()-1000, '');
+        setcookie('userid', '', time()-1000, '');
+        setcookie('username', '', time()-1000, '');
     }
 }
 ?>

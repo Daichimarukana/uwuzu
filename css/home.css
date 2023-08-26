@@ -1165,12 +1165,12 @@ main h1{
 }
 
 
+
 .ueuse .favbox .tuduki{
     cursor: pointer;
     border: none;
     display: block;
     width:auto;
-    padding: 8px auto;
 
     margin-left: 0px;
     margin-right: 12px;
@@ -1178,8 +1178,8 @@ main h1{
     margin-bottom: 2px;
 
 
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     padding-left: 12px;
     padding-right: 12px;
 
@@ -1193,8 +1193,6 @@ main h1{
     font-weight: normal;
     text-decoration:none;
     text-align: center;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
 
@@ -1203,19 +1201,14 @@ main h1{
     border: none;
     display: block;
     width:auto;
-    padding: 8px auto;
-
     margin-left: 0px;
     margin-right: 12px;
     margin-top: 2px;
     margin-bottom: 2px;
-
-
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
     padding-left: 12px;
     padding-right: 12px;
-
 
     background-color: #FFC832;
 
@@ -1230,7 +1223,10 @@ main h1{
     transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
-
+.ueuse .favbox .tuduki svg {
+    fill: currentColor;
+    transition: all 250ms ease-out;
+}
 .ueuse .favbox .delbtn{
     cursor: pointer;
     border: none;
@@ -1843,7 +1839,9 @@ label>input {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
     z-index: 9999;
+    transition: all 250ms ease-out;
 }
 
 .show {
@@ -1853,11 +1851,11 @@ label>input {
     background-color: #fff;
     padding: 16px;
     border-radius: 10px;
-    width: 60%;
-    max-width: 400px;
+    width: 20%;
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 30%;
+    left: 40%;
+    right: 40%;
     transform: translate(-50%, -50%);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
 }
@@ -1975,6 +1973,35 @@ label>input {
 .modal-content .fbtn_no:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:115px;
+}
+
+.modal-content.slideUp {
+    animation: SlideUp .3s ease-out forwards;
+    }
+.modal-content.slideDown {
+    animation: SlideDown .15s ease-in-out forwards;
+}
+/*下から上*/
+@keyframes SlideUp {
+    0% {
+    opacity: 0;
+    transform: translateY(-1%);
+    }
+    100% {
+    opacity: 1;
+    transform: translateY(-20%);
+    }
+}
+/*上から下*/
+@keyframes SlideDown {
+    0% {
+    opacity: 1;
+    transform: translateY(-20%);
+    }
+    100% {
+    opacity: 0;
+    transform: translateY(-1%);
+    }
 }
 
 .topbox {
@@ -2682,6 +2709,98 @@ hr{
     border-bottom: 3px solid #ffffff;
     transform: rotate(-45deg);
 }
+.new_ueuse {
+    margin-left: auto;
+    margin-right: auto;
+}
+.new_ueuse_text {
+    width: auto;
+    height: 24px;
+    animation: slideDown 3.0s ease forwards;
+    position: absolute;
+    z-index: 101;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin-left: 40%;
+    margin-right: 40%;
+    background: #FFC832;
+    text-align: center;
+    overflow: hidden;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    border-radius: 25px;
+    padding-top: 8px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    color:#FFF;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+@keyframes slideDown {
+    0%, 100% { transform: translateY(-64px); }
+    10%, 90% { transform: translateY(32px); }
+}
+
+
+
+.buruburu {
+    display: inline-block;
+    animation: hurueru .1s infinite;
+}
+
+@keyframes hurueru {
+    0% {
+        transform: translate(0px, 0px) rotateZ(0deg)
+    }
+
+    25% {
+        transform: translate(2px, 2px) rotateZ(1deg)
+    }
+
+    50% {
+        transform: translate(0px, 2px) rotateZ(0deg)
+    }
+
+    75% {
+        transform: translate(2px, 0px) rotateZ(-1deg)
+    }
+
+    100% {
+        transform: translate(0px, 0px) rotateZ(0deg)
+    }
+}
+
+.btn-shine {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shine:after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 10%;
+    height: 150%;
+    background: #fff;
+    transform: rotate(45deg);
+    animation: reflect 3s ease-in-out infinite;
+}
+
+@keyframes reflect {
+
+    0%,
+    75% {
+        transform: rotate(45deg) scale(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: rotate(45deg) scale(100);
+        opacity: 0;
+    }
+}
 
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
@@ -2918,26 +3037,26 @@ hr{
     .ueuse .favbox .tuduki{
     
         display: block;
-        width:26%;
+        width:auto;
         padding: 8px auto;
 
         margin-left: 0px;
         margin-right: 12px;
         margin-top: 2px;
         margin-bottom: 2px;
-
-
-        padding-top: 8px;
-        padding-bottom: 8px;
-        padding-left: 6px;
-        padding-right: 6px;
+    
+    
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 12px;
+        padding-right: 12px;
 
 
         background-color: #FFFAE6;
 
         border-radius: 50px;
         color:#FFC832;
-        font-size: 12px;
+        font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
         text-decoration:none;
@@ -2946,24 +3065,23 @@ hr{
 
     .ueuse .favbox .tuduki:hover{
         background-color: #FFC832;
-        
         margin-left: 0px;
         margin-right: 12px;
         margin-top: 2px;
         margin-bottom: 2px;
+    
+    
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 12px;
+        padding-right: 12px;
 
-
-        padding-top: 8px;
-        padding-bottom: 8px;
-        padding-left: 6px;
-        padding-right: 6px;
-
-        width:28%;
+        width:auto;
         border-radius: 50px;
         color:#FFFAE6;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
-        font-size: 12px;
+        font-size: 16px;
         text-decoration:none;
         text-align: center;
     }
@@ -3577,6 +3695,129 @@ hr{
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
+    }
+   
+    .modal{
+        top:0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100dvh;
+        background-color: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        margin-bottom: 0px;
+    }
+    .modal-content {
+        margin-top:40dvh;
+        width: calc(100% - 48px);
+        margin-bottom: 0px;
+        height: 55dvh;
+        padding: 24px;
+        bottom: 0px;
+        left: 0;
+        animation: SlideUp .5s ease-in-out forwards;
+    }
+
+    .modal-content textarea{
+        text-align: left;
+        width:100%;
+        height:90px;
+        border-radius: 12px;
+        font-size: 16px;
+    }
+
+    .modal-content .btn_area{
+        display: flex;
+        width: 100%;
+        margin-top: 12px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .modal-content .fbtn{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:48%;
+        padding: 8px auto;
+        margin-left: auto;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    .modal-content .fbtn:hover{
+        width:50%;
+    }
+    .modal-content .fbtn:active{
+        width:45%;
+    }
+
+    .modal-content .fbtn_no{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:48%;
+        padding: 8px auto;
+        margin-left: 0px;
+        margin-right: auto;
+        margin-bottom: 0px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    .modal-content .fbtn_no:hover{
+        width:50%;
+    }
+    .modal-content .fbtn_no:active{
+        width:45%;
+    }
+
+    .modal-content.slideUp {
+        animation: SlideUp .3s ease-out forwards;
+        }
+    .modal-content.slideDown {
+        animation: SlideDown .15s ease-in-out forwards;
+    }
+    /*下から上*/
+    @keyframes SlideUp {
+        0% {
+        opacity: 0;
+        transform: translateY(-1%);
+        }
+        100% {
+        opacity: 1;
+        transform: translateY(-40%);
+        }
+    }
+    /*上から下*/
+    @keyframes SlideDown {
+        0% {
+        opacity: 1;
+        transform: translateY(-40%);
+        }
+        100% {
+        opacity: 0;
+        transform: translateY(-1%);
+        }
     }
 
 }

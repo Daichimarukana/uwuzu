@@ -19,7 +19,7 @@ $termsdata = file_get_contents($termsfile);
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="/css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>400 Bad Request - <?php echo file_get_contents($servernamefile);?></title>
 </head>
@@ -28,7 +28,7 @@ $termsdata = file_get_contents($termsfile);
 
 <div class="topbox">
     <div class="logo">
-        <img src="../img/uwuzulogo.svg">
+        <img src="/img/uwuzulogo.svg">
     </div>
 </div>
 
@@ -42,7 +42,7 @@ $termsdata = file_get_contents($termsfile);
         <p><(＿　＿)><br>はいっ！エラーです！！！<br>原因はわかりません！！！！！！！！</p>
     </div>
 
-    <a href="../home/" class="irobutton">ホームへ行く</a>
+    <a href="/home/" class="irobutton">ホームへ行く</a>
 
 </div>
 

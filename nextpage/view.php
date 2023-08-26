@@ -1,21 +1,21 @@
 
 <?php 
-
-function processMarkdownAndWrapEmptyLines($markdownText) {
-
+function processMarkdownAndWrapEmptyLines($markdownText){
+    $markdownText = preg_replace('/^\[\[buruburu (.+)\]\]/m', '<p class="buruburu">$1</p>', $markdownText);//←ここ！！！！！！！！！！！！！！
+    
     // コード（#code）をHTMLのdiv class="code"タグに変換
     $markdownText = preg_replace('/^#code (.+)/m', '<div class="code"><p>$1</p></div>', $markdownText);
-    
+
+    // 画像（#img）をHTMLのimgタグに変換
+    $markdownText = preg_replace('/^#img (.+)/m', '<img src="$1">', $markdownText);
+
     // タイトル（#、##、###）をHTMLのhタグに変換
-    $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
-    $markdownText = preg_replace('/^## (.+)/m', '<h2>$1</h2>', $markdownText);
-    $markdownText = preg_replace('/^### (.+)/m', '<h3>$1</h3>', $markdownText);
+    $markdownText = preg_replace('/^# (.+)/m', '<h2>$1</h2>', $markdownText);
+    $markdownText = preg_replace('/^## (.+)/m', '<h3>$1</h3>', $markdownText);
+    $markdownText = preg_replace('/^### (.+)/m', '<h4>$1</h4>', $markdownText);
 
     // 箇条書き（-）をHTMLのul/liタグに変換
     $markdownText = preg_replace('/^- (.+)/m', '<ul><li>$1</li></ul>', $markdownText);
-
-    // 空行の前に何もない行をHTMLのpタグに変換
-    $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
 
     return $markdownText;
 }
@@ -154,7 +154,7 @@ class MessageDisplay {
             }else{
                 echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><img src="../img/sysimage/favorite_1.svg" alt="いいね" /> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }
-            echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki">返信をみる&する</a>';
+            echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlentities($this->value['reply_count']).'</a>';
             if($this->value['account'] === $this->userid){
                 if($this->value['abi'] === "none"){
                     echo '<input type="submit" name="addabi" id="addabi" data-uniqid2="' . htmlentities($this->value['uniqid']) . '" class="addabi" value="追記する">';

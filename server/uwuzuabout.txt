@@ -25,11 +25,12 @@ daichimarukana < 「うぃずゆー(With you)」「うぃじゅー(witzou)」「
 
 ## 4. 開発言語は？
 uwuzuはPHPとJS、HTML(プログラミング言語じゃないか)、CSSで作られています！
-ライブラリはjQuery、Reactを導入しています！
+ライブラリはjQueryを導入しています！
 
 ## 5. サーバーの建て方
 ※MySQLの設定結構めんどいです。
 まず、Apache2とPHP 8とmysql Ver 15が導入されているサーバーを準備します！
+PHP 8では事前にGDを有効化しておいてください！(QRコードの生成に必要です。)
 次にSQLを設定します。(InnoDB)
 まず、お好きな名前でDBを作成し、その中に、account,emoji,notice,role,ueuse,notificationとテーブルを作成します。
 テーブルの中身は以下のとおりです。

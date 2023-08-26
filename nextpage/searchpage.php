@@ -61,6 +61,15 @@ if (!empty($pdo)) {
             $message['username'] = $userData['username'];
             $message['role'] = $userData['role'];
         }
+
+        $rpQuery = $pdo->prepare("SELECT COUNT(*) as reply_count FROM ueuse WHERE rpuniqid = :rpuniqid");
+        $rpQuery->bindValue(':rpuniqid', $message['uniqid']);
+        $rpQuery->execute();
+        $rpData = $rpQuery->fetch(PDO::FETCH_ASSOC);
+        
+        if ($rpData){
+            $message['reply_count'] = $rpData['reply_count'];
+        }
     }
 
     if(!empty($messages)){
