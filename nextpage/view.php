@@ -10,12 +10,15 @@ function processMarkdownAndWrapEmptyLines($markdownText){
     $markdownText = preg_replace('/^#img (.+)/m', '<img src="$1">', $markdownText);
 
     // タイトル（#、##、###）をHTMLのhタグに変換
-    $markdownText = preg_replace('/^# (.+)/m', '<h2>$1</h2>', $markdownText);
-    $markdownText = preg_replace('/^## (.+)/m', '<h3>$1</h3>', $markdownText);
-    $markdownText = preg_replace('/^### (.+)/m', '<h4>$1</h4>', $markdownText);
+    $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
+    $markdownText = preg_replace('/^## (.+)/m', '<h2>$1</h2>', $markdownText);
+    $markdownText = preg_replace('/^### (.+)/m', '<h3>$1</h3>', $markdownText);
 
     // 箇条書き（-）をHTMLのul/liタグに変換
     $markdownText = preg_replace('/^- (.+)/m', '<ul><li>$1</li></ul>', $markdownText);
+
+    // 空行の前に何もない行をHTMLのpタグに変換
+    $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
 
     return $markdownText;
 }
@@ -26,7 +29,7 @@ function replaceEmojisWithImages($postText) {
     $emojiPattern = '/:(\w+):/';
     $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
         $emojiName = $matches[1];
-        return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt='$emojiName'>";
+        return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt=':$emojiName:' title=':$emojiName:'>";
     }, $postText);
     
     // @username を検出してリンクに置き換える
@@ -52,7 +55,13 @@ function replaceEmojisWithImages($postText) {
         }
     }, $postTextWithImages);
 
-    return $postTextWithImagesAndUsernames;
+    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9_]+)/u';
+    $postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
+        $hashtags = $matches[1];
+            return "<a class = 'hashtags' href='/search?q=".urlencode('#').$hashtags."'>".'#'.$hashtags."</a>";
+    }, $postTextWithImagesAndUsernames);
+
+    return $postTextWithHashtags;
 }
 
 function replaceURLsWithLinks($postText) {

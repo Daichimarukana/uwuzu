@@ -139,12 +139,42 @@ if( !empty($pdo) ) {
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
 		// ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
-		$pattern = '/:(\w+):/';
-		$postTextWithImages = preg_replace_callback($pattern, function($matches) {
+		$emojiPattern = '/:(\w+):/';
+		$postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
 			$emojiName = $matches[1];
-			return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt='$emojiName'>";
+			return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt=':$emojiName:' title=':$emojiName:'>";
 		}, $postText);
-		return $postTextWithImages;
+		
+		// @username を検出してリンクに置き換える
+		$usernamePattern = '/@(\w+)/';
+		$postTextWithImagesAndUsernames = preg_replace_callback($usernamePattern, function($matches) {
+			$username = $matches[1];
+
+			$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+			));
+		
+			$mentionsuserQuery = $dbh->prepare("SELECT username, userid FROM account WHERE userid = :userid");
+			$mentionsuserQuery->bindValue(':userid', $username);
+			$mentionsuserQuery->execute();
+			$mentionsuserData = $mentionsuserQuery->fetch();   
+			
+			if(empty($mentionsuserData)){
+				return "@$username";
+			}else{
+				return "<a class = 'mta' href='/@".$mentionsuserData["userid"]."'>@".$mentionsuserData["username"]."</a>";
+			}
+		}, $postTextWithImages);
+
+		$hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9_]+)/u';
+		$postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
+			$hashtags = $matches[1];
+				return "<a class = 'hashtags' href='/search?q=".urlencode('#').$hashtags."'>".'#'.$hashtags."</a>";
+		}, $postTextWithImagesAndUsernames);
+
+		return $postTextWithHashtags;
 	}
 
 	function replaceURLsWithLinks($postText) {
@@ -327,7 +357,33 @@ $pdo = null;
 
 		<div class="userheader">
 			<?php if($userData["userid"] == "none"){?>
-				<div class="tokonone" id="noueuse"><p>このユーザーは存在しません</p></div>
+				<!--いないひと--->
+				<div class="hed">
+					<img src="../img/defhead/head.png">
+				</div>
+				<div class="icon">
+					<img src="../img/deficon/icon.png">
+					<h2>でふぉると</h2>
+					<p>@admin</p>
+				</div>
+				<div class="roleboxes">
+					<div class="rolebox" style="border: 1px solid #252525;">
+						<p style="color: #252525;">
+							つよいひと
+						</p>
+					</div>
+				</div>
+				<div class="profile">
+					<p>残念だがそのユーザーはいない。このサーバーには...</p>
+				</div>
+		</div>
+			<div class="fzone">
+				<div class="time">
+					<p>紀元前3000年からuwuzuを利用して<s>います。</s>いるわけねぇだろ()</p>
+					<p>フォロー数:ない フォロワー数:いない</p>
+				</div>
+			</div>
+				<!--ここまで！--->
 			<?php }else{?>
 			<div class="hed">
 				<img src="<?php echo htmlentities('../'.$userdata['headname']); ?>">

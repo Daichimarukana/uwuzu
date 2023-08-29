@@ -25,7 +25,7 @@
             <div class="noticebox">
                 <h4><?php echo $valuen['title'];?></h4>
                 <p><?php echo nl2br($valuen['note']);?></p>
-                <div class="makeup"><p>編集者 : <a href="/<?php echo $uneinoticeaccount?>"><?php echo htmlspecialchars($uneinoticeaccount)?></a></p></div>
+                <div class="makeup"><p>編集者 : <a href="/@<?php echo $uneinoticeaccount?>">@<?php echo htmlspecialchars($uneinoticeaccount)?></a></p></div>
                 <div class="time"><p><?php echo date('Y年m月d日 H:i', strtotime($valuen['datetime']));?></p></div>
             </div>
         <?php }?>

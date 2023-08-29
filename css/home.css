@@ -32,6 +32,12 @@ body{
     background-size: cover;
 }
 
+@media screen and (max-width:1500px) {
+    body{
+        width: 95%;
+    }
+}
+
 .irobutton{
     cursor: pointer;
     border: none;
@@ -354,7 +360,7 @@ body{
     border: none;
     display: flex;
     width:80%;
-    margin: 16px;
+    margin: 8px;
     padding: 8px auto;
     margin-left: auto;
     margin-right: auto;
@@ -601,6 +607,19 @@ main h1{
     font-weight: normal;
 
 }
+
+.userheader .profile .hashtags{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    margin-right: 0px;
+    font-size: 16px;
+    color:#FFC832;
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+}
+
 
 .fzone{
     margin-left: 24px;
@@ -1367,7 +1386,17 @@ main h1{
     border: 0;
     border-top: 1px solid #999;
 }
-
+.ueuse .hashtags{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    margin-right: 0px;
+    font-size: 16px;
+    color:#FFC832;
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+}
 
 
 .tokonone p{
@@ -1838,7 +1867,7 @@ label>input {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(5px);
     z-index: 9999;
     transition: all 250ms ease-out;
@@ -1857,7 +1886,7 @@ label>input {
     left: 40%;
     right: 40%;
     transform: translate(-50%, -50%);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
 
 .modal-content textarea{
@@ -2802,6 +2831,45 @@ hr{
     }
 }
 
+.tlchange{
+    border-radius: 10px;
+    margin: 12px;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+    text-align: center;
+    display: flex;
+}
+.tlchange .off{
+    width: 45%;
+    line-height: 32px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-wrap:  break-word;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 24px;
+    color:#CCC;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.tlchange .on{
+    width: 45%;
+    line-height: 32px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-wrap:  break-word;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 24px;
+    color:#FFC832;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    border-bottom: 1px solid #FFC832;
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -3033,6 +3101,10 @@ hr{
         transition: all 250ms ease-out;
     }
 
+    .ueuse .favbox img{
+        width: 24px;
+        height: 24px;
+    }
 
     .ueuse .favbox .tuduki{
     
@@ -3084,6 +3156,14 @@ hr{
         font-size: 16px;
         text-decoration:none;
         text-align: center;
+    }
+    .ueuse .favbox .tuduki svg {
+        margin-top: -8px;
+        margin-right: 4px;
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+        transition: all 250ms ease-out;
     }
 
     .ueuse .favbox .delbtn{
@@ -3210,12 +3290,6 @@ hr{
         transition: box-shadow 250ms ease-in-out;
         transition: width 250ms ease-out;
         transition: all 250ms ease-out;
-    }
-
-
-    .ueuse .favbox img{
-        margin-left: 0px;
-        width: 24px;
     }
 
     .ueuse{
@@ -3703,7 +3777,7 @@ hr{
         bottom: 0;
         width: 100%;
         height: 100dvh;
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: rgba(0, 0, 0, 0.25);
         backdrop-filter: blur(4px);
         z-index: 9999;
         margin-bottom: 0px;
@@ -3820,6 +3894,34 @@ hr{
         }
     }
 
+    .tlchange{
+        border-radius: 10px;
+        margin: 12px;
+        margin-bottom: 0px;
+        width: auto;
+        text-align: center;
+        display: flex;
+    }
+    .tlchange .off{
+        width: 45%;
+        line-height: 24px;
+        margin-left: auto;
+        margin-right: auto;
+        overflow-wrap:  break-word;
+        margin-top: 12px;
+        margin-bottom: 12px;
+        font-size: 20px;
+    }
+    .tlchange .on{
+        width: 45%;
+        line-height: 24px;
+        margin-left: auto;
+        margin-right: auto;
+        overflow-wrap:  break-word;
+        margin-top: 12px;
+        margin-bottom: 12px;
+        font-size: 20px;
+    }
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -3855,11 +3957,9 @@ hr{
         background-color: #FFFAE6;
         color: #0c0c0c;
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-        width:75%;
     }
     .leftbutton:active{
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        width:65%;
     }
 
     main{
@@ -4316,4 +4416,17 @@ hr{
         color:#0c0c0c;
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     }
+        
+    .tlchange{
+        background-color: #0c0c0c;
+        border: none;
+    }
+    .tlchange .off{
+        color:#F5F5F5;
+    }
+    .tlchange .on{
+        color:#FFC832;
+        border-bottom: 1px solid #FFC832;
+    }
+
 }

@@ -37,4 +37,4 @@ if(!empty($notices)){
     $uneinoticeaccount = "uwuzu";
     $uneinoticedatetime = "";
 }
-
+?>

@@ -393,7 +393,7 @@ if ("serviceWorker" in navigator) {
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <link rel="stylesheet" href="../css/home.css">
-<title>ホーム - <?php echo file_get_contents($servernamefile);?></title>
+<title>ローカルタイムライン - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
@@ -402,7 +402,10 @@ if ("serviceWorker" in navigator) {
 	<?php require('../require/leftbox.php');?>
 	
 	<main class="outer">
-
+		<div class="tlchange">
+				<a href="index" class="on">LTL</a>
+				<a href="ftl" class="off">FTL</a>
+		</div>
 		<?php if( !empty($error_message) ): ?>
 			<ul class="errmsg">
 				<?php foreach( $error_message as $value ): ?>

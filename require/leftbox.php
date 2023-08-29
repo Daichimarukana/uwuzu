@@ -20,8 +20,8 @@
             <hr>
             <a href="/emoji/addemoji" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/addemoji.svg#addemoji"></use></svg>絵文字登録</a>
             <a href="/notice/addnotice" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/addnotice.svg#addnotice"></use></svg>お知らせ配信</a>
-            <hr>
         <?php }?>
+        <hr>
         <form method="post">
             <input type="submit" name="logout" class="leftbutton" value="ログアウト">
         </form>

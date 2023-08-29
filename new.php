@@ -583,12 +583,12 @@ $pdo = null;
 
 <script type="text/javascript">
 
-function checkForm($this) {
-    var str = $this.value;
-    while (str.match(/[^A-Za-z\d]/)) {
-        str = str.replace(/[^A-Za-z\d]/, "");
+function checkForm(inputElement) {
+    var str = inputElement.value;
+    while (str.match(/[^A-Za-z\d_]/)) {
+        str = str.replace(/[^A-Za-z\d_]/, "");
     }
-    $this.value = str;
+    inputElement.value = str;
 }
 
 

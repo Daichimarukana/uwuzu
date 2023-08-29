@@ -107,6 +107,14 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 } 
+
+if(isset($_GET['q'])){ 
+	$keyword = htmlentities($_GET['q']);
+}else{
+	$keyword = "";
+}
+
+
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -157,7 +165,7 @@ $pdo = null;
 		<h1>検索</h1>
 		</div>
 			<div class="sendbox">
-			<input class="inbox" placeholder="ユーズ検索" id="ueusetext" type="text" value="">
+			<input class="inbox" placeholder="ユーズ検索" id="ueusetext" type="text" value="<?php if( !empty($keyword) ){ echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); } ?>">
 			<button class="search_btn" id="search_btn">検索</button>
 		</div>
 
@@ -207,6 +215,10 @@ $pdo = null;
 <script>
 $(document).ready(function() {
 	
+	if(ueusetext.value){
+		loadPosts();
+	}
+
 	$(document).on('click', '.search_btn', function(event) {
 		loadPosts();
 	});

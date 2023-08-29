@@ -38,11 +38,24 @@ if (!empty($pdo)) {
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));   
-    
-    $messageQuery = $dbh->prepare("SELECT account,username,ueuse,uniqid,rpuniqid,datetime,photo1,photo2,video1,favorite, abi, abidate FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC");
-	$messageQuery->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
-	$messageQuery->execute();
-	$message_array = $messageQuery->fetchAll();
+
+    $keywordPattern = '/from:@(\w+)\s+(.+)/';
+    if (preg_match($keywordPattern, $keyword, $matches)) {
+        $username = $matches[1];
+        $searchKeyword = $matches[2];
+
+        $messageQuery = $dbh->prepare("SELECT account,username,ueuse,uniqid,rpuniqid,datetime,photo1,photo2,video1,favorite, abi, abidate FROM ueuse WHERE account = :username AND (ueuse LIKE :searchKeyword OR abi LIKE :searchKeyword) ORDER BY datetime DESC");
+        $messageQuery->bindValue(':username', $username, PDO::PARAM_STR);
+        $messageQuery->bindValue(':searchKeyword', '%' . $searchKeyword . '%', PDO::PARAM_STR);
+        $messageQuery->execute();
+        $message_array = $messageQuery->fetchAll();
+    } else {
+        $messageQuery = $dbh->prepare("SELECT account,username,ueuse,uniqid,rpuniqid,datetime,photo1,photo2,video1,favorite, abi, abidate FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC");
+        $messageQuery->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+        $messageQuery->execute();
+        $message_array = $messageQuery->fetchAll();
+    }
+
         
 	$messages = array();
 	foreach ($message_array as $row) {
