@@ -28,7 +28,6 @@ $_SESSION["password"]="";
 
 session_name('uwuzu_s_id');
 session_start();
-session_regenerate_id(true);
 // データベースに接続
 try {
 

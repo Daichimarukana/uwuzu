@@ -23,7 +23,6 @@ $onlyuser = file_get_contents($onlyuserfile);
 
 session_name('uwuzu_s_id');
 session_start();
-session_regenerate_id(true);
 
 // 変数の初期化
 $current_date = null;
