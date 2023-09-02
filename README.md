@@ -15,6 +15,10 @@ AGPLライセンスです！！！
 まず、お好きな名前でDBを作成し、その中に、account,emoji,notice,role,ueuse,notificationとテーブルを作成します。
 テーブルの中身は以下のとおりです。
 照合順序は全て標準でutf8mb4_general_ciです。
+【お知らせ！！！】
+バージョン1.2.15よりSQLの構造ファイルを公開したので今までと比べて大幅に簡単にuwuzuサーバーの構築ができるようになりました！！！
+なお、ロールは自動で追加されませんのでuser、officialロールはご自身で追加してください！
+
 ### account
 - sysid(INT)(AUTO_INCREMENT	) アカウントが追加されるとカウントされるシステム用ID
 - username(varchar(500)) ユーザーネーム保存用
