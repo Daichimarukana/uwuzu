@@ -2,7 +2,6 @@
 <?php 
 function processMarkdownAndWrapEmptyLines($markdownText){
     $markdownText = preg_replace('/^\[\[buruburu (.+)\]\]/m', '<p class="buruburu">$1</p>', $markdownText);//←ここ！！！！！！！！！！！！！！
-    
     // コード（#code）をHTMLのdiv class="code"タグに変換
     $markdownText = preg_replace('/^#code (.+)/m', '<div class="code"><p>$1</p></div>', $markdownText);
 
@@ -118,12 +117,19 @@ class MessageDisplay {
             }
             
             echo '        <div class="time">';
-            $day = date("Ymd", strtotime(htmlentities($this->value['datetime'])));
-            if ($day == date("Ymd")) {
-                echo date("今日 H:i", strtotime(htmlentities($this->value['datetime'])));
+            $datetime = strtotime(htmlentities($this->value['datetime']));
+            $today = strtotime(date("Y-m-d"));
+            if (date("md", $datetime) == "0101") {
+                if (date("Y", $datetime) == date("Y")) {
+                    echo "元日 " . date("H:i", $datetime);
+                } else {
+                    echo date("Y年m月d日 H:i", $datetime);
+                }
+            } elseif ($datetime >= $today) {
+                echo "今日 " . date("H:i", $datetime);
             } else {
-                echo date("Y年m月d日 H:i", strtotime(htmlentities($this->value['datetime'])));
-            }
+                echo date("Y年m月d日 H:i", $datetime);
+            }            
             echo '        </div>';
             
             echo '    </div>';
@@ -132,12 +138,12 @@ class MessageDisplay {
             
             if (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
                 echo '    <div class="photo2">';
-                echo '        <img src="' . htmlentities($this->value['photo1']) . '" alt="画像">';
-                echo '        <img src="' . htmlentities($this->value['photo2']) . '" alt="画像">';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo1']) && $this->value['photo1'] !== 'none') {
                 echo '    <div class="photo1">';
-                echo '        <img src="' . htmlentities($this->value['photo1']) . '" alt="画像">';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
                 echo '    </div>';
             }
             if (!empty($this->value['video1']) && $this->value['video1'] !== 'none') {

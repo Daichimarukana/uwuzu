@@ -22,7 +22,9 @@ $stmt = null;
 $res = null;
 $option = null;
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 //------------------------------------------
 // データベースに接続
@@ -57,10 +59,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -84,10 +102,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -679,55 +713,56 @@ $(document).ready(function() {
 
 	$(document).on('click', '.addabi', function (event) {
 
-		abimodal.style.display = 'block';
-		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
+	abimodal.style.display = 'block';
+	modalMain.addClass("slideUp");
+	modalMain.removeClass("slideDown");
 
-		var uniqid2 = $(this).attr('data-uniqid2');
-		var postAbiElement = $(this).closest('.addabi');
+	var uniqid2 = $(this).attr('data-uniqid2');
+	var postAbiElement = $(this).closest('.addabi');
 
-		AbiCancelButton.addEventListener('click', () => {
+	AbiCancelButton.addEventListener('click', () => {
+		modalMain.removeClass("slideUp");
+		modalMain.addClass("slideDown");
+		window.setTimeout(function(){
+			abimodal.style.display = 'none';
+		}, 150);
+	});
+
+	$('#AbiForm').off('submit').on('submit', function (event) {
+
+		event.preventDefault();
+
+		var abitext = document.getElementById("abitexts").value;
+		var username = "<?php echo $username?>";
+
+		if(abitext == ""){
 			modalMain.removeClass("slideUp");
-    		modalMain.addClass("slideDown");
+			modalMain.addClass("slideDown");
 			window.setTimeout(function(){
 				abimodal.style.display = 'none';
 			}, 150);
-		});
+		}else{
+			$.ajax({
+				url: '../abi/addabi.php',
+				method: 'POST',
+				data: { uniqid: uniqid2, abitext: abitext, username: username},
+				dataType: 'json',
+				success: function (response) {
+					console.log(response); // レスポンス内容をコンソールに表示
+					if (response.success) {
+						abimodal.style.display = 'none';
+						postAbiElement.remove();
 
-		$('#AbiForm').off('submit').on('submit', function (event) {
-
-			event.preventDefault();
-
-			var abitext = document.getElementById("abitexts").value;
-
-			if(abitext == ""){
-				modalMain.removeClass("slideUp");
-				modalMain.addClass("slideDown");
-				window.setTimeout(function(){
-					abimodal.style.display = 'none';
-				}, 150);
-			}else{
-				$.ajax({
-					url: '../abi/addabi.php',
-					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext},
-					dataType: 'json',
-					success: function (response) {
-						console.log(response); // レスポンス内容をコンソールに表示
-						if (response.success) {
-							abimodal.style.display = 'none';
-							postAbiElement.remove();
-
-						} else {
-
-						}
-					},
-					error: function (xhr, status, error) {
+					} else {
 
 					}
-				});
-			}
-		});
+				},
+				error: function (xhr, status, error) {
+
+				}
+			});
+		}
+	});
 	});
 
 });

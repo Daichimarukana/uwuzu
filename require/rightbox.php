@@ -21,14 +21,22 @@
     ?>
     <h1>お知らせ</h1>
     <div class="noticearea">
-        <?php foreach ($notices as $valuen) {?>
+    <?php if(empty($notices)){?>
+        <div class="noticebox">
+            <h4>なし</h4>
+            <p>おしらせないよ～</p>
+            <div class="makeup"><p>編集者 : <a href="/rule/uwuzuabout">@uwuzu</a></p></div>
+            <div class="time"><p>いま</p></div>
+        </div>
+    <?php }else{?> 
+    <?php foreach ($notices as $value) {?>
             <div class="noticebox">
-                <h4><?php echo $valuen['title'];?></h4>
-                <p><?php echo nl2br($valuen['note']);?></p>
-                <div class="makeup"><p>編集者 : <a href="/@<?php echo $uneinoticeaccount?>">@<?php echo htmlspecialchars($uneinoticeaccount)?></a></p></div>
-                <div class="time"><p><?php echo date('Y年m月d日 H:i', strtotime($valuen['datetime']));?></p></div>
+                <h4><?php echo $value['title'];?></h4>
+                <p><?php echo nl2br($value['note']);?></p>
+                <div class="makeup"><p>編集者 : <a href="/@<?php echo $value['account'];?>">@<?php echo $value['account'];?></a></p></div>
+                <div class="time"><p><?php echo date('Y年m月d日 H:i', strtotime($value['datetime']));?></p></div>
             </div>
-        <?php }?>
+        <?php }}?>
     </div>
     <h1>サーバー情報</h1>
     <div class="btmbox">

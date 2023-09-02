@@ -22,7 +22,9 @@ $stmt = null;
 $res = null;
 $option = null;
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 //------------------------------------------
 // データベースに接続
@@ -57,10 +59,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -84,10 +102,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -299,19 +333,27 @@ $(document).ready(function() {
 
 
 	
+
     
 	var modal = document.getElementById('myDelModal');
     var deleteButton = document.getElementById('deleteButton');
     var cancelButton = document.getElementById('cancelButton'); // 追加
+	var modalMain = $('.modal-content');
 
     $(document).on('click', '.delbtn', function (event) {
         modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
 
         var uniqid2 = $(this).attr('data-uniqid2');
 		var postElement = $(this).closest('.ueuse');
 
         deleteButton.addEventListener('click', () => {
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
 
             $.ajax({
                 url: '../delete/delete.php',
@@ -332,25 +374,54 @@ $(document).ready(function() {
         });
 
         cancelButton.addEventListener('click', () => { // 追加
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
         });
     });
 
+
+	var more_modal = document.getElementById('myMoreModal');
+    var m_cancelButton = document.getElementById('m_c_button'); // 追加
+	var modalMain = $('.modal-content');
+
+    $(document).on('click', '.more_btn', function (event) {
+        more_modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        m_cancelButton.addEventListener('click', () => {
+			modalMain.removeClass("slideUp");
+    		modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				more_modal.style.display = 'none';
+			}, 150);
+		});
+    });
 
 
 	var abimodal = document.getElementById('myAbiModal');
 	var AbiAddButton = document.getElementById('AbiAddButton');
 	var AbiCancelButton = document.getElementById('AbiCancelButton');
+	var modalMain = $('.modal-content');
 
 	$(document).on('click', '.addabi', function (event) {
 
 		abimodal.style.display = 'block';
+		modalMain.addClass("slideUp");
+		modalMain.removeClass("slideDown");
 
 		var uniqid2 = $(this).attr('data-uniqid2');
 		var postAbiElement = $(this).closest('.addabi');
 
 		AbiCancelButton.addEventListener('click', () => {
-			abimodal.style.display = 'none';
+			modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				abimodal.style.display = 'none';
+			}, 150);
 		});
 
 		$('#AbiForm').off('submit').on('submit', function (event) {
@@ -358,27 +429,35 @@ $(document).ready(function() {
 			event.preventDefault();
 
 			var abitext = document.getElementById("abitexts").value;
+			var usernames = '<?php echo $username; ?>';
 
 			if(abitext == ""){
-				abimodal.style.display = 'none';
+				modalMain.removeClass("slideUp");
+				modalMain.addClass("slideDown");
+				window.setTimeout(function(){
+					abimodal.style.display = 'none';
+				}, 150);
 			}else{
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext},
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示
 						if (response.success) {
 							abimodal.style.display = 'none';
 							postAbiElement.remove();
-
+							console.log(response);
 						} else {
-
+							abimodal.style.display = 'none';
+							postAbiElement.remove();
 						}
 					},
 					error: function (xhr, status, error) {
-
+						console.log(error);
+						abimodal.style.display = 'none';
+						postAbiElement.remove();
 					}
 				});
 			}

@@ -26,8 +26,9 @@ $_SESSION["userid"]="";
 $password = null;
 $_SESSION["password"]="";
 
-
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 $userid = $_SESSION['userid'];
 try {

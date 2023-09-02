@@ -8,7 +8,9 @@ require('../db.php');
 $onlyuserfile = "../server/onlyuser.txt";
 $onlyuser = file_get_contents($onlyuserfile);
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 // 変数の初期化
 $current_date = null;
@@ -56,10 +58,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -83,10 +101,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;

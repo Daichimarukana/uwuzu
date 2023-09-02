@@ -24,11 +24,12 @@ $stmt = null;
 $res = null;
 $option = null;
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 $userid = htmlentities($_SESSION['userid']);
 $username = htmlentities($_SESSION['username']);
-
 
 try {
 
@@ -61,10 +62,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -88,10 +105,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -275,17 +308,51 @@ if (!empty($_POST['follow'])) {
         $updateQuery->bindValue(':follow', $userData["userid"], PDO::PARAM_STR);
         $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
         $res_follow = $updateQuery->execute();
+        
+		$datetime = date("Y-m-d H:i:s");
+		$pdo->beginTransaction();
 
-        if ($res && $res_follow) {
+		try {
+			$touserid = $userData["userid"];
+			$datetime = date("Y-m-d H:i:s");
+			$msg = "".$userid."さんにフォローされました。";
+			$title = "🎉".$userid."さんにフォローされました！🎉";
+			$url = "/@" . $userid . "";
+			$userchk = 'none';
+
+			// 通知用SQL作成
+			$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+
+
+			$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+			$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+			$stmt->bindParam(':url', $url, PDO::PARAM_STR);
+			$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+			$stmt->bindParam(':title', $title, PDO::PARAM_STR);
+
+			$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+			// SQLクエリの実行
+			$res = $stmt->execute();
+
+			// コミット
+			$res = $pdo->commit();
+
+		} catch(Exception $e) {
+
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+		}
+
+		if ($res && $res_follow) {
             $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             header("Location:" . $url);
             exit;
         } else {
             $error_message[] = '更新に失敗しました。';
         }
+	}
 
-        $stmt = null;
-    }
 } elseif (!empty($_POST['unfollow'])) {
 	// フォロー解除ボタンが押された場合の処理
     $followerList = explode(',', $userdata['follower']);
@@ -592,28 +659,43 @@ $(document).ready(function() {
     const modal1 = document.getElementById('myModal');
     const openModalButton = document.getElementById('openModalButton');
     const closeButton = document.getElementById('closeModal');
+	var modalMain = $('.modal-content');
 
     openModalButton.addEventListener('click', () => {
         modal1.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
     });
 
     closeButton.addEventListener('click', () => {
-        modal1.style.display = 'none';
+        modalMain.removeClass("slideUp");
+		modalMain.addClass("slideDown");
+		window.setTimeout(function(){
+			modal1.style.display = 'none';
+		}, 150);
     });
 
 
+    
 	var modal = document.getElementById('myDelModal');
     var deleteButton = document.getElementById('deleteButton');
     var cancelButton = document.getElementById('cancelButton'); // 追加
+	var modalMain = $('.modal-content');
 
     $(document).on('click', '.delbtn', function (event) {
         modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
 
         var uniqid2 = $(this).attr('data-uniqid2');
 		var postElement = $(this).closest('.ueuse');
 
         deleteButton.addEventListener('click', () => {
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
 
             $.ajax({
                 url: '../delete/delete.php',
@@ -634,25 +716,54 @@ $(document).ready(function() {
         });
 
         cancelButton.addEventListener('click', () => { // 追加
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
         });
     });
 
+
+	var more_modal = document.getElementById('myMoreModal');
+    var m_cancelButton = document.getElementById('m_c_button'); // 追加
+	var modalMain = $('.modal-content');
+
+    $(document).on('click', '.more_btn', function (event) {
+        more_modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        m_cancelButton.addEventListener('click', () => {
+			modalMain.removeClass("slideUp");
+    		modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				more_modal.style.display = 'none';
+			}, 150);
+		});
+    });
 
 
 	var abimodal = document.getElementById('myAbiModal');
 	var AbiAddButton = document.getElementById('AbiAddButton');
 	var AbiCancelButton = document.getElementById('AbiCancelButton');
+	var modalMain = $('.modal-content');
 
 	$(document).on('click', '.addabi', function (event) {
 
 		abimodal.style.display = 'block';
+		modalMain.addClass("slideUp");
+		modalMain.removeClass("slideDown");
 
 		var uniqid2 = $(this).attr('data-uniqid2');
 		var postAbiElement = $(this).closest('.addabi');
 
 		AbiCancelButton.addEventListener('click', () => {
-			abimodal.style.display = 'none';
+			modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				abimodal.style.display = 'none';
+			}, 150);
 		});
 
 		$('#AbiForm').off('submit').on('submit', function (event) {
@@ -660,27 +771,35 @@ $(document).ready(function() {
 			event.preventDefault();
 
 			var abitext = document.getElementById("abitexts").value;
+			var usernames = '<?php echo $username; ?>';
 
 			if(abitext == ""){
-				abimodal.style.display = 'none';
+				modalMain.removeClass("slideUp");
+				modalMain.addClass("slideDown");
+				window.setTimeout(function(){
+					abimodal.style.display = 'none';
+				}, 150);
 			}else{
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext},
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示
 						if (response.success) {
 							abimodal.style.display = 'none';
 							postAbiElement.remove();
-
+							console.log(response);
 						} else {
-
+							abimodal.style.display = 'none';
+							postAbiElement.remove();
 						}
 					},
 					error: function (xhr, status, error) {
-
+						console.log(error);
+						abimodal.style.display = 'none';
+						postAbiElement.remove();
 					}
 				});
 			}

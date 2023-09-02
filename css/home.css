@@ -1020,8 +1020,19 @@ main h1{
     color:#999;
     font-family: 'BIZ UDPGothic', sans-serif;
 }
+.ueuse .photo1 a{
+    width: 48%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ueuse .photo2 a{
+    width: 48%;
+    margin-left: auto;
+    margin-right: auto;
+}
 
-.ueuse .photo1 img{
+
+.ueuse .photo1 a img{
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
@@ -1036,13 +1047,13 @@ main h1{
     display: flex;
 }
 
-.ueuse .photo2 img{
+.ueuse .photo2 a img{
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    width: 47%;
+    width: 100%;
     height: 350px;
     border: 1px solid #EEE;
 }
@@ -2870,6 +2881,60 @@ hr{
     border-bottom: 1px solid #FFC832;
 }
 
+.hny{
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    margin: 12px;
+    border: 1px solid #EEE;
+}
+.hny .top{
+    background-color: #CB4042;
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    color:#FCFAF2;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.hny .textmain{
+    background-color: #EEE;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+.hny .textmain h1{
+    background-color: #FFC832;
+    text-align: left;
+    color:#FCFAF2;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    word-wrap: break-word;
+    font-size: 32px;
+    line-height: 32px;
+    padding: 12px;
+    border-radius: 7px;
+}
+.hny .textmain p{
+    text-align: left;
+    color:#252525;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    word-wrap: break-word;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: bold;
+}
+.hny .textmain .rp{
+    text-align: right;
+    color:#252525;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: normal;
+    margin-bottom: 6px;
+}
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -3921,6 +3986,69 @@ hr{
         margin-top: 12px;
         margin-bottom: 12px;
         font-size: 20px;
+    }
+
+    .hny{
+        position: absolute;
+        animation: slideDownhny 5.0s ease-in-out forwards;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow:0 0px 32px 0 rgba(0, 0, 0, .15);
+        margin: 12px;
+        border: 1px solid #EEE;
+    }
+    @keyframes slideDownhny {
+        0%, 100% { transform: translateY(-40dvh); }
+        20%, 90% { transform: translateY(0px); }
+    }
+    .hny .top{
+        background-color: #CB4042;
+        padding-left: 24px;
+        padding-right: 24px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        color:#FCFAF2;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: bold;
+    }
+    .hny .textmain{
+        background-color: #EEE;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+    .hny .textmain h1{
+        background-color: transparent;
+        text-align: left;
+        color:#252525;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        word-wrap: break-word;
+        font-size: 22px;
+        line-height: 32px;
+        padding: 0px;
+        border-radius: 7px;
+    }
+    .hny .textmain p{
+        margin: 0px;
+        text-align: left;
+        color:#252525;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        word-wrap: break-word;
+        font-size: 16px;
+        line-height: 22px;
+        font-weight: bold;
+    }
+    .hny .textmain .rp{
+        margin-top: 6px;
+        text-align: right;
+        color:#252525;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        word-wrap: break-word;
+        font-size: 14px;
+        line-height: 22px;
+        font-weight: normal;
+        margin-bottom: 6px;
     }
 }
 

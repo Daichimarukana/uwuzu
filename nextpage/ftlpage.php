@@ -63,6 +63,9 @@ if (!empty($pdo)) {
             $messages[] = $row;
         }
     }
+    usort($messages, function($a, $b) {
+        return strtotime($b['datetime']) - strtotime($a['datetime']);
+    });
     // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
     foreach ($messages as &$message) {
         $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname FROM account WHERE userid = :userid");

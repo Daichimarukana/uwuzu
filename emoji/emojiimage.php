@@ -21,7 +21,9 @@ $rpassword = array();
 $emojiname = null;
 $_SESSION["emojiname"]="";
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 
 $option = array(

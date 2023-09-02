@@ -3,7 +3,9 @@
 <?php
 require('db.php');
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
     header("Location: home/index.php");

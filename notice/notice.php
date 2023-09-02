@@ -24,17 +24,4 @@ while ($row = $notice_array->fetch(PDO::FETCH_ASSOC)) {
     $notices[] = $row;
 }
 
-if(!empty($notices)){
-    foreach ($notices as $value) {
-        $uneinoticenote = htmlentities($value['note']);
-        $uneinoticetitle = htmlentities($value['title']);
-        $uneinoticeaccount = htmlentities($value['account']);
-        $uneinoticedatetime = htmlentities($value['datetime']);
-    }
-}else{
-    $uneinoticenote = "";
-    $uneinoticetitle = "おしらせはありません";
-    $uneinoticeaccount = "uwuzu";
-    $uneinoticedatetime = "";
-}
 ?>

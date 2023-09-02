@@ -22,7 +22,9 @@ $stmt = null;
 $res = null;
 $option = null;
 
+session_name('uwuzu_s_id');
 session_start();
+session_regenerate_id(true);
 
 //------------------------------------------
 // データベースに接続
@@ -57,10 +59,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid, [
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -84,10 +102,26 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+	]);
 	}else{
 		header("Location: ../login.php");
 		exit;
@@ -373,6 +407,12 @@ require('../logout/logout.php');
 // データベースの接続を閉じる
 $pdo = null;
 
+if(isset($_GET['text'])){ 
+	$ueuse = $_GET['text'];
+}else{
+	$ueuse = "";
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -402,6 +442,33 @@ if ("serviceWorker" in navigator) {
 	<?php require('../require/leftbox.php');?>
 	
 	<main class="outer">
+		<?php if(empty($_COOKIE['event'])){
+			  if (date("md") == "0101") {?>
+			<div class="hny" id="osho_gats">
+				<div class="top">Happy New Year <?php echo date("Y")?> !!!</div>
+				<div class="textmain">
+					<h1>あけましておめでとうございます！</h1>
+					<p>あけましておめでとうございます<br>今日から<?php echo date("Y年")?>ですね～！<br>今年もどうぞuwuzuをよろしくお願いいたします！</p>
+					<p><script type="text/javascript">
+					rand = Math.floor(Math.random()*8);
+										
+					if (rand == 0) msg = "早速ですが年越しジャンプしました？";
+					if (rand == 1) msg = "早速ですがお餅は食べましたか？";
+					if (rand == 2) msg = "お餅を喉に詰まらせないよう気をつけてくださいね～";
+					if (rand == 3) msg = "福袋とか買いましたか～？";
+					if (rand == 4) msg = "やっぱりこたつでゆっくりしたいね...";
+					if (rand == 5) msg = "みかんでも食べます？";
+					if (rand == 6) msg = "お鍋でもどうですか～？";
+					if (rand == 7) msg = "一生こたつにいたい...";
+											
+					document.write(msg);
+					</script></p>
+					<div class="rp"><?php echo date("Y年n月j日")?></div>
+					<button class="os_exit_btn">とじる</button>
+				</div>
+			</div>
+			<?php }?>
+		<?php }?>
 		<div class="tlchange">
 				<a href="index" class="on">LTL</a>
 				<a href="ftl" class="off">FTL</a>
@@ -415,7 +482,7 @@ if ("serviceWorker" in navigator) {
 		<?php endif; ?>
 		<form method="post" enctype="multipart/form-data">
 			<div class="sendbox">
-				<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlspecialchars( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+				<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8'); } ?></textarea>
 				<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
 				<div class="fxbox">
 					<label for="upload_images" id="images">
@@ -680,14 +747,14 @@ $(document).ready(function() {
 
 		abimodal.style.display = 'block';
 		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
+		modalMain.removeClass("slideDown");
 
 		var uniqid2 = $(this).attr('data-uniqid2');
 		var postAbiElement = $(this).closest('.addabi');
 
 		AbiCancelButton.addEventListener('click', () => {
 			modalMain.removeClass("slideUp");
-    		modalMain.addClass("slideDown");
+			modalMain.addClass("slideDown");
 			window.setTimeout(function(){
 				abimodal.style.display = 'none';
 			}, 150);
@@ -698,6 +765,7 @@ $(document).ready(function() {
 			event.preventDefault();
 
 			var abitext = document.getElementById("abitexts").value;
+			var usernames = '<?php echo $username; ?>';
 
 			if(abitext == ""){
 				modalMain.removeClass("slideUp");
@@ -709,24 +777,33 @@ $(document).ready(function() {
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext},
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示
 						if (response.success) {
 							abimodal.style.display = 'none';
 							postAbiElement.remove();
-
+							console.log(response);
 						} else {
-
+							abimodal.style.display = 'none';
+							postAbiElement.remove();
 						}
 					},
 					error: function (xhr, status, error) {
-
+						console.log(error);
+						abimodal.style.display = 'none';
+						postAbiElement.remove();
 					}
 				});
 			}
 		});
+	});
+
+	var osho_gats = document.getElementById('osho_gats');
+	$(document).on('click', '.os_exit_btn', function (event) {
+		document.cookie = "event=done; max-age=86400";
+		osho_gats.style.display = 'none';
 	});
 
 });
