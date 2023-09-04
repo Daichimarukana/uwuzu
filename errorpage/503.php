@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 
 <?php
+
+$custom503file = "../server/503imagepath.txt";
+
+//-------------------------
+
 $servernamefile = "../server/servername.txt";
 
 //-------------------------------------
@@ -38,6 +43,9 @@ $termsdata = file_get_contents($termsfile);
     <div class="p2c"><?php echo $domain;?></div>
 
     <div class="err404">
+        <?php if(!(empty($custom503file))){?>
+            <img src="<?php echo file_get_contents($custom503file);?>">
+        <?php }?>
         <h1>503 Service Unavailable</h1>
         <p>(´。＿。｀;)< サーバーに過負荷がかかっているようです...<br>時間をおいてから再度アクセスしてください！</p>
     </div>
