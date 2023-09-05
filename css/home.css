@@ -115,7 +115,7 @@ body{
     padding: 8px 10px;
     border: none;
     border-radius: 10px;
-    background: #fff;
+    background: #f5f5f5;
     font-family: 'Zen Maru Gothic', sans-serif;
     color: rgb(32,32,32);
     font-size: 1em;
@@ -795,7 +795,38 @@ main h1{
     color:#252525;
     font-family: 'BIZ UDPGothic', sans-serif;
 }
+.select_utl{
+    margin: 0px;
+    background-color: #FFF;
+    border: none;
+    width: auto;
+    text-align: center;
+    display: flex;
+}
+.select_utl .btn{
+    display: block;
+    width: 25%;
+    line-height: 32px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-wrap: break-word;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 16px;
+    background: #FFF;
+    color: #CCC;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
 
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+}
+.select_utl .btmline{
+    color: #FFC832;
+    border-bottom: 1px solid #FFC832;
+}
 
 
 .ueuse{
@@ -1711,8 +1742,8 @@ main h1{
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 15px;
-    background-color: #f7f7f7;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    background-color: #ffffff;
+    box-shadow:none;
     text-align: left;
 }
 
@@ -3015,7 +3046,7 @@ hr{
     color:#252525;
     font-family: 'BIZ UDGothic', sans-serif;
     word-wrap: break-word;
-    font-size: 22px;
+    font-size: 18px;
     line-height: 22px;
     font-weight: bold;
 }
@@ -3026,7 +3057,7 @@ hr{
     color:#252525;
     font-family: 'BIZ UDGothic', sans-serif;
     word-wrap: break-word;
-    font-size: 16px;
+    font-size: 14px;
     line-height: 22px;
     font-weight: bold;
 }
@@ -4149,6 +4180,17 @@ hr{
         font-weight: normal;
         margin-bottom: 6px;
     }
+ 
+    .formarea{
+        padding-top: 16px;
+        padding-bottom: 16px;
+        padding-left: 32px;
+        padding-right: 32px;
+        border-radius: 0px;
+        box-shadow:none;
+        text-align: left;
+    }
+
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -4535,7 +4577,7 @@ hr{
         padding-top: 8px;
         padding-bottom: 8px;
         background-color: #0c0c0c;
-        border: 1px solid #EEE;
+        border: none;
         width: auto;
     }
     .server_code h1{
@@ -4677,4 +4719,17 @@ hr{
         border-bottom: 1px solid #FFC832;
     }
 
+
+    .select_utl{
+        background-color: #0c0c0c;
+    }
+
+    .select_utl .btn{
+        background: #0c0c0c;
+        color: #EEE;
+    }
+    .select_utl .btmline{
+        color: #FFC832;
+        border-bottom: 1px solid #FFC832;
+    }
 }

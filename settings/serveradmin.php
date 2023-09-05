@@ -21,6 +21,8 @@ $onlyuserfile = "../server/onlyuser.txt";
 
 $err404imagefile = "../server/404imagepath.txt";
 
+$robots = "../robots.txt";
+
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -49,9 +51,6 @@ $option = null;
 session_name('uwuzu_s_id');
 session_start();
 session_regenerate_id(true);
-
-$userid = htmlentities($_SESSION['userid']);
-$username = htmlentities($_SESSION['username']);
 
 try {
 
@@ -235,6 +234,24 @@ if( !empty($_POST['btn_submit']) ) {
 	}else{
 		$saveonlyuser = "false";
 	}
+
+	$postrobots = $_POST['robots'];
+
+	if($postrobots === "true"){
+		//GPTBotによるクロールを拒否
+		$file = fopen($robots, 'w');
+		$data = "User-agent: GPTBot\nDisallow: /";
+		fputs($file, $data);
+		fclose($file);
+	}else{
+		//GPTBotによるクロールを許可
+		$file = fopen($robots, 'w');
+		$data = "";
+		fputs($file, $data);
+		fclose($file);
+	}
+
+
 	$serverterms = $_POST['serverterms'];
 
 	$serverprv = $_POST['serverprv'];
@@ -334,7 +351,7 @@ if( !empty($_POST['code_btn_submit']) ) {
     // プリペアドステートメントを削除
     $stmt = null;
 }
-
+require('../logout/logout.php');
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -396,6 +413,19 @@ if( !empty($_POST['code_btn_submit']) ) {
             </div>
 
 			<div>
+                <p>OpenAIによるクロールを拒否するかどうか<br>※robots.txtによりOpenAIからのクロールを拒否するものであり、他のAI企業によるクロールを完全拒否するものではございません。</p>
+                <div class="switch_button">
+					<?php if(file_get_contents($robots) === "User-agent: GPTBot\nDisallow: /"){?>
+						<input id="robots" class="switch_input" type='checkbox' name="robots" value="true" checked/>
+						<label for="robots" class="switch_label"></label>
+					<?php }else{?>
+						<input id="robots" class="switch_input" type='checkbox' name="robots" value="true" />
+						<label for="robots" class="switch_label"></label>
+					<?php }?>
+				</div>
+            </div>
+
+			<div>
                 <p>利用規約</p>
                 <textarea id="serverterms" placeholder="しっかり書きましょう" class="inbox" type="text" name="serverterms"><?php $sinfo = explode("\n", $serverterms); foreach ($sinfo as $info) { echo $info; }?></textarea>
 			</div>
@@ -421,11 +451,10 @@ if( !empty($_POST['code_btn_submit']) ) {
 						<h1>コード:<?php if( !empty($value["code"]) ){ echo htmlentities($value["code"]); }?></h1>
 						<p>使用状況:<?php if( !empty($value["used"]) ){
 							if($value["used"] === "none"){
-								echo "未使用";
+								echo "未使用<br>発行日時:".$value["datetime"]."";
 							}elseif($value["used"] === "true"){
-								echo "使用済み";
+								echo "使用済み<br>使用日時:".$value["datetime"]."";
 							}?></p>
-						<p>発行日時:<?php if( !empty($value["datetime"]) ){ echo htmlentities($value["datetime"]); }?></p>
 					</div>
 				<?php }?>	
 				<?php }?>

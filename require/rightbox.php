@@ -43,7 +43,7 @@
         <h2>Server</h2>
         <h3><?php echo file_get_contents($servernamefile);?></h3>
         <p><?php echo $domain;?></p>
-        <a href="/rule/terms">利用規約</a><a href="/rule/privacypolicy">プライバシーポリシー</a>
+        <a href="/rule/terms">利用規約</a><a href="/rule/privacypolicy">プライバシーポリシー</a><a href="/rule/serverabout">詳細</a>
         <h2>Software</h2>
         <h3><?php echo $uwuzuinfo[0]?></h3>
         <p>Version : <?php echo $uwuzuinfo[1]?></p>

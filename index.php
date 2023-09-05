@@ -38,25 +38,6 @@ $contactfile = "server/contact.txt";
 $onlyuserfile = "server/onlyuser.txt";
 $onlyuser = file_get_contents($onlyuserfile);
 
-try {
-
-    $option = array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
-    );
-    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-
-    $stmt = $pdo->prepare("SELECT COUNT(userid) FROM account");
-    $stmt->execute();
-    $count2 = $stmt->fetchColumn();
-  
-
-} catch(PDOException $e) {
-
-    // 接続エラーのときエラー内容を取得する
-    $error_message[] = $e->getMessage();
-}
-
 // データベースに接続
 try {
     $option = array(

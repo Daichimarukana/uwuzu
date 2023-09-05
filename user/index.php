@@ -519,8 +519,12 @@ $pdo = null;
 				</form>
 			</div>
 		</div>
-
-
+		<hr>
+		<div class="select_utl">
+			<button class="btn" id="all_ueuse_btn">ユーズ</button>
+			<button class="btn" id="media_ueuse_btn">メディア</button>
+			<button class="btn" id="like_ueuse_btn">いいね</button>
+		</div>
 
 		<hr>
 			<section class="inner">
@@ -574,25 +578,107 @@ $(document).ready(function() {
 	
     var isLoading = false;
 
+	var mode = "";
+
     function loadPosts() {
-        if (isLoading) return;
-        isLoading = true;
+		if (isLoading) return;
+		isLoading = true;
 		$("#loading").show();
 		var uwuzuid = '<?php echo $uwuzuid; ?>';
 		var userid = '<?php echo $userid; ?>';
-        $.ajax({
-            url: '../nextpage/userpage.php', // PHPファイルへのパス
-            method: 'GET',
-            data: { page: pageNumber, id: uwuzuid ,userid: userid},
-            dataType: 'html',
-            success: function(response) {
-                $('#postContainer').append(response);
-                pageNumber++;
-                isLoading = false;
-				$("#loading").hide();
-            }
-        });
+		if(mode == 'allueuse'){
+			$.ajax({
+				url: '../nextpage/userpage.php', // PHPファイルへのパス
+				method: 'GET',
+				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				dataType: 'html',
+				success: function(response) {
+					$('#postContainer').append(response);
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				}
+			});
+		}else if(mode == 'mediaueuse'){
+			$.ajax({
+				url: '../nextpage/usermediapage.php', // PHPファイルへのパス
+				method: 'GET',
+				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				dataType: 'html',
+				success: function(response) {
+					$('#postContainer').append(response);
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				}
+			});
+		}else if(mode == 'likeueuse'){
+			$.ajax({
+				url: '../nextpage/userlikepage.php', // PHPファイルへのパス
+				method: 'GET',
+				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				dataType: 'html',
+				success: function(response) {
+					$('#postContainer').append(response);
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				}
+			});
+		}else{
+			$('#all_ueuse_btn').addClass('btmline');
+			$.ajax({
+				url: '../nextpage/userpage.php', // PHPファイルへのパス
+				method: 'GET',
+				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				dataType: 'html',
+				success: function(response) {
+					$('#postContainer').append(response);
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				}
+			});
+		}
     }
+	
+	$("#all_ueuse_btn").on('click',function(event) {
+		$('#all_ueuse_btn').addClass('btmline');
+		$('#media_ueuse_btn').removeClass('btmline');
+		$('#like_ueuse_btn').removeClass('btmline');
+
+		event.preventDefault();
+		$("#postContainer").empty();
+		pageNumber = 1;
+		mode = "allueuse";
+		loadPosts();
+	});
+
+	$("#media_ueuse_btn").on('click',function(event) {
+		$('#media_ueuse_btn').addClass('btmline');
+		$('#like_ueuse_btn').removeClass('btmline');
+		$('#all_ueuse_btn').removeClass('btmline');
+
+		event.preventDefault();
+		$("#postContainer").empty();
+		pageNumber = 1;
+		mode = "mediaueuse";
+		loadPosts();
+	});
+
+	$("#like_ueuse_btn").on('click',function(event) {
+		$('#like_ueuse_btn').addClass('btmline');
+		$('#media_ueuse_btn').removeClass('btmline');
+		$('#all_ueuse_btn').removeClass('btmline');
+
+		event.preventDefault();
+		$("#postContainer").empty();
+		pageNumber = 1;
+		mode = "likeueuse";
+		loadPosts();
+	});
+
+
 
 	$('.outer').on('scroll', function() {
 		var innerHeight = $('.inner').innerHeight(), //内側の要素の高さ
