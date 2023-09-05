@@ -51,7 +51,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
@@ -59,7 +59,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid,[
+	setcookie('userid', $userid, [
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
@@ -94,7 +94,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット

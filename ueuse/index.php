@@ -56,7 +56,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
@@ -64,7 +64,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid,[
+	setcookie('userid', $userid, [
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
@@ -99,7 +99,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット
@@ -663,20 +663,28 @@ $(document).ready(function() {
 	var modal = document.getElementById('myDelModal');
     var deleteButton = document.getElementById('deleteButton');
     var cancelButton = document.getElementById('cancelButton'); // 追加
+	var modalMain = $('.modal-content');
 
     $(document).on('click', '.delbtn', function (event) {
         modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
 
         var uniqid2 = $(this).attr('data-uniqid2');
+		var userid = '<?php echo $userid; ?>';
 		var postElement = $(this).closest('.ueuse');
 
         deleteButton.addEventListener('click', () => {
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
 
             $.ajax({
                 url: '../delete/delete.php',
                 method: 'POST',
-                data: { uniqid: uniqid2 },
+                data: { uniqid: uniqid2, userid: userid },
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
@@ -692,67 +700,75 @@ $(document).ready(function() {
         });
 
         cancelButton.addEventListener('click', () => { // 追加
-            modal.style.display = 'none';
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
         });
     });
 
-
-		var abimodal = document.getElementById('myAbiModal');
+	var abimodal = document.getElementById('myAbiModal');
 	var AbiAddButton = document.getElementById('AbiAddButton');
 	var AbiCancelButton = document.getElementById('AbiCancelButton');
+	var modalMain = $('.modal-content');
 
 	$(document).on('click', '.addabi', function (event) {
 
-	abimodal.style.display = 'block';
-	modalMain.addClass("slideUp");
-	modalMain.removeClass("slideDown");
+		abimodal.style.display = 'block';
+		modalMain.addClass("slideUp");
+		modalMain.removeClass("slideDown");
 
-	var uniqid2 = $(this).attr('data-uniqid2');
-	var postAbiElement = $(this).closest('.addabi');
+		var uniqid2 = $(this).attr('data-uniqid2');
+		var postAbiElement = $(this).closest('.addabi');
 
-	AbiCancelButton.addEventListener('click', () => {
-		modalMain.removeClass("slideUp");
-		modalMain.addClass("slideDown");
-		window.setTimeout(function(){
-			abimodal.style.display = 'none';
-		}, 150);
-	});
-
-	$('#AbiForm').off('submit').on('submit', function (event) {
-
-		event.preventDefault();
-
-		var abitext = document.getElementById("abitexts").value;
-		var username = "<?php echo $username?>";
-
-		if(abitext == ""){
+		AbiCancelButton.addEventListener('click', () => {
 			modalMain.removeClass("slideUp");
 			modalMain.addClass("slideDown");
 			window.setTimeout(function(){
 				abimodal.style.display = 'none';
 			}, 150);
-		}else{
-			$.ajax({
-				url: '../abi/addabi.php',
-				method: 'POST',
-				data: { uniqid: uniqid2, abitext: abitext, username: username},
-				dataType: 'json',
-				success: function (response) {
-					console.log(response); // レスポンス内容をコンソールに表示
-					if (response.success) {
+		});
+
+		$('#AbiForm').off('submit').on('submit', function (event) {
+
+			event.preventDefault();
+
+			var abitext = document.getElementById("abitexts").value;
+			var usernames = '<?php echo $username; ?>';
+			var userid = '<?php echo $userid; ?>';
+
+			if(abitext == ""){
+				modalMain.removeClass("slideUp");
+				modalMain.addClass("slideDown");
+				window.setTimeout(function(){
+					abimodal.style.display = 'none';
+				}, 150);
+			}else{
+				$.ajax({
+					url: '../abi/addabi.php',
+					method: 'POST',
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid },
+					dataType: 'json',
+					success: function (response) {
+						console.log(response); // レスポンス内容をコンソールに表示
+						if (response.success) {
+							abimodal.style.display = 'none';
+							postAbiElement.remove();
+							console.log(response);
+						} else {
+							abimodal.style.display = 'none';
+							postAbiElement.remove();
+						}
+					},
+					error: function (xhr, status, error) {
+						console.log(error);
 						abimodal.style.display = 'none';
 						postAbiElement.remove();
-
-					} else {
-
 					}
-				},
-				error: function (xhr, status, error) {
-
-				}
-			});
-		}
-	});
+				});
+			}
+		});
 	});
 
 });

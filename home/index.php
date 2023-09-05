@@ -51,7 +51,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
@@ -94,7 +94,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット
@@ -682,6 +682,7 @@ $(document).ready(function() {
     	modalMain.removeClass("slideDown");
 
         var uniqid2 = $(this).attr('data-uniqid2');
+		var userid = '<?php echo $userid; ?>';
 		var postElement = $(this).closest('.ueuse');
 
         deleteButton.addEventListener('click', () => {
@@ -694,7 +695,7 @@ $(document).ready(function() {
             $.ajax({
                 url: '../delete/delete.php',
                 method: 'POST',
-                data: { uniqid: uniqid2 },
+                data: { uniqid: uniqid2, userid: userid },
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
@@ -717,26 +718,6 @@ $(document).ready(function() {
 			}, 150);
         });
     });
-
-
-	var more_modal = document.getElementById('myMoreModal');
-    var m_cancelButton = document.getElementById('m_c_button'); // 追加
-	var modalMain = $('.modal-content');
-
-    $(document).on('click', '.more_btn', function (event) {
-        more_modal.style.display = 'block';
-		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
-
-        m_cancelButton.addEventListener('click', () => {
-			modalMain.removeClass("slideUp");
-    		modalMain.addClass("slideDown");
-			window.setTimeout(function(){
-				more_modal.style.display = 'none';
-			}, 150);
-		});
-    });
-
 
 	var abimodal = document.getElementById('myAbiModal');
 	var AbiAddButton = document.getElementById('AbiAddButton');
@@ -766,6 +747,7 @@ $(document).ready(function() {
 
 			var abitext = document.getElementById("abitexts").value;
 			var usernames = '<?php echo $username; ?>';
+			var userid = '<?php echo $userid; ?>';
 
 			if(abitext == ""){
 				modalMain.removeClass("slideUp");
@@ -777,7 +759,7 @@ $(document).ready(function() {
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext, username: usernames },
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示

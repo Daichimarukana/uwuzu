@@ -92,6 +92,7 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
                 $datetime = date("Y-m-d H:i:s");
                 $uniqid = createUniqId();
                 $abi = "none";
+                $nones = "none";
 
                 // トランザクション開始
                 $pdo->beginTransaction();
@@ -99,12 +100,16 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
                 try {
 
                     // SQL作成
-                    $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :datetime, :abi)");
+                    $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
             
                     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                     $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
                     $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
                     $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                    $stmt->bindParam(':photo1', $nones, PDO::PARAM_STR);
+                    $stmt->bindParam(':photo2', $nones, PDO::PARAM_STR);
+                    $stmt->bindParam(':video1', $nones, PDO::PARAM_STR);
 
                     $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
