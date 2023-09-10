@@ -22,11 +22,6 @@ $stmt = null;
 $res = null;
 $option = null;
 
-
-$userid = $_SESSION['userid'];
-$backupcode = $_SESSION['backupcode'];
-
-
 try {
 
     $option = array(
@@ -177,8 +172,8 @@ require('../logout/logout.php');
 		</ul>
 	<?php endif; ?>
 
-    <div class="emojibox">
-    <h1>二段階認証登録完了</h1>
+    <div class="formarea">
+    <h1>通報完了</h1>
             <?php if( !empty($error_message) ): ?>
                 <ul class="errmsg">
                     <?php foreach( $error_message as $value ): ?>
@@ -186,13 +181,8 @@ require('../logout/logout.php');
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
-		<div class="formarea">
-        <p>登録完了！セキュリティの強化にご協力いただきありがとうございます！<br>(≧∇≦)</p>
-		<p>バックアップコードは以下のものです！<br>以下のコードでスマートフォンをなくしてしまったなどのもしものときにログインいただけます。<br>絶対に大切に保管してください！<br>また、そのバックアップコードは絶対に公開しないでください。</p>
-		<p><?php echo $backupcode;?>
-		</div>
-        
-        <a href="index" class="irobutton">戻る</a>
+		<p>通報しました！</p>
+        <a href="/home/" class="irobutton">戻る</a>
     </div>
     </main>
 

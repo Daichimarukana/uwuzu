@@ -488,10 +488,12 @@ require('../logout/logout.php');
 		?>
 		<p>以下のボタンよりアクセストークンを取得すると使用できます。<br>アクセストークンは一度発行すると作り直すまで再度確認はできません。また、絶対に他人に知られないように保護してください。<p>
 		<input type="submit" class = "irobutton" name="token_submit" value="アクセストークン発行">
+		<?php }elseif($userData['token']==='ice'){ ?>
+			<p>アカウントが凍結されているため発行できません。</p>
 		<?php }else{ ?>
 			<p>以下のボタンよりアクセストークンを削除できます。ボタンを押すとすぐに削除されますのでご注意ください。</p>
 			<input type="submit" class = "irobutton" name="token_off_submit" value="アクセストークン削除">
-		<?php } ?>
+		<?php }?>
         </form>
 	</main>
 

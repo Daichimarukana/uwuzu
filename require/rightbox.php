@@ -19,8 +19,8 @@
         $uwuzuinfo[$i] = ($softwaredata[$i]);
     }
     ?>
-    <h1>お知らせ</h1>
     <div class="noticearea">
+    <h1>お知らせ</h1>
     <?php if(empty($notices)){?>
         <div class="noticebox">
             <h4>なし</h4>
@@ -38,8 +38,8 @@
             </div>
         <?php }}?>
     </div>
-    <h1>サーバー情報</h1>
     <div class="btmbox">
+        <h1>サーバー情報</h1>
         <h2>Server</h2>
         <h3><?php echo file_get_contents($servernamefile);?></h3>
         <p><?php echo $domain;?></p>

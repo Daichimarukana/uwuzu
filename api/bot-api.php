@@ -42,6 +42,22 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
     $token = htmlentities($_GET['token']);
     $ueuse = nl2br(htmlentities($_GET['ueuse']));
 
+    if($token === 'ice'){
+        $err = "input_error";
+        $response = array(
+            'error_code' => $err,
+        );
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    }elseif($token === ''){
+        $err = "input_error";
+        $response = array(
+            'error_code' => $err,
+        );
+        
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    }
+
     require('../db.php');
 
     $datetime = array();

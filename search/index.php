@@ -55,6 +55,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$loginid = $res["loginid"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -98,6 +99,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$loginid = $res["loginid"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -288,13 +290,13 @@ $(document).ready(function() {
 	}
 
 
-
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
 		event.preventDefault();
 
 		var postUniqid = $(this).data('uniqid');
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
 
 		var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
@@ -304,7 +306,7 @@ $(document).ready(function() {
 		$.ajax({
 			url: '../favorite/favorite.php',
 			method: 'POST',
-			data: { uniqid: postUniqid, userid: userid }, // ここに自分のユーザーIDを指定
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
 			dataType: 'json',
 			success: function(response) {
 				if (response.success) {
@@ -328,86 +330,67 @@ $(document).ready(function() {
 				// エラー時の処理
 			}
 		});
-	});
+		});
 
 
 
-	
 
-    
-	var modal = document.getElementById('myDelModal');
-    var deleteButton = document.getElementById('deleteButton');
-    var cancelButton = document.getElementById('cancelButton'); // 追加
-	var modalMain = $('.modal-content');
 
-    $(document).on('click', '.delbtn', function (event) {
-        modal.style.display = 'block';
+		var modal = document.getElementById('myDelModal');
+		var deleteButton = document.getElementById('deleteButton');
+		var cancelButton = document.getElementById('cancelButton'); // 追加
+		var modalMain = $('.modal-content');
+
+		$(document).on('click', '.delbtn', function (event) {
+		modal.style.display = 'block';
 		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
+		modalMain.removeClass("slideDown");
 
-        var uniqid2 = $(this).attr('data-uniqid2');
+		var uniqid2 = $(this).attr('data-uniqid2');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		var postElement = $(this).closest('.ueuse');
 
-        deleteButton.addEventListener('click', () => {
-            modalMain.removeClass("slideUp");
-			modalMain.addClass("slideDown");
-			window.setTimeout(function(){
-				modal.style.display = 'none';
-			}, 150);
-
-            $.ajax({
-                url: '../delete/delete.php',
-                method: 'POST',
-                data: { uniqid: uniqid2 },
-                dataType: 'json',
-                success: function (response) {
-                    if (response.success) {
-                        postElement.remove();
-                    } else {
-                        // 削除失敗時の処理
-                    }
-                },
-                error: function () {
-                    // エラー時の処理
-                }
-            });
-        });
-
-        cancelButton.addEventListener('click', () => { // 追加
-            modalMain.removeClass("slideUp");
-			modalMain.addClass("slideDown");
-			window.setTimeout(function(){
-				modal.style.display = 'none';
-			}, 150);
-        });
-    });
-
-
-	var more_modal = document.getElementById('myMoreModal');
-    var m_cancelButton = document.getElementById('m_c_button'); // 追加
-	var modalMain = $('.modal-content');
-
-    $(document).on('click', '.more_btn', function (event) {
-        more_modal.style.display = 'block';
-		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
-
-        m_cancelButton.addEventListener('click', () => {
+		deleteButton.addEventListener('click', () => {
 			modalMain.removeClass("slideUp");
-    		modalMain.addClass("slideDown");
+			modalMain.addClass("slideDown");
 			window.setTimeout(function(){
-				more_modal.style.display = 'none';
+				modal.style.display = 'none';
+			}, 150);
+
+			$.ajax({
+				url: '../delete/delete.php',
+				method: 'POST',
+				data: { uniqid: uniqid2, userid: userid, account_id: account_id },
+				dataType: 'json',
+				success: function (response) {
+					if (response.success) {
+						postElement.remove();
+					} else {
+						// 削除失敗時の処理
+					}
+				},
+				error: function () {
+					// エラー時の処理
+				}
+			});
+		});
+
+		cancelButton.addEventListener('click', () => { // 追加
+			modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
 			}, 150);
 		});
-    });
+		});
 
+		var abimodal = document.getElementById('myAbiModal');
+		var AbiAddButton = document.getElementById('AbiAddButton');
+		var AbiCancelButton = document.getElementById('AbiCancelButton');
+		var modalMain = $('.modal-content');
 
-	var abimodal = document.getElementById('myAbiModal');
-	var AbiAddButton = document.getElementById('AbiAddButton');
-	var AbiCancelButton = document.getElementById('AbiCancelButton');
-	var modalMain = $('.modal-content');
-
-	$(document).on('click', '.addabi', function (event) {
+		$(document).on('click', '.addabi', function (event) {
 
 		abimodal.style.display = 'block';
 		modalMain.addClass("slideUp");
@@ -430,6 +413,8 @@ $(document).ready(function() {
 
 			var abitext = document.getElementById("abitexts").value;
 			var usernames = '<?php echo $username; ?>';
+			var userid = '<?php echo $userid; ?>';
+			var account_id = '<?php echo $loginid; ?>';
 
 			if(abitext == ""){
 				modalMain.removeClass("slideUp");
@@ -441,7 +426,7 @@ $(document).ready(function() {
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext, username: usernames },
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid, account_id: account_id },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示
@@ -462,9 +447,7 @@ $(document).ready(function() {
 				});
 			}
 		});
-	});
-
-
+		});
 });
 
 </script>

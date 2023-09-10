@@ -55,6 +55,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$loginid = $res["loginid"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -98,6 +99,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$loginid = $res["loginid"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;

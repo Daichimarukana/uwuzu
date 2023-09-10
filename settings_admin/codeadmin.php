@@ -1,6 +1,28 @@
 <?php
 
 $servernamefile = "../server/servername.txt";
+
+$serverinfofile = '../server/info.txt';
+$serverinfo = file_get_contents($serverinfofile);
+
+$servertermsfile = '../server/terms.txt';
+$serverterms = file_get_contents($servertermsfile);
+
+$serverprvfile = '../server/privacypolicy.txt';
+$serverprv = file_get_contents($serverprvfile);
+
+$contactfile = "../server/contact.txt";
+
+$adminfile = "../server/admininfo.txt";
+
+$serverstopfile = "../server/serverstop.txt";
+
+$onlyuserfile = "../server/onlyuser.txt";
+
+$err404imagefile = "../server/404imagepath.txt";
+
+$robots = "../robots.txt";
+
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -8,6 +30,9 @@ function createUniqId(){
     $hashCreateTime = strrev($hashCreateTime);
 
     return base_convert($hashCreateTime,10,36);
+}
+function random_code($length = 8){
+    return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
 }
 
 require('../db.php');
@@ -27,23 +52,19 @@ session_name('uwuzu_s_id');
 session_start();
 session_regenerate_id(true);
 
-$userid = htmlentities($_SESSION['userid']);
-$username = htmlentities($_SESSION['username']);
-
 try {
 
     $option = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
     );
-    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
 } catch(PDOException $e) {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
@@ -160,7 +181,7 @@ $notificationcount = $notiData['notification_count'];
 if( !empty($pdo) ) {
 	
 	// データベース接続の設定
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+	$dbh = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
@@ -173,7 +194,7 @@ if( !empty($pdo) ) {
 
 	$role = $userData["role"];
 
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+	$dbh = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
 	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
 
@@ -186,90 +207,72 @@ if( !empty($pdo) ) {
 	
 }
 
+if (!empty($pdo)) {
+    
+    $sql = "SELECT code,used,datetime FROM invitation ORDER BY datetime DESC";
+    $invcode = $pdo->query($sql);    
 
+    while ($row = $invcode->fetch(PDO::FETCH_ASSOC)) {
 
-if( !empty($_POST['btn_submit']) ) {
-	$title = $_POST['title'];
-    $note = $_POST['note'];
-
-    // IDの入力チェック
-	if( empty($title) ) {
-		$error_message[] = 'タイトルを入力してください！';
-	} else {
-
-        // 文字数を確認
-        if( 1024 < mb_strlen($title, 'UTF-8') ) {
-			$error_message[] = 'タイトルは1024文字以内で入力してください。';
-		}
-
+        $codes[] = $row;
     }
-
-	if( empty($error_message) ) {
-		
-		// 書き込み日時を取得
-        $datetime = date("Y-m-d H:i:s");
-
-        // トランザクション開始
-        $pdo->beginTransaction();
-
-        try {
-
-            // SQL作成
-            $stmt = $pdo->prepare("INSERT INTO notice (title,note,account,datetime) VALUES (:title,:note,:account,:datetime)");
-
-
-            // 値をセット
-            $stmt->bindParam( ':title', $title, PDO::PARAM_STR);
-            $stmt->bindParam( ':note', $note, PDO::PARAM_STR);
-
-            $stmt->bindParam( ':account', $userid, PDO::PARAM_STR);
-            
-            $stmt->bindParam( ':datetime', $datetime, PDO::PARAM_STR);
-
-            // SQLクエリの実行
-            $res = $stmt->execute();
-
-            // コミット
-            $res = $pdo->commit();
-
-        } catch(Exception $e) {
-
-            // エラーが発生した時はロールバック
-            $pdo->rollBack();
-        }
-
-        if( $res ) {
-            $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            header("Location:".$url."");
-            exit;  
-        } else {
-            $error_message[] = '配信に失敗しました。';
-        }
-
-        // プリペアドステートメントを削除
-        $stmt = null;
-
-
-	}
-   
 }
 
+if( !empty($_POST['code_btn_submit']) ) {
+	$make_code = $_POST['make_code'];
+	$code_num = 0;
+	while ($code_num < (int)$make_code) {
+		$code_num++;
+		$pdo->beginTransaction();
+		$datetime = date("Y-m-d H:i:s");
 
+		try {
+
+			$new_invcode = random_code();
+			$used = "none";
+	
+			// SQL作成
+			$stmt = $pdo->prepare("INSERT INTO invitation (code, used, datetime) VALUES (:code, :used, :datetime)");
+	
+			$stmt->bindParam(':code', $new_invcode, PDO::PARAM_STR);
+			$stmt->bindParam(':used', $used, PDO::PARAM_STR);
+			$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+	
+			// SQLクエリの実行
+			$res = $stmt->execute();
+	
+			// コミット
+			$res = $pdo->commit();
+	
+		} catch (Exception $e) {
+	
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+		}
+	}
+	if ($res) {
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:".$url."");
+		exit;  
+	} else {
+		$error_message[] = '発行に失敗しました。';
+	}
+
+    // プリペアドステートメントを削除
+    $stmt = null;
+}
 require('../logout/logout.php');
-
-
-// データベースの接続を閉じる
-$pdo = null;
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>お知らせ配信 - <?php echo file_get_contents($servernamefile);?></title>
+<title>招待コード発行所 - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
@@ -277,43 +280,85 @@ $pdo = null;
 <?php require('../require/leftbox.php');?>
 	<main>
 
-            <?php if( !empty($error_message) ): ?>
-                <ul class="errmsg">
-                    <?php foreach( $error_message as $value ): ?>
-                        <p>・ <?php echo $value; ?></p>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-                
-        <form class="formarea" enctype="multipart/form-data" method="post">
+	<?php if( !empty($error_message) ): ?>
+		<ul class="errmsg">
+			<?php foreach( $error_message as $value ): ?>
+				<p>・ <?php echo $value; ?></p>
+			<?php endforeach; ?>
+		</ul>
+	<?php endif; ?>
+		<div class="admin_settings">
+			<?php require('settings_left_menu.php');?>
+		
+			<div class="admin_right">
+				<form class="formarea" enctype="multipart/form-data" method="post">
+					<h1>招待コード発行所</h1>
+					<?php if(file_get_contents($onlyuserfile) === "true"){?>
+						<p>下の発行ボタンで新しくコードを発行できます！<br>なお、コードは一回限り有効です。</p>
+						<div>
+							<p>発行数</p>
+							<input id="make_code" placeholder="1" class="inbox" type="number" name="make_code" value="1" min="1" max="10000">
+						</div>
+						<input type="submit" class = "irobutton" name="code_btn_submit" value="発行！">
+						<?php foreach ($codes as $value) {?>
+							<div class="server_code">
+								<details>
+									<summary>コード:<?php if( !empty($value["code"]) ){ echo htmlentities($value["code"]); }?><?php if( !empty($value["used"]) ){if($value["used"] === "true"){echo " ✅";}}?> </summary>
+									<p>使用状況:<?php if( !empty($value["used"]) ){
+										if($value["used"] === "none"){
+											echo "未使用<br>発行日時:".$value["datetime"]."";
+										}elseif($value["used"] === "true"){
+											echo "使用済み<br>使用日時:".$value["datetime"]."";
+										}?></p>
+									<div class="delbox">
+										<p>削除ボタンを押すとこのコードは使用できなくなります。</p>
+										<button type="button" id="code_delete" class="delbtn" del-code="<?php echo htmlentities($value["code"]);?>">削除</button>
+									</div>
+								</details>
+							</div>
+						<?php }?>	
+						<?php }?>
+					<?php }else{?>
+						<p>サーバーは招待制にされていないため招待コードは利用できません。</p>
+					<?php }?>
 
-		<h1>お知らせ配信</h1>
-
-        <p>タイトルと内容を入力して配信してください。<br>削除と編集はここからは出来ません。<br>DB管理画面から行ってください。</p>
-
-            <!--ユーザーネーム関係-->
-            <div>
-                <p>タイトル</p>
-                <input placeholder="ここにタイトル" class="inbox" type="text" name="title" value="<?php if( !empty($_SESSION['title']) ){ echo htmlspecialchars( $_SESSION['title'], ENT_QUOTES, 'UTF-8'); } ?>">
-            </div>
-
-            <div>
-                <p>この絵文字について</p>
-                <textarea placeholder="ここに内容" class="inbox" name="note"><?php if( !empty($_SESSION['note']) ){ echo htmlspecialchars( $_SESSION['note'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
-            </div>
-
-            <div>
-                
-            <input type="submit" class = "irobutton" name="btn_submit" value="配信">
-            </div>
-
-        </form>
-
-        </div>
+				</form>
+			</div>
+		</div>
 	</main>
 
 	<?php require('../require/rightbox.php');?>
-    <?php require('../require/botbox.php');?>
+	<?php require('../require/botbox.php');?>
+	
+<script>
+$(document).ready(function() {
+
+	$(document).on('click', '.delbtn', function (event) {
+
+        var code = $(this).attr('del-code');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var codeElement = $(this).closest('.server_code');
+
+		$.ajax({
+			url: 'code_delete.php',
+			method: 'POST',
+			data: { code: code, userid: userid, account_id: account_id },
+			dataType: 'json',
+			success: function (response) {
+				if (response.success) {
+					codeElement.remove();
+				} else {
+					// 削除失敗時の処理
+				}
+			},
+			error: function () {
+				// エラー時の処理
+			}
+		});
+    });
+});
+</script>
 </body>
 
 </html>

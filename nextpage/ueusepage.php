@@ -29,7 +29,7 @@ $userid = htmlentities($_GET['userid']);
 
 $ueuseid = htmlentities(isset($_GET['id'])) ? htmlentities($_GET['id']) : '';
 
-$itemsPerPage = 30; // 1ページあたりの投稿数
+$itemsPerPage = 15; // 1ページあたりの投稿数
 $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
 $offset = ($pageNumber - 1) * $itemsPerPage;
 
@@ -83,6 +83,24 @@ if (!empty($pdo)) {
         }
     }
 
+    //adsystem------------------
+
+    $message['ads'] = "false";
+
+    $today = date("Y-m-d H:i:s");
+
+    $adsQuery = $pdo->prepare("SELECT * FROM ads WHERE start_date < :today AND limit_date > :today ORDER BY rand()");
+    $adsQuery->bindValue(':today', $today);
+    $adsQuery->execute();
+    $adsresult = $adsQuery->fetch();
+    if(!(empty($adsresult))){
+        $message['ads'] = "true";
+        $message['ads_url'] = $adsresult["url"];
+        $message['ads_img_url'] = $adsresult["image_url"];
+        $message['ads_memo'] = $adsresult["memo"];
+    }
+    //--------------------------
+
     if(!empty($messages)){
         foreach ($messages as $value) {
             $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
@@ -93,6 +111,9 @@ if (!empty($pdo)) {
 
             $messageDisplay = new MessageDisplay($value, $userid);
             $messageDisplay->display();
+        }
+        if($message['ads'] === "true"){
+            echo '<div class="ads"><a href = "' . htmlentities($message['ads_url']) . '"><img src="' . htmlentities($message['ads_img_url']) . '" title="' . htmlentities($message['ads_memo']) . '"></a></div>';
         }
     }else{
         echo '<div class="tokonone" id="noueuse"><p>投稿がありません</p></div>';

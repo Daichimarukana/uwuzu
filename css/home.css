@@ -677,6 +677,7 @@ main h1{
     border: none;
     display: block;
     width:120px;
+    height: 24px;
     padding: 8px auto;
 
     margin-left: auto;
@@ -754,6 +755,56 @@ main h1{
     width:115px;
 }
 
+
+.fzone .follow .report{
+    cursor: pointer;
+    border: none;
+    display: block;
+    padding: 6px;
+
+    width:24px;
+    height: 24px;
+
+    margin-left: auto;
+    margin-right: 12px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    background-color: #FFFAE6;
+
+    border-radius: 50px;
+    color:#FFC832;
+    border: 1px solid #FFC832;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.fzone .follow .report:hover{
+    background-color: #ffebeb;
+    color: #ff4848;
+    border: 1px solid #ff4848;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:32px;
+}
+.fzone .follow .report:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:22px;
+}
+.fzone .follow .report svg{
+    width: 24px;
+    height: 24px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 6px;
+    fill: currentColor;
+}
+
 .fzone .time{
     margin-top: auto;
     margin-bottom: 0px;
@@ -763,6 +814,7 @@ main h1{
 .fzone .time p{
     margin-top: 0px;
     margin-bottom: 0px;
+    margin-right: 32px;
     text-align: left;
     font-size: 12px;
     color:#999;
@@ -828,7 +880,41 @@ main h1{
     border-bottom: 1px solid #FFC832;
 }
 
-
+.ads{
+    display: block;
+    position: relative;
+    animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    margin: 12px;
+    border-radius: 10px;
+    padding: 0px;
+    overflow:hidden;
+    background-color: #F5F5F5;
+    border: 1px solid #EEE;
+    width: auto;
+}
+@keyframes slideInY {
+    0% {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0px);
+    }
+    40%,100% {
+      opacity: 1;
+    }
+}
+.ads a{
+    margin: 0px;
+    padding: 0px;
+}
+.ads a img{
+    object-fit: cover;
+    margin: 0px;
+    width: 100%;
+    height: 10dvh;
+    vertical-align:top;
+}
 .ueuse{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
     margin: 12px;
@@ -1413,7 +1499,14 @@ main h1{
     transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
-
+.ueuse .favbox .addabi svg {
+    margin-top: -12px;
+    margin-right: 0px;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 250ms ease-out;
+}
 
 .ueuse .favbox img{
     margin-left: 0px;
@@ -1945,6 +2038,7 @@ label>input {
     font-size: 18px;
 }
 .modal-content p{
+    line-height: 20px;
     font-size: 16px;
     color:#252525;
     text-decoration: none;
@@ -2260,6 +2354,7 @@ label>input {
     margin-left: 12px;
     margin-right: 12px;
     width: 24%;
+    height: 92.5dvh;
     background-color: #fff;
     padding: 12px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
@@ -2279,7 +2374,7 @@ label>input {
 
 .rightbox .noticearea{
     width: auto;
-    height: 52dvh;
+    height: 50dvh;
     overflow: scroll;
     border-radius: 10px;
 }
@@ -2370,7 +2465,7 @@ label>input {
 .rightbox .btmbox{
     position: absolute;
     bottom: 12px; /*下に固定*/
-    height: 31dvh;
+    height: 35dvh;
     width: 90%;
 }
 
@@ -3026,6 +3121,13 @@ hr{
     margin-left: 0px;
 }
 
+
+summary {
+    font-weight: bold;
+    margin: -0.5em -0.5em 0;
+    padding: 0.5em;
+}
+
 .server_code{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
     margin-top: 12px;
@@ -3034,14 +3136,15 @@ hr{
     padding-left: 12px;
     padding-right: 12px;
     padding-top: 8px;
-    padding-bottom: 8px;
+    padding-bottom: 4px;
     background-color: #F5F5F5;
     border: 1px solid #EEE;
     width: auto;
 }
-.server_code h1{
-    margin-top: 4px;
-    margin-bottom: 4px;
+.server_code details {
+    padding: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
     text-align: left;
     color:#252525;
     font-family: 'BIZ UDGothic', sans-serif;
@@ -3049,6 +3152,28 @@ hr{
     font-size: 18px;
     line-height: 22px;
     font-weight: bold;
+}
+.server_code summary {
+    display: block;
+    list-style: none;
+}
+.server_code summary::-webkit-details-marker {
+    display: none;
+}
+.server_code details[open] p{
+    animation: slideInYopen 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+@keyframes slideInYopen {
+    0% {
+      transform: translateY(-16px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0px);
+    }
+    40%,100% {
+      opacity: 1;
+    }
 }
 .server_code p{
     margin-top: 4px;
@@ -3061,7 +3186,328 @@ hr{
     line-height: 22px;
     font-weight: bold;
 }
+.delbox {
+    margin: 0px;
+    padding: 0px;
+    display: flex;
+}
+.delbox p{
+    margin-top: auto;
+    margin-bottom: auto;
+    text-align: left;
+    color:#252525;
+    font-family: 'BIZ UDGothic', sans-serif;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: bold;
+}
+.delbox .delbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:60px;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: 0px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: #F5F5F5;
+    border-radius: 50px;
+    color:#FF4848;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
 
+.delbox .delbtn:hover{
+    background-color: #FF4848;
+    color: #f5f5f5;;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+.admin_settings{
+    display: flex;
+}
+.admin_settings .admin_right{
+    margin-right: 0px;
+    width: 70%;
+}
+.admin_settings .admin_left{
+    position: sticky;
+    top: 0;
+    margin-left: 0px;
+    padding: 12px;
+    width: 30%;
+    height: 92.5dvh;
+    border-right: 1px solid #EEE;
+}
+.admin_leftbtn{
+    cursor: pointer;
+    border: none;
+    display: flex;
+    width:80%;
+    margin: 8px;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-left: 12px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+
+
+    background-color: #FFFFFF;
+
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 18px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: left;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.admin_leftbtn:hover{
+    background-color: #FFC832;
+    color: #FFFAE6;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:85%;
+}
+.admin_leftbtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:75%;
+}
+
+.admin_userinfo{
+    padding: 12px;
+}
+.admin_userinfo .icon{
+    display: flex;
+    vertical-align: middle;
+}
+.admin_userinfo .icon img{
+    object-fit: cover;
+    margin-top: 12px;
+    text-align: left;
+    width: 128px;
+    height:128px;
+    border-radius: 50%;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+.admin_userinfo .icon .tatext{
+    display: block;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.admin_userinfo .icon .tatext h2{
+    word-wrap: break-word;
+    margin-left: 12px;
+    margin-top: 12px;
+    margin-bottom: auto;
+    color:#252525;
+    font-size: 32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+.admin_userinfo .icon .tatext p{
+    word-wrap: break-word;
+    margin-left: 12px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 14px;
+    color: #999;
+    font-size: 18px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+
+.admin_userinfo .profile p{
+    text-align: left;
+    margin-top: 12px;
+    margin-bottom: auto;
+    margin-left: 0px;
+    margin-right: 0px;
+    word-wrap: break-word;
+    font-size: 18px;
+    color:#252525;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.admin_userinfo .roleboxes{
+    margin-top: 12px;
+    margin-left: 0px;
+    display: flex;
+    padding: 0px;
+    flex-wrap : wrap;
+}
+.admin_userinfo .rolebox{
+    margin-top: 0px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 12px;
+    width: auto;
+    padding-left: auto;
+    padding-right: auto;
+    background-color: #fff;
+    border: 1px solid #FFC832;
+    border-radius: 25px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+.admin_userinfo .rolebox p{
+    color:#FFC832;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+}
+.admin_userinfo .about{
+    display: block;
+}
+.admin_userinfo .p2{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #868686;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+.admin_userinfo .about p{
+    word-wrap: break-word;
+    margin-left: 0px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 14px;
+    color: #252525;
+    font-size: 18px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+.admin_userinfo .banzone{
+    display: flex;
+}
+.admin_userinfo .banzone .banbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:25%;
+    margin: 12px;
+    padding: 8px 5%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #ff4848;
+
+    text-align: center;
+    border-radius: 50px;
+    color:#fff;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.admin_userinfo .banzone .banbtn:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:30%;
+}
+.admin_userinfo .banzone .banbtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:20%;
+}
+.admin_userinfo .banzone .waterbtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:25%;
+    margin: 12px;
+    padding: 8px 5%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #FFFAE6;
+
+    text-align: center;
+    border-radius: 50px;
+    color:#FFC832;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.admin_userinfo .banzone .waterbtn:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:30%;
+}
+.admin_userinfo .banzone .waterbtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:20%;
+}
+.admin_userinfo .banzone .icebtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:25%;
+    margin: 12px;
+    padding: 8px 5%;
+    margin-left: auto;
+    margin-right: auto;
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    background-color: #ffbc0d;
+
+    text-align: center;
+    border-radius: 50px;
+    color:#fff;
+    font-size: 22px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+}
+.admin_userinfo .banzone .icebtn:hover{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:30%;
+}
+.admin_userinfo .banzone .icebtn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    width:20%;
+}
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -3484,6 +3930,16 @@ hr{
         text-align: center;
         transition: box-shadow 250ms ease-in-out;
         transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    
+    .ueuse .favbox .addabi svg {
+        margin-top: -8px;
+        margin-right: 0px;
+        margin-bottom: 2px;
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
         transition: all 250ms ease-out;
     }
 
@@ -4191,6 +4647,59 @@ hr{
         text-align: left;
     }
 
+    .admin_settings{
+        display: block;
+    }
+    .admin_settings .admin_right{
+        width: 100%;
+    }
+    .admin_settings .admin_left{
+        background-color: #fff;
+        position:relative;
+        width: 100%;
+        height: auto;
+        padding: 0px;
+        border-right: 1px solid #EEE;
+    }
+    .admin_leftbtn{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:80%;
+        margin: 8px;
+        padding: 8px auto;
+        margin-left: auto;
+        margin-right: auto;
+    
+        padding-left: 12px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+    
+    
+        background-color: #FFFFFF;
+    
+        border-radius: 50px;
+        color:#FFC832;
+        font-size: 18px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: left;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    .admin_leftbtn:hover{
+        background-color: #FFC832;
+        color: #FFFAE6;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:85%;
+    }
+    .admin_leftbtn:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:75%;
+    }
+
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -4408,6 +4917,18 @@ hr{
         color:#FFFAE6;
     }
     
+    .fzone .follow .report{
+        background-color: #0c0c0c;
+        color:#FFC832;
+        border: 1px solid #FFC832;
+    }
+    .fzone .follow .report:hover{
+        background-color: #302c2c;
+        color: #ff4848;
+        border: 1px solid #ff4848;
+    }
+
+
 
     .rightbox{
         background-color: #0c0c0c;
@@ -4580,7 +5101,7 @@ hr{
         border: none;
         width: auto;
     }
-    .server_code h1{
+    .server_code details{
         color: #CCC;
     }
     .server_code p{
@@ -4731,5 +5252,50 @@ hr{
     .select_utl .btmline{
         color: #FFC832;
         border-bottom: 1px solid #FFC832;
+    }
+
+    .admin_settings .admin_left{
+        background-color: #0c0c0c;
+        border-right: none;
+    }
+    .admin_leftbtn{
+        background-color: #0c0c0c;
+        color:#FFC832;
+    }
+    .admin_leftbtn:hover{
+        background-color: #FFC832;
+        color: #0c0c0c;
+    }
+
+    .admin_userinfo .icon .tatext h2{
+        color:#FFF;
+    }
+    .admin_userinfo .icon .tatext p{
+        color: #CCC;
+    }
+    .admin_userinfo .profile p{
+        color:#CCC;
+    }
+    .admin_userinfo .rolebox{
+        background-color: #0c0c0c;
+        border: 1px solid #FFC832;
+    }
+    .admin_userinfo .rolebox p{
+        color:#FFC832;
+    }
+    .admin_userinfo .p2{
+        color: #CCC;
+    }
+    .admin_userinfo .about p{
+        color: #FFF;
+    }
+    .delbox .delbtn{
+        background-color: #302c2c;
+        color:#FF4848;
+    }
+    
+    .delbox .delbtn:hover{
+        background-color: #FF4848;
+        color: #F5F5F5;
     }
 }

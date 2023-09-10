@@ -127,6 +127,8 @@ class MessageDisplay {
                 }
             } elseif ($datetime >= $today) {
                 echo "今日 " . date("H:i", $datetime);
+            } elseif (date("Y", $datetime) == date("Y")) {
+                echo date("m月d日 H:i", $datetime);
             } else {
                 echo date("Y年m月d日 H:i", $datetime);
             }            
@@ -171,13 +173,16 @@ class MessageDisplay {
             }
             echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlentities($this->value['reply_count']).'</a>';
             if($this->value['account'] === $this->userid){
-                if($this->value['abi'] === "none"){
-                    echo '<input type="submit" name="addabi" id="addabi" data-uniqid2="' . htmlentities($this->value['uniqid']) . '" class="addabi" value="追記する">';
+                if(!($this->value['role'] === "ice")){
+                    if($this->value['abi'] === "none"){
+                        echo '<button name="addabi" id="addabi" data-uniqid2="' . htmlentities($this->value['uniqid']) . '" class="addabi"><svg><use xlink:href="../img/sysimage/addabi_1.svg#addabi_1"></use></svg></button>';
+                    }
                 }
                 echo '<input type="submit" name="delueuse" id="uniqid2" data-uniqid2="' . htmlentities($this->value['uniqid']) . '" class="delbtn" value="削除">';
             }
             echo '</div>';
             echo '</div>';
+            
         }
     }
 }

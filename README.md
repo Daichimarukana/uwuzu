@@ -9,15 +9,15 @@ AGPLライセンスです！！！
 
 
 ## 5. サーバーの建て方
-※MySQLの設定結構めんどいです。
 まず、Apache2とPHP 8とmysql Ver 15が導入されているサーバーを準備します！
+PHP 8では事前にGDを有効化しておいてください！(QRコードの生成に必要です。)
 次にSQLを設定します。(InnoDB)
-まず、お好きな名前でDBを作成し、その中に、account,emoji,notice,role,ueuse,notificationとテーブルを作成します。
+まず、お好きな名前でDBを作成し、その中に、account,emoji,notice,role,ueuse,notification,ads,reportとテーブルを作成します。
 テーブルの中身は以下のとおりです。
 照合順序は全て標準でutf8mb4_general_ciです。
-【お知らせ！！！】
-バージョン1.2.15よりSQLの構造ファイルを公開したので今までと比べて大幅に簡単にuwuzuサーバーの構築ができるようになりました！！！
-なお、ロールは自動で追加されませんのでuser、officialロールはご自身で追加してください！
+
+## 簡単に構築できるようSQLの構造ファイルがリリースに添付されています！そちらをインポートしていただけますと大幅に簡単に導入できます！
+(userロールとofficialロールとiceロールの設定は別途必要です。お手数ですがそこの設定だけよろしくお願いいたします。)
 
 ### account
 - sysid(INT)(AUTO_INCREMENT	) アカウントが追加されるとカウントされるシステム用ID
@@ -88,37 +88,30 @@ AGPLライセンスです！！！
 - used(varchar(25)) 使用済みかそうでないか
 - datetime(datetime) 招待コード仕様日時更新用
 
-すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、あとはApacheとphpとMy SQLを起動するだけ！
-起動したらまずDBのroleにphpmyadminから「user」ロールと「official」ロールを追加、権限は「user」と「official」でOK。ロール名はとりあえず「一般ユーザー」ロールの色はHEXコード(#を除く)で000000のように指定。(この２つのロールがないとエラーが発生します。)
-そしたら普通にuwuzuにアクセスして自分のアカウントを登録。
-それが終わったら一度サーバーを止め、uwuzuの動作ディレクトリ内のserverフォルダ内のファイルを各自設定
-ファイルの機能は以下の通り！
-- admininfo.txt : 管理者名(てすとまる/@sampledayo)
-- contact.txt : 管理者への連絡用メアド(sample@test.com)
-- info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
-- privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
-- servername.txt : サーバー名(てすとさば)
-- terms.txt : 利用規約(サーバーの利用規約を記載)
-- uwuzuabout.txt : このファイル(uwuzuを改造した場合は書き換え)
-- uwuzuinfo.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
-- uwuzurelease.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
-- onlyuser.txt : 招待コード機能をオンにするかどうか、「true」でオン、「false」でオフ。招待コードはDBに直接追加。
+### report
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- uniqid(varchar(256)) 通報ID保存用
+- userid(varchar(500)) 通報先ユーザーID保存用
+- report_userid(varchar(500)) 通報元ユーザーID保存用
+- msg(text) サービス管理者宛メッセージ保存用
+- datetime(datetime) 通報日時保存用
+- admin_chk(varchar(25)) 解決済みかどうか確認用
 
+### ads
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- uniqid(varchar(512)) 広告ID保存用
+- url(varchar(512)) 広告のクリック先URL保存用
+- image_url(varchar(512)) 広告に表示する画像URL保存用
+- memo(text) 広告にマウスオーバーしたときに表示されるメッセージ保存用
+- start_date(datetime) 広告配信開始日時保存用
+- limit_date(datetime) 広告配信終了日時保存用
+- datetime(datetime) 広告追加日時保存用
 
-すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、あとはApacheとphpとMy SQLを起動するだけ！
-起動したらまずDBのroleにphpmyadminから「user」ロールを追加権限は「user」でOK。ロール名はとりあえず「一般ユーザー」ロールの色はHEXコード(#を除く)で000000のように指定。
+すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、動作ディレクトリ内のdb.phpにDBのログイン情報を書き込んであとはApacheとphpとMy SQLを起動するだけ！
+起動したらまずDBのroleにphpmyadminから「user」ロールと「official」ロールと「ice」ロールを追加、権限は「user」と「official」と「ice」でOK。ロール名はとりあえず「一般ユーザー」とか適当でOK、ロールの色はHEXコード(#を除く)で000000のように指定。(この3つのロールがないとエラーが発生します。)
 そしたら普通にuwuzuにアクセスして自分のアカウントを登録。
-それが終わったら一度サーバーを止め、uwuzuの動作ディレクトリ内のserverフォルダ内のファイルを各自設定
-ファイルの機能は以下の通り！
-- admininfo.txt : 管理者名(てすとまる/@sampledayo)
-- contact.txt : 管理者への連絡用メアド(sample @test.com)
-- info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
-- privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
-- servername.txt : サーバー名(てすとさば)
-- terms.txt : 利用規約(サーバーの利用規約を記載)
-- uwuzuabout.txt : このファイル(uwuzuを改造した場合は書き換え)
-- uwuzuinfo.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
-- uwuzurelease.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
+## 管理者アカウント登録機能が追加されました。【[domain]/admin/】より設定できるのでそちらをご利用ください。
+なお、管理者アカウントを導入後に登録した場合サーバーを止めてuwuzu動作ディレクトリ内のserverフォルダ内のファイルを設定する必要はございません。
 
 ### これでサーバーは完成！！！
 脆弱だから自己責任で楽しんでね～()

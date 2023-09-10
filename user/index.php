@@ -47,7 +47,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', $_SESSION['userid']);
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -58,6 +58,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$loginid = $res["loginid"];
+	$role = $res["role"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -90,7 +92,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', $_COOKIE['userid']);
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -101,6 +103,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$loginid = $res["loginid"];
+	$role = $res["role"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -487,21 +491,27 @@ $pdo = null;
 					<p><?php echo $follow_yes;?></p>
 				</div>
 			<?php }?>
+			<div class="follow">
+				<a href="/user/report?q=<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?>" class="report" title="通報"><svg><use xlink:href="../img/sysimage/report_1.svg#report"></use></svg></a>
+			</div>
 			<?php if ($userData['userid'] == $userid) { ?>
 				<div class="follow">
-					<a href="../settings/" class="fbtn_no">設定</a>
+					<a href="../settings/" class="fbtn_no" title="設定" >設定</a>
 				</div>
 			<?php } else { ?>
+				
 				<form method="post">
 					<div class="follow">
 						<?php
-						$followerList = explode(',', $userdata['follower']);
-						if (in_array($userid, $followerList)) {
-							// フォロー済みの場合はフォロー解除ボタンを表示
-							echo '<input type="button" id="openModalButton" class="fbtn_un" name="unfollow" value="フォロー解除">';
-						} else {
-							// 未フォローの場合はフォローボタンを表示
-							echo '<input type="submit" class="fbtn" name="follow" value="フォロー">';
+						if(!($role === "ice")){
+							$followerList = explode(',', $userdata['follower']);
+							if (in_array($userid, $followerList)) {
+								// フォロー済みの場合はフォロー解除ボタンを表示
+								echo '<input type="button" id="openModalButton" class="fbtn_un" name="unfollow" value="フォロー解除">';
+							} else {
+								// 未フォローの場合はフォローボタンを表示
+								echo '<input type="submit" class="fbtn" name="follow" value="フォロー">';
+							}
 						}
 						?>
 					</div>
@@ -510,15 +520,17 @@ $pdo = null;
 			<?php } ?>
 		</div>
 
-		<div id="myModal" class="modal">
-			<div class="modal-content">
-				<p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをフォロー解除しますか？</p>
-				<form class="btn_area" method="post">
-					<input type="submit" id="openModalButton" class="fbtn_no" name="unfollow" value="フォロー解除">
-					<input type="button" id="closeModal" class="fbtn" value="キャンセル">
-				</form>
+		<?php if(!($role === "ice")){?>
+			<div id="myModal" class="modal">
+				<div class="modal-content">
+					<p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをフォロー解除しますか？</p>
+					<form class="btn_area" method="post">
+						<input type="submit" id="openModalButton" class="fbtn_no" name="unfollow" value="フォロー解除">
+						<input type="button" id="closeModal" class="fbtn" value="キャンセル">
+					</form>
+				</div>
 			</div>
-		</div>
+		<?php }?>
 		<hr>
 		<div class="select_utl">
 			<button class="btn" id="all_ueuse_btn">ユーズ</button>
@@ -697,6 +709,26 @@ $(document).ready(function() {
 		}
 	});
 
+    // JavaScriptでウィンドウを制御
+    const modal1 = document.getElementById('myModal');
+    const openModalButton = document.getElementById('openModalButton');
+    const closeButton = document.getElementById('closeModal');
+	var modalMain = $('.modal-content');
+
+    openModalButton.addEventListener('click', () => {
+        modal1.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+    });
+
+    closeButton.addEventListener('click', () => {
+        modalMain.removeClass("slideUp");
+		modalMain.addClass("slideDown");
+		window.setTimeout(function(){
+			modal1.style.display = 'none';
+		}, 150);
+    });
+
 
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
@@ -704,6 +736,7 @@ $(document).ready(function() {
 
 		var postUniqid = $(this).data('uniqid');
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
 
 		var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
@@ -713,7 +746,7 @@ $(document).ready(function() {
 		$.ajax({
 			url: '../favorite/favorite.php',
 			method: 'POST',
-			data: { uniqid: postUniqid, userid: userid }, // ここに自分のユーザーIDを指定
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
 			dataType: 'json',
 			success: function(response) {
 				if (response.success) {
@@ -737,85 +770,67 @@ $(document).ready(function() {
 				// エラー時の処理
 			}
 		});
-	});
+		});
 
-});
 
-    // JavaScriptでウィンドウを制御
-    const modal1 = document.getElementById('myModal');
-    const openModalButton = document.getElementById('openModalButton');
-    const closeButton = document.getElementById('closeModal');
-	var modalMain = $('.modal-content');
 
-    openModalButton.addEventListener('click', () => {
-        modal1.style.display = 'block';
+
+
+		var modal = document.getElementById('myDelModal');
+		var deleteButton = document.getElementById('deleteButton');
+		var cancelButton = document.getElementById('cancelButton'); // 追加
+		var modalMain = $('.modal-content');
+
+		$(document).on('click', '.delbtn', function (event) {
+		modal.style.display = 'block';
 		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
-    });
+		modalMain.removeClass("slideDown");
 
-    closeButton.addEventListener('click', () => {
-        modalMain.removeClass("slideUp");
-		modalMain.addClass("slideDown");
-		window.setTimeout(function(){
-			modal1.style.display = 'none';
-		}, 150);
-    });
-
-
-	var modal = document.getElementById('myDelModal');
-    var deleteButton = document.getElementById('deleteButton');
-    var cancelButton = document.getElementById('cancelButton'); // 追加
-	var modalMain = $('.modal-content');
-
-    $(document).on('click', '.delbtn', function (event) {
-        modal.style.display = 'block';
-		modalMain.addClass("slideUp");
-    	modalMain.removeClass("slideDown");
-
-        var uniqid2 = $(this).attr('data-uniqid2');
+		var uniqid2 = $(this).attr('data-uniqid2');
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		var postElement = $(this).closest('.ueuse');
 
-        deleteButton.addEventListener('click', () => {
-            modalMain.removeClass("slideUp");
+		deleteButton.addEventListener('click', () => {
+			modalMain.removeClass("slideUp");
 			modalMain.addClass("slideDown");
 			window.setTimeout(function(){
 				modal.style.display = 'none';
 			}, 150);
 
-            $.ajax({
-                url: '../delete/delete.php',
-                method: 'POST',
-                data: { uniqid: uniqid2, userid: userid },
-                dataType: 'json',
-                success: function (response) {
-                    if (response.success) {
-                        postElement.remove();
-                    } else {
-                        // 削除失敗時の処理
-                    }
-                },
-                error: function () {
-                    // エラー時の処理
-                }
-            });
-        });
+			$.ajax({
+				url: '../delete/delete.php',
+				method: 'POST',
+				data: { uniqid: uniqid2, userid: userid, account_id: account_id },
+				dataType: 'json',
+				success: function (response) {
+					if (response.success) {
+						postElement.remove();
+					} else {
+						// 削除失敗時の処理
+					}
+				},
+				error: function () {
+					// エラー時の処理
+				}
+			});
+		});
 
-        cancelButton.addEventListener('click', () => { // 追加
-            modalMain.removeClass("slideUp");
+		cancelButton.addEventListener('click', () => { // 追加
+			modalMain.removeClass("slideUp");
 			modalMain.addClass("slideDown");
 			window.setTimeout(function(){
 				modal.style.display = 'none';
 			}, 150);
-        });
-    });
+		});
+		});
 
-	var abimodal = document.getElementById('myAbiModal');
-	var AbiAddButton = document.getElementById('AbiAddButton');
-	var AbiCancelButton = document.getElementById('AbiCancelButton');
-	var modalMain = $('.modal-content');
+		var abimodal = document.getElementById('myAbiModal');
+		var AbiAddButton = document.getElementById('AbiAddButton');
+		var AbiCancelButton = document.getElementById('AbiCancelButton');
+		var modalMain = $('.modal-content');
 
-	$(document).on('click', '.addabi', function (event) {
+		$(document).on('click', '.addabi', function (event) {
 
 		abimodal.style.display = 'block';
 		modalMain.addClass("slideUp");
@@ -839,6 +854,7 @@ $(document).ready(function() {
 			var abitext = document.getElementById("abitexts").value;
 			var usernames = '<?php echo $username; ?>';
 			var userid = '<?php echo $userid; ?>';
+			var account_id = '<?php echo $loginid; ?>';
 
 			if(abitext == ""){
 				modalMain.removeClass("slideUp");
@@ -850,7 +866,7 @@ $(document).ready(function() {
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid },
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid, account_id: account_id },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示
@@ -872,6 +888,7 @@ $(document).ready(function() {
 			}
 		});
 	});
+});
 </script>
 
 </html>

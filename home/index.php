@@ -44,7 +44,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', $_SESSION['userid']);
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -55,6 +55,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
 	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$loginid = $res["loginid"];
+	$role = $res["role"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -87,7 +89,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', $_COOKIE['userid']);
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -98,6 +100,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	// セッションに値をセット
 	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
 	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$loginid = $res["loginid"];
+	$role = $res["role"];
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -480,28 +484,30 @@ if ("serviceWorker" in navigator) {
 				<?php endforeach; ?>
 			</ul>
 		<?php endif; ?>
-		<form method="post" enctype="multipart/form-data">
-			<div class="sendbox">
-				<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8'); } ?></textarea>
-				<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
-				<div class="fxbox">
-					<label for="upload_images" id="images">
-					<img src="../img/sysimage/image_1.svg">
-					<input type="file" name="upload_images" id ="upload_images" accept="image/*">
-					</label>
-					<label for="upload_images2" id="images2">
-					<img src="../img/sysimage/image_1.svg">
-					<input type="file" name="upload_images2" id ="upload_images2" accept="image/*">
-					</label>
-					<label for="upload_videos1" id="videos1">
-					<img src="../img/sysimage/video_1.svg">
-					<input type="file" name="upload_videos1" id ="upload_videos1" accept="video/*">
-					</label>
+		<?php if(!($role ==="ice")){?>
+			<form method="post" enctype="multipart/form-data">
+				<div class="sendbox">
+					<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8'); } ?></textarea>
+					<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
+					<div class="fxbox">
+						<label for="upload_images" id="images">
+						<img src="../img/sysimage/image_1.svg">
+						<input type="file" name="upload_images" id ="upload_images" accept="image/*">
+						</label>
+						<label for="upload_images2" id="images2">
+						<img src="../img/sysimage/image_1.svg">
+						<input type="file" name="upload_images2" id ="upload_images2" accept="image/*">
+						</label>
+						<label for="upload_videos1" id="videos1">
+						<img src="../img/sysimage/video_1.svg">
+						<input type="file" name="upload_videos1" id ="upload_videos1" accept="video/*">
+						</label>
 
-					<input type="submit" class="ueusebtn" name="btn_submit" value="ユーズする">
+						<input type="submit" class="ueusebtn" name="btn_submit" value="ユーズする">
+					</div>
 				</div>
-			</div>
-		</form>
+			</form>
+		<?php }?>
 		<script>
 			document.getElementById("upload_videos1").addEventListener('change', function(e){
 				var file_reader = new FileReader();
@@ -632,6 +638,7 @@ $(document).ready(function() {
 
 		var postUniqid = $(this).data('uniqid');
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
 
 		var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
@@ -641,7 +648,7 @@ $(document).ready(function() {
 		$.ajax({
 			url: '../favorite/favorite.php',
 			method: 'POST',
-			data: { uniqid: postUniqid, userid: userid }, // ここに自分のユーザーIDを指定
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
 			dataType: 'json',
 			success: function(response) {
 				if (response.success) {
@@ -683,6 +690,7 @@ $(document).ready(function() {
 
         var uniqid2 = $(this).attr('data-uniqid2');
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		var postElement = $(this).closest('.ueuse');
 
         deleteButton.addEventListener('click', () => {
@@ -695,7 +703,7 @@ $(document).ready(function() {
             $.ajax({
                 url: '../delete/delete.php',
                 method: 'POST',
-                data: { uniqid: uniqid2, userid: userid },
+                data: { uniqid: uniqid2, userid: userid, account_id: account_id },
                 dataType: 'json',
                 success: function (response) {
                     if (response.success) {
@@ -748,6 +756,7 @@ $(document).ready(function() {
 			var abitext = document.getElementById("abitexts").value;
 			var usernames = '<?php echo $username; ?>';
 			var userid = '<?php echo $userid; ?>';
+			var account_id = '<?php echo $loginid; ?>';
 
 			if(abitext == ""){
 				modalMain.removeClass("slideUp");
@@ -759,7 +768,7 @@ $(document).ready(function() {
 				$.ajax({
 					url: '../abi/addabi.php',
 					method: 'POST',
-					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid },
+					data: { uniqid: uniqid2, abitext: abitext, username: usernames, userid: userid, account_id: account_id },
 					dataType: 'json',
 					success: function (response) {
 						console.log(response); // レスポンス内容をコンソールに表示
