@@ -572,7 +572,7 @@ function loadPosts() {
 	$("#loading").show();
 	var userid = '<?php echo $userid; ?>';
 	$.ajax({
-		url: '../nextpage/nextpage.php', // PHPファイルへのパス
+		url: '../nextpage/ftlpage.php', // PHPファイルへのパス
 		method: 'GET',
 		data: { page: pageNumber, userid: userid },
 		dataType: 'html',
