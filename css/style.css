@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Josefin+Sans:ital,wght@1,700&family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@500&display=swap');
+@import url("color.css");
 
 body{
     display: flex;
@@ -7,7 +8,7 @@ body{
     margin-bottom: 0px;
     margin-left: auto;
     margin-right: 0px;
-    background-color: #FFFFFF;
+    background-color: var(--background-color);
         /* 画像を常に天地左右の中央に配置 */
     background-position: center center;
     
@@ -24,7 +25,7 @@ body{
 .leftbox{
     margin-top: 0px;
     margin-bottom: 0px;
-    background-color: #FFC832;
+    background-color: var(--main-color);
     width: 35%;
     height: 100%;
     margin-left: 0px;
@@ -33,7 +34,7 @@ body{
 
 .leftbox h1{
     margin-left: 20px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 2em;
 }
 .leftbox .logo{
@@ -48,7 +49,7 @@ body{
     
 }
 .leftbox .logo p{
-    color:#fff;
+    color:var(--background-color);
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
     font-size: 32px;
@@ -60,7 +61,7 @@ body{
 .leftbox2{
     margin-top: 0px;
     margin-bottom: 0px;
-    background-color: #FFC832;
+    background-color: var(--main-color);
     width: 35%;
     height: 100vh;
     margin-left: 0px;
@@ -69,7 +70,7 @@ body{
 
 .leftbox2 h1{
     margin-left: 20px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 2em;
 }
 .leftbox2 .logo{
@@ -84,7 +85,7 @@ body{
     
 }
 .leftbox2 .logo p{
-    color:#fff;
+    color:var(--background-color);
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
     font-size: 32px;
@@ -101,14 +102,14 @@ body{
     margin-top: 64px;
     margin-bottom: 100px;
     border-radius: 25px;
-    background-color: #fff;
+    background-color: var(--background-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
 
 .textbox h1{
     word-wrap: break-word;
     margin: 0px;
-    color: #FFC832;
+    color: var(--main-color);
     font-size: 32px;
     font-family: 'Zen Maru Gothic', sans-serif;
 }
@@ -198,7 +199,7 @@ body{
     width: 43%;
     height: 5dvh;
     border-radius: 15px;
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
     padding: 18px;
 }
@@ -233,7 +234,7 @@ body{
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 15px;
-    background-color: #f7f7f7;
+    background-color: var(--background-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
     margin-top: 32px;
     text-align: center;
@@ -259,11 +260,11 @@ label > input {
     padding-top: 8px;
     padding-bottom: 8px;
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     text-align: center;
     border-radius: 50px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -297,10 +298,10 @@ label > input {
 
 
     text-align: center;
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -324,7 +325,7 @@ label > input {
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 15px;
-    background-color: #f7f7f7;
+    background-color: var(--background-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
     margin-top: 64px;
     text-align: left;
@@ -365,7 +366,7 @@ label > input {
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 15px;
-    background-color: #f7f7f7;
+    background-color: var(--background-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
     margin-top: 64px;
     text-align: center;
@@ -409,7 +410,7 @@ label > input {
     padding: 8px 10px;
     border: none;
     border-radius: 10px;
-    background: #fff;
+    background: var(--background-color);
     font-family: 'Zen Maru Gothic', sans-serif;
     color: rgb(32,32,32);
     font-size: 1em;
@@ -430,13 +431,13 @@ label > input {
 
 .inbox:hover {
     outline: none;
-    border: 1px solid #FFC832;
+    border: 1px solid var(--main-color);
 }
 
 .inbox:focus {
     outline: none;
-    border: 1px solid #FFC832;
-    border-bottom: 3px solid #FFC832;
+    border: 1px solid var(--main-color);
+    border-bottom: 3px solid var(--main-color);
 }
 
 
@@ -475,10 +476,10 @@ label > input {
     padding-top: 8px;
     padding-bottom: 8px;
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 26px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -509,10 +510,10 @@ label > input {
     padding-bottom: 8px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 26px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -541,8 +542,8 @@ label > input {
     padding-left: auto;
     padding-right: auto;
 
-    background-color: #fff;
-    border: 1px solid #FFC832;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
 
     border-radius: 25px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
@@ -551,7 +552,7 @@ label > input {
 
 .rolebox p{
 
-    color:#FFC832;
+    color:var(--main-color);
     margin-top: 2px;
     margin-bottom: 2px;
     margin-left: 10px;
@@ -567,7 +568,7 @@ label > input {
 .userleftbox{
     margin-top: 0px;
     margin-bottom: 0px;
-    background-color: #FFC832;
+    background-color: var(--main-color);
     width: 10%;
     height: 100%;
     margin-left: 0px;
@@ -577,7 +578,7 @@ label > input {
 .userleftbox h1{
     font-family: 'Zen Maru Gothic', sans-serif;
     margin-left: 20px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 32px;
 }
 .userleftbox .logo{
@@ -592,7 +593,7 @@ label > input {
     
 }
 .userleftbox .logo p{
-    color:#fff;
+    color:var(--background-color);
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
     font-size: 32px;
@@ -615,10 +616,10 @@ label > input {
     padding-bottom: 8px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 20px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -629,8 +630,8 @@ label > input {
     transition: all 250ms ease-out;
 }
 .leftbutton:hover{
-    background-color: #FFFAE6;
-    color: #FFC832;
+    background-color: var(--sub-color);
+    color: var(--main-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:75%;
 }
@@ -645,7 +646,7 @@ main{
     margin-left: 24px;
     margin-right: 24px;
     width: 80%;
-    background-color: #fff;
+    background-color: var(--background-color);
     padding: 24px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
 }
@@ -680,10 +681,10 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     text-align: center;
     font-family: 'Zen Maru Gothic', sans-serif;
@@ -695,8 +696,8 @@ main h1{
     transition: all 250ms ease-out;
 }
 .fbtn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:55%;
 }
@@ -739,12 +740,12 @@ main h1{
 
     .leftbox h1{
         margin-left: 20px;
-        color:#fff;
+        color:var(--background-color);
         font-size: 2em;
     }
     .leftbox .logo{
         display: flex;
-        background-color: #FFC832;
+        background-color: var(--main-color);
         border-radius: 15px;
     }
 
@@ -756,7 +757,7 @@ main h1{
         
     }
     .leftbox .logo p{
-        color:#fff;
+        color:var(--background-color);
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
         font-size: 32px;
@@ -774,14 +775,14 @@ main h1{
         margin-top: 64px;
         margin-bottom: 8px;
         border-radius: 25px;
-        background-color: #fff;
+        background-color: var(--background-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
     }
     
     .textbox h1{
         word-wrap: break-word;
         margin: 0px;
-        color: #FFC832;
+        color: var(--main-color);
         font-size: 32px;
         font-family: 'Zen Maru Gothic', sans-serif;
     }
@@ -793,7 +794,7 @@ main h1{
         padding-left: 12px;
         padding-right: 12px;
         border-radius: 15px;
-        background-color: #f7f7f7;
+        background-color: var(--background-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
         margin-top: 32px;
         text-align: center;
@@ -850,10 +851,10 @@ main h1{
         padding-bottom: 12px;
 
 
-        background-color: #FFC832;
+        background-color: var(--main-color);
 
         border-radius: 50px;
-        color:#FFFAE6;
+        color:var(--sub-color);
         font-size: 16px;
         text-align: center;
         font-family: 'Zen Maru Gothic', sans-serif;
@@ -865,8 +866,8 @@ main h1{
         transition: all 250ms ease-out;
     }
     .fbtn:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;
+        background-color: var(--main-color);
+        color: var(--sub-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:55%;
     }
@@ -878,7 +879,7 @@ main h1{
     .leftbox2{
         margin-top: 0px;
         margin-bottom: 0px;
-        background-color: #FFC832;
+        background-color: var(--main-color);
         width: 100%;
         height: 100vh;
         margin-left: 0px;

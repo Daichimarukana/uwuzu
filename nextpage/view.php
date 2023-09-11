@@ -65,7 +65,7 @@ function replaceEmojisWithImages($postText) {
 
 function replaceURLsWithLinks($postText) {
     // URLを正規表現を使って検出
-    $pattern = '/(https?:\/\/[^\s]+)/';
+    $pattern = '/(https:\/\/[^\s]+)/';
     preg_match_all($pattern, $postText, $matches);
 
     // 検出したURLごとに処理を行う
@@ -167,9 +167,9 @@ class MessageDisplay {
             echo '<hr>';
             echo '<div class="favbox">';
             if (false !== strstr($this->value['favorite'], $this->userid)) {
-                echo '<button class="favbtn favbtn_after" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><img src="../img/sysimage/favorite_2.svg" alt="いいね" /> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
+                echo '<button class="favbtn favbtn_after" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_2.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }else{
-                echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><img src="../img/sysimage/favorite_1.svg" alt="いいね" /> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
+                echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_1.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }
             echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlentities($this->value['reply_count']).'</a>';
             if($this->value['account'] === $this->userid){

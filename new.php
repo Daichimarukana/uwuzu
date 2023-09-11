@@ -1,5 +1,10 @@
 <?php
 
+$banuseridfile = "server/banuserid.txt";
+$banuserid_info = file_get_contents($banuseridfile);
+
+$banuserid = preg_split("/\r\n|\n|\r/", $banuserid_info);
+
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -221,7 +226,7 @@ if( !empty($_POST['btn_submit']) ) {
         PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
     );
 
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    
 
     if($onlyuser === "true"){
         $query = $dbh->prepare('SELECT * FROM invitation WHERE code = :code limit 1');
@@ -273,16 +278,7 @@ if( !empty($_POST['btn_submit']) ) {
 			$error_message[] = 'IDは20文字以内で入力してください。';
 		}
 
-        if($userid === 'uwuzu_official'){
-            $error_message[] = 'そのIDは登録禁止になっています。';
-        }
-        if($userid === 'uwuzu'){
-            $error_message[] = 'そのIDは登録禁止になっています。';
-        }
-        if($userid === 'admin'){
-            $error_message[] = 'そのIDは登録禁止になっています。';
-        }
-        if($userid === 'root'){
+        if(in_array($userid, $banuserid) === true ){
             $error_message[] = 'そのIDは登録禁止になっています。';
         }
 

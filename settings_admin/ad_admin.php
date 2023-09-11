@@ -324,7 +324,7 @@ if (!empty($pdo)) {
 		<div class="admin_right">       
 			<form class="formarea" enctype="multipart/form-data" method="post">
 				<h1>広告追加</h1>
-				<p>広告はLTL・FTL・返信画面に表示されます。<br>また、投稿10件につき一件の広告がランダムに選ばれ表示されます。<br>表示の優先順位は設定できません。</p>
+				<p>広告はLTL・FTL・返信画面に表示されます。<br>また、投稿15件につき一件の広告がランダムに選ばれ表示されます。<br>表示の優先順位は設定できません。</p>
 				<div>
 					<p>クリックした時のリダイレクト先URL</p>
 					<div class="p2">広告をクリックするとこのURLに飛びます。</div>
@@ -338,12 +338,12 @@ if (!empty($pdo)) {
 				<div>
 					<p>掲載開始日時</p>
 					<div class="p2">広告の掲載開始日時です。</div>
-					<input type="date" name="ads_start_date" class="inbox" value="2023-08-16">
+					<input type="date" name="ads_start_date" class="inbox" value="">
 				</div>
 				<div>
 					<p>掲載終了日時</p>
 					<div class="p2">広告の掲載終了日時です。</div>
-					<input type="date" name="ads_limit_date" class="inbox" value="2023-08-17">
+					<input type="date" name="ads_limit_date" class="inbox" value="">
 				</div>
 				<div>
 					<p>広告のメモ</p>

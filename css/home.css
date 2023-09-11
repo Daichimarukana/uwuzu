@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Josefin+Sans:ital,wght@1,700&family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@500&display=swap');
-
+@import url("color.css");
 
 ::-webkit-scrollbar{
     display:none;
@@ -18,7 +18,7 @@ body{
     margin-left: auto;
     margin-right: auto;
     padding-top: 12px;
-    background-color: #f7f7f7;
+    background-color: var(--background-color);
         /* 画像を常に天地左右の中央に配置 */
     background-position: center center;
     
@@ -51,11 +51,11 @@ body{
     padding-top: 8px;
     padding-bottom: 8px;
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     text-align: center;
     border-radius: 50px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -89,10 +89,10 @@ body{
 
 
     text-align: center;
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -111,38 +111,38 @@ body{
 }
 
 .inbox {
+    margin-top: 4px;
+    margin-bottom: 4px;
     width: 96%;
     padding: 8px 10px;
-    border: none;
     border-radius: 10px;
-    background: #f5f5f5;
+    background: var(--background-color);
     font-family: 'Zen Maru Gothic', sans-serif;
     color: rgb(32,32,32);
     font-size: 1em;
     line-height: 1.5;
     white-space: nowrap;
-    box-shadow:0px 0px 25px rgba(0,0,0,0.05) inset;
-    box-shadow:0px 0px 25px rgba(0,0,0,0.07);
+    box-shadow:0px 0px 25px rgba(0,0,0,0.03);
     overflow-x: scroll; 
     overflow-y : scroll ;
     transition: border 350ms ease-in-out;
     transition: border-bottom 150ms ease-out;
-    border: 1px solid #f1f1f1;
+    border: 1px solid var(--border-color);
   }
   
 .inbox::placeholder {
-    color: #999;
+    color: var(--subtext-color);
 }
 
 .inbox:hover {
     outline: none;
-    border: 1px solid #FFC832;
+    border: 1px solid var(--main-color);
 }
 
 .inbox:focus {
     outline: none;
-    border: 1px solid #FFC832;
-    border-bottom: 3px solid #FFC832;
+    border: 1px solid var(--main-color);
+    border-bottom: 3px solid var(--main-color);
 }
 
 
@@ -179,10 +179,10 @@ body{
     padding-top: 8px;
     padding-bottom: 8px;
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 26px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -213,10 +213,10 @@ body{
     padding-bottom: 8px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 26px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -247,8 +247,8 @@ body{
     padding-left: auto;
     padding-right: auto;
 
-    background-color: #fff;
-    border: 1px solid #FFC832;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
 
     border-radius: 25px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
@@ -257,7 +257,7 @@ body{
 
 .rolebox p{
 
-    color:#FFC832;
+    color:var(--main-color);
     margin-top: 2px;
     margin-bottom: 2px;
     margin-left: 10px;
@@ -277,19 +277,19 @@ body{
     margin-left: 12px;
     margin-right: 12px;
     margin-bottom: 12px;
-    background-color: #FFFFFF;
-    width: 18%;
+    background-color: var(--background-color)FFF;
+    width: 240px;
     height: 100%;
     margin-left: 0px;
     padding: 32px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    border: 1px solid #FFC832;
+    border: 1px solid var(--main-color);
 }
 
 .userleftbox h1{
     font-family: 'Zen Maru Gothic', sans-serif;
     margin-left: 20px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 32px;
 }
 .userleftbox .logo{
@@ -306,7 +306,7 @@ body{
     
 }
 .userleftbox .logo p{
-    color:#FFC832;
+    color:var(--main-color);
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
     font-size: 32px;
@@ -330,10 +330,10 @@ body{
     padding-bottom: 8px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 20px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -344,14 +344,14 @@ body{
     transition: all 250ms ease-out;
 }
 .leftbutton_on:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:85%;
 }
 .leftbutton_on:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:75%;
+    width:78%;
 }
 
 .leftbutton{
@@ -370,10 +370,10 @@ body{
     padding-bottom: 8px;
 
 
-    background-color: #FFFFFF;
+    background-color: var(--background-color)FFF;
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 20px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -384,14 +384,14 @@ body{
     transition: all 250ms ease-out;
 }
 .leftbutton:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:85%;
 }
 .leftbutton:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:75%;
+    width:78%;
 }
 
 .leftbutton .notipod{
@@ -412,7 +412,7 @@ body{
     margin-bottom: 0px;
     margin-left: auto;
     margin-right: auto;
-    color:#FFFFFF;
+    color:#FFF;
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -422,7 +422,7 @@ body{
 }
 
 .leftbutton:hover .notipod {
-    background-color:#FFFFFF;
+    background-color:#FFF;
 }
 
 .leftbutton:hover .notipod p{
@@ -440,7 +440,7 @@ body{
     background-color: #ffbc0d;
 }
 .leftbutton:hover img{
-    background-color: #FFF;
+    background-color: var(--background-color);
 }
 
 svg {
@@ -463,13 +463,13 @@ main{
     margin-left: 12px;
     margin-right: 12px;
     width: 62%;
-    background-color: #fff;
+    background-color: var(--background-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    border: 1px solid #FFC832;
+    border: 1px solid var(--main-color);
 }
 
 main h1{
-    color:#252525;
+    color:var(--text-color);
     font-size: 32px;
     font-family: 'Zen Maru Gothic', sans-serif;
 }
@@ -515,7 +515,7 @@ main h1{
     margin-left: 12px;
     margin-top: auto;
     margin-bottom: 12px;
-    color:#252525;
+    color:var(--text-color);
     font-size: 32px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: 900;
@@ -527,7 +527,7 @@ main h1{
     margin-right: auto;
     margin-top: auto;
     margin-bottom: 14px;
-    color: #999;
+    color: var(--subtext-color);
     font-size: 18px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: 900;
@@ -541,7 +541,7 @@ main h1{
     margin-right: 24px;
     word-wrap: break-word;
     font-size: 18px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -559,7 +559,7 @@ main h1{
     margin-bottom: auto;
     margin-left: auto;
     font-size: 16px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -585,8 +585,8 @@ main h1{
     padding-left: auto;
     padding-right: auto;
 
-    background-color: #fff;
-    border: 1px solid #FFC832;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
 
     border-radius: 25px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
@@ -596,7 +596,7 @@ main h1{
 
 .userheader .rolebox p{
 
-    color:#FFC832;
+    color:var(--main-color);
     margin-top: 2px;
     margin-bottom: 2px;
     margin-left: 10px;
@@ -614,7 +614,7 @@ main h1{
     margin-left: 0px;
     margin-right: 0px;
     font-size: 16px;
-    color:#FFC832;
+    color:var(--main-color);
     text-decoration: none;
     font-family: 'BIZ UDGothic', sans-serif;
     font-weight: bold;
@@ -648,10 +648,10 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -662,8 +662,8 @@ main h1{
     transition: all 250ms ease-out;
 }
 .fzone .follow .fbtn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
@@ -689,11 +689,11 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
-    border: 1px solid #FFC832;
+    color:var(--main-color);
+    border: 1px solid var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -704,8 +704,8 @@ main h1{
     transition: all 250ms ease-out;
 }
 .fzone .follow .fbtn_no:hover{
-    background-color: #FFFAE6;
-    color: #FFC832;
+    background-color: var(--sub-color);
+    color: var(--main-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
@@ -730,10 +730,10 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#4e4428;
+    color:var(--link-color);
     border: none;
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
@@ -745,8 +745,8 @@ main h1{
     transition: all 250ms ease-out;
 }
 .fzone .follow .fbtn_un:hover{
-    background-color: #FFFAE6;
-    color: #FFC832;
+    background-color: var(--sub-color);
+    color: var(--main-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
@@ -770,11 +770,11 @@ main h1{
     margin-top: 12px;
     margin-bottom: 12px;
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
-    border: 1px solid #FFC832;
+    color:var(--main-color);
+    border: 1px solid var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -817,7 +817,7 @@ main h1{
     margin-right: 32px;
     text-align: left;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
@@ -826,7 +826,7 @@ main h1{
     margin-bottom: 0px;
     text-align: left;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
@@ -835,7 +835,7 @@ main h1{
     margin-bottom: 0px;
     margin-left: auto;
     margin-right: auto;
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
     border-radius: 10px;
     padding: 12px;
 }
@@ -844,12 +844,12 @@ main h1{
     margin-bottom: 0px;
     text-align: left;
     font-size: 12px;
-    color:#252525;
+    color:var(--text-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 .select_utl{
     margin: 0px;
-    background-color: #FFF;
+    background-color: var(--background-color);
     border: none;
     width: auto;
     text-align: center;
@@ -865,8 +865,8 @@ main h1{
     margin-top: 0px;
     margin-bottom: 0px;
     font-size: 16px;
-    background: #FFF;
-    color: #CCC;
+    background: var(--background-color);
+    color: var(--dark-subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -876,8 +876,8 @@ main h1{
     cursor: pointer;
 }
 .select_utl .btmline{
-    color: #FFC832;
-    border-bottom: 1px solid #FFC832;
+    color: var(--main-color);
+    border-bottom: 1px solid var(--main-color);
 }
 
 .ads{
@@ -888,8 +888,8 @@ main h1{
     border-radius: 10px;
     padding: 0px;
     overflow:hidden;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 @keyframes slideInY {
@@ -923,8 +923,8 @@ main h1{
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 @keyframes slideInY {
@@ -958,7 +958,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 18px;
-    color: #252525;
+    color: var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -973,8 +973,8 @@ main h1{
     margin-bottom: auto;
     margin-left: 6px;
     border-radius: 10px;
-    background-color: #FFF;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
 }
 .ueuse .flebox .idbox a{
     margin-top: 6px;
@@ -983,7 +983,7 @@ main h1{
     margin-right: 8px;
     text-align: center;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
 }
@@ -995,7 +995,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 60px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1008,7 +1008,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 60px;
     font-size: 48px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1020,7 +1020,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 60px;
     font-size: 32px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1032,7 +1032,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 60px;
     font-size: 24px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1043,7 +1043,7 @@ main h1{
     margin-top: auto;
     margin-bottom: auto;
     margin-left: auto;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1051,7 +1051,7 @@ main h1{
 
 .ueuse .mta{
     line-height: 30px;
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
     padding: 6px;
     border-radius: 25px;
     margin-top: auto;
@@ -1059,7 +1059,7 @@ main h1{
     margin-left: 3px;
     margin-right: 3px;
     font-size: 14px;
-    color:#FFC832;
+    color:var(--main-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1067,8 +1067,8 @@ main h1{
 }
 .ueuse .mta:hover{
     font-size: 14px;
-    background-color: #FFC832;
-    color:#FFFAE6;
+    background-color: var(--main-color);
+    color:var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
 }
 
@@ -1077,7 +1077,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 6px;
     font-size: 16px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1134,7 +1134,7 @@ main h1{
     margin-right: 12px;
     text-align: right;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 .ueuse .photo1 a{
@@ -1157,7 +1157,7 @@ main h1{
     margin-right: auto;
     width: 100%;
     height: 350px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .ueuse .photo2{
@@ -1172,7 +1172,7 @@ main h1{
     margin-right: auto;
     width: 100%;
     height: 350px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .ueuse .video1 video{
@@ -1183,7 +1183,7 @@ main h1{
     margin-right: auto;
     width: 100%;
     height: 350px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .ueuse .abi{
@@ -1196,8 +1196,8 @@ main h1{
     padding-right: 12px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: #FFFFFF;
-    border: 1px solid #EEE;
+    background-color: var(--background-color)FFF;
+    border: 1px solid var(--border-color);
     width: auto;
 }
 
@@ -1209,17 +1209,17 @@ main h1{
     margin-bottom: 12px;
     margin-left: auto;
     font-size: 14px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
 
 .ueuse .abi .back{
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
     padding: 12px;
     border-radius: 7px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .ueuse .abi .back h1{
@@ -1228,7 +1228,7 @@ main h1{
     margin-bottom: auto;
     margin-left: auto;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1239,7 +1239,7 @@ main h1{
     margin-bottom: auto;
     margin-left: auto;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1268,10 +1268,10 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1299,10 +1299,10 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1310,7 +1310,22 @@ main h1{
     text-align: center;
     transition: all 250ms ease-out
 }
-
+.ueuse .favbox .favbtn svg {
+    margin-top: -4px;
+    margin-right: 4px;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 250ms ease-out;
+}
+.ueuse .favbox .favbtn_after svg {
+    margin-top: -4px;
+    margin-right: 4px;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 250ms ease-out;
+}
 
 
 .ueuse .favbox .tuduki{
@@ -1331,10 +1346,10 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1357,10 +1372,10 @@ main h1{
     padding-left: 12px;
     padding-right: 12px;
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1390,7 +1405,7 @@ main h1{
     padding-bottom: 2px;
 
 
-    background-color: #F5F5F5;
+    background-color: var(--background-color);
 
     border-radius: 50px;
     color:#FF4848;
@@ -1423,7 +1438,7 @@ main h1{
     background-color: #FF4848;
 
     border-radius: 50px;
-    color: #f5f5f5;;
+    color: var(--background-color);;
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1455,10 +1470,10 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1486,10 +1501,10 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color: #FFFAE6;;
+    color: var(--sub-color);;
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1519,7 +1534,7 @@ main h1{
     margin-bottom: 12px;
     padding: 0;
     border: 0;
-    border-top: 1px solid #999;
+    border-top: 1px solid var(--subtext-color);
 }
 .ueuse .hashtags{
     margin-top: auto;
@@ -1527,7 +1542,7 @@ main h1{
     margin-left: 0px;
     margin-right: 0px;
     font-size: 16px;
-    color:#FFC832;
+    color:var(--main-color);
     text-decoration: none;
     font-family: 'BIZ UDGothic', sans-serif;
     font-weight: normal;
@@ -1539,7 +1554,7 @@ main h1{
     margin-top: 64px;
     margin-bottom: 64px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1552,8 +1567,8 @@ main h1{
     padding-right: 24px;
     padding-top: 24px;
     padding-bottom: 24px;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 
@@ -1577,14 +1592,14 @@ main h1{
     margin-top: 12px;
     margin-bottom: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
 
 .sendbox textarea{
-    background-color: #F5F5F5;
+    background-color: var(--background-color);
     text-align: left;
     margin-left: auto;
     margin-right: auto;
@@ -1618,10 +1633,10 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1632,8 +1647,8 @@ main h1{
     transition: all 250ms ease-out;
 }
 .sendbox label:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:7%;
 }
@@ -1651,7 +1666,7 @@ main h1{
     margin-top: auto;
     margin-bottom: auto;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1672,10 +1687,10 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1686,8 +1701,8 @@ main h1{
     transition: all 250ms ease-out;
 }
 .ueusebtn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:21%;
 }
@@ -1704,8 +1719,8 @@ main h1{
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 .ueuse2 .flebox{
@@ -1725,7 +1740,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 26px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1736,8 +1751,8 @@ main h1{
     margin-bottom: auto;
     margin-left: 6px;
     border-radius: 10px;
-    background-color: #FFF;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
 }
 .ueuse2 .flebox .idbox a{
     margin-top: 6px;
@@ -1746,7 +1761,7 @@ main h1{
     margin-right: 8px;
     text-align: center;
     font-size: 16px;
-    color:#999;
+    color:var(--subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
 }
@@ -1757,7 +1772,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 80px;
     font-size: 22px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1767,7 +1782,7 @@ main h1{
     margin-bottom: auto;
     margin-left: 6px;
     font-size: 16px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1788,7 +1803,7 @@ main h1{
     margin-right: 12px;
     text-align: right;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
@@ -1800,7 +1815,7 @@ main h1{
     margin-right: auto;
     width: 100%;
     height: 25dvh;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .ueuse2 .photo2{
@@ -1815,7 +1830,7 @@ main h1{
     margin-right: auto;
     width: 47%;
     height: 350px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .ueuse2 .video1 video{
@@ -1826,7 +1841,7 @@ main h1{
     margin-right: auto;
     width: 100%;
     height: 350px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .formarea{
@@ -1835,7 +1850,7 @@ main h1{
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 15px;
-    background-color: #ffffff;
+    background-color: var(--background-color)fff;
     box-shadow:none;
     text-align: left;
 }
@@ -1846,7 +1861,7 @@ main h1{
     margin-top: 12px;
     margin-bottom: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1857,7 +1872,7 @@ main h1{
     margin-top: 12px;
     margin-bottom: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -1911,7 +1926,18 @@ main h1{
     margin-bottom: 10px;
     word-wrap: break-word;
     line-height: 20px;
-    color: #868686;
+    color: var(--subtext-color);
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.p2{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: var(--subtext-color);
     font-size: 12px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: normal;
@@ -1933,10 +1959,10 @@ label>input {
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1947,8 +1973,8 @@ label>input {
     transition: all 250ms ease-out;
 }
 .imgbtn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:19%;
 }
@@ -1971,10 +1997,10 @@ label>input {
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -1985,8 +2011,8 @@ label>input {
     transition: all 250ms ease-out;
 }
 .imgbtn2:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:19%;
 }
@@ -2012,7 +2038,7 @@ label>input {
     display: block;
 }
 .modal-content {
-    background-color: #fff;
+    background-color: var(--background-color);
     padding: 16px;
     border-radius: 10px;
     width: 20%;
@@ -2025,7 +2051,7 @@ label>input {
 }
 
 .modal-content textarea{
-    background-color: #F5F5F5;
+    background-color: var(--background-color);
     text-align: left;
     margin-left: auto;
     margin-right: auto;
@@ -2040,7 +2066,7 @@ label>input {
 .modal-content p{
     line-height: 20px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2048,7 +2074,7 @@ label>input {
 
 .modal-content h1{
     font-size: 24px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2076,10 +2102,10 @@ label>input {
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -2090,8 +2116,8 @@ label>input {
     transition: all 250ms ease-out;
 }
 .modal-content .fbtn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
@@ -2115,11 +2141,11 @@ label>input {
     padding-bottom: 6px;
 
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:#FFC832;
-    border: 1px solid #FFC832;
+    color:var(--main-color);
+    border: 1px solid var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -2130,8 +2156,8 @@ label>input {
     transition: all 250ms ease-out;
 }
 .modal-content .fbtn_no:hover{
-    background-color: #FFFAE6;
-    color: #FFC832;
+    background-color: var(--sub-color);
+    color: var(--main-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
@@ -2180,13 +2206,13 @@ label>input {
     padding-bottom: 0.2%;
     padding-left: 23%;
     
-    background-color: #FFC832;
+    background-color: var(--main-color);
     box-shadow: 0px 0px 30px rgba(0,0,0,0.1);
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
     font-size: 2em;
     text-align: left;
-    color: #fff;
+    color: var(--background-color);
   
 }
 
@@ -2204,7 +2230,7 @@ label>input {
     width: 77%;
     margin-top: 64px;
     margin-bottom: 64px;
-    background-color: #f7f7f7;
+    background-color: var(--background-color);
 }
 
 .terms h1{
@@ -2213,7 +2239,7 @@ label>input {
     font-weight: bold;
     font-size: 48px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .terms h2{
@@ -2222,7 +2248,7 @@ label>input {
     font-weight: bold;
     font-size: 48px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .terms h3{
@@ -2231,7 +2257,7 @@ label>input {
     font-weight: bold;
     font-size: 32px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .terms h4{
@@ -2240,7 +2266,7 @@ label>input {
     font-weight: bold;
     font-size: 24px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .terms p{
@@ -2251,13 +2277,13 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .terms img{
-    background-color: #FFF;
-    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
-              linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+    background-color: var(--background-color);
+    background: linear-gradient(45deg, var(--dark-subtext-color) 25%, transparent 25%, transparent 75%, var(--dark-subtext-color) 75%),
+              linear-gradient(45deg, var(--dark-subtext-color) 25%, transparent 25%, transparent 75%, var(--dark-subtext-color) 75%);
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
     object-fit: cover;
@@ -2267,7 +2293,7 @@ label>input {
     border-radius: 15px;
 }
 .terms .code{
-    background-color: #252525;
+    background-color: var(--text-color);
     border-radius: 15px;
     padding: 12px;
 }
@@ -2280,7 +2306,7 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: left;
-    color: #FFFFFF;
+    color: var(--background-color)FFF;
 }
 
 
@@ -2290,7 +2316,7 @@ label>input {
     text-align: left;
     word-wrap: break-word;
     line-height: 20px;
-    color: #868686;
+    color: var(--subtext-color);
     font-size: 12px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: normal;
@@ -2301,7 +2327,7 @@ label>input {
     text-align: left;
     word-wrap: break-word;
     line-height: 24px;
-    color: #252525;
+    color: var(--text-color);
     font-size: 22px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2332,7 +2358,7 @@ label>input {
     font-weight: bold;
     font-size: 64px;
     text-align: center;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .terms .err404 p{
@@ -2343,7 +2369,7 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: center;
-    color: #252525;
+    color: var(--text-color);
 }
 
 
@@ -2355,10 +2381,10 @@ label>input {
     margin-right: 12px;
     width: 24%;
     height: 92.5dvh;
-    background-color: #fff;
+    background-color: var(--background-color);
     padding: 12px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    border: 1px solid #FFC832;
+    border: 1px solid var(--main-color);
 }
 
 .rightbox h1{
@@ -2369,7 +2395,7 @@ label>input {
     font-weight: bold;
     font-size: 28px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .noticearea{
@@ -2387,8 +2413,8 @@ label>input {
     margin-left: auto;
     margin-right: auto;
     width: auto;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
     padding: 12px;
 }
@@ -2400,7 +2426,7 @@ label>input {
     font-weight: bold;
     font-size: 20px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .noticebox p{
@@ -2411,7 +2437,7 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .noticebox img{
@@ -2431,7 +2457,7 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .noticebox .makeup a{
@@ -2439,7 +2465,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 0px;
     font-size: 16px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2456,7 +2482,7 @@ label>input {
     margin-bottom: 0px;
     text-align: left;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
@@ -2465,7 +2491,7 @@ label>input {
 .rightbox .btmbox{
     position: absolute;
     bottom: 12px; /*下に固定*/
-    height: 35dvh;
+    height: 320px;
     width: 90%;
 }
 
@@ -2476,7 +2502,7 @@ label>input {
     font-weight: bold;
     font-size: 20px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .btmbox h3{
@@ -2486,7 +2512,7 @@ label>input {
     font-weight: normal;
     font-size: 20px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .btmbox p{
@@ -2498,7 +2524,7 @@ label>input {
     font-weight: normal;
     font-size: 14px;
     text-align: left;
-    color: #252525;
+    color: var(--text-color);
 }
 
 .rightbox .btmbox a{
@@ -2507,7 +2533,7 @@ label>input {
     margin-left: 0px;
     margin-right: 6px;
     font-size: 14px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2544,13 +2570,13 @@ label>input {
 }
 
 .emjtex{
-    background-color: #F5F5F5;
+    background-color: var(--background-color);
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
     padding: 12px;
     border-radius: 10px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 
 .emjtex .fx{
@@ -2571,7 +2597,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 24px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2583,7 +2609,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2595,7 +2621,7 @@ label>input {
     margin-bottom: 6px;
     margin-left: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2610,8 +2636,8 @@ label>input {
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: #FFFAE6;
-    border: 1px solid #EEE;
+    background-color: var(--sub-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 
@@ -2624,7 +2650,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 18px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2635,8 +2661,8 @@ label>input {
     margin-bottom: auto;
     margin-left: 6px;
     border-radius: 10px;
-    background-color: #FFF;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
 }
 .notification2 .flebox .idbox a{
     margin-top: 6px;
@@ -2645,7 +2671,7 @@ label>input {
     margin-right: 8px;
     text-align: center;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
 }
@@ -2657,7 +2683,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2669,7 +2695,7 @@ label>input {
     margin-bottom: 6px;
     margin-left: 12px;
     font-size: 24px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2683,7 +2709,7 @@ label>input {
     margin-right: 12px;
     text-align: right;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
@@ -2693,7 +2719,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 16px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2708,8 +2734,8 @@ label>input {
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 @keyframes slideInY {
@@ -2733,7 +2759,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 18px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2744,8 +2770,8 @@ label>input {
     margin-bottom: auto;
     margin-left: 6px;
     border-radius: 10px;
-    background-color: #FFF;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
 }
 .notification .flebox .idbox a{
     margin-top: 6px;
@@ -2754,7 +2780,7 @@ label>input {
     margin-right: 8px;
     text-align: center;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
 }
@@ -2766,7 +2792,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 16px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2778,7 +2804,7 @@ label>input {
     margin-bottom: 6px;
     margin-left: 12px;
     font-size: 24px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2792,7 +2818,7 @@ label>input {
     margin-right: 12px;
     text-align: right;
     font-size: 12px;
-    color:#999;
+    color:var(--subtext-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
@@ -2802,7 +2828,7 @@ label>input {
     margin-bottom: auto;
     margin-left: 12px;
     font-size: 16px;
-    color:#4e4428;
+    color:var(--link-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -2813,7 +2839,7 @@ hr{
     margin-bottom: 12px;
     padding: 0;
     border: 0;
-    border-top: 1px solid #FFC832;
+    border-top: 1px solid var(--main-color);
 }
 
 
@@ -2831,10 +2857,10 @@ hr{
     padding-bottom: 6px;
 
 
-    background-color: #FFC832;
+    background-color: var(--main-color);
 
     border-radius: 50px;
-    color:#FFFAE6;
+    color:var(--sub-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -2845,8 +2871,8 @@ hr{
     transition: all 250ms ease-out;
 }
 .search_btn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:21%;
 }
@@ -2869,7 +2895,7 @@ hr{
     margin-right: 8px;
     margin-top: auto;
     margin-bottom: auto;
-    background-color: #FFC832;
+    background-color: var(--main-color);
     border-radius: 50%;
     transition: all 250ms ease-out;
 }
@@ -2882,8 +2908,8 @@ hr{
     content: '';
     width: 10px;
     height: 5px;
-    border-left: 3px solid #ffffff;
-    border-bottom: 3px solid #ffffff;
+    border-left: 3px solid var(--background-color);
+    border-bottom: 3px solid var(--background-color);
     transform: rotate(-45deg);
 }
 .new_ueuse {
@@ -2902,7 +2928,7 @@ hr{
     left: 0;
     margin-left: 40%;
     margin-right: 40%;
-    background: #FFC832;
+    background: var(--main-color);
     text-align: center;
     overflow: hidden;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
@@ -2911,7 +2937,7 @@ hr{
     padding-bottom: 0px;
     padding-left: 0px;
     padding-right: 0px;
-    color:#FFF;
+    color:var(--background-color);
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 @keyframes slideDown {
@@ -2960,7 +2986,7 @@ hr{
     left: -50%;
     width: 10%;
     height: 150%;
-    background: #fff;
+    background: var(--background-color);
     transform: rotate(45deg);
     animation: reflect 3s ease-in-out infinite;
 }
@@ -2982,8 +3008,8 @@ hr{
 .tlchange{
     border-radius: 10px;
     margin: 12px;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
     text-align: center;
     display: flex;
@@ -2997,7 +3023,7 @@ hr{
     margin-top: 12px;
     margin-bottom: 12px;
     font-size: 24px;
-    color:#CCC;
+    color:var(--dark-subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -3011,11 +3037,11 @@ hr{
     margin-top: 12px;
     margin-bottom: 12px;
     font-size: 24px;
-    color:#FFC832;
+    color:var(--main-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
-    border-bottom: 1px solid #FFC832;
+    border-bottom: 1px solid var(--main-color);
 }
 
 .hny{
@@ -3023,7 +3049,7 @@ hr{
     overflow: hidden;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
     margin: 12px;
-    border: 1px solid #EEE;
+    border: 1px solid var(--border-color);
 }
 .hny .top{
     background-color: #CB4042;
@@ -3036,14 +3062,14 @@ hr{
     font-weight: bold;
 }
 .hny .textmain{
-    background-color: #EEE;
+    background-color: var(--border-color);
     padding-top: 8px;
     padding-bottom: 8px;
     padding-left: 24px;
     padding-right: 24px;
 }
 .hny .textmain h1{
-    background-color: #FFC832;
+    background-color: var(--main-color);
     text-align: left;
     color:#FCFAF2;
     font-family: 'BIZ UDPGothic', sans-serif;
@@ -3055,7 +3081,7 @@ hr{
 }
 .hny .textmain p{
     text-align: left;
-    color:#252525;
+    color:var(--text-color);
     font-family: 'BIZ UDPGothic', sans-serif;
     word-wrap: break-word;
     font-size: 16px;
@@ -3064,7 +3090,7 @@ hr{
 }
 .hny .textmain .rp{
     text-align: right;
-    color:#252525;
+    color:var(--text-color);
     font-family: 'BIZ UDPGothic', sans-serif;
     word-wrap: break-word;
     font-size: 14px;
@@ -3086,7 +3112,7 @@ hr{
 .switch_label {
     width: 48px;
     height: 24px;
-    background: #ccc;
+    background: var(--dark-subtext-color);
     position: relative;
     display: inline-block;
     border-radius: 25px;
@@ -3104,12 +3130,12 @@ hr{
     left: 0;
     top: 0;
     z-index: 2;
-    background: #fff;
+    background: var(--background-color);
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     transition: 0.2s;
 }
 .switch_input:checked + .switch_label {
-    background-color: #FFC832;
+    background-color: var(--main-color);
 } 
 .switch_input:checked + .switch_label:after {
     left: 24px;
@@ -3137,8 +3163,8 @@ summary {
     padding-right: 12px;
     padding-top: 8px;
     padding-bottom: 4px;
-    background-color: #F5F5F5;
-    border: 1px solid #EEE;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
     width: auto;
 }
 .server_code details {
@@ -3146,7 +3172,7 @@ summary {
     margin-top: 0px;
     margin-bottom: 0px;
     text-align: left;
-    color:#252525;
+    color:var(--text-color);
     font-family: 'BIZ UDGothic', sans-serif;
     word-wrap: break-word;
     font-size: 18px;
@@ -3179,7 +3205,7 @@ summary {
     margin-top: 4px;
     margin-bottom: 4px;
     text-align: left;
-    color:#252525;
+    color:var(--text-color);
     font-family: 'BIZ UDGothic', sans-serif;
     word-wrap: break-word;
     font-size: 14px;
@@ -3195,7 +3221,7 @@ summary {
     margin-top: auto;
     margin-bottom: auto;
     text-align: left;
-    color:#252525;
+    color:var(--text-color);
     font-family: 'BIZ UDGothic', sans-serif;
     word-wrap: break-word;
     font-size: 14px;
@@ -3214,7 +3240,7 @@ summary {
     margin-bottom: 6px;
     padding-top: 2px;
     padding-bottom: 2px;
-    background-color: #F5F5F5;
+    background-color: var(--background-color);
     border-radius: 50px;
     color:#FF4848;
     font-size: 16px;
@@ -3229,7 +3255,38 @@ summary {
 
 .delbox .delbtn:hover{
     background-color: #FF4848;
-    color: #f5f5f5;;
+    color: var(--background-color);;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.mini_irobtn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:60px;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: 0px;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    background-color: var(--background-color);
+    border-radius: 50px;
+    color: var(--main-color);
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.mini_irobtn:hover{
+    background-color: var(--main-color);
+    color: var(--background-color);;
     transition: box-shadow 250ms ease-in-out;
     transition: width 250ms ease-out;
     transition: all 250ms ease-out;
@@ -3249,7 +3306,7 @@ summary {
     padding: 12px;
     width: 30%;
     height: 92.5dvh;
-    border-right: 1px solid #EEE;
+    border-right: 1px solid var(--border-color);
 }
 .admin_leftbtn{
     cursor: pointer;
@@ -3266,10 +3323,10 @@ summary {
     padding-bottom: 4px;
 
 
-    background-color: #FFFFFF;
+    background-color: var(--background-color)FFF;
 
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 18px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -3280,8 +3337,8 @@ summary {
     transition: all 250ms ease-out;
 }
 .admin_leftbtn:hover{
-    background-color: #FFC832;
-    color: #FFFAE6;
+    background-color: var(--main-color);
+    color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:85%;
 }
@@ -3316,7 +3373,7 @@ summary {
     margin-left: 12px;
     margin-top: 12px;
     margin-bottom: auto;
-    color:#252525;
+    color:var(--text-color);
     font-size: 32px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: 900;
@@ -3327,7 +3384,7 @@ summary {
     margin-right: auto;
     margin-top: auto;
     margin-bottom: 14px;
-    color: #999;
+    color: var(--subtext-color);
     font-size: 18px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: 900;
@@ -3341,7 +3398,7 @@ summary {
     margin-right: 0px;
     word-wrap: break-word;
     font-size: 18px;
-    color:#252525;
+    color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
@@ -3361,13 +3418,13 @@ summary {
     width: auto;
     padding-left: auto;
     padding-right: auto;
-    background-color: #fff;
-    border: 1px solid #FFC832;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
     border-radius: 25px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
 .admin_userinfo .rolebox p{
-    color:#FFC832;
+    color:var(--main-color);
     margin-top: 2px;
     margin-bottom: 2px;
     margin-left: 10px;
@@ -3384,7 +3441,7 @@ summary {
     margin-bottom: 10px;
     word-wrap: break-word;
     line-height: 20px;
-    color: #868686;
+    color:var(--subtext-color);
     font-size: 12px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: normal;
@@ -3395,7 +3452,7 @@ summary {
     margin-right: auto;
     margin-top: auto;
     margin-bottom: 14px;
-    color: #252525;
+    color: var(--text-color);
     font-size: 18px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: 900;
@@ -3420,7 +3477,7 @@ summary {
 
     text-align: center;
     border-radius: 50px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -3451,11 +3508,11 @@ summary {
     padding-top: 8px;
     padding-bottom: 8px;
 
-    background-color: #FFFAE6;
+    background-color: var(--sub-color);
 
     text-align: center;
     border-radius: 50px;
-    color:#FFC832;
+    color:var(--main-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -3486,11 +3543,11 @@ summary {
     padding-top: 8px;
     padding-bottom: 8px;
 
-    background-color: #ffbc0d;
+    background-color: var(--main-color);
 
     text-align: center;
     border-radius: 50px;
-    color:#fff;
+    color:var(--background-color);
     font-size: 22px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -3508,6 +3565,38 @@ summary {
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:20%;
 }
+
+.error{
+    width: auto;
+    margin-top: 12px;
+    margin-left: 12px;
+    margin-right:12px;
+
+    background-color: var(--sub-color);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+
+    text-align: center;
+    overflow: hidden;
+}
+.error h1{
+    margin-top: 0px;
+    border-radius: 8px;
+    padding: 6px;
+    background-color: var(--main-color);
+    color: var(--background-color);
+    font-size: 22px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+}
+.error p{
+    color: var(--text-color);
+    font-size: 18px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -3582,15 +3671,15 @@ summary {
         margin-left: 0px;
         margin-right: 0px;
         width: auto;
-        background-color: #fff;
+        background-color: var(--background-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         border: none;
-        border-bottom: 1px solid #FFC832;
+        border-bottom: 1px solid var(--main-color);
     }
 
     main h1{
-        color:#252525;
+        color:var(--text-color);
         font-size: 32px;
         font-family: 'Zen Maru Gothic', sans-serif;
     }
@@ -3610,7 +3699,7 @@ summary {
         margin-top: 12px;
         margin-bottom: 12px;
         font-size: 14px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -3651,7 +3740,7 @@ summary {
         margin-top: auto;
         margin-bottom: auto;
         font-size: 16px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -3704,7 +3793,7 @@ summary {
         padding-bottom: 0.5dvh;
 
         border-radius: 0px;
-        color:#FFC832;
+        color:var(--main-color);
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -3717,8 +3806,8 @@ summary {
         border: none;
     }
     .btmbutton:hover{
-        background-color: #FFFFFF;
-        color: #FFC832;
+        background-color: var(--background-color)FFF;
+        color: var(--main-color);
         box-shadow:none;
     }
     .btmbutton:active svg{
@@ -3747,6 +3836,23 @@ summary {
         height: 24px;
     }
 
+    .ueuse .favbox .favbtn svg {
+        margin-top: -4px;
+        margin-right: 4px;
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+        transition: all 250ms ease-out;
+    }
+    .ueuse .favbox .favbtn_after svg {
+        margin-top: -4px;
+        margin-right: 4px;
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+        transition: all 250ms ease-out;
+    }
+
     .ueuse .favbox .tuduki{
     
         display: block;
@@ -3765,10 +3871,10 @@ summary {
         padding-right: 12px;
 
 
-        background-color: #FFFAE6;
+        background-color: var(--sub-color);
 
         border-radius: 50px;
-        color:#FFC832;
+        color:var(--main-color);
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -3777,7 +3883,7 @@ summary {
     }
 
     .ueuse .favbox .tuduki:hover{
-        background-color: #FFC832;
+        background-color: var(--main-color);
         margin-left: 0px;
         margin-right: 12px;
         margin-top: 2px;
@@ -3791,7 +3897,7 @@ summary {
 
         width:auto;
         border-radius: 50px;
-        color:#FFFAE6;
+        color:var(--sub-color);
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
         font-size: 16px;
@@ -3823,7 +3929,7 @@ summary {
         padding-bottom: 2px;
 
 
-        background-color: #F5F5F5;
+        background-color: var(--background-color);
 
         border-radius: 50px;
         color:#FF4848;
@@ -3856,7 +3962,7 @@ summary {
         background-color: #FF4848;
 
         border-radius: 50px;
-        color: #f5f5f5;;
+        color: var(--background-color);;
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -3888,10 +3994,10 @@ summary {
         padding-right: 12px;
 
 
-        background-color: #FFFAE6;
+        background-color: var(--sub-color);
 
         border-radius: 50px;
-        color:#FFC832;
+        color:var(--main-color);
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -3919,10 +4025,10 @@ summary {
         padding-right: 12px;
 
 
-        background-color: #FFC832;
+        background-color: var(--main-color);
 
         border-radius: 50px;
-        color: #FFFAE6;;
+        color: var(--sub-color);;
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -3951,8 +4057,8 @@ summary {
         padding-right: 12px;
         padding-top: 12px;
         padding-bottom: 12px;
-        background-color: #F5F5F5;
-        border: 1px solid #EEE;
+        background-color: var(--background-color);
+        border: 1px solid var(--border-color);
         width: auto;
     }
 
@@ -3967,7 +4073,7 @@ summary {
         margin-bottom: auto;
         margin-left: 12px;
         font-size: 18px;
-        color: #252525;
+        color: var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -3980,7 +4086,7 @@ summary {
         margin-right: 12px;
         text-align: right;
         font-size: 12px;
-        color:#999;
+        color:var(--subtext-color);
         font-family: 'BIZ UDPGothic', sans-serif;
     }
         
@@ -3991,19 +4097,19 @@ summary {
         margin-left: 12px;
         margin-right: 12px;
         margin-bottom: 12px;
-        background-color: #FFFFFF;
+        background-color: var(--background-color)FFF;
         width: 18%;
         height: 100%;
         margin-left: 0px;
         padding: 32px;
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        border: 1px solid #FFC832;
+        border: 1px solid var(--main-color);
     }
 
     .leftbox h1{
         font-family: 'Zen Maru Gothic', sans-serif;
         margin-left: 20px;
-        color:#fff;
+        color:var(--background-color);
         font-size: 32px;
     }
     .leftbox .logo{
@@ -4020,7 +4126,7 @@ summary {
         
     }
     .leftbox .logo p{
-        color:#FFC832;
+        color:var(--main-color);
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
         font-size: 32px;
@@ -4033,8 +4139,8 @@ summary {
         width:40%;
     }
     .imgbtn:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;
+        background-color: var(--main-color);
+        color: var(--sub-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:35%;
     }
@@ -4057,10 +4163,10 @@ summary {
         padding-bottom: 6px;
 
 
-        background-color: #FFC832;
+        background-color: var(--main-color);
 
         border-radius: 50px;
-        color:#FFFAE6;
+        color:var(--sub-color);
         font-size: 16px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -4071,8 +4177,8 @@ summary {
         transition: all 250ms ease-out;
     }
     .imgbtn2:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;
+        background-color: var(--main-color);
+        color: var(--sub-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:19%;
     }
@@ -4109,7 +4215,7 @@ summary {
         width: 90%;
         margin-top: 64px;
         margin-bottom: 64px;
-        background-color: #f7f7f7;
+        background-color: var(--background-color);
     }
 
     .terms h1{
@@ -4118,7 +4224,7 @@ summary {
         font-weight: bold;
         font-size: 48px;
         text-align: left;
-        color: #252525;
+        color: var(--text-color);
     }
 
     .terms h2{
@@ -4127,7 +4233,7 @@ summary {
         font-weight: bold;
         font-size: 48px;
         text-align: left;
-        color: #252525;
+        color: var(--text-color);
     }
 
     .terms h3{
@@ -4136,7 +4242,7 @@ summary {
         font-weight: bold;
         font-size: 32px;
         text-align: left;
-        color: #252525;
+        color: var(--text-color);
     }
 
     .terms h4{
@@ -4145,7 +4251,7 @@ summary {
         font-weight: bold;
         font-size: 24px;
         text-align: left;
-        color: #252525;
+        color: var(--text-color);
     }
 
     .terms p{
@@ -4156,7 +4262,7 @@ summary {
         font-weight: normal;
         font-size: 16px;
         text-align: left;
-        color: #252525;
+        color: var(--text-color);
     }
 
     .terms img{
@@ -4172,7 +4278,7 @@ summary {
     }
 
     .terms .code{
-        background-color: #252525;
+        background-color: var(--text-color);
         border-radius: 15px;
         padding: 12px;
     }
@@ -4185,7 +4291,7 @@ summary {
         font-weight: normal;
         font-size: 16px;
         text-align: left;
-        color: #FFFFFF;
+        color: var(--background-color)FFF;
     }
 
 
@@ -4195,7 +4301,7 @@ summary {
         text-align: left;
         word-wrap: break-word;
         line-height: 20px;
-        color: #868686;
+        color: var(--subtext-color);
         font-size: 12px;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: normal;
@@ -4206,7 +4312,7 @@ summary {
         text-align: left;
         word-wrap: break-word;
         line-height: 24px;
-        color: #252525;
+        color: var(--text-color);
         font-size: 22px;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4219,7 +4325,7 @@ summary {
         font-weight: bold;
         font-size: 64px;
         text-align: center;
-        color: #252525;
+        color: var(--text-color);
     }
 
 
@@ -4231,7 +4337,7 @@ summary {
         margin-right: auto;
         width: 100%;
         height: auto;
-        border: 1px solid #EEE;
+        border: 1px solid var(--border-color);
     }
     
     .ueuse .photo2{
@@ -4246,7 +4352,7 @@ summary {
         margin-right: auto;
         width: 47%;
         height: auto;
-        border: 1px solid #EEE;
+        border: 1px solid var(--border-color);
     }
     
     .ueuse .video1 video{
@@ -4257,7 +4363,7 @@ summary {
         margin-right: auto;
         width: 100%;
         height: auto;
-        border: 1px solid #EEE;
+        border: 1px solid var(--border-color);
     }
 
 
@@ -4267,7 +4373,7 @@ summary {
         margin-bottom: auto;
         margin-left: 12px;
         font-size: 18px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4278,8 +4384,8 @@ summary {
         margin-bottom: auto;
         margin-left: 6px;
         border-radius: 10px;
-        background-color: #FFF;
-        border: 1px solid #EEE;
+        background-color: var(--background-color);
+        border: 1px solid var(--border-color);
     }
     .notification .flebox .idbox a{
         margin-top: 6px;
@@ -4288,7 +4394,7 @@ summary {
         margin-right: 8px;
         text-align: center;
         font-size: 12px;
-        color:#999;
+        color:var(--subtext-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
     }
@@ -4300,7 +4406,7 @@ summary {
         margin-bottom: auto;
         margin-left: -6px;
         font-size: 16px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4312,7 +4418,7 @@ summary {
         margin-bottom: 6px;
         margin-left: -6px;
         font-size: 18px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4326,7 +4432,7 @@ summary {
         margin-right: -6px;
         text-align: right;
         font-size: 12px;
-        color:#999;
+        color:var(--subtext-color);
         font-family: 'BIZ UDPGothic', sans-serif;
     }
     
@@ -4336,7 +4442,7 @@ summary {
         margin-bottom: auto;
         margin-left: -6px;
         font-size: 16px;
-        color:#4e4428;
+        color:var(--link-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4347,7 +4453,7 @@ summary {
         margin-bottom: auto;
         margin-left: 12px;
         font-size: 18px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4358,8 +4464,8 @@ summary {
         margin-bottom: auto;
         margin-left: 6px;
         border-radius: 10px;
-        background-color: #FFF;
-        border: 1px solid #EEE;
+        background-color: var(--background-color);
+        border: 1px solid var(--border-color);
     }
     .notification2 .flebox .idbox a{
         margin-top: 6px;
@@ -4368,7 +4474,7 @@ summary {
         margin-right: 8px;
         text-align: center;
         font-size: 12px;
-        color:#999;
+        color:var(--subtext-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
     }
@@ -4380,7 +4486,7 @@ summary {
         margin-bottom: auto;
         margin-left: -6px;
         font-size: 16px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4392,7 +4498,7 @@ summary {
         margin-bottom: 6px;
         margin-left: -6px;
         font-size: 18px;
-        color:#252525;
+        color:var(--text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4406,7 +4512,7 @@ summary {
         margin-right: -6px;
         text-align: right;
         font-size: 12px;
-        color:#999;
+        color:var(--subtext-color);
         font-family: 'BIZ UDPGothic', sans-serif;
     }
     
@@ -4416,7 +4522,7 @@ summary {
         margin-bottom: auto;
         margin-left: -6px;
         font-size: 16px;
-        color:#4e4428;
+        color:var(--link-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
@@ -4581,7 +4687,7 @@ summary {
         overflow: hidden;
         box-shadow:0 0px 32px 0 rgba(0, 0, 0, .15);
         margin: 12px;
-        border: 1px solid #EEE;
+        border: 1px solid var(--border-color);
     }
     @keyframes slideDownhny {
         0%, 100% { transform: translateY(-40dvh); }
@@ -4598,7 +4704,7 @@ summary {
         font-weight: bold;
     }
     .hny .textmain{
-        background-color: #EEE;
+        background-color: var(--border-color);
         padding-top: 8px;
         padding-bottom: 8px;
         padding-left: 24px;
@@ -4607,7 +4713,7 @@ summary {
     .hny .textmain h1{
         background-color: transparent;
         text-align: left;
-        color:#252525;
+        color:var(--text-color);
         font-family: 'BIZ UDPGothic', sans-serif;
         word-wrap: break-word;
         font-size: 22px;
@@ -4618,7 +4724,7 @@ summary {
     .hny .textmain p{
         margin: 0px;
         text-align: left;
-        color:#252525;
+        color:var(--text-color);
         font-family: 'BIZ UDPGothic', sans-serif;
         word-wrap: break-word;
         font-size: 16px;
@@ -4628,7 +4734,7 @@ summary {
     .hny .textmain .rp{
         margin-top: 6px;
         text-align: right;
-        color:#252525;
+        color:var(--text-color);
         font-family: 'BIZ UDPGothic', sans-serif;
         word-wrap: break-word;
         font-size: 14px;
@@ -4654,12 +4760,12 @@ summary {
         width: 100%;
     }
     .admin_settings .admin_left{
-        background-color: #fff;
+        background-color: var(--background-color);
         position:relative;
         width: 100%;
         height: auto;
         padding: 0px;
-        border-right: 1px solid #EEE;
+        border-right: 1px solid var(--border-color);
     }
     .admin_leftbtn{
         cursor: pointer;
@@ -4676,10 +4782,10 @@ summary {
         padding-bottom: 4px;
     
     
-        background-color: #FFFFFF;
+        background-color: var(--background-color)FFF;
     
         border-radius: 50px;
-        color:#FFC832;
+        color:var(--main-color);
         font-size: 18px;
         font-family: 'Zen Maru Gothic', sans-serif;
         font-weight: normal;
@@ -4690,8 +4796,8 @@ summary {
         transition: all 250ms ease-out;
     }
     .admin_leftbtn:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;
+        background-color: var(--main-color);
+        color: var(--sub-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:85%;
     }
@@ -4710,7 +4816,7 @@ summary {
 @media (prefers-color-scheme: dark) {
 
     body{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
     }
     .errmsg{
         background-color: #3a3333;
@@ -4718,22 +4824,22 @@ summary {
         border: 1px solid #FF4848;
     }
     .rolebox{
-        background-color: #0c0c0c;
-        border: 1px solid #FFC832;
+        background-color: var(--dark-background-color);
+        border: 1px solid var(--main-color);
     }
 
     .userleftbox{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
         border: none;
     }
 
     .leftbutton{
-        background-color: #181616;
-        color:#FFFAE6;
+        background-color: var(--dark-sub-color);
+        color:var(--sub-color);
     }
     .leftbutton:hover{
-        background-color: #FFFAE6;
-        color: #0c0c0c;
+        background-color: var(--sub-color);
+        color: var(--dark-background-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     }
     .leftbutton:active{
@@ -4741,23 +4847,23 @@ summary {
     }
 
     main{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         border: none;
     }
     
     main h1{
-        color:#FFFAE6;
+        color:var(--sub-color);
         font-size: 32px;
         font-family: 'Zen Maru Gothic', sans-serif;
     }
 
 
     .ueuse{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
         border: none;
     }
     .ueuse .flebox a{
-        color:#FFFAE6;
+        color:var(--sub-color);
     }
 
     .ueuse .flebox .idbox{
@@ -4765,36 +4871,36 @@ summary {
         border: none;
     }
     .ueuse .flebox .idbox a{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     .ueuse p{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     
     .ueuse h1{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .ueuse h2{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .ueuse h3{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .ueuse center{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .ueuse a{
-        color:#FFC832;
+        color:var(--main-color);
     }
     
     .ueuse .flebox .time{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     .ueuse .photo1 img{
@@ -4814,113 +4920,113 @@ summary {
     }
     
     .ueuse .abi{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         border: none;
     }
 
     .ueuse .abi p{
-        color:#FFFAE6;
+        color:var(--sub-color);
     }
     
     .ueuse .abi .back{
-        background-color: #FFC832;
+        background-color: var(--main-color);
         border: none;
     }
     
     .ueuse .abi .back h1{
-        color:#252525;
+        color:var(--text-color);
     }
     .ueuse .abi h3{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     .ueuse .favbox .favbtn{
-        background-color: #0c0c0c;
-        color:#FFC832;
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
     }
     .ueuse .favbox .favbtn_after{
-        background-color: #FFC832;
-        color:#FFFAE6;
+        background-color: var(--main-color);
+        color:var(--sub-color);
     }
     .ueuse .favbox .tuduki{
-        background-color: #0c0c0c;
-        color:#FFC832;
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
     }
     .ueuse .favbox .tuduki:hover{
-        background-color: #FFC832;
-        color:#FFFAE6;
+        background-color: var(--main-color);
+        color:var(--sub-color);
     }
     .ueuse .favbox .delbtn{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         color:#FF4848;
     }
     .ueuse .favbox .delbtn:hover{
         background-color: #FF4848;
-        color: #f5f5f5;;
+        color: var(--background-color);;
     }
     .ueuse .favbox .addabi{
-        background-color: #0c0c0c;
-        color:#FFC832;
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
     }
     .ueuse .favbox .addabi:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;;
+        background-color: var(--main-color);
+        color: var(--sub-color);;
     }
     .ueuse hr{
-        border-top: 1px solid #CCC;
+        border-top: 1px solid var(--dark-subtext-color);
     }
 
     .userheader h2{
-        color:#FFFAE6;
+        color:var(--sub-color);
     }
     
     .userheader p{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     
     .userheader .profile p{
-        color:#FFFAE6;
+        color:var(--sub-color);
     }
     
     .userheader .rolebox{
-        background-color: #181616;
-        border: 1px solid #FFC832;
+        background-color: var(--dark-sub-color);
+        border: 1px solid var(--main-color);
     }
     
     .fzone .follow .fbtn{
-        background-color: #FFC832;
-        color:#FFFAE6;
+        background-color: var(--main-color);
+        color:var(--sub-color);
     }
     .fzone .follow .fbtn:hover{
-        background-color: #FFC832;
-        color: #FFFAE6;
+        background-color: var(--main-color);
+        color: var(--sub-color);
     }
 
     .fzone .follow .fbtn_no{
-        background-color: #181616;
-        color:#FFC832;
-        border: 1px solid #FFC832;
+        background-color: var(--dark-sub-color);
+        color:var(--main-color);
+        border: 1px solid var(--main-color);
     }
     .fzone .follow .fbtn_no:hover{
-        background-color: #181616;
-        color: #FFC832;
+        background-color: var(--dark-sub-color);
+        color: var(--main-color);
     }
     .fzone .time p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     .fzone .time a{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     .fzone .follow_yes{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
     }
     .fzone .follow_yes p{
-        color:#FFFAE6;
+        color:var(--sub-color);
     }
     
     .fzone .follow .report{
-        background-color: #0c0c0c;
-        color:#FFC832;
-        border: 1px solid #FFC832;
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
+        border: 1px solid var(--main-color);
     }
     .fzone .follow .report:hover{
         background-color: #302c2c;
@@ -4931,159 +5037,159 @@ summary {
 
 
     .rightbox{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         border:none;
     }
     
     .rightbox h1{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
 
     .rightbox .noticebox{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
         border: none;
     }
     
     .rightbox .noticebox h4{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .rightbox .noticebox p{
-        color: #FFF;
+        color: var(--background-color);
     }
 
     .rightbox .noticebox .makeup p{
-        color:#FFFAE6;;
+        color:var(--sub-color);;
     }
     
     .rightbox .noticebox .makeup a{
-        color:#FFC832;
+        color:var(--main-color);
     }
     .rightbox .noticebox .time p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     .rightbox .btmbox h2{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     
     .rightbox .btmbox h3{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     
     .rightbox .btmbox p{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .rightbox .btmbox a{
-        color:#FFC832;
+        color:var(--main-color);
     }
 
     .sendbox{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
         border:none;
     }
     
     .sendbox p{
-        color: #FFF;;
+        color: var(--background-color);;
     }
     
     .sendbox textarea{
-        background-color: #181616;
-        color:#CCC;
+        background-color: var(--dark-sub-color);
+        color:var(--dark-subtext-color);
     }
     .sendbox .fxbox p{
-        color:#FFFAE6;
+        color:var(--sub-color);
     }
     
 
     .emjtex{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
         border: none;
     }
     
     .emjtex h3{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .emjtex p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
 
     .formarea{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
     }
     
     .formarea p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     .formarea li{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
 
     .modal-content {
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
     }
     
     .modal-content textarea{
-        background-color: #181616;
-        color:#CCC;
+        background-color: var(--dark-sub-color);
+        color:var(--dark-subtext-color);
     }
     .modal-content p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     .modal-content h1{
-        color:#FFF;
+        color:var(--background-color);
     }
 
     .modal-content .fbtn_no{
-        background-color: #181616;
-        color:#FFC832;
-        border: 1px solid #FFC832;
+        background-color: var(--dark-sub-color);
+        color:var(--main-color);
+        border: 1px solid var(--main-color);
     }
     .modal-content .fbtn_no:hover{
-        background-color: #181616;
-        color: #FFC832;
+        background-color: var(--dark-sub-color);
+        color: var(--main-color);
     }
 
     .inbox {
-        background: #0c0c0c;
-        color: #FFF;
+        background: var(--dark-background-color);
+        color: var(--background-color);
         border: none;
       }
       
     .inbox::placeholder {
-        color: #999;
+        color: var(--subtext-color);
     }
     
     .inbox:hover {
         outline: none;
-        border: 1px solid #FFC832;
+        border: 1px solid var(--main-color);
     }
     
     .inbox:focus {
         outline: none;
-        border: 1px solid #FFC832;
-        border-bottom: 3px solid #FFC832;
+        border: 1px solid var(--main-color);
+        border-bottom: 3px solid var(--main-color);
     }
     .botbox{
-        border-top: 1px solid #FFC832;
+        border-top: 1px solid var(--main-color);
     }
 
     .btmbutton{
-        background-color: #0c0c0c;
-        color:#F5F5F5;
+        background-color: var(--dark-background-color);
+        color:var(--background-color);
         border: none;
     }
     .btmbutton:hover{
-        background-color: #FFC832;
-        color: #f5f5f5;
+        background-color: var(--main-color);
+        color: var(--background-color);
     }
 
     
     .btmbutton_on{
-        background-color: #FFC832;
+        background-color: var(--main-color);
         color:#FF4444;
     }
 
@@ -5097,68 +5203,68 @@ summary {
         padding-right: 12px;
         padding-top: 8px;
         padding-bottom: 8px;
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         border: none;
         width: auto;
     }
     .server_code details{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     .server_code p{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
 
 
     .terms{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
     }
     
     .terms h1{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     
     .terms h2{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .terms h3{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .terms h4{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .terms p{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .terms .code{
-        background-color: #CCC;
+        background-color: var(--dark-subtext-color);
     }
     
     .terms .code p{
-        color: #252525;
+        color: var(--text-color);
     }
     
     .terms ul{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .terms .p2c{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     
     .terms .p3{
-        color: #FFF;
+        color: var(--background-color);
     }
     
     .terms .err404 h1{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     
     .terms .err404 p{
-        color: #FFF;
+        color: var(--background-color);
     }
 
     .notification2{
@@ -5167,55 +5273,55 @@ summary {
     }
 
     .notification2 .flebox a{
-        color:#CCC5;
+        color:var(--dark-subtext-color)5;
     }
     
     .notification2 p{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .notification2 h3{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     
     .notification2 .flebox .time{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     .notification2 a{
-        color:#FFC832;
+        color:var(--main-color);
     }
 
 
 
     .notification{
-        background-color: #181616;
+        background-color: var(--dark-sub-color);
         border: none;
     }
 
     .notification .flebox a{
-        color:#CCC5;
+        color:var(--dark-subtext-color)5;
     }
     
     .notification p{
-        color:#FFF;
+        color:var(--background-color);
     }
     
     .notification h3{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     
     .notification .flebox .time{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     
     .notification a{
-        color:#FFC832;
+        color:var(--main-color);
     }
     .tokonone p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
 
     .ueuse .mta{
@@ -5223,71 +5329,71 @@ summary {
     }
     .ueuse .mta:hover{
         font-size: 14px;
-        background-color: #FFC832;
-        color:#0c0c0c;
+        background-color: var(--main-color);
+        color:var(--dark-background-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     }
         
     .tlchange{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         border: none;
     }
     .tlchange .off{
-        color:#F5F5F5;
+        color:var(--background-color);
     }
     .tlchange .on{
-        color:#FFC832;
-        border-bottom: 1px solid #FFC832;
+        color:var(--main-color);
+        border-bottom: 1px solid var(--main-color);
     }
 
 
     .select_utl{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
     }
 
     .select_utl .btn{
-        background: #0c0c0c;
-        color: #EEE;
+        background: var(--dark-background-color);
+        color: var(--border-color);
     }
     .select_utl .btmline{
-        color: #FFC832;
-        border-bottom: 1px solid #FFC832;
+        color: var(--main-color);
+        border-bottom: 1px solid var(--main-color);
     }
 
     .admin_settings .admin_left{
-        background-color: #0c0c0c;
+        background-color: var(--dark-background-color);
         border-right: none;
     }
     .admin_leftbtn{
-        background-color: #0c0c0c;
-        color:#FFC832;
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
     }
     .admin_leftbtn:hover{
-        background-color: #FFC832;
-        color: #0c0c0c;
+        background-color: var(--main-color);
+        color: var(--dark-background-color);
     }
 
     .admin_userinfo .icon .tatext h2{
-        color:#FFF;
+        color:var(--background-color);
     }
     .admin_userinfo .icon .tatext p{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     .admin_userinfo .profile p{
-        color:#CCC;
+        color:var(--dark-subtext-color);
     }
     .admin_userinfo .rolebox{
-        background-color: #0c0c0c;
-        border: 1px solid #FFC832;
+        background-color: var(--dark-background-color);
+        border: 1px solid var(--main-color);
     }
     .admin_userinfo .rolebox p{
-        color:#FFC832;
+        color:var(--main-color);
     }
     .admin_userinfo .p2{
-        color: #CCC;
+        color: var(--dark-subtext-color);
     }
     .admin_userinfo .about p{
-        color: #FFF;
+        color: var(--background-color);
     }
     .delbox .delbtn{
         background-color: #302c2c;
@@ -5296,6 +5402,18 @@ summary {
     
     .delbox .delbtn:hover{
         background-color: #FF4848;
-        color: #F5F5F5;
+        color: var(--background-color);
+    }
+
+    .error{
+        background-color: var(--dark-sub-color);
+        border: 1px solid var(--main-color);
+    }
+    .error h1{
+        background-color: var(--main-color);
+        color: var(--dark-background-color);
+    }
+    .error p{
+        color: var(--background-color);
     }
 }

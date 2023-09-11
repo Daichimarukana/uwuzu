@@ -1,4 +1,10 @@
 <?php
+$mojisizefile = "../server/textsize.txt";
+
+$banurldomainfile = "../server/banurldomain.txt";
+$banurl_info = file_get_contents($banurldomainfile);
+$banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
+
 header("Content-Type: application/json; charset=utf-8");
 
 function createUniqId(){
@@ -42,6 +48,39 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
     $token = htmlentities($_GET['token']);
     $ueuse = nl2br(htmlentities($_GET['ueuse']));
 
+    if( empty($ueuse) ) {
+        $err = "input_not_found";
+        $response = array(
+            'error_code' => $err,
+        );
+         
+        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        exit;
+	} else {
+        // 文字数を確認
+        if( (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8') < mb_strlen($ueuse, 'UTF-8') ) {
+            $err = "content_to_".htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8')."_characters";
+            $response = array(
+                'error_code' => $err,
+            );
+             
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit;
+		}
+        // 禁止url確認
+		for($i = 0; $i < count($banurl); $i++) {
+			if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+				$err = "contains_prohibited_url";
+                $response = array(
+                    'error_code' => $err,
+                );
+                
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+			}
+		}
+    }
+
     if($token === 'ice'){
         $err = "input_error";
         $response = array(
@@ -49,6 +88,7 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
         );
         
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        exit;
     }elseif($token === ''){
         $err = "input_error";
         $response = array(
@@ -56,6 +96,7 @@ if(isset($_GET['token'])&&isset($_GET['ueuse'])) {
         );
         
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     require('../db.php');

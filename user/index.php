@@ -548,6 +548,10 @@ $pdo = null;
 			<div id="loading" class="loading" style="display: none;">
 				🤔
 			</div>
+			<div id="error" class="error" style="display: none;">
+				<h1>エラー</h1>
+				<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
+			</div>
 
 			<div id="myDelModal" class="modal">
 				<div class="modal-content">
@@ -596,6 +600,7 @@ $(document).ready(function() {
 		if (isLoading) return;
 		isLoading = true;
 		$("#loading").show();
+		$("#error").hide();
 		var uwuzuid = '<?php echo $uwuzuid; ?>';
 		var userid = '<?php echo $userid; ?>';
 		if(mode == 'allueuse'){
@@ -604,12 +609,18 @@ $(document).ready(function() {
 				method: 'GET',
 				data: { page: pageNumber, id: uwuzuid ,userid: userid},
 				dataType: 'html',
+				timeout: 300000,
 				success: function(response) {
 					$('#postContainer').append(response);
 					pageNumber++;
 					isLoading = false;
 					$("#loading").hide();
-				}
+				},
+				error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				},
 			});
 		}else if(mode == 'mediaueuse'){
 			$.ajax({
@@ -617,12 +628,18 @@ $(document).ready(function() {
 				method: 'GET',
 				data: { page: pageNumber, id: uwuzuid ,userid: userid},
 				dataType: 'html',
+				timeout: 300000,
 				success: function(response) {
 					$('#postContainer').append(response);
 					pageNumber++;
 					isLoading = false;
 					$("#loading").hide();
-				}
+				},
+				error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				},
 			});
 		}else if(mode == 'likeueuse'){
 			$.ajax({
@@ -630,12 +647,18 @@ $(document).ready(function() {
 				method: 'GET',
 				data: { page: pageNumber, id: uwuzuid ,userid: userid},
 				dataType: 'html',
+				timeout: 300000,
 				success: function(response) {
 					$('#postContainer').append(response);
 					pageNumber++;
 					isLoading = false;
 					$("#loading").hide();
-				}
+				},
+				error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				},
 			});
 		}else{
 			$('#all_ueuse_btn').addClass('btmline');
@@ -644,12 +667,18 @@ $(document).ready(function() {
 				method: 'GET',
 				data: { page: pageNumber, id: uwuzuid ,userid: userid},
 				dataType: 'html',
+				timeout: 300000,
 				success: function(response) {
 					$('#postContainer').append(response);
 					pageNumber++;
 					isLoading = false;
 					$("#loading").hide();
-				}
+				},
+				error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				},
 			});
 		}
     }

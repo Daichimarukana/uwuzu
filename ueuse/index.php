@@ -1,5 +1,9 @@
 <?php
+$mojisizefile = "../server/textsize.txt";
 
+$banurldomainfile = "../server/banurldomain.txt";
+$banurl_info = file_get_contents($banurldomainfile);
+$banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -197,8 +201,15 @@ if( !empty($_POST['btn_submit']) ) {
 		$error_message[] = '内容を入力してください。';
 	} else {
         // 文字数を確認
-        if( 1024 < mb_strlen($ueuse, 'UTF-8') ) {
-			$error_message[] = '内容は1024文字以内で入力してください。';
+        if( (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8') < mb_strlen($ueuse, 'UTF-8') ) {
+			$error_message[] = '内容は'.htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8').'文字以内で入力してください。';
+		}
+
+		// 禁止url確認
+		for($i = 0; $i < count($banurl); $i++) {
+			if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+				$error_message[] = '投稿が禁止されているURLが含まれています。';
+			}
 		}
     }
 
@@ -551,6 +562,15 @@ $pdo = null;
 
 		</div>
 	</section>
+
+	
+	<div id="loading" class="loading" style="display: none;">
+			🤔
+		</div>
+	<div id="error" class="error" style="display: none;">
+		<h1>エラー</h1>
+		<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
+	</div>
 	
 
 	<div id="myDelModal" class="modal">
@@ -599,11 +619,17 @@ $(document).ready(function() {
             method: 'GET',
             data: { page: pageNumber, id: ueuseid ,userid: userid},
             dataType: 'html',
+			timeout: 300000,
             success: function(response) {
                 $('#postContainer').append(response);
                 pageNumber++;
                 isLoading = false;
-            }
+            },
+			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+				isLoading = false;
+				$("#loading").hide();
+				$("#error").show();
+			},
         });
     }
 
