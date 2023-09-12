@@ -161,8 +161,13 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
-$touserid = htmlentities(str_replace('~', '', $_GET['touser']));
+if(isset($_GET['ueuseid']) && isset($_GET['touser'])) {
+	$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
+	$touserid = htmlentities(str_replace('~', '', $_GET['touser']));
+}elseif(isset($_GET['ueuseid'])){
+	$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
+	$touserid = null;
+}
 
 
 function get_mentions_userid($postText) {
@@ -191,6 +196,9 @@ function get_mentions_userid($postText) {
 
     return $mentionedUsers;
 }
+
+
+
 if( !empty($_POST['btn_submit']) ) {
 
 	
@@ -475,6 +483,7 @@ $pdo = null;
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -495,82 +504,87 @@ $pdo = null;
 	<?php endif; ?>
 
 	<div class="emojibox">
-		<h1>返信</h1>
-	</div>
-		<?php if(!($role ==="ice")){?>
-			<form method="post" enctype="multipart/form-data">
-				<div class="sendbox">
-					<textarea id="ueuse" placeholder="へんし～ん！！！" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlentities( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
-					<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
-					<div class="fxbox">
-						<label for="upload_images" id="images">
-						<img src="../img/sysimage/image_1.svg">
-						<input type="file" name="upload_images" id ="upload_images" accept="image/*">
-						</label>
-						<label for="upload_images2" id="images2">
-						<img src="../img/sysimage/image_1.svg">
-						<input type="file" name="upload_images2" id ="upload_images2" accept="image/*">
-						</label>
-						<label for="upload_videos1" id="videos1">
-						<img src="../img/sysimage/video_1.svg">
-						<input type="file" name="upload_videos1" id ="upload_videos1" accept="video/*">
-						</label>
+		<?php if(!empty($touserid)){?>
+			<h1>返信</h1>
+			</div>
+				<?php if(!($role ==="ice")){?>
+					<form method="post" enctype="multipart/form-data">
+						<div class="sendbox">
+							<textarea id="ueuse" placeholder="へんし～ん！！！" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlentities( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+							<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
+							<div class="fxbox">
+								<label for="upload_images" id="images">
+								<img src="../img/sysimage/image_1.svg">
+								<input type="file" name="upload_images" id ="upload_images" accept="image/*">
+								</label>
+								<label for="upload_images2" id="images2">
+								<img src="../img/sysimage/image_1.svg">
+								<input type="file" name="upload_images2" id ="upload_images2" accept="image/*">
+								</label>
+								<label for="upload_videos1" id="videos1">
+								<img src="../img/sysimage/video_1.svg">
+								<input type="file" name="upload_videos1" id ="upload_videos1" accept="video/*">
+								</label>
 
-						<input type="submit" class="ueusebtn" name="btn_submit" value="返信する">
-					</div>
-				</div>
-			</form>
+								<input type="submit" class="ueusebtn" name="btn_submit" value="返信する">
+							</div>
+						</div>
+					</form>
+				<?php }?>
+				<script>
+					document.getElementById("upload_videos1").addEventListener('change', function(e){
+						var file_reader = new FileReader();
+						// ファイルの読み込みを行ったら実行
+						file_reader.addEventListener('load', function(e) {
+						console.log(e.target.result);
+							const element = document.querySelector('#videos1');
+							const createElement = '<p>動画を選択しました。</p>';
+							element.insertAdjacentHTML('afterend', createElement);
+						});
+						file_reader.readAsText(e.target.files[0]);
+					});
+					document.getElementById("upload_images2").addEventListener('change', function(e){
+					var file_reader = new FileReader();
+					// ファイルの読み込みを行ったら実行
+					file_reader.addEventListener('load', function(e) {
+					console.log(e.target.result);
+						const element = document.querySelector('#images2');
+						const createElement = '<p>画像を選択しました。</p>';
+						element.insertAdjacentHTML('afterend', createElement);
+					});
+					file_reader.readAsText(e.target.files[0]);
+					});
+					document.getElementById("upload_images").addEventListener('change', function(e){
+					var file_reader = new FileReader();
+					// ファイルの読み込みを行ったら実行
+					file_reader.addEventListener('load', function(e) {
+					console.log(e.target.result);
+						const element = document.querySelector('#images');
+						const createElement = '<p>画像を選択しました。</p>';
+						element.insertAdjacentHTML('afterend', createElement);
+					});
+					file_reader.readAsText(e.target.files[0]);
+					});
+				</script>
+		<?php }else{?>
+			<h1>ユーズ</h1>
+			</div>
 		<?php }?>
-		<script>
-			document.getElementById("upload_videos1").addEventListener('change', function(e){
-				var file_reader = new FileReader();
-				// ファイルの読み込みを行ったら実行
-				file_reader.addEventListener('load', function(e) {
-				console.log(e.target.result);
-					const element = document.querySelector('#videos1');
-					const createElement = '<p>動画を選択しました。</p>';
-					element.insertAdjacentHTML('afterend', createElement);
-				});
-				file_reader.readAsText(e.target.files[0]);
-			});
-			document.getElementById("upload_images2").addEventListener('change', function(e){
-			var file_reader = new FileReader();
-			// ファイルの読み込みを行ったら実行
-			file_reader.addEventListener('load', function(e) {
-			console.log(e.target.result);
-				const element = document.querySelector('#images2');
-				const createElement = '<p>画像を選択しました。</p>';
-				element.insertAdjacentHTML('afterend', createElement);
-			});
-			file_reader.readAsText(e.target.files[0]);
-			});
-			document.getElementById("upload_images").addEventListener('change', function(e){
-			var file_reader = new FileReader();
-			// ファイルの読み込みを行ったら実行
-			file_reader.addEventListener('load', function(e) {
-			console.log(e.target.result);
-				const element = document.querySelector('#images');
-				const createElement = '<p>画像を選択しました。</p>';
-				element.insertAdjacentHTML('afterend', createElement);
-			});
-			file_reader.readAsText(e.target.files[0]);
-			});
-		</script>
 
-	<section class="inner">
-		<div id="postContainer">
+		<section class="inner">
+			<div id="postContainer">
 
-		</div>
-	</section>
+			</div>
+		</section>
 
 	
-	<div id="loading" class="loading" style="display: none;">
-			🤔
+		<div id="loading" class="loading" style="display: none;">
+				🤔
+			</div>
+		<div id="error" class="error" style="display: none;">
+			<h1>エラー</h1>
+			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
 		</div>
-	<div id="error" class="error" style="display: none;">
-		<h1>エラー</h1>
-		<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
-	</div>
 	
 
 	<div id="myDelModal" class="modal">
@@ -604,6 +618,7 @@ $pdo = null;
 </body>
 <script>
 $(document).ready(function() {
+	
 	loadPosts();
 
     var pageNumber = 1;
@@ -649,6 +664,7 @@ $(document).ready(function() {
 			}
 		}
 	});
+
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
 	event.preventDefault();
@@ -662,33 +678,33 @@ $(document).ready(function() {
 
 	var $this = $(this); // ボタン要素を変数に格納
 
-	$.ajax({
-		url: '../favorite/favorite.php',
-		method: 'POST',
-		data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
-		dataType: 'json',
-		success: function(response) {
-			if (response.success) {
-				// いいね成功時の処理
-				if (isLiked) {
-					$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
-					$this.find('img').attr('src', '../img/sysimage/favorite_1.svg'); // 画像を元の画像に戻す
-				} else {
-					$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
-					$this.find('img').attr('src', '../img/sysimage/favorite_2.svg'); // 画像を新しい画像に置き換える
-				}
+		$.ajax({
+			url: '../favorite/favorite.php',
+			method: 'POST',
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+			dataType: 'json',
+			success: function(response) {
+				if (response.success) {
+					// いいね成功時の処理
+					if (isLiked) {
+						$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
+						$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
+					} else {
+						$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
+						$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
+					}
 
-				var newFavoriteList = response.newFavorite.split(',');
-				var likeCount = newFavoriteList.length - 1;
-				likeCountElement.text(likeCount); // いいね数を更新
-			} else {
-				// いいね失敗時の処理
+					var newFavoriteList = response.newFavorite.split(',');
+					var likeCount = newFavoriteList.length - 1;
+					likeCountElement.text(likeCount); // いいね数を更新
+				} else {
+					// いいね失敗時の処理
+				}
+			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+			error: function() {
+				// エラー時の処理
 			}
-		}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
-		error: function() {
-			// エラー時の処理
-		}
-	});
+		});
 	});
 
 

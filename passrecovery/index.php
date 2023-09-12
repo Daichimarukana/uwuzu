@@ -167,7 +167,6 @@ $pdo = null;
                     <label for="userid">ユーザーID</label>
                     <input onInput="checkForm(this)" id="userid" class="inbox" type="text" name="userid" value="<?php if( !empty($_SESSION['userid']) ){ echo htmlentities( $_SESSION['userid'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
-                <!--個人情報関係-->
 
                 <!--アカウント関連-->
                 <div>

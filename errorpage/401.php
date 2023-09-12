@@ -20,6 +20,7 @@ $termsdata = file_get_contents($termsfile);
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="/css/home.css">
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>401 Unauthorized - <?php echo file_get_contents($servernamefile);?></title>
 </head>

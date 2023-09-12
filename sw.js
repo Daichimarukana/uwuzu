@@ -1,6 +1,8 @@
 var CACHE_NAME  = "app_uwuzu";
 var urlsToCache = [
     "home/index.php",
+    "home/ftl.php",
+    "notification/index.php",
     "search/index.php",
     "require/botbox.php",
     "require/leftbox.php",
@@ -16,6 +18,7 @@ var urlsToCache = [
     "new.php",
     "check.php",
     "success.php",
+    "img/",
 ];
 
 self.addEventListener('install', function(event) {

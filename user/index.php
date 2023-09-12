@@ -404,6 +404,7 @@ $pdo = null;
 <html lang="ja">
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="../css/home.css">
@@ -588,6 +589,7 @@ $pdo = null;
 
 <script>
 $(document).ready(function() {
+
 	loadPosts();
 
     var pageNumber = 1;
@@ -759,47 +761,48 @@ $(document).ready(function() {
     });
 
 
+	
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
-		event.preventDefault();
+	event.preventDefault();
 
-		var postUniqid = $(this).data('uniqid');
-		var userid = '<?php echo $userid; ?>';
-		var account_id = '<?php echo $loginid; ?>';
-		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
+	var postUniqid = $(this).data('uniqid');
+	var userid = '<?php echo $userid; ?>';
+	var account_id = '<?php echo $loginid; ?>';
+	var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
 
-		var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
+	var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
 
-		var $this = $(this); // ボタン要素を変数に格納
+	var $this = $(this); // ボタン要素を変数に格納
 
-		$.ajax({
-			url: '../favorite/favorite.php',
-			method: 'POST',
-			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
-			dataType: 'json',
-			success: function(response) {
-				if (response.success) {
-					// いいね成功時の処理
-					if (isLiked) {
-						$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
-						$this.find('img').attr('src', '../img/sysimage/favorite_1.svg'); // 画像を元の画像に戻す
-					} else {
-						$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
-						$this.find('img').attr('src', '../img/sysimage/favorite_2.svg'); // 画像を新しい画像に置き換える
-					}
-
-					var newFavoriteList = response.newFavorite.split(',');
-					var likeCount = newFavoriteList.length - 1;
-					likeCountElement.text(likeCount); // いいね数を更新
+	$.ajax({
+		url: '../favorite/favorite.php',
+		method: 'POST',
+		data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+		dataType: 'json',
+		success: function(response) {
+			if (response.success) {
+				// いいね成功時の処理
+				if (isLiked) {
+					$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
+					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
 				} else {
-					// いいね失敗時の処理
+					$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
+					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
 				}
-			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
-			error: function() {
-				// エラー時の処理
+
+				var newFavoriteList = response.newFavorite.split(',');
+				var likeCount = newFavoriteList.length - 1;
+				likeCountElement.text(likeCount); // いいね数を更新
+			} else {
+				// いいね失敗時の処理
 			}
-		});
-		});
+		}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+		error: function() {
+			// エラー時の処理
+		}
+	});
+	});
 
 
 

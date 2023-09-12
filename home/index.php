@@ -425,18 +425,13 @@ require('../logout/logout.php');
 // データベースの接続を閉じる
 $pdo = null;
 
-if(isset($_GET['text'])){ 
-	$ueuse = $_GET['text'];
-}else{
-	$ueuse = "";
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/console_notice.js"></script>
 <link rel="manifest" href="../manifest/manifest.json" />
 <script>
 if ("serviceWorker" in navigator) {

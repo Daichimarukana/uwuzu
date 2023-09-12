@@ -431,6 +431,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/console_notice.js"></script>
 <link rel="manifest" href="../manifest/manifest.json" />
 <script>
 if ("serviceWorker" in navigator) {
@@ -648,10 +649,10 @@ $(document).on('click', '.favbtn, .favbtn_after', function(event) {
 				// いいね成功時の処理
 				if (isLiked) {
 					$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
-					$this.find('img').attr('src', '../img/sysimage/favorite_1.svg'); // 画像を元の画像に戻す
+					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
 				} else {
 					$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
-					$this.find('img').attr('src', '../img/sysimage/favorite_2.svg'); // 画像を新しい画像に置き換える
+					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
 				}
 
 				var newFavoriteList = response.newFavorite.split(',');

@@ -1,6 +1,7 @@
 
 <?php 
 function processMarkdownAndWrapEmptyLines($markdownText){
+
     $markdownText = preg_replace('/^\[\[buruburu (.+)\]\]/m', '<p class="buruburu">$1</p>', $markdownText);//←ここ！！！！！！！！！！！！！！
     // コード（#code）をHTMLのdiv class="code"タグに変換
     $markdownText = preg_replace('/^#code (.+)/m', '<div class="code"><p>$1</p></div>', $markdownText);

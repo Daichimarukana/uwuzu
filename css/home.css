@@ -463,7 +463,7 @@ main{
     margin-left: 12px;
     margin-right: 12px;
     width: 62%;
-    background-color: var(--background-color);
+    background-color: var(--tl-color-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     border: 1px solid var(--main-color);
 }
@@ -923,7 +923,7 @@ main h1{
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
     border: 1px solid var(--border-color);
     width: auto;
 }
@@ -1850,7 +1850,7 @@ main h1{
     padding-left: 32px;
     padding-right: 32px;
     border-radius: 15px;
-    background-color: var(--background-color)fff;
+    background-color: var(--tl-color);
     box-shadow:none;
     text-align: left;
 }
@@ -3671,7 +3671,7 @@ summary {
         margin-left: 0px;
         margin-right: 0px;
         width: auto;
-        background-color: var(--background-color);
+        background-color: var(--tl-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         border: none;
@@ -4057,7 +4057,7 @@ summary {
         padding-right: 12px;
         padding-top: 12px;
         padding-bottom: 12px;
-        background-color: var(--background-color);
+        background-color: var(--ueuse-color);
         border: 1px solid var(--border-color);
         width: auto;
     }
@@ -4806,6 +4806,46 @@ summary {
         width:75%;
     }
 
+    .bot_menu_area{
+        display: flex;
+        flex-wrap : wrap;
+        width: 100%;
+    }
+    .menubutton{
+        display: block;
+        background-color: var(--background-color);
+        color: var(--main-color);
+        border-radius: 10px;
+        width: 25%;
+        height: 10dvh;
+        padding:0px;
+        text-align: center;
+        transition: all 250ms ease-out;
+        text-decoration: none;
+    }
+    .menubutton:hover{
+        background-color: var(--sub-color);
+        color: var(--main-color);
+    }
+    .menubutton svg {
+        width: 40%;
+        height: 40%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 15%;
+        margin-bottom: 0px;
+        vertical-align: middle;
+        fill: currentColor;
+    }
+    .menubutton div{
+        font-family: 'BIZ UDPGothic', sans-serif;
+        word-wrap: break-word;
+        font-size: 12px;
+        line-height: 22px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 15%;
+    }
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -5415,5 +5455,14 @@ summary {
     }
     .error p{
         color: var(--background-color);
+    }
+
+    .menubutton{
+        background-color: var(--dark-sub-color);
+        color: var(--main-color);
+    }
+    .menubutton:hover{
+        background-color: var(--dark-background-color);
+        color: var(--main-color);
     }
 }

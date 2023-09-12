@@ -154,6 +154,7 @@ require('../logout/logout.php');
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <title>設定 - <?php echo file_get_contents($servernamefile);?></title>

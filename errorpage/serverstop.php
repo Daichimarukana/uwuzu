@@ -4,6 +4,7 @@
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="home.css">
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>サーバー停止 - ゆずさば</title>
 </head>
