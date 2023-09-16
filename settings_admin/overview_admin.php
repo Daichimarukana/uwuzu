@@ -1,4 +1,29 @@
 <?php
+$servericonfile = "../server/servericon.txt";
+
+$servernamefile = "../server/servername.txt";
+
+$serverinfofile = '../server/info.txt';
+$serverinfo = file_get_contents($serverinfofile);
+
+$servertermsfile = '../server/terms.txt';
+$serverterms = file_get_contents($servertermsfile);
+
+$serverprvfile = '../server/privacypolicy.txt';
+$serverprv = file_get_contents($serverprvfile);
+
+$contactfile = "../server/contact.txt";
+
+$adminfile = "../server/admininfo.txt";
+
+$serverstopfile = "../server/serverstop.txt";
+
+$onlyuserfile = "../server/onlyuser.txt";
+
+$err404imagefile = "../server/404imagepath.txt";
+
+$robots = "../robots.txt";
+
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -8,37 +33,26 @@ function createUniqId(){
 
     return base_convert($hashCreateTime,10,36);
 }
-function random($length = 32)
-{
-    return substr(str_shuffle('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
+function random_code($length = 8){
+    return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
 }
-
 
 require('../db.php');
 
-$servernamefile = "../server/servername.txt";
-
-$onlyuserfile = "../server/onlyuser.txt";
-$onlyuser = file_get_contents($onlyuserfile);
-
-session_name('uwuzu_s_id');
-session_start();
-session_regenerate_id(true);
-
 // 変数の初期化
-$current_date = null;
-$message_array = array();
+$datetime = array();
+$user_name = null;
+$message = array();
+$message_data = null;
 $error_message = array();
-$authcode = array();
 $pdo = null;
 $stmt = null;
 $res = null;
 $option = null;
 
-
-$userid = $_SESSION['userid'];
-
-
+session_name('uwuzu_s_id');
+session_start();
+session_regenerate_id(true);
 
 try {
 
@@ -46,14 +60,13 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
     );
-    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
 } catch(PDOException $e) {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
@@ -159,6 +172,11 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 } 
+
+if(!($res["admin"] === "yes")){
+	header("Location: ../login.php");
+	exit;
+}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -166,90 +184,36 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-require_once '../authcode/GoogleAuthenticator.php';
 
-if(empty($_SESSION['secretcode'])){
-    $authcode = new PHPGangsta_GoogleAuthenticator();
-    $secret = $authcode->createSecret();
-    $_SESSION['secretcode'] = $secret;
-}else{
-    $authcode = new PHPGangsta_GoogleAuthenticator();
-    $secret = $_SESSION['secretcode'];
-}
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
-if( !empty($_POST['btn_submit']) ) {
-    $chkauthcode = new PHPGangsta_GoogleAuthenticator();
-    //二段階認証の確認
-    $userauthcode = $_POST['usercode'];
-
-    $discrepancy = 2;
-
-    $checkResult = $chkauthcode->verifyCode($secret, $userauthcode, $discrepancy);
-    if ($checkResult) {
-        if( empty($error_message) ) {
-            $backupcode = random();
-            $secret = $_SESSION['secretcode'];
-            // トランザクション開始
-            $pdo->beginTransaction();
-        
-            try {
-        
-                        // SQL作成
-                $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode,backupcode = :backupcode WHERE userid = :userid");
-        
-                $stmt->bindValue(':authcode', $secret, PDO::PARAM_STR);
-                $stmt->bindValue(':backupcode', $backupcode, PDO::PARAM_STR);
-                // ユーザーIDのバインド（WHERE句に必要）
-                $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-        
-                // SQLクエリの実行
-                $res = $stmt->execute();
-        
-                // コミット
-                $res = $pdo->commit();
-        
-        
-            } catch (Exception $e) {
-        
-                // エラーが発生した時はロールバック
-                $pdo->rollBack();
-            }
-        
-            if ($res) {
-                // リダイレクト先のURLへ転送する
-                $_SESSION['backupcode'] = $backupcode;
-                $url = 'success.php';
-                header('Location: ' . $url, true, 303);
-                exit; 
-            } else {
-                $error_message[] = '更新に失敗しました。';
-            }
-        
-            // プリペアドステートメントを削除
-            $stmt = null;
-        }
-    } else {
-        $error_message[] = "二段階認証が出来ませんでした。再度お試しください。";
-    }
-}
+//User
+$result = $mysqli->query("SELECT userid FROM account");
+$count1 = $result->num_rows;
+//ueuse
+$result2 = $mysqli->query("SELECT uniqid FROM ueuse");
+$count2 = $result2->num_rows;
+//emoji
+$result3 = $mysqli->query("SELECT sysid FROM emoji");
+$count3 = $result3->num_rows;
+//bot
+$result4 = $mysqli->query("SELECT userid FROM account WHERE sacinfo = 'bot'");
+$count4 = $result4->num_rows;
 
 require('../logout/logout.php');
-
-// データベースの接続を閉じる
-$pdo = null;
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>設定 - <?php echo file_get_contents($servernamefile);?></title>
+<title>サーバー概要 - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
@@ -264,45 +228,57 @@ $pdo = null;
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
+		<div class="admin_settings">
+			<?php require('settings_left_menu.php');?>
+		
+			<div class="admin_right">
+				<div class="formarea">
+					<h1>サーバー概要</h1>
+					<?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+						<div class="servericon">
+							<img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+						</div>
+					<?php }?>
+					<p>サーバー名</p>
+					<p><?php if( !empty(file_get_contents($servernamefile)) ){ echo htmlspecialchars(file_get_contents($servernamefile), ENT_QUOTES, 'UTF-8'); } ?></p>
+					<hr>
+					<p>サーバー紹介メッセージ</p>
+					<p><?php $sinfo = explode("\n", $serverinfo); foreach ($sinfo as $info) { echo htmlspecialchars($info); }?></p>
+					<hr>
+					<p>サーバー管理者の名前</p>
+					<p><?php if( !empty(file_get_contents($adminfile)) ){ echo htmlspecialchars(file_get_contents($adminfile), ENT_QUOTES, 'UTF-8'); } ?></p>
+					<hr>
+					<p>サーバーへのお問い合わせ用メールアドレス</p>
+					<p><?php if( !empty(file_get_contents($contactfile)) ){ echo htmlspecialchars(file_get_contents($contactfile), ENT_QUOTES, 'UTF-8'); } ?></p>
+					<hr>
+					<p>統計情報</p>
+					<div class="overview">
+						<div class="overview_cnt_l">
+							<div class="p2">ユーザー数</div>
+							<p><?php echo htmlentities($count1);?></p>
+						</div>
+						<div class="overview_cnt_r">
+							<div class="p2">投稿数</div>
+							<p><?php echo htmlentities($count2);?></p>
+						</div>
+					</div>
+					<div class="overview">
+						<div class="overview_cnt_l">
+							<div class="p2">カスタム絵文字数</div>
+							<p><?php echo htmlentities($count3);?></p>
+						</div>
+						<div class="overview_cnt_r">
+							<div class="p2">Botアカウント数</div>
+							<p><?php echo htmlentities($count4);?></p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
 
-    <div class="emojibox">
-    <h1>二段階認証の登録</h1>
-            <?php if( !empty($error_message) ): ?>
-                <ul class="errmsg">
-                    <?php foreach( $error_message as $value ): ?>
-                        <p>・ <?php echo $value; ?></p>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
-
-        <?php 
-
-        $title = file_get_contents($servernamefile);
-
-        $name = $userid;
-
-        $qrCodeUrl = $authcode->getQRCodeUrl($name, $secret, $title);
-        ?>
-                
-        <form class="formarea" enctype="multipart/form-data" method="post">
-        <p>以下の二次元コードより二段階認証をセットアップしてください。</p>
-        <p>セットアップが完了したら入力ボックスにコードを入力して「次へ」ボタンを押してください！<br>注意:まだ二段階認証の設定は終わっていません。次へを押すと設定が完了します。</p>
-        <div class="authzone">
-            <img src="../qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>">
-        </div>
-            <div>
-                <p>二段階認証コード</p>
-                <div class="p2">先程セットアップして出力された6桁のコードを入力してください。</div>
-                <input id="profile" type="text" placeholder="123456" class="inbox" name="usercode" value="">
-            </div>
-                <input type="submit" class = "irobutton" name="btn_submit" value="次へ">
-        </form>
-        
-    </div>
-    </main>
-
-<?php require('../require/rightbox.php');?>
-<?php require('../require/botbox.php');?>
+	<?php require('../require/rightbox.php');?>
+	<?php require('../require/botbox.php');?>
 </body>
 
 </html>

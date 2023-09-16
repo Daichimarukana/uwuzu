@@ -6,17 +6,53 @@ require('db.php');
 session_name('uwuzu_s_id');
 session_start();
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-    header("Location: home/index.php");
-	exit;
-	
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
-
-    header("Location: home/index.php");
-    exit;
-
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset($_COOKIE['loginid']) && isset($_SESSION['userid'])) {
+    $options = array(
+        // SQL実行失敗時に例外をスルー
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        // デフォルトフェッチモードを連想配列形式に設定
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
+        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+    );
+    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
+    $acck->bindValue(':userid', $_SESSION['userid']);
+    $acck->execute();
+    $acck_data = $acck->fetch();
+    if(!empty($acck_data)){
+        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_SESSION['userid'] === $acck_data["userid"] ){
+            header("Location: home/index.php");
+            exit;
+        }
+    }
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true && isset($_COOKIE['loginid']) && isset($_COOKIE['userid'])) {
+    $options = array(
+        // SQL実行失敗時に例外をスルー
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        // デフォルトフェッチモードを連想配列形式に設定
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
+        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+    );
+    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
+    $acck->bindValue(':userid', $_COOKIE['userid']);
+    $acck->execute();
+    $acck_data = $acck->fetch();
+    if(!empty($acck_data)){
+        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_COOKIE['userid'] === $acck_data["userid"] ){
+            header("Location: home/index.php");
+            exit;
+        }
+    }
 }
+$servericonfile = "server/servericon.txt";
+
+//-------------------------
 
 $servernamefile = "server/servername.txt";
 
@@ -106,10 +142,19 @@ if ("serviceWorker" in navigator) {
             <?php endforeach; ?>
         </ul>
     <?php endif; ?>
-
         <h1><?php echo file_get_contents($servernamefile);;?>へようこそ！</h1>
-        <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
-        <div class="p2c"><?php echo $domain;?></div>
+        <?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+            <div class="servericon">
+                <img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+                <div class="textzone">
+                    <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
+                    <div class="p2c"><?php echo $domain;?></div>
+                </div>
+            </div>
+        <?php }else{?>
+            <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
+            <div class="p2c"><?php echo $domain;?></div>
+        <?php }?>
 
         <p><?php
         $sinfo = explode("\n", $serverinfo);

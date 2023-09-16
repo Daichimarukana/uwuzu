@@ -63,10 +63,9 @@ function replaceEmojisWithImages($postText) {
 
     return $postTextWithHashtags;
 }
-
 function replaceURLsWithLinks($postText) {
     // URLを正規表現を使って検出
-    $pattern = '/(https:\/\/[^\s]+)/';
+    $pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
     preg_match_all($pattern, $postText, $matches);
 
     // 検出したURLごとに処理を行う
@@ -75,11 +74,12 @@ function replaceURLsWithLinks($postText) {
         $parsedUrl = parse_url($url);
         $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
 
-        // ドメインのみを表示するaタグを生成
-        $link = "<a href='$url' target='_blank'>$domain</a>";
+        // 不要な文字を削除してaタグを生成
+        $urlWithoutSpaces = preg_replace('/\s+/', '', $url);
+        $link = "<a href='$urlWithoutSpaces' target='_blank'>$domain</a>";
 
         // URLをドメインのみを表示するaタグで置き換え
-        $postText = str_replace($url, $link, $postText);
+        $postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
     }
 
     return $postText;
@@ -110,6 +110,11 @@ class MessageDisplay {
             echo '        <div class="idbox">';
             echo '            <a href="/@' . htmlentities($this->value['account']) . '">@' . htmlentities($this->value['account']) . '</a>';
             echo '        </div>';
+            if(!empty($this->value['sacinfo'])){
+                if($this->value['sacinfo'] === "bot"){
+                    echo '<div class="bot">Bot</div>';
+                }
+            }
             if (false !== strpos($this->value['role'], 'official')) {
                 echo '      <div class="checkicon">';
                 echo '          <div class="check" />';
@@ -136,7 +141,17 @@ class MessageDisplay {
             echo '        </div>';
             
             echo '    </div>';
-            
+
+            if($this->value['nsfw'] === "true"){
+                echo '    <div class="nsfw" data-uniqid="' . htmlentities($this->value['uniqid']) . '">';
+                echo '    <p>NSFW指定がされている投稿です！<br>職場や公共の場での表示には適さない場合があります。<br>表示ボタンを押すと表示されます。</p>';
+                echo '    <div class="btnzone">';
+                echo '    <input type="button" id="nsfw_view" class="mini_irobtn" value="表示">';
+                echo '    </div>';
+                echo '    </div>';
+                echo '    <div class="nsfw_main" data-uniqid="' . htmlentities($this->value['uniqid']) . '">';
+                echo '    <div class="block">';
+            }
             echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['ueuse'])))) . '</h1></h2></h3></font></center></p>';
             
             if (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
@@ -164,6 +179,10 @@ class MessageDisplay {
                 echo '<h3>追記日時 : '. date("Y年m月d日 H:i", strtotime(htmlentities($this->value['abidate']))) . '</h3>';
                 echo '</div>';
             }
+            if($this->value['nsfw'] === "true"){
+                echo '    </div>';
+                echo '    </div>';
+            }
             
             echo '<hr>';
             echo '<div class="favbox">';
@@ -183,7 +202,7 @@ class MessageDisplay {
             }
             echo '</div>';
             echo '</div>';
-            
+
         }
     }
 }

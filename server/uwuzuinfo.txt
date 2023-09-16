@@ -1,4 +1,4 @@
 uwuzu
-1.2.22
-2023/09/12
+1.2.23
+2023/09/16
 daichimarukana,putonfps

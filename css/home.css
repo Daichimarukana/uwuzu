@@ -9,6 +9,10 @@
     margin-right: 10px;
     border-radius: 25px;
 }
+::selection {
+    color: var(--background-color);
+    background: var(--main-color);
+}
 body{
     width: 70%;
     display: flex;
@@ -926,6 +930,7 @@ main h1{
     background-color: var(--ueuse-color);
     border: 1px solid var(--border-color);
     width: auto;
+    overflow: hidden;
 }
 @keyframes slideInY {
     0% {
@@ -988,6 +993,20 @@ main h1{
     font-family: 'BIZ UDPGothic', sans-serif;
 }
 
+.ueuse .flebox .bot{
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 6px 8px; 
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: var(--sub-color);
+    border: 1px solid var(--border-color);
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+    color:var(--main-color);
+}
 .ueuse p{
     line-height:20px;
     overflow-wrap:  break-word;
@@ -1196,7 +1215,7 @@ main h1{
     padding-right: 12px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: var(--background-color)FFF;
+    background-color: var(--tl-color);
     border: 1px solid var(--border-color);
     width: auto;
 }
@@ -1547,7 +1566,38 @@ main h1{
     font-family: 'BIZ UDGothic', sans-serif;
     font-weight: normal;
 }
-
+.ueuse .nsfw{
+    display: flex;
+    overflow: hidden;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--background-color);
+    padding: 12px;
+    border-radius: 8px;
+}
+.ueuse .nsfw .btnzone{
+    display: block;
+    margin-left: auto;
+    margin-top: auto;
+    margin-right: 0px;
+    margin-bottom: -6px;
+}
+.ueuse .nsfw p{
+    margin-left: 0px;
+}
+.ueuse .nsfw_main{
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    border-radius: 10px;
+}
+.ueuse .nsfw_main .block{
+    filter: brightness(70%) blur(32px) saturate(70%);
+    pointer-events: none;
+}
+.ueuse .nsfw_main .clear{
+    filter: brightness(100%) blur(0px) saturate(100%);
+}
 
 .tokonone p{
     text-align: center;
@@ -1625,6 +1675,7 @@ main h1{
     border: none;
     display: block;
     width:6%;
+    height: 24px;
     padding: 8px auto;
     margin-left: 6px;
     margin-right: 6px;
@@ -1656,9 +1707,12 @@ main h1{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:5%;
 }
-.sendbox label img{
-    vertical-align:bottom;
+.sendbox label svg{
+    margin: auto;
+    fill: currentColor;
+    vertical-align:top;
     width: 24px;
+    height: 24px;
 }
 .sendbox .fxbox p{
     line-height:20px;
@@ -1672,6 +1726,49 @@ main h1{
     font-weight: bold;
 }
 
+.sendbox .fxbox .nsfw_input {
+    position: absolute;
+
+    width: auto;
+    height: auto;
+    z-index: 5;
+    opacity: 0;
+    cursor: pointer;
+    transition: all 250ms ease-out;
+}  
+.sendbox .fxbox .nsfw_label {
+
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:6%;
+    height: 24px;
+    padding: 6px 6px;
+    
+
+    background-color: var(--main-color);
+    width: auto;
+    height: auto;
+    color: var(--background-color);
+    position: relative;
+    border-radius: 50px;
+    transition: all 250ms ease-out;
+}
+.sendbox .fxbox .nsfw_input:checked + .nsfw_label {
+    background-color: #FF4848;
+} 
+.sendbox .fxbox .nsfw_button {
+    position: relative;
+    width: auto;
+    height: auto;
+}
+.sendbox .fxbox .nsfw_label svg{
+    margin: auto;
+    fill: currentColor;
+    vertical-align:top;
+    width: 24px;
+    height: 24px;
+}
 
 
 .ueusebtn{
@@ -3597,6 +3694,53 @@ summary {
     font-weight: 900;
 }
 
+.overview{
+    display: flex;
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 12px;
+}
+.overview_cnt_l{
+    margin-left: 0px;
+    margin-right: 6px;
+    width: 50%;
+    background-color: var(--background-color);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+.overview_cnt_r{
+    margin-left: 6px;
+    margin-right: 0px;
+    width: 50%;
+    background-color: var(--background-color);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+.overview p{
+    color: var(--text-color);
+    font-size: 32px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+}
+.overview .p2{
+    color: var(--subtext-color);
+    font-size: 12px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+}
+.servericon{
+    text-align: center;
+}
+.servericon img{
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -3718,7 +3862,7 @@ summary {
         flex-shrink: 0;
         text-align: center;
         width:10%;
-        padding: 8px auto;
+        padding: 6px 2.6px;
         margin-left: 6px;
         margin-right: 6px;
         padding-top: 6px;
@@ -3806,7 +3950,7 @@ summary {
         border: none;
     }
     .btmbutton:hover{
-        background-color: var(--background-color)FFF;
+        background-color: var(--background-color);
         color: var(--main-color);
         box-shadow:none;
     }
@@ -4328,6 +4472,17 @@ summary {
         color: var(--text-color);
     }
 
+    .ueuse .flebox .bot{
+        margin-top: auto;
+        margin-bottom: auto;
+        padding: 3px 8px; 
+        margin-left: 6px;
+        border-radius: 10px;
+        font-family: 'BIZ UDGothic', sans-serif;
+        font-weight: bold;
+        text-align: center;
+        font-size: 12px;
+    }
 
     .ueuse .photo1 img{
         object-fit: cover;
@@ -4913,6 +5068,12 @@ summary {
     .ueuse .flebox .idbox a{
         color:var(--dark-subtext-color);
     }
+
+    .ueuse .flebox .bot{
+        background-color: #302c2c;
+        border: none;
+        color:var(--main-color);
+    }
     
     .ueuse p{
         color:var(--background-color);
@@ -5013,6 +5174,13 @@ summary {
     }
     .ueuse hr{
         border-top: 1px solid var(--dark-subtext-color);
+    }
+    .ueuse .nsfw{
+        border: none;
+        background-color: var(--dark-background-color);
+    }
+    .ueuse .nsfw_main{
+        border: none;
     }
 
     .userheader h2{
@@ -5464,5 +5632,36 @@ summary {
     .menubutton:hover{
         background-color: var(--dark-background-color);
         color: var(--main-color);
+    }
+    .mini_irobtn{
+        background-color: var(--dark-background-color);
+        color: var(--main-color);
+    }
+    .mini_irobtn:hover{
+        background-color: var(--main-color);
+        color: var(--dark-background-color);;
+    }
+    .overview_cnt_l{
+        background-color: var(--dark-background-color);
+        border: none;
+    }
+    .overview_cnt_r{
+        background-color: var(--dark-background-color);
+        border: none;
+    }
+    .overview p{
+        color: var(--dark-text-color);
+        font-size: 32px;
+        font-family: 'BIZ UDGothic', sans-serif;
+        font-weight: bold;
+    }
+    .overview .p2{
+        color: var(--dark-subtext-color);
+        font-size: 12px;
+        font-family: 'BIZ UDGothic', sans-serif;
+        font-weight: normal;
+    }
+    .servericon img{
+        box-shadow:none;
     }
 }

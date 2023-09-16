@@ -53,7 +53,7 @@ if (!empty($pdo)) {
     $messages = array(); // 初期化
 
     foreach ($followList as $followUserId) {
-        $sql = "SELECT account, username, uniqid, rpuniqid, ueuse, datetime, photo1, photo2, video1, favorite, abi, abidate FROM ueuse WHERE rpuniqid = '' AND account = :follow_account ORDER BY datetime DESC LIMIT $offset, $itemsPerPage";
+        $sql = "SELECT * FROM ueuse WHERE rpuniqid = '' AND account = :follow_account ORDER BY datetime DESC LIMIT $offset, $itemsPerPage";
 
         $stmt = $dbh->prepare($sql);
         $stmt->bindValue(':follow_account', $followUserId, PDO::PARAM_STR);
@@ -68,7 +68,7 @@ if (!empty($pdo)) {
     });
     // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
     foreach ($messages as &$message) {
-        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname FROM account WHERE userid = :userid");
+        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");
         $userQuery->bindValue(':userid', $message["account"]);
         $userQuery->execute();
         $userData = $userQuery->fetch();
@@ -77,6 +77,7 @@ if (!empty($pdo)) {
             $message['iconname'] = $userData['iconname'];
             $message['headname'] = $userData['headname'];
             $message['username'] = $userData['username'];
+            $message['sacinfo'] = $userData['sacinfo'];
             $message['role'] = $userData['role'];
         }
 

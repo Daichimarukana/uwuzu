@@ -47,59 +47,48 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: login.php");
-		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"]){
-	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
-    header("Location: home/index.php");
-	exit;
-	}
-
-		
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"]){
-	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, time() + 60 * 60 * 24 * 14);
-	setcookie('username', $username, time() + 60 * 60 * 24 * 14);
-	setcookie('loginid', $res["loginid"], time() + 60 * 60 * 24 * 14);
-	setcookie('admin_login', true, time() + 60 * 60 * 24 * 14);
-    header("Location: home/index.php");
-    exit;
-	}
-
-
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset($_COOKIE['loginid']) && isset($_SESSION['userid'])) {
+    $options = array(
+        // SQL実行失敗時に例外をスルー
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        // デフォルトフェッチモードを連想配列形式に設定
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
+        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+    );
+    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
+    $acck->bindValue(':userid', $_SESSION['userid']);
+    $acck->execute();
+    $acck_data = $acck->fetch();
+    if(!empty($acck_data)){
+        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_SESSION['userid'] === $acck_data["userid"] ){
+            header("Location: home/index.php");
+            exit;
+        }
+    }
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true && isset($_COOKIE['loginid']) && isset($_COOKIE['userid'])) {
+    $options = array(
+        // SQL実行失敗時に例外をスルー
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        // デフォルトフェッチモードを連想配列形式に設定
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
+        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+    );
+    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
+    $acck->bindValue(':userid', $_COOKIE['userid']);
+    $acck->execute();
+    $acck_data = $acck->fetch();
+    if(!empty($acck_data)){
+        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_COOKIE['userid'] === $acck_data["userid"] ){
+            header("Location: home/index.php");
+            exit;
+        }
+    }
 }
 
 if( !empty($_POST['btn_submit']) ) {
@@ -226,7 +215,7 @@ if( !empty($_POST['btn_submit']) ) {
         PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
     );
 
-    
+    $dbh = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
     if($onlyuser === "true"){
         $query = $dbh->prepare('SELECT * FROM invitation WHERE code = :code limit 1');

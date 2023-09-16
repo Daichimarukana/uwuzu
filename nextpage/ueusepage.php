@@ -46,7 +46,7 @@ if (!empty($pdo)) {
     ));
 
     // 投稿内容の取得（新しい順に取得）
-    $messageQuery = $dbh->prepare("SELECT account, username, ueuse, uniqid, rpuniqid, datetime, photo1, photo2, video1, favorite, abi, abidate FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT $offset, $itemsPerPage");
+    $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT $offset, $itemsPerPage");
     $messageQuery->bindValue(':ueuseid', $ueuseid);
     $messageQuery->bindValue(':rpueuseid', $ueuseid);
     $messageQuery->execute();
@@ -61,7 +61,7 @@ if (!empty($pdo)) {
 	}
     // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
     foreach ($messages as &$message) {
-        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname FROM account WHERE userid = :userid");
+        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");
         $userQuery->bindValue(':userid', $message["account"]);
         $userQuery->execute();
         $userData = $userQuery->fetch();
@@ -70,6 +70,7 @@ if (!empty($pdo)) {
             $message['iconname'] = $userData['iconname'];
             $message['headname'] = $userData['headname'];
             $message['username'] = $userData['username'];
+            $message['sacinfo'] = $userData['sacinfo'];
             $message['role'] = $userData['role'];
         }
 

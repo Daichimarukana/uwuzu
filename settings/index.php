@@ -46,8 +46,8 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -55,8 +55,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -89,8 +92,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -98,8 +101,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -159,7 +165,7 @@ if( !empty($pdo) ) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
-	$userQuery = $dbh->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
+	$userQuery = $dbh->prepare("SELECT username, userid, profile, role, token FROM account WHERE userid = :userid");
 	$userQuery->bindValue(':userid', $userid);
 	$userQuery->execute();
 	$userData = $userQuery->fetch();
@@ -182,6 +188,14 @@ if( !empty($pdo) ) {
 
 
 if( !empty($_POST['btn_submit']) ) {
+
+	$im_bot = $_POST['im_bot'];
+
+	if($im_bot === "true"){
+		$saveim_bot = "bot";
+	}else{
+		$saveim_bot = "none";
+	}
 
     // 空白除去
 	$username = $_POST['username'];
@@ -227,12 +241,13 @@ if( !empty($_POST['btn_submit']) ) {
 
 	try {
 		// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile WHERE userid = :userid;");
+		$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot WHERE userid = :userid;");
 
 		// 他の値をセット
 		$stmt->bindParam(':username', $username, PDO::PARAM_STR);
 		$stmt->bindParam(':mailadds', $mailadds, PDO::PARAM_STR);
 		$stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
+		$stmt->bindParam(':saveimbot', $saveim_bot, PDO::PARAM_STR);
 
 		// 条件を指定
 		// 以下の部分を適切な条件に置き換えてください
@@ -760,6 +775,23 @@ $pdo = null;
                 <p>プロフィール</p>
                 <textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlspecialchars( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
             </div>
+
+			<?php if(!empty($userData['token'])){?>
+
+				<p>このアカウントがBotであることを公開する</p>
+				<div class="switch_button">
+					<?php if($sacinfo === "bot"){?>
+						<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" checked/>
+						<label for="im_bot" class="switch_label"></label>
+					<?php }else{?>
+						<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" />
+						<label for="im_bot" class="switch_label"></label>
+					<?php }?>
+				</div>
+
+			<?php }elseif($userData['token']==='ice'){ ?>
+				<p>アカウントが凍結されているためBotであることの設定変更はできません。</p>
+			<?php }?>
 			            
             <input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
 

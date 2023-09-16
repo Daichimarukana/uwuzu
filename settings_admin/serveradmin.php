@@ -1,4 +1,5 @@
 <?php
+$servericonfile = "../server/servericon.txt";
 
 $servernamefile = "../server/servername.txt";
 
@@ -67,8 +68,8 @@ try {
 }
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -76,9 +77,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
-	$loginid = $res["loginid"];
+	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -111,8 +114,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -120,9 +123,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
-	$loginid = $res["loginid"];
+	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -221,6 +226,9 @@ if (!empty($pdo)) {
 if( !empty($_POST['btn_submit']) ) {
 
     // 空白除去
+
+	$servericon = $_POST['servericon'];
+
 	$servername = $_POST['servername'];
 
 	$serverinfo = $_POST['serverinfo'];
@@ -259,6 +267,12 @@ if( !empty($_POST['btn_submit']) ) {
 	$serverprv = $_POST['serverprv'];
 
 	$serverstop = $_POST['serverstop'];
+
+	//鯖icon
+	$file = fopen($servericonfile, 'w');
+	$data = $servericon;
+	fputs($file, $data);
+	fclose($file);
 
 	//鯖名
 	$file = fopen($servernamefile, 'w');
@@ -345,23 +359,37 @@ require('../logout/logout.php');
 			<div class="admin_right">
 				<form class="formarea" enctype="multipart/form-data" method="post">
 					<h1>サーバー設定</h1>
+					<?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+					<div class="servericon">
+						<img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+					</div>
+					<?php }?>
+					<div>
+						<p>サーバーアイコン</p>
+						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。</div>
+						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty(file_get_contents($servericonfile)) ){ echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); } ?>">
+					</div>
 					<div>
 						<p>サーバー名</p>
+						<div class="p2">サーバー名です。</div>
 						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty(file_get_contents($servernamefile)) ){ echo htmlspecialchars(file_get_contents($servernamefile), ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
 						<p>サーバー紹介メッセージ</p>
+						<div class="p2">サーバーの紹介メッセージです。</div>
 						<textarea id="serverinfo" placeholder="たのしいさーばーです" class="inbox" type="text" name="serverinfo"><?php $sinfo = explode("\n", $serverinfo); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
 
 					<div>
 						<p>サーバー管理者の名前</p>
+						<div class="p2">サーバー管理者名です。</div>
 						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty(file_get_contents($adminfile)) ){ echo htmlspecialchars(file_get_contents($adminfile), ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
 						<p>サーバーへのお問い合わせ用メールアドレス</p>
+						<div class="p2">ユーザーからのお問い合わせメアドです。</div>
 						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty(file_get_contents($contactfile)) ){ echo htmlspecialchars(file_get_contents($contactfile), ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 

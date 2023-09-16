@@ -19,6 +19,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 ## 簡単に構築できるようSQLの構造ファイルがリリースに添付されています！そちらをインポートしていただけますと大幅に簡単に導入できます！
 (userロールとofficialロールとiceロールの設定は別途必要です。お手数ですがそこの設定だけよろしくお願いいたします。)
 
+
 ### account
 - sysid(INT)(AUTO_INCREMENT	) アカウントが追加されるとカウントされるシステム用ID
 - username(varchar(500)) ユーザーネーム保存用
@@ -36,6 +37,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - admin(varchar(25)) 管理者アカウントなら「yes」、それ以外なら「none」と入力。
 - authcode(varchar(256)) 二段階認証用キー保存用
 - backupcode(varchar(256)) 二段階認証のバックアップコード保存用
+- sacinfo(varchar(256)) 特殊アカウント識別用
 
 ### emoji
 - sysid(INT)(AUTO_INCREMENT) アカウントが追加されるとカウントされるシステム用ID
@@ -73,6 +75,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - favorite(text) いいね保存用
 - abi(text) 投稿者の追記保存用
 - abidate(datetime) 追記日時保存用
+- nsfw(varchar(25)) NSFW指定有無保存用
 
 ### notification
 - sysid(INT)(AUTO_INCREMENT) 通知されるとカウントされるシステム用ID
@@ -112,6 +115,26 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 そしたら普通にuwuzuにアクセスして自分のアカウントを登録。
 ## 管理者アカウント登録機能が追加されました。【[domain]/admin/】より設定できるのでそちらをご利用ください。
 なお、管理者アカウントを導入後に登録した場合サーバーを止めてuwuzu動作ディレクトリ内のserverフォルダ内のファイルを設定する必要はございません。
+管理者アカウント作成後にログインし、サーバー設定より以下の項目が簡単に設定できます。
+
+- 404imagepath.txt : 404ページに表示する画像パス保存用
+- 503imagepath.txt : 503ページに表示する画像パス保存用
+- admininfo.txt : 管理者名(てすとまる/@sampledayo)
+- banurldomain.txt : 投稿禁止URLドメイン
+- banuserid.txt : 登録禁止ユーザーid
+- admininfo.txt : 管理者名(てすとまる/@sampledayo)
+- contact.txt : 管理者への連絡用メアド(sample@test.com)
+- info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
+- privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
+- servaricon.txt : サーバーアイコンのURL
+- servername.txt : サーバー名(てすとさば)
+- serverstop.txt : サーバー停止ページで表示するメッセージ
+- terms.txt : 利用規約(サーバーの利用規約を記載)
+- textsize.txt : 最大文字数
+- uwuzuabout.txt : このファイル(uwuzuを改造した場合は書き換え)
+- uwuzuinfo.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
+- uwuzurelease.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
+- onlyuser.txt : 招待コード機能をオンにするかどうか、「true」でオン、「false」でオフ。招待コードはDBに直接追加。
 
 ### これでサーバーは完成！！！
 脆弱だから自己責任で楽しんでね～()

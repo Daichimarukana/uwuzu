@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- ホスト: ひみつ♡()
--- 生成日時: 2023-09-02 18:20:50
+-- ホスト: ひみつ☆
+-- 生成日時: 2023-09-16 15:15:33
 -- サーバのバージョン： 10.4.28-MariaDB
 -- PHP のバージョン: 8.2.4
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- データベース: `nandemo`
+-- データベース: `account`
 --
 
 -- --------------------------------------------------------
@@ -44,7 +44,25 @@ CREATE TABLE `account` (
   `follower` text NOT NULL,
   `admin` varchar(50) NOT NULL,
   `authcode` varchar(256) NOT NULL,
-  `backupcode` varchar(256) NOT NULL
+  `backupcode` varchar(256) NOT NULL,
+  `sacinfo` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `ads`
+--
+
+CREATE TABLE `ads` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(512) NOT NULL,
+  `url` varchar(512) NOT NULL,
+  `image_url` varchar(512) NOT NULL,
+  `memo` text NOT NULL,
+  `start_date` datetime NOT NULL,
+  `limit_date` datetime NOT NULL,
+  `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -110,6 +128,22 @@ CREATE TABLE `notification` (
 -- --------------------------------------------------------
 
 --
+-- テーブルの構造 `report`
+--
+
+CREATE TABLE `report` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
+  `userid` varchar(500) NOT NULL,
+  `report_userid` varchar(500) NOT NULL,
+  `msg` text NOT NULL,
+  `datetime` datetime NOT NULL,
+  `admin_chk` varchar(25) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- テーブルの構造 `role`
 --
 
@@ -140,7 +174,8 @@ CREATE TABLE `ueuse` (
   `datetime` datetime NOT NULL,
   `favorite` text NOT NULL,
   `abi` text NOT NULL,
-  `abidate` datetime NOT NULL
+  `abidate` datetime NOT NULL,
+  `nsfw` varchar(25) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -151,6 +186,12 @@ CREATE TABLE `ueuse` (
 -- テーブルのインデックス `account`
 --
 ALTER TABLE `account`
+  ADD PRIMARY KEY (`sysid`);
+
+--
+-- テーブルのインデックス `ads`
+--
+ALTER TABLE `ads`
   ADD PRIMARY KEY (`sysid`);
 
 --
@@ -178,6 +219,12 @@ ALTER TABLE `notification`
   ADD PRIMARY KEY (`sysid`);
 
 --
+-- テーブルのインデックス `report`
+--
+ALTER TABLE `report`
+  ADD PRIMARY KEY (`sysid`);
+
+--
 -- テーブルのインデックス `role`
 --
 ALTER TABLE `role`
@@ -197,6 +244,12 @@ ALTER TABLE `ueuse`
 -- テーブルの AUTO_INCREMENT `account`
 --
 ALTER TABLE `account`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `ads`
+--
+ALTER TABLE `ads`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -221,6 +274,12 @@ ALTER TABLE `notice`
 -- テーブルの AUTO_INCREMENT `notification`
 --
 ALTER TABLE `notification`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `report`
+--
+ALTER TABLE `report`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

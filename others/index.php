@@ -59,8 +59,8 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -68,8 +68,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
+	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -102,8 +105,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -111,8 +114,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
+	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -354,12 +360,14 @@ if( !empty($_POST['session_submit']) ) {
 
 if( !empty($_POST['token_submit']) ) {
 	$token = random_token();
+	$nones = "none";
 	$pdo->beginTransaction();
 		try {
 			
-            $stmt = $pdo->prepare("UPDATE account SET token = :token WHERE userid = :userid;");
+            $stmt = $pdo->prepare("UPDATE account SET token = :token, sacinfo = :new_sacinfo WHERE userid = :userid;");
 
             $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+			$stmt->bindParam(':new_sacinfo', $nones, PDO::PARAM_STR);
 
             $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
 
@@ -388,12 +396,14 @@ if( !empty($_POST['token_submit']) ) {
 
 if( !empty($_POST['token_off_submit']) ) {
 	$token = '';
+	$new_sacinfo = 'none';
 	$pdo->beginTransaction();
 		try {
 			
-            $stmt = $pdo->prepare("UPDATE account SET token = :token WHERE userid = :userid;");
+            $stmt = $pdo->prepare("UPDATE account SET token = :token,sacinfo = :sacinfo WHERE userid = :userid;");
 
             $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+			$stmt->bindParam(':sacinfo', $new_sacinfo, PDO::PARAM_STR);
 
             $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
 

@@ -7,6 +7,10 @@ require('../db.php');
 session_name('uwuzu_s_id');
 session_start();
 
+$servericonfile = "../server/servericon.txt";
+
+//-------------------------
+
 $contactfile = "../server/contact.txt";
 
 $adminfile = "../server/admininfo.txt";
@@ -90,6 +94,11 @@ $count2 = $result2->num_rows;
 <div class="terms">
 
     <h1>サーバー情報</h1>
+    <?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+        <div class="servericon">
+            <img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+    <?php }?>
     <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
     <div class="p2c"><?php echo $domain;?></div>
     <hr>

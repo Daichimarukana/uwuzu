@@ -44,13 +44,13 @@ if (!empty($pdo)) {
         $username = $matches[1];
         $searchKeyword = $matches[2];
 
-        $messageQuery = $dbh->prepare("SELECT account,username,ueuse,uniqid,rpuniqid,datetime,photo1,photo2,video1,favorite, abi, abidate FROM ueuse WHERE account = :username AND (ueuse LIKE :searchKeyword OR abi LIKE :searchKeyword) ORDER BY datetime DESC");
+        $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :username AND (ueuse LIKE :searchKeyword OR abi LIKE :searchKeyword) ORDER BY datetime DESC");
         $messageQuery->bindValue(':username', $username, PDO::PARAM_STR);
         $messageQuery->bindValue(':searchKeyword', '%' . $searchKeyword . '%', PDO::PARAM_STR);
         $messageQuery->execute();
         $message_array = $messageQuery->fetchAll();
     } else {
-        $messageQuery = $dbh->prepare("SELECT account,username,ueuse,uniqid,rpuniqid,datetime,photo1,photo2,video1,favorite, abi, abidate FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC");
+        $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC");
         $messageQuery->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
         $messageQuery->execute();
         $message_array = $messageQuery->fetchAll();
@@ -63,7 +63,7 @@ if (!empty($pdo)) {
 	}
     // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
     foreach ($messages as &$message) {
-        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname FROM account WHERE userid = :userid");
+        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");
         $userQuery->bindValue(':userid', $message["account"]);
         $userQuery->execute();
         $userData = $userQuery->fetch();
@@ -72,6 +72,7 @@ if (!empty($pdo)) {
             $message['iconname'] = $userData['iconname'];
             $message['headname'] = $userData['headname'];
             $message['username'] = $userData['username'];
+            $message['sacinfo'] = $userData['sacinfo'];
             $message['role'] = $userData['role'];
         }
 

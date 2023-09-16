@@ -51,8 +51,8 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -60,10 +60,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
-	$loginid = $res["loginid"];
-	$role = $res["role"];
+	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -96,8 +97,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -105,10 +106,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
-	$loginid = $res["loginid"];
-	$role = $res["role"];
+	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -152,7 +154,6 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 } 
-
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -191,6 +192,18 @@ function get_mentions_userid($postText) {
 if( !empty($_POST['btn_submit']) ) {
 
 	$ueuse = htmlentities($_POST['ueuse']);
+
+	if(isset($_POST['nsfw_chk'])){
+		$nsfw_chk = htmlentities($_POST['nsfw_chk']);
+	}else{
+		$nsfw_chk = "false";
+	}
+
+	if($nsfw_chk === "true"){
+		$save_nsfw = "true";
+	}else{
+		$save_nsfw = "false";
+	}
 
 	// メッセージの入力チェック
 	if( empty($ueuse) ) {
@@ -337,7 +350,7 @@ if( !empty($_POST['btn_submit']) ) {
             try {
 
                 // SQL作成
-                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
+                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi, :nsfw)");
         
                 $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                 $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
@@ -349,8 +362,9 @@ if( !empty($_POST['btn_submit']) ) {
 				$stmt->bindParam(':video1', $video1, PDO::PARAM_STR);
                 $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-				$stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+				$stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
 
+				$stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
                 // SQLクエリの実行
                 $res = $stmt->execute();
 
@@ -432,6 +446,7 @@ $pdo = null;
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script src="../js/console_notice.js"></script>
+<script src="../js/nsfw_event.js"></script>
 <link rel="manifest" href="../manifest/manifest.json" />
 <script>
 if ("serviceWorker" in navigator) {
@@ -473,18 +488,23 @@ if ("serviceWorker" in navigator) {
 					<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8'); } ?></textarea>
 					<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
 					<div class="fxbox">
-						<label for="upload_images" id="images">
-						<img src="../img/sysimage/image_1.svg">
+						<label for="upload_images" id="images" title="画像1">
+						<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
 						<input type="file" name="upload_images" id ="upload_images" accept="image/*">
 						</label>
-						<label for="upload_images2" id="images2">
-						<img src="../img/sysimage/image_1.svg">
+						<label for="upload_images2" id="images2" style="display: none" title="画像2">
+						<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
 						<input type="file" name="upload_images2" id ="upload_images2" accept="image/*">
 						</label>
-						<label for="upload_videos1" id="videos1">
-						<img src="../img/sysimage/video_1.svg">
+						<label for="upload_videos1" id="videos1" title="動画1">
+						<svg><use xlink:href="../img/sysimage/video_1.svg#video"></use></svg>
 						<input type="file" name="upload_videos1" id ="upload_videos1" accept="video/*">
 						</label>
+
+						<div class="nsfw_button">
+							<input id="nsfw_chk" class="nsfw_input" type='checkbox' name="nsfw_chk" value="true"/>
+							<label for="nsfw_chk" class="nsfw_label" title="投稿をNSFW指定にする"><svg><use xlink:href="../img/sysimage/eye_1.svg#eye"></use></svg></label>
+						</div>
 
 						<input type="submit" class="ueusebtn" name="btn_submit" value="ユーズする">
 					</div>
@@ -496,7 +516,6 @@ if ("serviceWorker" in navigator) {
 				var file_reader = new FileReader();
 				// ファイルの読み込みを行ったら実行
 				file_reader.addEventListener('load', function(e) {
-				console.log(e.target.result);
 					const element = document.querySelector('#videos1');
 					const createElement = '<p>動画を選択しました。</p>';
 					element.insertAdjacentHTML('afterend', createElement);
@@ -507,7 +526,6 @@ if ("serviceWorker" in navigator) {
 			var file_reader = new FileReader();
 			// ファイルの読み込みを行ったら実行
 			file_reader.addEventListener('load', function(e) {
-			console.log(e.target.result);
 				const element = document.querySelector('#images2');
 				const createElement = '<p>画像を選択しました。</p>';
 				element.insertAdjacentHTML('afterend', createElement);
@@ -518,10 +536,10 @@ if ("serviceWorker" in navigator) {
 			var file_reader = new FileReader();
 			// ファイルの読み込みを行ったら実行
 			file_reader.addEventListener('load', function(e) {
-			console.log(e.target.result);
 				const element = document.querySelector('#images');
 				const createElement = '<p>画像を選択しました。</p>';
 				element.insertAdjacentHTML('afterend', createElement);
+				$("#images2").show();
 			});
 			file_reader.readAsText(e.target.files[0]);
 			});

@@ -69,8 +69,8 @@ try {
 }
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_SESSION['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -78,9 +78,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_SESSION['userid']; // セッションに格納されている値をそのままセット
-	$username = $_SESSION['username']; // セッションに格納されている値をそのままセット
-	$loginid = $res["loginid"];
+	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -113,8 +115,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', $_COOKIE['userid']);
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
 	if(empty($res["userid"])){
@@ -122,9 +124,11 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = $_COOKIE['userid']; // クッキーから取得した値をセット
-	$username = $_COOKIE['username']; // クッキーから取得した値をセット
-	$loginid = $res["loginid"];
+	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
