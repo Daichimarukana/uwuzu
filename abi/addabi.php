@@ -1,4 +1,10 @@
 <?php
+$mojisizefile = "../server/textsize.txt";
+
+$banurldomainfile = "../server/banurldomain.txt";
+$banurl_info = file_get_contents($banurldomainfile);
+$banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
+
 require('../db.php');
 
 if (htmlentities(isset($_POST['uniqid'])) && htmlentities(isset($_POST['abitext'])) && htmlentities(isset($_POST['userid'])) && htmlentities(isset($_POST['account_id']))) {
@@ -67,6 +73,27 @@ if (htmlentities(isset($_POST['uniqid'])) && htmlentities(isset($_POST['abitext'
         $result2 = $query->fetch();
 
         if($result2["loginid"] === $loginid){
+
+            // 文字数を確認
+            if( (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8') < mb_strlen($abitext, 'UTF-8') ) {
+                $err = "content_to_".htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8')."_characters";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            // 禁止url確認
+            for($i = 0; $i < count($banurl); $i++) {
+                if (false !== strpos($abitext, 'https://'.$banurl[$i])) {
+                    $err = "contains_prohibited_url";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
 
             try {
                 $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);

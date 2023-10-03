@@ -20,6 +20,8 @@ $serverstopfile = "../server/serverstop.txt";
 
 $onlyuserfile = "../server/onlyuser.txt";
 
+$activitypub_file = "../server/activitypub.txt";
+
 $err404imagefile = "../server/404imagepath.txt";
 
 $robots = "../robots.txt";
@@ -261,6 +263,14 @@ if( !empty($_POST['btn_submit']) ) {
 		fclose($file);
 	}
 
+	$activitypub = $_POST['activitypub'];
+
+	if($activitypub === "true"){
+		$saveactivitypub = "true";
+	}else{
+		$saveactivitypub = "false";
+	}
+
 
 	$serverterms = $_POST['serverterms'];
 
@@ -301,6 +311,12 @@ if( !empty($_POST['btn_submit']) ) {
 	//招待制にするか
 	$file = fopen($onlyuserfile, 'w');
 	$data = $saveonlyuser;
+	fputs($file, $data);
+	fclose($file);
+
+	//ActivityPub
+	$file = fopen($activitypub_file, 'w');
+	$data = $saveactivitypub;
 	fputs($file, $data);
 	fclose($file);
 
@@ -415,6 +431,20 @@ require('../logout/logout.php');
 							<?php }else{?>
 								<input id="robots" class="switch_input" type='checkbox' name="robots" value="true" />
 								<label for="robots" class="switch_label"></label>
+							<?php }?>
+						</div>
+					</div>
+
+					<div>
+						<p>ActivityPubサーバーとして認識されるようにするか</p>
+						<div class="p2">ActivityPubの仮実装をオンにするかです。inboxに入ってきた内容には今現在これといったレスポンスを返しません。<br>また、publicKeyも返却しません。<br>現状ActivityPubサーバーと連合を組むことは出来ません。(リモートユーザーの確認程度なら出来ます。)</div>
+						<div class="switch_button">
+							<?php if(file_get_contents($activitypub_file) === "true"){?>
+								<input id="activitypub" class="switch_input" type='checkbox' name="activitypub" value="true" checked/>
+								<label for="activitypub" class="switch_label"></label>
+							<?php }else{?>
+								<input id="activitypub" class="switch_input" type='checkbox' name="activitypub" value="true" />
+								<label for="activitypub" class="switch_label"></label>
 							<?php }?>
 						</div>
 					</div>

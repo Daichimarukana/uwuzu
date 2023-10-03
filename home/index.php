@@ -1,4 +1,5 @@
 <?php
+
 $servernamefile = "../server/servername.txt";
 
 $mojisizefile = "../server/textsize.txt";

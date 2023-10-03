@@ -1,6 +1,66 @@
 ## リリースノートだぜぇぇぇぇぇぇい！！！！！！！
 ここにはuwuzuの更新情報を載せてくぜぇ～！(いやまてテンションおかしいだろ...)
 
+## Version 1.2.24
+リリース日:2023/10/04
+画像選択ボタンのUIを変更しました。
+サーバー管理画面で改行が正常にされない問題を修正しました。
+アカウントの解凍機能を微調整しました。
+うっかりミスを修正しました。
+不完全ですがActivityPubに準拠したjsonを返すプログラムを実装しました。
+標準では動作しないようにしてあります。
+凍結されたユーザーの投稿をLTLとFTLで表示しないようにしました。
+追記機能にも禁止URLと文字数制限を掛けるようにしました。
+bot-apiの仕様を変更しました。
+(新URL)https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&ueuse=[投稿の内容]&type=post
+【レスポンス例↓】
+uniqid	"1bwtu12ea1"
+userid	"admin"
+
+typeを指定するようにしてください。
+typeにgetuserを指定し、ueuseを削除するとアクセストークンからユーザー情報を取得することができるようになります。
+※アクセストークンから取得しない場合は今までと同じくuserdata-apiをご利用ください。
+(新URL)https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=getuser
+【レスポンス例↓】
+user_name	"あどみん"
+user_id	"admin"
+profile	"tets\r\n2"
+user_icon	"https://[ドメイン名(uwuzu.netなど)]/usericons/64f5f5bf69a2f-admin.webp"
+user_header	"https://[ドメイン名(uwuzu.netなど)]/userheads/64f5f5bf69c3f-admin.png"
+registered_date	"2023-09-05 00:20:31"
+follow	",test"
+follow_cnt	"1"
+follower	",test"
+follower_cnt	"1"
+
+凍結されたユーザーがプロフィールを変更できないようにしました。
+パスワード更新の際にユーザーIDの確認を求めるようにしました。
+ユーザー情報取得APIのレスポンス仕様を変更しました。
+【レスポンス例↓】
+user_name	"あどみん"
+user_id	"admin"
+profile	"tets\r\n2"
+user_icon	"https://[ドメイン名(uwuzu.netなど)]/usericons/64f5f5bf69a2f-admin.webp"
+user_header	"https://[ドメイン名(uwuzu.netなど)]/userheads/64f5f5bf69c3f-admin.png"
+registered_date	"2023-09-05 00:20:31"
+follow	",test"
+follow_cnt	"1"
+follower	",test"
+follower_cnt	"1"
+
+返信APIを実装しました。
+https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]
+【レスポンス例↓】
+uniqid	"1bwtu12ea2"
+userid	"admin"
+
+バグの修正をしました。
+アカウント検索機能を実装しました。
+ユーザープロフィールで投稿数を表示するようにしました。
+ブロック機能を実装しました。(現状Xのミュート機能とほぼ同じ機能です)
+DBに変更があるためaccountにblocklist[text]を追加してください。
+uwuzu_database.sqlも更新済みです。
+
 ## Version 1.2.23
 リリース日:2023/09/16
 アカウント登録ができない問題を修正しました。
@@ -19,7 +79,7 @@ UIを一部変更しました。
 サーバーアイコン機能を実装しました！
 アカウント登録画面をダークモード対応にしました！
 DBに変更があるためaccountにsacinfo[varchar(256)]を、ueuseにnsfw[varchar(25)]を追加してください。
-uwuzu-database.sqlも更新済みです。
+uwuzu_database.sqlも更新済みです。
 
 ## Version 1.2.22
 リリース日:2023/09/12

@@ -53,7 +53,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -67,6 +67,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -99,7 +100,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -113,6 +114,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -155,7 +157,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}  
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -413,39 +415,42 @@ if( !empty($_POST['btn_submit']) ) {
 				$mentionedUsers = get_mentions_userid($ueuse);
 
 				foreach ($mentionedUsers as $mentionedUser) {
+					
+					if(!($mentionedUser === $userid)){
 				
-					$pdo->beginTransaction();
+						$pdo->beginTransaction();
 
-					try {
-						$touserid = $mentionedUser;
-						$datetime = date("Y-m-d H:i:s");
-						$msg = "" . $ueuse . "";
-						$title = "" . $username . "さんにメンションされました！";
-						$url = "/!" . $uniqid . "~" . $userid . "";
-						$userchk = 'none';
+						try {
+							$touserid = $mentionedUser;
+							$datetime = date("Y-m-d H:i:s");
+							$msg = "" . $ueuse . "";
+							$title = "" . $username . "さんにメンションされました！";
+							$url = "/!" . $uniqid . "~" . $userid . "";
+							$userchk = 'none';
 
-						// 通知用SQL作成
-						$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+							// 通知用SQL作成
+							$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
 
 
-						$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-						$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-						$stmt->bindParam(':url', $url, PDO::PARAM_STR);
-						$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-						$stmt->bindParam(':title', $title, PDO::PARAM_STR);
+							$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+							$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+							$stmt->bindParam(':url', $url, PDO::PARAM_STR);
+							$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+							$stmt->bindParam(':title', $title, PDO::PARAM_STR);
 
-						$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+							$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-						// SQLクエリの実行
-						$res = $stmt->execute();
+							// SQLクエリの実行
+							$res = $stmt->execute();
 
-						// コミット
-						$res = $pdo->commit();
+							// コミット
+							$res = $pdo->commit();
 
-					} catch(Exception $e) {
+						} catch(Exception $e) {
 
-						// エラーが発生した時はロールバック
-						$pdo->rollBack();
+							// エラーが発生した時はロールバック
+							$pdo->rollBack();
+						}
 					}
 			
 				}

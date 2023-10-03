@@ -493,15 +493,21 @@ require('../logout/logout.php');
 		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。<br>page=は指定しなくても動作します。(https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数])</p>
 		<hr>
 		<li>投稿API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&ueuse=[投稿の内容]</p>
-
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=post&ueuse=[投稿の内容]</p>
+		<hr>
+		<li>アクセストークンからユーザー情報取得API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=getuser</p>
+		<hr>
+		<li>返信API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]</p>
+		<hr>
 		<?php 
 			if(empty($userData['token'])){
 		?>
 		<p>以下のボタンよりアクセストークンを取得すると使用できます。<br>アクセストークンは一度発行すると作り直すまで再度確認はできません。また、絶対に他人に知られないように保護してください。<p>
 		<input type="submit" class = "irobutton" name="token_submit" value="アクセストークン発行">
 		<?php }elseif($userData['token']==='ice'){ ?>
-			<p>アカウントが凍結されているため発行できません。</p>
+			<p>アクセストークンはアカウントが凍結されているため発行できません。</p>
 		<?php }else{ ?>
 			<p>以下のボタンよりアクセストークンを削除できます。ボタンを押すとすぐに削除されますのでご注意ください。</p>
 			<input type="submit" class = "irobutton" name="token_off_submit" value="アクセストークン削除">

@@ -53,6 +53,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - datetime(datetime) アカウント作成日時保存用
 - follow(text) アカウントがフォローしている人保存用
 - follower(text) アカウントがフォローされている人保存用
+- blocklist(text) ブロックしている人保存用
 - admin(varchar(25)) 管理者アカウントなら「yes」、それ以外なら「none」と入力。
 - authcode(varchar(256)) 二段階認証用キー保存用
 - backupcode(varchar(256)) 二段階認証のバックアップコード保存用
@@ -142,10 +143,10 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 
 - 404imagepath.txt : 404ページに表示する画像パス保存用
 - 503imagepath.txt : 503ページに表示する画像パス保存用
+- activitypub.txt : ActivityPub機能のオンオフ(trueまたはfalse)
 - admininfo.txt : 管理者名(てすとまる/@sampledayo)
 - banurldomain.txt : 投稿禁止URLドメイン
 - banuserid.txt : 登録禁止ユーザーid
-- admininfo.txt : 管理者名(てすとまる/@sampledayo)
 - contact.txt : 管理者への連絡用メアド(sample@test.com)
 - info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
 - privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
@@ -182,4 +183,4 @@ daichimarukanaと一緒に開発したいよ～って人は私のHPからメー�
 
 
 編集者 : daichimarukana
-最終更新日 : 2023/09/10 18:15
+最終更新日 : 2023/10/04 00:07

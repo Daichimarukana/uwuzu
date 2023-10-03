@@ -282,32 +282,22 @@ if( !empty($_POST['btn_submit']) ) {
 
 if( !empty($_POST['pass_submit']) ) {
 
+	$pass_chk = htmlentities($_POST['passchk_userid']);
 	$password = $_POST['password'];
 
 	$hashpassword = password_hash($password, PASSWORD_DEFAULT);
 
-    $options = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-
-
-    $query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
-
-    $query->execute(array(':userid' => $userid));
-
-    $result = $query->fetch();
+	if(empty($pass_chk)){
+		$error_message[] = 'ユーザーidを入力してください。';
+	}else{
+		if(!($pass_chk === $userData["userid"])){
+			$error_message[] = 'ユーザーidが不正です。';
+		}
+	}
 
 	// ユーザーネームの入力チェック
 	if( empty($password) ) {
-		$error_message[] = 'パスワードを入力してください。';
+		$error_message[] = '新しいパスワードを入力してください。';
 	} else {
 
 		$weakPasswords = array(
@@ -394,6 +384,7 @@ if( !empty($_POST['pass_submit']) ) {
 		}
     }
 
+
     if( empty($error_message) ) {
 		// トランザクション開始
 	$pdo->beginTransaction();
@@ -401,7 +392,7 @@ if( !empty($_POST['pass_submit']) ) {
 
 	try {
 		// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET password = :password WHERE userid = :userid;");
+		$stmt = $pdo->prepare("UPDATE account SET password = :password WHERE userid = :userid");
 
 		// 他の値をセット
 		$stmt->bindParam(':password', $hashpassword, PDO::PARAM_STR);
@@ -748,56 +739,65 @@ $pdo = null;
 			<div class="iconimg">
 				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
 			</div>
-			<label class="imgbtn" for="file_upload">アイコン選択
-			<input type="file" id="file_upload" name="image" accept="image/*">
-			</label>
+			<?php if($role === "ice"){?>
+				<p>お使いのアカウントは凍結されているため設定を変更できません</p>
+			<?php }else{?>
 
-			<label class="imgbtn2" for="file_upload2">ヘッダー選択
-			<input type="file" id="file_upload2" name="image2s" accept="image/*">
-			</label>
-			
-			<div class="sub">
-				<input type="submit" class = "imgbtn" name="img1btn_submit" value="ヘッダー画像更新">
-				<input type="submit" class = "imgbtn" name="img2btn_submit" value="アイコン画像更新">
-			</div>
+				<label class="imgbtn" for="file_upload">アイコン選択
+				<input type="file" id="file_upload" name="image" accept="image/*">
+				</label>
 
-            <!--ユーザーネーム関係-->
-            <div>
-                <p>ユーザーネーム</p>
-                <input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userdata['username']) ){ echo htmlspecialchars( $userdata['username'], ENT_QUOTES, 'UTF-8'); } ?>">
-            </div>
-            <div>
-                <p>メールアドレス</p>
-                <input id="mailadds" type="text" placeholder="" class="inbox" name="mailadds" value="<?php if( !empty($userdata['mailadds']) ){ echo htmlspecialchars( $userdata['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
-            </div>
-            <!--プロフィール関連-->
-            <div>
-                <p>プロフィール</p>
-                <textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlspecialchars( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
-            </div>
-
-			<?php if(!empty($userData['token'])){?>
-
-				<p>このアカウントがBotであることを公開する</p>
-				<div class="switch_button">
-					<?php if($sacinfo === "bot"){?>
-						<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" checked/>
-						<label for="im_bot" class="switch_label"></label>
-					<?php }else{?>
-						<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" />
-						<label for="im_bot" class="switch_label"></label>
-					<?php }?>
+				<label class="imgbtn2" for="file_upload2">ヘッダー選択
+				<input type="file" id="file_upload2" name="image2s" accept="image/*">
+				</label>
+				
+				<div class="sub">
+					<input type="submit" class = "imgbtn" name="img1btn_submit" value="ヘッダー画像更新">
+					<input type="submit" class = "imgbtn" name="img2btn_submit" value="アイコン画像更新">
 				</div>
 
-			<?php }elseif($userData['token']==='ice'){ ?>
-				<p>アカウントが凍結されているためBotであることの設定変更はできません。</p>
-			<?php }?>
-			            
-            <input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
+				<!--ユーザーネーム関係-->
+				<div>
+					<p>ユーザーネーム</p>
+					<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userdata['username']) ){ echo htmlspecialchars( $userdata['username'], ENT_QUOTES, 'UTF-8'); } ?>">
+				</div>
+				<div>
+					<p>メールアドレス</p>
+					<input id="mailadds" type="text" placeholder="" class="inbox" name="mailadds" value="<?php if( !empty($userdata['mailadds']) ){ echo htmlspecialchars( $userdata['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
+				</div>
+				<!--プロフィール関連-->
+				<div>
+					<p>プロフィール</p>
+					<textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlspecialchars( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+				</div>
 
+				<?php if(!empty($userData['token'])){?>
+
+					<p>このアカウントがBotであることを公開する</p>
+					<div class="switch_button">
+						<?php if($sacinfo === "bot"){?>
+							<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" checked/>
+							<label for="im_bot" class="switch_label"></label>
+						<?php }else{?>
+							<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" />
+							<label for="im_bot" class="switch_label"></label>
+						<?php }?>
+					</div>
+
+				<?php }elseif($userData['token']==='ice'){ ?>
+					<p>アカウントが凍結されているためBotであることの設定変更はできません。</p>
+				<?php }?>
+							
+				<input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
+
+			<?php }?>
 			<hr>
 			<div>
-                <p>パスワード</p>
+                <p>ユーザーid</p>
+                <input id="passchk_userid" type="text" class="inbox" name="passchk_userid" oncopy="return false" onpaste="return false" oncontextmenu="return false" style="-webkit-text-security:disc;" value="">
+            </div>
+			<div>
+                <p>新しいパスワード</p>
                 <input id="password" type="text" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" style="-webkit-text-security:disc;" value="">
             </div>
 

@@ -27,6 +27,12 @@ try {
 
 $userid = htmlentities($_GET['userid']);
 
+$aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+$aduserinfoQuery->bindValue(':userid', htmlentities($userid));
+$aduserinfoQuery->execute();
+$res = $aduserinfoQuery->fetch();
+$myblocklist = htmlentities($res["blocklist"]);
+
 $itemsPerPage = 15; // 1ページあたりのユーズ数
 $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
 $offset = ($pageNumber - 1) * $itemsPerPage;
@@ -87,15 +93,18 @@ if (!empty($pdo)) {
 
     if(!empty($messages)){
         foreach ($messages as $value) {
-                
-            $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
-    
-            // コンマで区切って配列に分割し、要素数を数える
-            $favIds = explode(',', $fav);
-            $value["favcnt"] = count($favIds)-1;
-    
-            $messageDisplay = new MessageDisplay($value, $userid); // $userid をコンストラクタに渡す
-            $messageDisplay->display();
+            if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8'))) {
+                if(!($value["role"] === "ice")){
+                    $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
+            
+                    // コンマで区切って配列に分割し、要素数を数える
+                    $favIds = explode(',', $fav);
+                    $value["favcnt"] = count($favIds)-1;
+            
+                    $messageDisplay = new MessageDisplay($value, $userid); // $userid をコンストラクタに渡す
+                    $messageDisplay->display();
+                }
+            }
         }
         if($message['ads'] === "true"){
             echo '<div class="ads"><a href = "' . htmlentities($message['ads_url']) . '"><img src="' . htmlentities($message['ads_img_url']) . '" title="' . htmlentities($message['ads_memo']) . '"></a></div>';

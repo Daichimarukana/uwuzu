@@ -243,7 +243,7 @@ require('../logout/logout.php');
 					<p><?php if( !empty(file_get_contents($servernamefile)) ){ echo htmlspecialchars(file_get_contents($servernamefile), ENT_QUOTES, 'UTF-8'); } ?></p>
 					<hr>
 					<p>サーバー紹介メッセージ</p>
-					<p><?php $sinfo = explode("\n", $serverinfo); foreach ($sinfo as $info) { echo htmlspecialchars($info); }?></p>
+					<p><?php $sinfo = explode("\n", $serverinfo); foreach ($sinfo as $info) { echo nl2br(htmlspecialchars($info)); }?></p>
 					<hr>
 					<p>サーバー管理者の名前</p>
 					<p><?php if( !empty(file_get_contents($adminfile)) ){ echo htmlspecialchars(file_get_contents($adminfile), ENT_QUOTES, 'UTF-8'); } ?></p>

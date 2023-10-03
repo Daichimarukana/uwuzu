@@ -5,6 +5,7 @@ if(isset($_GET['userid'])) {
 
 $search = htmlentities($_GET['userid']);
 
+$domain = $_SERVER['HTTP_HOST'];
 
 require('../db.php');
 
@@ -36,7 +37,7 @@ session_start();
             PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
         ));   
 
-        $userQuery = $pdo->prepare("SELECT username,profile,datetime,follow,follower FROM account WHERE userid = :userid");
+        $userQuery = $pdo->prepare("SELECT username,userid,profile,datetime,follow,follower,iconname,headname FROM account WHERE userid = :userid");
         $userQuery->bindValue(':userid', $search);
         $userQuery->execute();
         $userdata = $userQuery->fetch();
@@ -54,7 +55,10 @@ if (empty($userdata)){
 
     $response = array(
         'user_name' => htmlentities($userdata["username"]),
+        'user_id' => htmlentities($userdata["userid"]),
         'profile' => htmlentities($userdata["profile"]),
+        'user_icon' => htmlentities("https://".$domain."/".$userdata["iconname"]),
+        'user_header' => htmlentities("https://".$domain."/".$userdata["headname"]),
         'registered_date' => htmlentities($userdata["datetime"]),
         'follow' => htmlentities($userdata["follow"]),
         'follow_cnt' => htmlentities($userdata["follow_cnt"]),
@@ -62,7 +66,7 @@ if (empty($userdata)){
         'follower_cnt' => htmlentities($userdata["follower_cnt"]),
     );
 }
-echo json_encode($response, JSON_UNESCAPED_UNICODE);;
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
 
 }else{
 

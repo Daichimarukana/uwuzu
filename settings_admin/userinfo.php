@@ -299,7 +299,7 @@ if( !empty($_POST['send_water_submit']) ) {
 
 	$newrole = "user";
 	$newtoken = "";
-	$newadmin = "user";
+	$newadmin = "none";
 	// トランザクション開始
 	$pdo->beginTransaction();
 

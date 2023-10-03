@@ -287,13 +287,13 @@ require('../logout/logout.php');
 					<div>
 						<p>登録禁止ユーザーid</p>
 						<div class="p2">ここに入力してあるユーザーidは登録できません。<br>改行で禁止するユーザーidを指定できます。<br>すでにあるアカウントは影響を受けません。</div>
-						<textarea id="banuserid" placeholder="uwuzu" class="inbox" type="text" name="banuserid"><?php $sinfo = explode("\n", $banuserid_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
+						<textarea id="banuserid" placeholder="uwuzu" class="inbox" type="text" name="banuserid"><?php $sinfo = explode("\r", $banuserid_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
 
 					<div>
 						<p>投稿禁止URLドメイン</p>
 						<div class="p2">ここに入力してあるドメインが含まれる投稿をしようとすると投稿が拒否されます。<br>なお、この機能はまだ確実な動作が保証されないためベータ版です。<br>位置情報特定サイトなどの対策等にご利用ください。</div>
-						<textarea id="banurldomain" placeholder="" class="inbox" type="text" name="banurldomain"><?php $sinfo = explode("\n", $banurldomain_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
+						<textarea id="banurldomain" placeholder="" class="inbox" type="text" name="banurldomain"><?php $sinfo = explode("\r", $banurldomain_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
 
 					<div>

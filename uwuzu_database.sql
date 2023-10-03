@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- ホスト: ひみつ☆
--- 生成日時: 2023-09-16 15:15:33
+-- ホスト: ひみつ
+-- 生成日時: 2023-10-03 17:20:43
 -- サーバのバージョン： 10.4.28-MariaDB
 -- PHP のバージョン: 8.2.4
 
@@ -42,6 +42,7 @@ CREATE TABLE `account` (
   `datetime` datetime NOT NULL,
   `follow` text NOT NULL,
   `follower` text NOT NULL,
+  `blocklist` text NOT NULL,
   `admin` varchar(50) NOT NULL,
   `authcode` varchar(256) NOT NULL,
   `backupcode` varchar(256) NOT NULL,

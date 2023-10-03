@@ -2,6 +2,8 @@
 
 $servernamefile = "../server/servername.txt";
 
+$domain = $_SERVER['HTTP_HOST'];
+
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -47,7 +49,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -61,6 +63,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -93,7 +96,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -107,6 +110,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -173,7 +177,9 @@ if( !empty($pdo) ) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
-	$uwuzuid = htmlentities(str_replace('@', '', $_GET['uwuzuid']));
+	$uwuzuid2 = htmlentities(str_replace('@', '', $_GET['uwuzuid']));
+
+	$uwuzuid = htmlentities(str_replace('@'.$domain, '', $uwuzuid2));
 
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
@@ -237,7 +243,7 @@ if( !empty($pdo) ) {
 		return $postText;
 	}
 
-	$userQuery = $dbh->prepare("SELECT username, userid, profile, role, follower FROM account WHERE userid = :userid");
+	$userQuery = $dbh->prepare("SELECT username, userid, profile, role, follower, blocklist FROM account WHERE userid = :userid");
 	$userQuery->bindValue(':userid', $uwuzuid);
 	$userQuery->execute();
 	$userData = $userQuery->fetch();
@@ -248,7 +254,7 @@ if( !empty($pdo) ) {
 	
 		$roles = explode(',', $userData["role"]); // カンマで区切られたロールを配列に分割
 
-		$rerole = $dbh->prepare("SELECT  follow, follower, username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
+		$rerole = $dbh->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
 
 		$rerole->bindValue(':userid', $uwuzuid);
 		// SQL実行
@@ -289,10 +295,24 @@ if( !empty($pdo) ) {
 
 		$profileText = htmlentities($userData['profile'], ENT_QUOTES, 'UTF-8');
 
+
+		$allueuse = $dbh->prepare("SELECT account FROM ueuse WHERE account = :userid");
+		$allueuse->bindValue(':userid', $uwuzuid);
+		$allueuse->execute();
+		$ueuse_cnt = $allueuse->rowCount(); 
+
+
+
 	}else{
 		$userData["userid"] = "none";
 		$userData['username'] = "ゆーざーなし";
+
+		$ueuse_cnt = "zero";
+		$followCount = "zero";
+		$followerCount = "zero";
 	}
+
+	
 }
 
 if (!empty($_POST['follow'])) {
@@ -393,6 +413,71 @@ if (!empty($_POST['follow'])) {
 }
 
 
+if (!empty($_POST['send_block_submit'])) {
+
+	$updateQuery = $pdo->prepare("UPDATE account SET blocklist = CONCAT_WS(',', blocklist, :blocklist) WHERE userid = :userid");
+	$updateQuery->bindValue(':blocklist', $userData["userid"], PDO::PARAM_STR);
+	$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+	$res_block = $updateQuery->execute();
+
+	// フォロー解除ボタンが押された場合の処理
+    $followerList = explode(',', $userdata['follower']);
+    if (in_array($userid, $followerList)) {
+        // 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
+        $followerList = array_diff($followerList, array($userid));
+        $newFollowerList = implode(',', $followerList);
+
+        // UPDATE文を実行してフォロー情報を更新
+        $updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
+        $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
+        $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
+        $res = $updateQuery->execute();
+
+		$deluserid = ",".$userdata["userid"];
+        // 自分のfollowカラムから相手のユーザーIDを削除
+        $updateQuery = $pdo->prepare("UPDATE account SET follow = REPLACE(follow, :follow, '') WHERE userid = :userid");
+        $updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
+        $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+        $res_follow = $updateQuery->execute();
+
+        if ($res && $res_follow) {
+            $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            header("Location:" . $url);
+            exit;
+        } else {
+            $error_message[] = '更新に失敗しました。';
+        }
+
+        $stmt = null;
+    }
+
+	if ($res_block) {
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:" . $url);
+		exit;
+	} else {
+		$error_message[] = '更新に失敗しました。';
+	}
+
+} elseif (!empty($_POST['send_un_block_submit'])) {
+
+	$deluserid = ",".$userdata["userid"];
+	// 自分のfollowカラムから相手のユーザーIDを削除
+	$updateQuery = $pdo->prepare("UPDATE account SET blocklist = REPLACE(blocklist, :blocklist, '') WHERE userid = :userid");
+	$updateQuery->bindValue(':blocklist', $deluserid, PDO::PARAM_STR);
+	$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+	$res_block = $updateQuery->execute();
+
+	if ($res_block) {
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:" . $url);
+		exit;
+	} else {
+		$error_message[] = '更新に失敗しました。';
+	}
+}
+
+
 
 require('../logout/logout.php');
 
@@ -455,7 +540,6 @@ $pdo = null;
 			<div class="fzone">
 				<div class="time">
 					<p>紀元前3000年からuwuzuを利用して<s>います。</s>いるわけねぇだろ()</p>
-					<p>フォロー数:ない フォロワー数:いない</p>
 				</div>
 			</div>
 				<!--ここまで！--->
@@ -466,7 +550,7 @@ $pdo = null;
 			<div class="icon">
 				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
 				<h2><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?></h2>
-				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?><!--<span>@<?php /*echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); */?></span>--></p>
 			</div>
 
 			<div class="roleboxes">
@@ -480,21 +564,40 @@ $pdo = null;
 				<?php endforeach; ?>
 			</div>
 
-			<div class="profile">
-				<p><?php echo replaceEmojisWithImages(replaceURLsWithLinks(nl2br($profileText))); ?></p>
-			</div>
+			<?php if (false === strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+				<div class="profile">
+					<p><?php echo replaceEmojisWithImages(replaceURLsWithLinks(nl2br($profileText))); ?></p>
+				</div>
+			<?php }else{?>
+				<div class="profile">
+					<p>ブロックしているためプロフィールは表示されません。</p>
+				</div>
+			<?php }?>
 			
 		</div>
 		<div class="fzone">
 			<div class="time">
 				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
-				<p>フォロー数:<?php echo $followCount;?> フォロワー数:<?php echo $followerCount;?></p>
+				<p><?php if(htmlentities($userdata['role']) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
 			</div>
 			<?php if(!empty($follow_yes)){?>
 				<div class="follow_yes">
 					<p><?php echo $follow_yes;?></p>
 				</div>
 			<?php }?>
+
+			<?php if ($userid !== htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8')) {?>
+				<?php if (false !== strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+					<div class="follow">
+						<a id="un_block" href="javascript:void(0);" class="report" title="ブロック解除"><svg><use xlink:href="../img/sysimage/unblock_1.svg#block"></use></svg></a>
+					</div>
+				<?php }else{?>
+					<div class="follow">
+						<a id="block" href="javascript:void(0);" class="report" title="ブロック"><svg><use xlink:href="../img/sysimage/block_1.svg#block"></use></svg></a>
+					</div>
+				<?php }?>
+			<?php }?>
+			
 			<div class="follow">
 				<a href="/user/report?q=<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?>" class="report" title="通報"><svg><use xlink:href="../img/sysimage/report_1.svg#report"></use></svg></a>
 			</div>
@@ -504,22 +607,24 @@ $pdo = null;
 				</div>
 			<?php } else { ?>
 				
-				<form method="post">
-					<div class="follow">
-						<?php
-						if(!($role === "ice")){
-							$followerList = explode(',', $userdata['follower']);
-							if (in_array($userid, $followerList)) {
-								// フォロー済みの場合はフォロー解除ボタンを表示
-								echo '<input type="button" id="openModalButton" class="fbtn_un" name="unfollow" value="フォロー解除">';
-							} else {
-								// 未フォローの場合はフォローボタンを表示
-								echo '<input type="submit" class="fbtn" name="follow" value="フォロー">';
+				<?php if (false === strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+					<form method="post">
+						<div class="follow">
+							<?php
+							if(!($role === "ice")){
+								$followerList = explode(',', $userdata['follower']);
+								if (in_array($userid, $followerList)) {
+									// フォロー済みの場合はフォロー解除ボタンを表示
+									echo '<input type="button" id="openModalButton" class="fbtn_un" name="unfollow" value="フォロー解除">';
+								} else {
+									// 未フォローの場合はフォローボタンを表示
+									echo '<input type="submit" class="fbtn" name="follow" value="フォロー">';
+								}
 							}
-						}
-						?>
-					</div>
-				</form>
+							?>
+						</div>
+					</form>
+				<?php } ?>
 			<?php } ?>
 			<?php } ?>
 		</div>
@@ -536,6 +641,21 @@ $pdo = null;
 			</div>
 		<?php }?>
 		<hr>
+		<div class="f_c_area">
+			<div class="fcnt">
+				<div class="p2">ユーズ数</div>
+				<p><?php echo $ueuse_cnt;?></p>
+			</div>
+			<div class="fcnt">
+				<div class="p2">フォロー数</div>
+				<p><?php echo $followCount;?></p>
+			</div>
+			<div class="fcnt">
+				<div class="p2">フォロワー数</div>
+				<p><?php echo $followerCount;?></p>
+			</div>
+		</div>
+		<hr>
 		<div class="select_utl">
 			<button class="btn" id="all_ueuse_btn">ユーズ</button>
 			<button class="btn" id="media_ueuse_btn">メディア</button>
@@ -543,15 +663,20 @@ $pdo = null;
 		</div>
 
 		<hr>
-			<section class="inner">
-				<div id="postContainer">
+			<?php if (false === strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+				<section class="inner">
+					<div id="postContainer">
 
+					</div>
+				</section>
+
+				<div id="loading" class="loading" style="display: none;">
+					🤔
 				</div>
-			</section>
+			<?php }else{?>
+				<div class="tokonone" id="noueuse"><p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをブロックしているため投稿の閲覧は出来ません。</p></div>
+			<?php }?>
 
-			<div id="loading" class="loading" style="display: none;">
-				🤔
-			</div>
 			<div id="error" class="error" style="display: none;">
 				<h1>エラー</h1>
 				<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
@@ -580,6 +705,28 @@ $pdo = null;
 					</form>
 				</div>
 			</div>
+
+			<div id="account_BlockModal" class="modal">
+				<div class="modal-content">
+					<h1><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんをブロックしますか？</h1>
+					<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントをブロックしますか？<br>ブロックするとフォローが解除され、検索以外のLTL、FTL等で<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿が表示されなくなります。<br>また、相手からこのアカウントを閲覧することもできなくなります。<br>※ブロックしたことは相手には通知されません。<br><br>ブロックを解除するときはこのアカウントのユーザーページ(このページ)から解除を行ってください。</p>
+					<form class="btn_area" method="post">
+						<input type="submit" id="deleteButton2" class="fbtn_no" name="send_block_submit" value="ブロック">
+						<input type="button" id="cancelButton2" class="fbtn" value="キャンセル">
+					</form>
+				</div>
+			</div>	
+
+			<div id="account_un_BlockModal" class="modal">
+				<div class="modal-content">
+					<h1><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのブロックを解除しますか？</h1>
+					<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントをブロック解除しますか？<br>ブロック解除すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿の閲覧が可能になりフォローすることもできるようになります。</p>
+					<form class="btn_area" method="post">
+						<input type="submit" id="deleteButton3" class="fbtn_no" name="send_un_block_submit" value="ブロック解除">
+						<input type="button" id="cancelButton3" class="fbtn" value="キャンセル">
+					</form>
+				</div>
+			</div>	
 		
 	</main>
 
@@ -808,9 +955,6 @@ $(document).ready(function() {
 	});
 
 
-
-
-
 		var modal = document.getElementById('myDelModal');
 		var deleteButton = document.getElementById('deleteButton');
 		var cancelButton = document.getElementById('cancelButton'); // 追加
@@ -922,6 +1066,60 @@ $(document).ready(function() {
 				});
 			}
 		});
+	});
+
+	var modal2 = document.getElementById('account_BlockModal');
+    var deleteButton2 = document.getElementById('deleteButton2');
+    var cancelButton2 = document.getElementById('cancelButton2'); // 追加
+	var modalMain = $('.modal-content');
+
+	$('#block').click(function() {
+        modal2.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        deleteButton2.addEventListener('click', () => {
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal2.style.display = 'none';
+			}, 150);
+        });
+
+        cancelButton2.addEventListener('click', () => { // 追加
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal2.style.display = 'none';
+			}, 150);
+        });
+	});
+
+	var modal3 = document.getElementById('account_un_BlockModal');
+    var deleteButton3 = document.getElementById('deleteButton3');
+    var cancelButton3 = document.getElementById('cancelButton3'); // 追加
+	var modalMain = $('.modal-content');
+
+	$('#un_block').click(function() {
+        modal3.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        deleteButton3.addEventListener('click', () => {
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal3.style.display = 'none';
+			}, 150);
+        });
+
+        cancelButton3.addEventListener('click', () => { // 追加
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal3.style.display = 'none';
+			}, 150);
+        });
 	});
 });
 </script>

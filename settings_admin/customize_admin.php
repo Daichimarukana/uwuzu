@@ -268,7 +268,7 @@ require('../logout/logout.php');
 					<div>
 						<p>CSS</p>
 						<div class="p2">ここで指定されている色が適用されます。<br>もし適用されなかった場合はキャッシュを削除し再読み込みしてください。<br>表示がおかしくなってしまった場合はカラーコードを再度確認してください。</div>
-						<textarea id="colordata" placeholder="uwuzu" class="inbox" type="text" name="colordata"><?php $sinfo = explode("\n", $color_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
+						<textarea id="colordata" placeholder="uwuzu" class="inbox" type="text" name="colordata"><?php $sinfo = explode("\r", $color_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
 
 					<input type="submit" class = "irobutton" name="btn_submit" value="保存&更新">

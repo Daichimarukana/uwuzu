@@ -466,7 +466,7 @@ main{
     margin-top: 12px;
     margin-left: 12px;
     margin-right: 12px;
-    width: 62%;
+    width: 60%;
     background-color: var(--tl-color-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     border: 1px solid var(--main-color);
@@ -532,6 +532,18 @@ main h1{
     margin-top: auto;
     margin-bottom: 14px;
     color: var(--subtext-color);
+    font-size: 18px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: 900;
+}
+
+.userheader span{
+    word-wrap: break-word;
+    margin-left: 0px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 14px;
+    color: var(--dark-subtext-color);
     font-size: 18px;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: 900;
@@ -1599,6 +1611,100 @@ main h1{
     filter: brightness(100%) blur(0px) saturate(100%);
 }
 
+.ueuse .profilebox{
+    max-height: 64px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ueuse .profilebox p{
+    line-height:20px;
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 24px;
+    margin-right: 24px;
+    font-size: 16px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .headbox a{
+    margin: 0px;
+}
+.ueuse .headbox img{
+    overflow: hidden;
+    object-fit: cover;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    width: 100%;
+    height: 74px;
+    border-radius: 7px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+.ueuse .flebox .user{
+    margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+}
+.ueuse .flebox .user img{
+    object-fit: cover;
+    margin-top: -54px;
+    margin-left: 12px;
+    text-align: center;
+    width: 74px;
+    height:74px;
+    border-radius: 50%;
+}
+.ueuse .flebox .user a {
+    flex-shrink: 0;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 12px;
+    font-size: 22px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .flebox .user .idbox{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+}
+.ueuse .flebox .user .idbox a{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 8px;
+    margin-right: 8px;
+    text-align: center;
+    font-size: 12px;
+    color:var(--subtext-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+}
+.ueuse .flebox .user .bot{
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 6px 8px; 
+    margin-left: 6px;
+    border-radius: 10px;
+    background-color: var(--sub-color);
+    border: 1px solid var(--border-color);
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+    text-align: center;
+    font-size: 12px;
+    color:var(--main-color);
+}
+
+
 .tokonone p{
     text-align: center;
     margin-top: 64px;
@@ -1674,9 +1780,10 @@ main h1{
     cursor: pointer;
     border: none;
     display: block;
-    width:6%;
+    width: 24px;
     height: 24px;
-    padding: 8px auto;
+    padding: 6px 6px;
+    
     margin-left: 6px;
     margin-right: 6px;
 
@@ -1701,11 +1808,9 @@ main h1{
     background-color: var(--main-color);
     color: var(--sub-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    width:7%;
 }
 .sendbox label:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:5%;
 }
 .sendbox label svg{
     margin: auto;
@@ -1749,7 +1854,7 @@ main h1{
     background-color: var(--main-color);
     width: auto;
     height: auto;
-    color: var(--background-color);
+    color: var(--sub-color);
     position: relative;
     border-radius: 50px;
     transition: all 250ms ease-out;
@@ -2476,7 +2581,7 @@ label>input {
     margin-top: 12px;
     margin-left: 12px;
     margin-right: 12px;
-    width: 24%;
+    width: 260px;
     height: 92.5dvh;
     background-color: var(--background-color);
     padding: 12px;
@@ -2534,6 +2639,7 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: left;
+    overflow-wrap:break-word;
     color: var(--text-color);
 }
 
@@ -2587,7 +2693,7 @@ label>input {
 
 .rightbox .btmbox{
     position: absolute;
-    bottom: 12px; /*下に固定*/
+    bottom: 36px; /*下に固定*/
     height: 320px;
     width: 90%;
 }
@@ -3741,6 +3847,41 @@ summary {
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
 }
 
+.f_c_area{
+    margin: 0px;
+    background-color: var(--background-color);
+    border: none;
+    width: auto;
+    text-align: center;
+    display: flex;
+}
+.f_c_area .fcnt{
+    display: block;
+    width: 25%;
+    line-height: 32px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+    border: none;
+}
+.f_c_area .fcnt .p2{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+.f_c_area .fcnt p{
+    overflow-wrap: break-word;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 20px;
+    color: var(--main-color);
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+    text-align: center;
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -3858,21 +3999,22 @@ summary {
     }
 
     .sendbox label{
+        cursor: pointer;
+        border: none;
         display: block;
-        flex-shrink: 0;
-        text-align: center;
-        width:10%;
-        padding: 6px 2.6px;
+        width: 24px;
+        height: 24px;
+        padding: 6px 6px;
+        
         margin-left: 6px;
         margin-right: 6px;
+
         padding-top: 6px;
         padding-bottom: 6px;
-    }
-    .sendbox label:hover{
-        width:11%;
-    }
-    .sendbox label:active{
-        width:9%;
+
+
+        background-color: var(--main-color);
+        text-align: center;
     }
     .sendbox label img{
         vertical-align:bottom;
@@ -4233,6 +4375,46 @@ summary {
         color:var(--subtext-color);
         font-family: 'BIZ UDPGothic', sans-serif;
     }
+
+    .ueuse .headbox{
+        margin-bottom: 12px;
+    }
+    .ueuse .headbox a{
+        margin: 0px;
+        padding: 0px;
+    }
+    .ueuse .headbox img{
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 0px;
+        margin-bottom: 12px;
+        width: 100%;
+        height: 74px;
+    }
+    .ueuse .profilebox p{
+        margin-left: 12px;
+        margin-right: 12px;
+    }
+    .ueuse .flebox .user{
+        margin-top: -12px;
+    }
+    .ueuse .flebox .user img{
+        margin-left: 12px;
+    }
+    .ueuse .flebox .user a {
+        margin-left: 0px;
+    }
+    .ueuse .flebox .user .bot{
+        margin-top: auto;
+        margin-bottom: auto;
+        padding: 3px 8px; 
+        margin-left: 6px;
+        border-radius: 10px;
+        font-family: 'BIZ UDGothic', sans-serif;
+        font-weight: bold;
+        text-align: center;
+        font-size: 12px;
+    }
         
     .leftbox{
         display: block;
@@ -4241,7 +4423,7 @@ summary {
         margin-left: 12px;
         margin-right: 12px;
         margin-bottom: 12px;
-        background-color: var(--background-color)FFF;
+        background-color: var(--background-color);
         width: 18%;
         height: 100%;
         margin-left: 0px;
@@ -5183,12 +5365,37 @@ summary {
         border: none;
     }
 
+    .ueuse .profilebox p{
+        color:var(--dark-text-color);
+    }
+    .ueuse .flebox .user a{
+        color:var(--sub-color);
+    }
+
+    .ueuse .flebox .user .idbox{
+        background-color: #302c2c;
+        border: none;
+    }
+    .ueuse .flebox .user .idbox a{
+        color:var(--dark-subtext-color);
+    }
+
+    .ueuse .flebox .user .bot{
+        background-color: #302c2c;
+        border: none;
+        color:var(--main-color);
+    }
+
     .userheader h2{
         color:var(--sub-color);
     }
     
     .userheader p{
         color: var(--dark-subtext-color);
+    }
+
+    .userheader span{
+        color: var(--subtext-color);
     }
     
     .userheader .profile p{
@@ -5663,5 +5870,11 @@ summary {
     }
     .servericon img{
         box-shadow:none;
+    }
+    .f_c_area{
+        background-color: var(--dark-background-color);
+    }
+    .f_c_area .fcnt p{
+        color: var(--dark-text-color);
     }
 }
