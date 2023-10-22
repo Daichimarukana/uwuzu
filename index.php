@@ -8,7 +8,7 @@ session_start();
 
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset($_COOKIE['loginid']) && isset($_SESSION['userid'])) {
-    $options = array(
+    $option = array(
         // SQL実行失敗時に例外をスルー
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         // デフォルトフェッチモードを連想配列形式に設定
@@ -29,7 +29,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
         }
     }
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true && isset($_COOKIE['loginid']) && isset($_COOKIE['userid'])) {
-    $options = array(
+    $option = array(
         // SQL実行失敗時に例外をスルー
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         // デフォルトフェッチモードを連想配列形式に設定

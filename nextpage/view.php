@@ -72,11 +72,14 @@ function replaceURLsWithLinks($postText) {
     foreach ($matches[0] as $url) {
         // ドメイン部分を抽出
         $parsedUrl = parse_url($url);
-        $domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
-
+        if (!isset($parsedUrl['path'])) {
+            $parsedUrl['path'] = '';
+        }
+        $domain = $parsedUrl['host'].(strlen($parsedUrl['path']) > 24 ? substr($parsedUrl['path'], 0, 24) . '...' : $parsedUrl['path']);
+        
         // 不要な文字を削除してaタグを生成
         $urlWithoutSpaces = preg_replace('/\s+/', '', $url);
-        $link = "<a href='$urlWithoutSpaces' target='_blank'>$domain</a>";
+        $link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
 
         // URLをドメインのみを表示するaタグで置き換え
         $postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
@@ -175,8 +178,8 @@ class MessageDisplay {
                 echo '  <div class="back">';
                 echo '<h1>' . htmlentities($this->value['username']) . 'さんが追記しました</h1>';
                 echo '  </div>';
-                echo '<p>'.replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['abi']))) . '</p>';
-                echo '<h3>追記日時 : '. date("Y年m月d日 H:i", strtotime(htmlentities($this->value['abidate']))) . '</h3>';
+                echo '<p>'.processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['abi'])))) . '</p>';
+                echo '<div class="h3s">追記日時 : '. date("Y年m月d日 H:i", strtotime(htmlentities($this->value['abidate']))) . '</div>';
                 echo '</div>';
             }
             if($this->value['nsfw'] === "true"){
@@ -186,7 +189,8 @@ class MessageDisplay {
             
             echo '<hr>';
             echo '<div class="favbox">';
-            if (false !== strstr($this->value['favorite'], $this->userid)) {
+            $favoriteList = explode(',', $this->value['favorite']);
+            if (in_array($this->userid, $favoriteList)) {
                 echo '<button class="favbtn favbtn_after" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_2.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }else{
                 echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_1.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';

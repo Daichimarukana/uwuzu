@@ -60,7 +60,7 @@ foreach ($sterms as $terms) {
 
 <div class="topbox">
     <div class="logo">
-        <img src="../img/uwuzulogo.svg">
+        <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
     </div>
 </div>
 
@@ -71,6 +71,8 @@ foreach ($sterms as $terms) {
     <div class="p2c"><?php echo $domain;?></div>
 
     <p><?php echo $htmltext;?></p>
+
+    <a href = "javascript:history.back();" class="irobutton">戻る</a>
 
 </div>
 

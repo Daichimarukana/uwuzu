@@ -101,5 +101,7 @@ if(file_get_contents($activitypub_file) === "true"){
     $item; // ループ内で $response にデータを追加
 
     echo json_encode($item, JSON_UNESCAPED_UNICODE);
+}else{
+    header("HTTP/1.1 410 Gone");
 }
 ?>

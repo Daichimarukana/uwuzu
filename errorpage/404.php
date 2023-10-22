@@ -48,6 +48,10 @@ $termsdata = file_get_contents($termsfile);
         <?php }?>
         <h1>404 Not found</h1>
         <p>申し訳ございませんがお探しのページは見つかりませんでした！<br>ページの移動や削除が行われた可能性がございます。</p>
+        <p><?php if (rand(1, 100) === 1) {
+            echo "さがすのがんばれよ...(?)";
+        }
+        ?></p>
     </div>
 
     <a href="/home/" class="irobutton">ホームへ行く</a>

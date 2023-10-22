@@ -460,6 +460,7 @@ svg {
 
 
 main{
+    position: relative;
     height: 95dvh;
     overflow: auto;
     border-radius: 17px;
@@ -467,7 +468,7 @@ main{
     margin-left: 12px;
     margin-right: 12px;
     width: 60%;
-    background-color: var(--tl-color-color);
+    background-color: var(--tl-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     border: 1px solid var(--main-color);
 }
@@ -644,6 +645,7 @@ main h1{
     width: auto;
     height: 48px;
     display: flex;
+    align-items: stretch;
     padding-left: 12px;
     padding-right: 12px;
 }
@@ -746,11 +748,11 @@ main h1{
     padding-bottom: 6px;
 
 
-    background-color: var(--main-color);
+    background-color: var(--sub-color);
 
     border-radius: 50px;
-    color:var(--link-color);
-    border: none;
+    color:var(--main-color);
+    border: 1px solid var(--main-color);
     font-size: 16px;
     font-family: 'Zen Maru Gothic', sans-serif;
     font-weight: normal;
@@ -762,7 +764,7 @@ main h1{
 }
 .fzone .follow .fbtn_un:hover{
     background-color: var(--sub-color);
-    color: var(--main-color);
+    color: var(--text-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
@@ -847,21 +849,34 @@ main h1{
 }
 
 .fzone .follow_yes{
-    margin-top: auto;
-    margin-bottom: 0px;
+    border: none;
+    display: block;
+    width:auto;
+    height: auto;
+
     margin-left: auto;
-    margin-right: auto;
+    margin-right: 12px;
+    margin-top: 12px;
+    margin-bottom: 0px;
+
+
     background-color: var(--sub-color);
-    border-radius: 10px;
-    padding: 12px;
+
+    border-radius: 50px;
+    color:var(--main-color);
 }
 .fzone .follow_yes p{
-    margin-top: 0px;
-    margin-bottom: 0px;
-    text-align: left;
-    font-size: 12px;
-    color:var(--text-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    overflow-wrap: break-word;
+    margin: 0px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 6px;
+    margin-right: 6px;
+    font-size: 10px;
+    font-family: 'BIZUD Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
 }
 .select_utl{
     margin: 0px;
@@ -1106,7 +1121,6 @@ main h1{
 .ueuse a{
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 6px;
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
@@ -1236,8 +1250,8 @@ main h1{
 .ueuse .abi p{
     line-height:20px;
     overflow-wrap:  break-word;
-    margin-top: 12px;
-    margin-bottom: 12px;
+    margin-top: 0px;
+    margin-bottom: 0px;
     margin-left: auto;
     font-size: 14px;
     color:var(--text-color);
@@ -1251,6 +1265,7 @@ main h1{
     padding: 12px;
     border-radius: 7px;
     border: 1px solid var(--border-color);
+    margin-bottom: 12px;
 }
 
 .ueuse .abi .back h1{
@@ -1264,9 +1279,42 @@ main h1{
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
-.ueuse .abi h3{
-    overflow-wrap:  break-word;
+.ueuse .abi h1{
+    overflow-wrap: break-word;
     margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    font-size: 42px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .abi h2{
+    overflow-wrap: break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    font-size: 32px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .abi h3{
+    overflow-wrap: break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    font-size: 24px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.ueuse .abi .h3s{
+    overflow-wrap:  break-word;
+    margin-top: 12px;
     margin-bottom: auto;
     margin-left: auto;
     font-size: 12px;
@@ -2244,12 +2292,14 @@ label>input {
     padding: 16px;
     border-radius: 10px;
     width: 20%;
+    max-height: 348px;
     position: absolute;
     top: 30%;
     left: 40%;
     right: 40%;
     transform: translate(-50%, -50%);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    overflow: scroll;
 }
 
 .modal-content textarea{
@@ -2368,6 +2418,49 @@ label>input {
     width:115px;
 }
 
+.modal-content .action_userlist{
+    display: flex;
+    width: auto;
+    background-color: var(--ueuse-color);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    padding: 12px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+
+.modal-content .action_userlist img{
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.modal-content .action_userlist .userabout{
+    display: block;
+    margin-left: 12px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+.modal-content .action_userlist .userabout .username a{
+    line-height: 20px;
+    overflow-wrap:  break-word;
+    font-size: 16px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+.modal-content .action_userlist .userabout .userid a{
+    line-height: 20px;
+    overflow-wrap:  break-word;
+    font-size: 14px;
+    color:var(--subtext-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
 .modal-content.slideUp {
     animation: SlideUp .3s ease-out forwards;
     }
@@ -2483,9 +2576,11 @@ label>input {
 }
 
 .terms img{
-    background-color: var(--background-color);
-    background: linear-gradient(45deg, var(--dark-subtext-color) 25%, transparent 25%, transparent 75%, var(--dark-subtext-color) 75%),
-              linear-gradient(45deg, var(--dark-subtext-color) 25%, transparent 25%, transparent 75%, var(--dark-subtext-color) 75%);
+    width:100%;
+    height:260px;
+    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
+                linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+    background-color: #FFF;
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
     object-fit: cover;
@@ -2527,6 +2622,28 @@ label>input {
 .terms .p3{
     margin-top: 24px;
     text-align: left;
+    word-wrap: break-word;
+    line-height: 24px;
+    color: var(--text-color);
+    font-size: 22px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.terms .sp2c{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    text-align: center;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: var(--subtext-color);
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+.terms .sp3{
+    margin-top: 24px;
+    text-align: center;
     word-wrap: break-word;
     line-height: 24px;
     color: var(--text-color);
@@ -3774,6 +3891,7 @@ summary {
     margin-top: 12px;
     margin-left: 12px;
     margin-right:12px;
+    margin-bottom: 12px;
 
     background-color: var(--sub-color);
     padding: 12px;
@@ -3881,6 +3999,71 @@ summary {
     font-weight: normal;
     text-align: center;
 }
+.sp_time_area{
+    display: none;
+}
+
+
+.offline{
+    position: absolute;
+    animation: slideDownOffline 5.0s ease-in-out forwards;
+    margin-top: 32px;
+    margin-right: auto;
+    margin-left: auto;
+    right: 0;
+    left: 0;
+    width: fit-content;
+    height: 32px;
+    z-index: 9999;
+    background-color: #FF4848;
+    border-radius: 20px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+.offline p{
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 12px;
+    margin-right: 12px;
+    line-height: 24px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-size: 16px;
+    color:var(--tl-color);
+    color: transparent; 
+    text-shadow: 0 0 0 var(--tl-color);
+    text-align: center;
+}
+@keyframes slideDownOffline {
+    0%, 100% { transform: translateY(-40dvh); }
+    20%, 90% { transform: translateY(0px); }
+}
+.online{
+    position: absolute;
+    animation: slideDownOffline 5.0s ease-in-out forwards;
+    margin-top: 32px;
+    margin-right: auto;
+    margin-left: auto;
+    right: 0;
+    left: 0;
+    width: fit-content;
+    height: 32px;
+    z-index: 9999;
+    background-color: #1d9bf0;
+    border-radius: 20px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+}
+.online p{
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 12px;
+    margin-right: 12px;
+    line-height: 24px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-size: 16px;
+    color:var(--tl-color);
+    color: transparent; 
+    text-shadow: 0 0 0 var(--tl-color);
+    text-align: center;
+}
 
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
@@ -3946,6 +4129,41 @@ summary {
     .fzone{
         margin-left: 12px;
         margin-right: 12px;
+        justify-content: flex-end
+    }
+
+    .fzone .time{
+        display: none;
+    }
+
+    .sp_time_area{
+        display: block;
+        margin-left: 24px;
+        margin-right:24px;
+    }
+
+    .sp_time_area .time{
+        margin-top: auto;
+        margin-bottom: 24px;
+        margin-left: 0px;
+        margin-right: auto;
+    }
+    .sp_time_area .time p{
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-right: 32px;
+        text-align: left;
+        font-size: 12px;
+        color:var(--subtext-color);
+        font-family: 'BIZ UDPGothic', sans-serif;
+    }
+    .sp_time_area .time a{
+        margin-top: 0px;
+        margin-bottom: 0px;
+        text-align: left;
+        font-size: 12px;
+        color:var(--subtext-color);
+        font-family: 'BIZ UDPGothic', sans-serif;
     }
 
     main{
@@ -3967,6 +4185,13 @@ summary {
         color:var(--text-color);
         font-size: 32px;
         font-family: 'Zen Maru Gothic', sans-serif;
+    }
+
+    .fzone .follow_yes p{
+        margin-top: 10px;
+        margin-bottom: 10px;
+        margin-left: 6px;
+        margin-right: 6px;
     }
 
     .sendbox .fx img{
@@ -4881,6 +5106,8 @@ summary {
         width: calc(100% - 48px);
         margin-bottom: 0px;
         height: 55dvh;
+        max-height: 55dvh;
+        overflow: scroll;
         padding: 24px;
         bottom: 0px;
         left: 0;
@@ -5183,6 +5410,12 @@ summary {
         text-align: center;
         margin-bottom: 15%;
     }
+    .offline{
+        margin-top: 12px;
+    }
+    .online{
+        margin-top: 12px;
+    }
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -5318,8 +5551,17 @@ summary {
     
     .ueuse .abi .back h1{
         color:var(--text-color);
+    } 
+    .ueuse .abi h1{
+        color:var(--dark-text-color);
+    }
+    .ueuse .abi h2{
+        color:var(--dark-text-color);
     }
     .ueuse .abi h3{
+        color:var(--dark-text-color);
+    }
+    .ueuse .abi .h3s{
         color:var(--dark-subtext-color);
     }
     .ueuse .favbox .favbtn{
@@ -5425,6 +5667,47 @@ summary {
         background-color: var(--dark-sub-color);
         color: var(--main-color);
     }
+    .fzone .follow .fbtn_un{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:120px;
+        padding: 8px auto;
+
+        margin-left: auto;
+        margin-right: 0px;
+        margin-top: 12px;
+        margin-bottom: 12px;
+
+        padding-top: 6px;
+        padding-bottom: 6px;
+
+
+        background-color: var(--dark-sub-color);
+
+        border-radius: 50px;
+        color:var(--main-color);
+        border: 1px solid var(--main-color);
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+    .fzone .follow .fbtn_un:hover{
+        background-color: var(--dark-sub-color);
+        color: var(--dark-text-color);
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+        width:125px;
+    }
+    .fzone .follow .fbtn_un:active{
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+        width:115px;
+    }
+
     .fzone .time p{
         color:var(--dark-subtext-color);
     }
@@ -5567,6 +5850,17 @@ summary {
         background-color: var(--dark-sub-color);
         color: var(--main-color);
     }
+    
+    .modal-content .action_userlist{
+        background-color: var(--dark-background-color);
+        border:none;
+    }
+    .modal-content .action_userlist .userabout .username a{
+        color:var(--dark-text-color);
+    }
+    .modal-content .action_userlist .userabout .userid a{
+        color:var(--dark-subtext-color);
+    }
 
     .inbox {
         background: var(--dark-background-color);
@@ -5671,6 +5965,13 @@ summary {
     }
     
     .terms .p3{
+        color: var(--background-color);
+    }
+    .terms .sp2c{
+        color: var(--dark-subtext-color);
+    }
+    
+    .terms .sp3{
         color: var(--background-color);
     }
     
@@ -5876,5 +6177,9 @@ summary {
     }
     .f_c_area .fcnt p{
         color: var(--dark-text-color);
+    }
+
+    .userheader .profile p a{
+        color:var(--main-color);
     }
 }

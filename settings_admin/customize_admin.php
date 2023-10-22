@@ -13,6 +13,9 @@ $mojisizefile = "../server/textsize.txt";
 $colorfile = "../css/color.css";
 $color_info = file_get_contents($colorfile);
 
+$manifestfile = "../manifest/manifest.json";
+$manifest_info = file_get_contents($manifestfile);
+
 $err404imagefile = "../server/404imagepath.txt";
 
 $robots = "../robots.txt";
@@ -220,10 +223,17 @@ if( !empty($_POST['btn_submit']) ) {
 
     // 空白除去
 	$colordata = $_POST['colordata'];
+	$manifestdata = $_POST['manifestdata'];
 
 	//鯖名
 	$file = fopen($colorfile, 'w');
 	$data = $colordata;
+	fputs($file, $data);
+	fclose($file);
+
+	//manifest
+	$file = fopen($manifestfile, 'w');
+	$data = $manifestdata;
 	fputs($file, $data);
 	fclose($file);
 
@@ -268,7 +278,13 @@ require('../logout/logout.php');
 					<div>
 						<p>CSS</p>
 						<div class="p2">ここで指定されている色が適用されます。<br>もし適用されなかった場合はキャッシュを削除し再読み込みしてください。<br>表示がおかしくなってしまった場合はカラーコードを再度確認してください。</div>
-						<textarea id="colordata" placeholder="uwuzu" class="inbox" type="text" name="colordata"><?php $sinfo = explode("\r", $color_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
+						<textarea id="colordata" placeholder="CSS" class="inbox" type="text" name="colordata"><?php $sinfo = explode("\r", $color_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
+					</div>
+
+					<div>
+						<p>PWA(manifest)</p>
+						<div class="p2">ここでPWAの設定を変更できます。<br>"short_name"、"name"が表示されるアプリ名、"theme_color"、"background_color"がテーマカラーとPWA起動時のスプラッシュ画面の背景色です。<br>いま記載したもの以外の設定は変更しないことをお勧めします。</div>
+						<textarea id="manifestdata" placeholder="manifest.json" class="inbox" type="text" name="manifestdata"><?php $sinfo = explode("\r", $manifest_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
 
 					<input type="submit" class = "irobutton" name="btn_submit" value="保存&更新">

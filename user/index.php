@@ -49,7 +49,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -64,6 +64,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
 	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -96,7 +97,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -111,6 +112,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
 	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -224,7 +226,7 @@ if( !empty($pdo) ) {
 
 	function replaceURLsWithLinks($postText) {
 		// URLを正規表現を使って検出
-		$pattern = '/(https?:\/\/[^\s]+)/';
+		$pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
 		preg_match_all($pattern, $postText, $matches);
 	
 		// 検出したURLごとに処理を行う
@@ -233,11 +235,12 @@ if( !empty($pdo) ) {
 			$parsedUrl = parse_url($url);
 			$domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
 	
-			// ドメインのみを表示するaタグを生成
-			$link = "<a href='$url'>$domain</a>";
+			// 不要な文字を削除してaタグを生成
+			$urlWithoutSpaces = preg_replace('/\s+/', '', $url);
+			$link = "<a href='$urlWithoutSpaces' target='_blank'>$domain</a>";
 	
 			// URLをドメインのみを表示するaタグで置き換え
-			$postText = str_replace($url, $link, $postText);
+			$postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
 		}
 	
 		return $postText;
@@ -278,8 +281,9 @@ if( !empty($pdo) ) {
 		// コンマで区切って配列に分割し、要素数を数える
 		$followIds = explode(',', $follow);
 		$followCount = count($followIds)-1;
-		
-		$follow_on_me = strpos($follow, $userid);
+
+        $follow_on_me = array_search($userid, $followIds);
+	
 		if ($follow_on_me !== false) {
 			$follow_yes = "フォローされています"; // worldを含む:6
 		}else{
@@ -301,6 +305,47 @@ if( !empty($pdo) ) {
 		$allueuse->execute();
 		$ueuse_cnt = $allueuse->rowCount(); 
 
+		//-------フォロワー取得---------
+
+		// フォロワーのユーザーIDを $follower_userids 配列に追加
+		foreach ($followerIds as $follower_userid) {
+			$follower_userids[] = $follower_userid;
+		}
+
+		// フォロワーのユーザー情報を取得
+		$follower_userdata = array();
+
+		foreach ($follower_userids as $follower_userid) {
+			$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+			$follower_userQuery->bindValue(':userid', $follower_userid);
+			$follower_userQuery->execute();
+			$follower_userinfo = $follower_userQuery->fetch();
+
+			if ($follower_userinfo) {
+				// フォロワーのユーザー情報を $follower_userdata 配列に追加
+				$follower_userdata[] = $follower_userinfo;
+			}
+		}
+
+		//-------フォロー取得---------
+
+		foreach ($followIds as $follow_userid) {
+			$follow_userids[] = $follow_userid;
+		}
+
+		$follow_userdata = array();
+
+		foreach ($follow_userids as $follow_userid) {
+			$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+			$follow_userQuery->bindValue(':userid', $follow_userid);
+			$follow_userQuery->execute();
+			$follow_userinfo = $follow_userQuery->fetch();
+
+			if ($follow_userinfo) {
+				// フォロワーのユーザー情報を $follower_userdata 配列に追加
+				$follow_userdata[] = $follow_userinfo;
+			}
+		}
 
 
 	}else{
@@ -393,9 +438,12 @@ if (!empty($_POST['follow'])) {
         $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
         $res = $updateQuery->execute();
 
-		$deluserid = ",".$userdata["userid"];
+		$myflwlist = explode(',', $myfollowlist);
+		$delfollowList = array_diff($myflwlist, array($userData['userid']));
+        $deluserid = implode(',', $delfollowList);
+
         // 自分のfollowカラムから相手のユーザーIDを削除
-        $updateQuery = $pdo->prepare("UPDATE account SET follow = REPLACE(follow, :follow, '') WHERE userid = :userid");
+        $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
         $updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
         $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
         $res_follow = $updateQuery->execute();
@@ -433,9 +481,11 @@ if (!empty($_POST['send_block_submit'])) {
         $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
         $res = $updateQuery->execute();
 
-		$deluserid = ",".$userdata["userid"];
+		$myflwlist = explode(',', $myfollowlist);
+		$delfollowList = array_diff($myflwlist, array($userData['userid']));
+        $deluserid = implode(',', $delfollowList);
         // 自分のfollowカラムから相手のユーザーIDを削除
-        $updateQuery = $pdo->prepare("UPDATE account SET follow = REPLACE(follow, :follow, '') WHERE userid = :userid");
+        $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
         $updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
         $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
         $res_follow = $updateQuery->execute();
@@ -461,9 +511,11 @@ if (!empty($_POST['send_block_submit'])) {
 
 } elseif (!empty($_POST['send_un_block_submit'])) {
 
-	$deluserid = ",".$userdata["userid"];
+	$myblklist = explode(',', $myBlocklist);
+	$delblkList = array_diff($myblklist, array($userData['userid']));
+	$deluserid = implode(',', $delblkList);
 	// 自分のfollowカラムから相手のユーザーIDを削除
-	$updateQuery = $pdo->prepare("UPDATE account SET blocklist = REPLACE(blocklist, :blocklist, '') WHERE userid = :userid");
+	$updateQuery = $pdo->prepare("UPDATE account SET blocklist = :blocklist WHERE userid = :userid");
 	$updateQuery->bindValue(':blocklist', $deluserid, PDO::PARAM_STR);
 	$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
 	$res_block = $updateQuery->execute();
@@ -490,6 +542,7 @@ $pdo = null;
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
@@ -504,6 +557,16 @@ $pdo = null;
 </head>
 
 <body>
+
+	<div>
+		<div id="offline" class="offline" style="display:none;">
+			<p>🦖💨 インターネットへの接続が切断されました...</p>
+		</div>
+		<div id="online" class="online" style="display:none;">
+			<p>🌐💫 インターネットへの接続が復帰しました！！！</p>
+		</div>
+	</div>
+
 	<?php require('../require/leftbox.php');?>
 	<main class="outer">
 
@@ -516,7 +579,8 @@ $pdo = null;
 		<?php endif; ?>
 
 		<div class="userheader">
-			<?php if($userData["userid"] == "none"){?>
+			<?php if($userData["userid"] == "none"){
+				header("HTTP/1.1 404 Not Found");?>
 				<!--いないひと--->
 				<div class="hed">
 					<img src="../img/defhead/head.png">
@@ -558,7 +622,7 @@ $pdo = null;
 					<?php $roleData = $roleDataArray[$roleId]; ?>
 					<div class="rolebox" style="border: 1px solid <?php echo '#' . $roleData["rolecolor"]; ?>;">
 						<p style="color: <?php echo '#' . $roleData["rolecolor"]; ?>;">
-							<?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
+							<?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); }else{ echo("ロールが正常に設定されていません。");} ?>
 						</p>
 					</div>
 				<?php endforeach; ?>
@@ -580,6 +644,7 @@ $pdo = null;
 				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
 				<p><?php if(htmlentities($userdata['role']) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
 			</div>
+			
 			<?php if(!empty($follow_yes)){?>
 				<div class="follow_yes">
 					<p><?php echo $follow_yes;?></p>
@@ -629,6 +694,13 @@ $pdo = null;
 			<?php } ?>
 		</div>
 
+		<div class="sp_time_area">
+			<div class="time">
+				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
+				<p><?php if(htmlentities($userdata['role']) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
+			</div>
+		</div>
+
 		<?php if(!($role === "ice")){?>
 			<div id="myModal" class="modal">
 				<div class="modal-content">
@@ -646,11 +718,11 @@ $pdo = null;
 				<div class="p2">ユーズ数</div>
 				<p><?php echo $ueuse_cnt;?></p>
 			</div>
-			<div class="fcnt">
+			<div class="fcnt" id="follow_cnt" style="cursor:pointer;">
 				<div class="p2">フォロー数</div>
 				<p><?php echo $followCount;?></p>
 			</div>
-			<div class="fcnt">
+			<div class="fcnt" id="follower_cnt" style="cursor:pointer;">
 				<div class="p2">フォロワー数</div>
 				<p><?php echo $followerCount;?></p>
 			</div>
@@ -725,6 +797,59 @@ $pdo = null;
 						<input type="submit" id="deleteButton3" class="fbtn_no" name="send_un_block_submit" value="ブロック解除">
 						<input type="button" id="cancelButton3" class="fbtn" value="キャンセル">
 					</form>
+				</div>
+			</div>	
+
+
+			<div id="FollowerUserModal" class="modal">
+				<div class="modal-content">
+					<p><?php echo htmlentities($userData["username"], ENT_QUOTES, 'UTF-8');?>さんをフォローしているユーザー</p>
+					<?php 
+					if(!empty($follower_userdata)){
+						foreach ($follower_userdata as $value) {
+							if (false === strpos($myblocklist, ',' . htmlentities($value['userid'], ENT_QUOTES, 'UTF-8'))) {
+								echo "<div class='action_userlist'>";
+								echo "<a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'><img src=".htmlentities($value['iconname'], ENT_QUOTES, 'UTF-8')."></a>";
+								echo "<div class='userabout'>";
+								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".htmlentities($value['username'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "<div class='userid'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "</div>";
+								echo "</div>";
+							}
+						}
+					}else{
+						echo "<p>".htmlentities($userData["username"], ENT_QUOTES, 'UTF-8')."さんは誰にもフォローされていません。</p>";
+					}
+					?>
+					<div class="btn_area">
+						<input type="button" id="CloseButton4" class="fbtn" value="閉じる">
+					</div>
+				</div>
+			</div>	
+
+			<div id="FollowUserModal" class="modal">
+				<div class="modal-content">
+					<p><?php echo htmlentities($userData["username"], ENT_QUOTES, 'UTF-8');?>さんがフォローしているユーザー</p>
+					<?php 
+					if(!empty($follow_userdata)){
+						foreach ($follow_userdata as $value) {
+							if (false === strpos($myblocklist, ',' . htmlentities($value['userid'], ENT_QUOTES, 'UTF-8'))) {
+								echo "<div class='action_userlist'>";
+								echo "<a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'><img src=".htmlentities($value['iconname'], ENT_QUOTES, 'UTF-8')."></a>";
+								echo "<div class='userabout'>";
+								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".htmlentities($value['username'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "<div class='userid'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "</div>";
+								echo "</div>";
+							}
+						}
+					}else{
+						echo "<p>".htmlentities($userData["username"], ENT_QUOTES, 'UTF-8')."さんは誰もフォローしていません。</p>";
+					}
+					?>
+					<div class="btn_area">
+						<input type="button" id="CloseButton5" class="fbtn" value="閉じる">
+					</div>
 				</div>
 			</div>	
 		
@@ -880,10 +1005,13 @@ $(document).ready(function() {
 		if (outerBottom <= $('.outer').scrollTop()) {
 			var elem = document.getElementById("noueuse");
 
-			if (elem === null){
+			if($("#error").css('display') == 'block') {
+				// えらー処理
+				return;
+			}else if (elem === null){
 				// 存在しない場合の処理
 				loadPosts();
-			} else {
+			}else{
 				// 存在する場合の処理
 				return;
 			}
@@ -1121,6 +1249,59 @@ $(document).ready(function() {
 			}, 150);
         });
 	});
+
+	var modal4 = document.getElementById('FollowerUserModal');
+    var CloseButton4 = document.getElementById('CloseButton4'); // 追加
+	var modalMain = $('.modal-content');
+
+	$('#follower_cnt').click(function() {
+        modal4.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        CloseButton4.addEventListener('click', () => {
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal4.style.display = 'none';
+			}, 150);
+        });
+	});
+
+	var modal5 = document.getElementById('FollowUserModal');
+    var CloseButton5 = document.getElementById('CloseButton5'); // 追加
+	var modalMain = $('.modal-content');
+
+	$('#follow_cnt').click(function() {
+        modal5.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        CloseButton5.addEventListener('click', () => {
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal5.style.display = 'none';
+			}, 150);
+        });
+	});
+
+	window.addEventListener('online', function(){
+		checkOnline();
+	});
+	window.addEventListener('offline', function(){
+		checkOnline();
+	});
+	function checkOnline() {
+		if( navigator.onLine ) {
+			$("#online").show();
+			$("#offline").hide();
+		} else {
+			$("#online").hide();
+			$("#offline").show();
+		}
+	}
+
 });
 </script>
 

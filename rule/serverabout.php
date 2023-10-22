@@ -7,7 +7,12 @@ require('../db.php');
 session_name('uwuzu_s_id');
 session_start();
 
-$servericonfile = "../server/servericon.txt";
+$servericonfile = file_get_contents("../server/servericon.txt");
+$servericondata = explode( "\n", $servericonfile );
+$cnt = count($servericondata);
+for( $i=0;$i<$cnt;$i++ ){
+    $uwuzuicon[$i] = ($servericondata[$i]);
+}
 
 //-------------------------
 
@@ -87,7 +92,7 @@ $count2 = $result2->num_rows;
 
 <div class="topbox">
     <div class="logo">
-        <img src="../img/uwuzulogo.svg">
+        <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
     </div>
 </div>
 
@@ -96,11 +101,11 @@ $count2 = $result2->num_rows;
     <h1>サーバー情報</h1>
     <?php if( !empty(file_get_contents($servericonfile)) ){ ?>
         <div class="servericon">
-            <img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+            <img src="<?php echo htmlspecialchars($uwuzuicon[0], ENT_QUOTES, 'UTF-8'); ?>">
         </div>
     <?php }?>
-    <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
-    <div class="p2c"><?php echo $domain;?></div>
+    <div class="sp3"><?php echo file_get_contents($servernamefile);?></div>
+    <div class="sp2c"><?php echo $domain;?></div>
     <hr>
     <h4>説明</h4>
     <p><?php
@@ -115,11 +120,13 @@ $count2 = $result2->num_rows;
     <p>連絡用メールアドレス : <?php echo htmlspecialchars(file_get_contents($contactfile), ENT_QUOTES, 'UTF-8');?></p>
 
     <hr>
-    <?php if(!($onlyuser =="true")){?>
+
     <h4>統計情報</h4>
-        <p>ユーザー数 : <?php echo $count1."<br>"?></p>
-        <p>投稿数 : <?php echo $count2."<br>"?></p>
-    <?php }else{?>
+    <p>ユーザー数 : <?php echo $count1."<br>"?></p>
+    <p>投稿数 : <?php echo $count2."<br>"?></p>
+
+    <?php if($onlyuser =="true"){?>
+    <hr>
     <h4>注意</h4>
     <p>このサーバーにアカウント登録するには招待コードが必要です。</p>
     <?php }?>
@@ -127,6 +134,8 @@ $count2 = $result2->num_rows;
     <h4>サーバーソフトウェア</h4>
     <div class="p3"><?php echo $uwuzuinfo[0];?></div>
     <div class="p2c">Version : <?php echo $uwuzuinfo[1];?><br>Developer : <?php echo $uwuzuinfo[3];?><br>Last Update : <?php echo $uwuzuinfo[2];?></div>
+
+    <a href = "javascript:history.back();" class="irobutton">戻る</a>
 
 </div>
 

@@ -21,7 +21,7 @@ if(file_get_contents($activitypub_file) === "true"){
 
     $user = htmlentities($_GET['resource']);
 
-    $userid = str_replace('@','', str_replace('@'.$domain.'', '', $user));
+    $userid = str_replace('acct:','', str_replace('@'.$domain.'', '', $user));
 
     $item = array(
         "subject" => "acct:".$userid.'@'.$domain.'',
@@ -35,5 +35,7 @@ if(file_get_contents($activitypub_file) === "true"){
     );
 
     echo json_encode($item, JSON_UNESCAPED_UNICODE);
+}else{
+    header("HTTP/1.1 410 Gone");
 }
 ?>

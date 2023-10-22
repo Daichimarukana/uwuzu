@@ -440,23 +440,60 @@ if( !empty($_POST['send_ban_submit']) ) {
 		$deleteQuery->bindValue(':touserid', $userId2, PDO::PARAM_STR);
 		$res = $deleteQuery->execute();
 
-		// フォローの更新
-		$updateFollowQuery = $pdo->prepare("UPDATE account SET follow = REPLACE(follow, :userid, '') WHERE follow LIKE :pattern");
-		$updateFollowQuery->bindValue(':userid', ",$userId2", PDO::PARAM_STR);
-		$updateFollowQuery->bindValue(':pattern', "%,$userId2%", PDO::PARAM_STR);
-		$updateFollowQuery->execute();
+		// ユーザーIDを削除したい全てのアカウントを取得
+		$query = $pdo->prepare("SELECT * FROM account WHERE follow LIKE :pattern1 OR follow LIKE :pattern2 OR follow LIKE :pattern3 OR follower LIKE :pattern1 OR follower LIKE :pattern2 OR follower LIKE :pattern3");
+		$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);
+		$query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);
+		$query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);
+		$query->execute();
+		$accounts = $query->fetchAll();
 
-		// フォロワーの更新
-		$updateFollowerQuery = $pdo->prepare("UPDATE account SET follower = REPLACE(follower, :userid, '') WHERE follower LIKE :pattern");
-		$updateFollowerQuery->bindValue(':userid', ",$userId2", PDO::PARAM_STR);
-		$updateFollowerQuery->bindValue(':pattern', "%,$userId2%", PDO::PARAM_STR);
-		$updateFollowerQuery->execute();
+		foreach ($accounts as $account) {
+			// フォローの更新
+			if (strpos($account['follow'], ",$userid,") !== false || strpos($account['follow'], ",$userid") !== false || strpos($account['follow'], "$userid,") !== false) {
+				$followList = explode(',', $account['follow']);
+				$followList = array_diff($followList, array($userid));
+				$newFollowList = implode(',', $followList);
 
-		// いいねの更新
-		$updateFavoriteQuery = $pdo->prepare("UPDATE ueuse SET favorite = REPLACE(favorite, :favorite, '') WHERE favorite LIKE :pattern");
-		$updateFavoriteQuery->bindValue(':favorite', ",$userId2", PDO::PARAM_STR);
-		$updateFavoriteQuery->bindValue(':pattern', "%,$userId2%", PDO::PARAM_STR);
-		$updateFavoriteQuery->execute();
+				$updateFollowQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
+				$updateFollowQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
+				$updateFollowQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
+				$updateFollowQuery->execute();
+			}
+
+			// フォロワーの更新
+			if (strpos($account['follower'], ",$userid,") !== false || strpos($account['follower'], ",$userid") !== false || strpos($account['follower'], "$userid,") !== false) {
+				$followerList = explode(',', $account['follower']);
+				$followerList = array_diff($followerList, array($userid));
+				$newFollowerList = implode(',', $followerList);
+
+				$updateFollowerQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
+				$updateFollowerQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
+				$updateFollowerQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
+				$updateFollowerQuery->execute();
+			}
+		}
+
+		$query = $pdo->prepare("SELECT * FROM ueuse WHERE favorite LIKE :pattern1 OR favorite LIKE :pattern2 OR favorite LIKE :pattern3");
+		$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);
+		$query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);
+		$query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);
+		$query->execute();
+		$accounts = $query->fetchAll();
+
+		foreach ($accounts as $account) {
+			// いいねの更新
+			if (strpos($account['favorite'], ",$userid,") !== false || strpos($account['favorite'], ",$userid") !== false || strpos($account['favorite'], "$userid,") !== false) {
+				$favoriteList = explode(',', $account['favorite']);
+				$favoriteList = array_diff($favoriteList, array($userid));
+				$newFavoriteList = implode(',', $favoriteList);
+
+				$updateFavoriteQuery = $pdo->prepare("UPDATE ueuse SET favorite = :favorite WHERE uniqid = :uniqid");
+				$updateFavoriteQuery->bindValue(':favorite', $newFavoriteList, PDO::PARAM_STR);
+				$updateFavoriteQuery->bindValue(':uniqid', $account['uniqid'], PDO::PARAM_STR);
+				$updateFavoriteQuery->execute();
+			}
+		}
 
 	} catch (Exception $e) {
 

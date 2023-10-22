@@ -467,6 +467,15 @@ if ("serviceWorker" in navigator) {
 
 <body>
 
+	<div>
+		<div id="offline" class="offline" style="display:none;">
+			<p>🦖💨 インターネットへの接続が切断されました...</p>
+		</div>
+		<div id="online" class="online" style="display:none;">
+			<p>🌐💫 インターネットへの接続が復帰しました！！！</p>
+		</div>
+	</div>
+
 	<?php require('../require/leftbox.php');?>
 	
 	<main class="outer">
@@ -497,6 +506,7 @@ if ("serviceWorker" in navigator) {
 			</div>
 			<?php }?>
 		<?php }?>
+
 		<div class="tlchange">
 				<a href="index" class="on">LTL</a>
 				<a href="ftl" class="off">FTL</a>
@@ -827,6 +837,22 @@ $(document).ready(function() {
 			}
 		});
 	});
+
+	window.addEventListener('online', function(){
+		checkOnline();
+	});
+	window.addEventListener('offline', function(){
+		checkOnline();
+	});
+	function checkOnline() {
+		if( navigator.onLine ) {
+			$("#online").show();
+			$("#offline").hide();
+		} else {
+			$("#online").hide();
+			$("#offline").show();
+		}
+	}
 
 	
 	var osho_gats = document.getElementById('osho_gats');

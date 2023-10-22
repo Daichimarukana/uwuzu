@@ -9,5 +9,7 @@ if(file_get_contents($activitypub_file) === "true"){
     echo '<XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">';
     echo '<Link rel="lrdd" type="application/xrd+xml" template="https://'.$domain.'/.well-known/webfinger?resource={uri}"/>';
     echo '</XRD>';
+}else{
+    header("HTTP/1.1 410 Gone");
 }
 ?>

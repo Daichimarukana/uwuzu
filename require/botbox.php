@@ -20,6 +20,8 @@
             <a href="/@<?php echo $userid; ?>" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/profile.svg#profile"></use></svg><div>プロフィール</div></a>
             <a href="/settings" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/settings.svg#settings"></use></svg><div>設定</div></a>
             <a href="/others" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/others.svg#others"></use></svg><div>その他</div></a>
+            <a href="/rule/terms" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/terms.svg#terms"></use></svg><div>利用規約</div></a>
+            <a href="/rule/privacypolicy" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/privacypolicy.svg#privacypolicy"></use></svg><div>プライバシー<br>ポリシー</div></a>
 
             <?php if($res["admin"] === "yes"){?>
                 <a href="/emoji/addemoji" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/addemoji.svg#addemoji"></use></svg><div>絵文字登録</div></a>

@@ -437,7 +437,7 @@ require('../logout/logout.php');
 
 					<div>
 						<p>ActivityPubサーバーとして認識されるようにするか</p>
-						<div class="p2">ActivityPubの仮実装をオンにするかです。inboxに入ってきた内容には今現在これといったレスポンスを返しません。<br>また、publicKeyも返却しません。<br>現状ActivityPubサーバーと連合を組むことは出来ません。(リモートユーザーの確認程度なら出来ます。)</div>
+						<div class="p2">ActivityPubの仮実装をオンにするかです。inboxに入ってきた内容には今現在これといったレスポンスを返しません。<br>また、publicKeyも返却しません。<br>現状ActivityPubサーバーと連合を組むことは出来ません。(リモートユーザーの確認程度なら出来ます。)<br>オフの状態だと410 Goneを返します。</div>
 						<div class="switch_button">
 							<?php if(file_get_contents($activitypub_file) === "true"){?>
 								<input id="activitypub" class="switch_input" type='checkbox' name="activitypub" value="true" checked/>

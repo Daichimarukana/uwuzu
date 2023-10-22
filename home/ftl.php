@@ -467,9 +467,19 @@ if ("serviceWorker" in navigator) {
 
 <body>
 
+	<div>
+		<div id="offline" class="offline" style="display:none;">
+			<p>🦖💨 インターネットへの接続が切断されました...</p>
+		</div>
+		<div id="online" class="online" style="display:none;">
+			<p>🌐💫 インターネットへの接続が復帰しました！！！</p>
+		</div>
+	</div>
+
 	<?php require('../require/leftbox.php');?>
 	
 	<main class="outer">
+
 		<div class="tlchange">
 				<a href="index" class="off">LTL</a>
 				<a href="ftl" class="on">FTL</a>
@@ -801,13 +811,29 @@ $(document).on('click', '.addabi', function (event) {
 			});
 		}
 	});
-});
+	});
 
-var osho_gats = document.getElementById('osho_gats');
-$(document).on('click', '.os_exit_btn', function (event) {
-	document.cookie = "event=done; max-age=86400";
-	osho_gats.style.display = 'none';
-});
+	window.addEventListener('online', function(){
+		checkOnline();
+	});
+	window.addEventListener('offline', function(){
+		checkOnline();
+	});
+	function checkOnline() {
+		if( navigator.onLine ) {
+			$("#online").show();
+			$("#offline").hide();
+		} else {
+			$("#online").hide();
+			$("#offline").show();
+		}
+	}
+
+	var osho_gats = document.getElementById('osho_gats');
+	$(document).on('click', '.os_exit_btn', function (event) {
+		document.cookie = "event=done; max-age=86400";
+		osho_gats.style.display = 'none';
+	});
 
 });
 
