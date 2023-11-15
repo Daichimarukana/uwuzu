@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: ひみつ
--- 生成日時: 2023-10-03 17:20:43
+-- 生成日時: 2023-11-15 14:03:33
 -- サーバのバージョン： 10.4.28-MariaDB
 -- PHP のバージョン: 8.2.4
 
@@ -171,6 +171,8 @@ CREATE TABLE `ueuse` (
   `ueuse` text NOT NULL,
   `photo1` varchar(512) NOT NULL,
   `photo2` varchar(512) NOT NULL,
+  `photo3` varchar(512) NOT NULL,
+  `photo4` varchar(512) NOT NULL,
   `video1` varchar(512) NOT NULL,
   `datetime` datetime NOT NULL,
   `favorite` text NOT NULL,

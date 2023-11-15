@@ -7,14 +7,16 @@ require('../db.php');
 session_name('uwuzu_s_id');
 session_start();
 
-$servericonfile = file_get_contents("../server/servericon.txt");
-$servericondata = explode( "\n", $servericonfile );
-$cnt = count($servericondata);
-for( $i=0;$i<$cnt;$i++ ){
-    $uwuzuicon[$i] = ($servericondata[$i]);
-}
+$servericonfile = "../server/servericon.txt";
 
 //-------------------------
+$serverlogofile = "../server/serverlogo.txt";
+$serverlogodata = file_get_contents($serverlogofile);
+$serverlogodata = explode( "\n", $serverlogodata );
+$cnt = count( $serverlogodata );
+for( $i=0;$i<$cnt;$i++ ){
+    $serverlogo_link[$i] = ($serverlogodata[$i]);
+}
 
 $contactfile = "../server/contact.txt";
 
@@ -91,9 +93,15 @@ $count2 = $result2->num_rows;
 <body>
 
 <div class="topbox">
-    <div class="logo">
-        <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
-    </div>
+    <?php if(!empty($serverlogo_link[1])){ ?>
+        <div class="logo">
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+        </div>
+    <?php }else{?>
+        <div class="logo">
+            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+        </div>
+    <?php }?>
 </div>
 
 <div class="terms">
@@ -101,7 +109,7 @@ $count2 = $result2->num_rows;
     <h1>サーバー情報</h1>
     <?php if( !empty(file_get_contents($servericonfile)) ){ ?>
         <div class="servericon">
-            <img src="<?php echo htmlspecialchars($uwuzuicon[0], ENT_QUOTES, 'UTF-8'); ?>">
+            <img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
         </div>
     <?php }?>
     <div class="sp3"><?php echo file_get_contents($servernamefile);?></div>

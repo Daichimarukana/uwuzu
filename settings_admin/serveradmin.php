@@ -1,6 +1,14 @@
 <?php
 $servericonfile = "../server/servericon.txt";
 
+$serverlogofile = "../server/serverlogo.txt";
+$serverlogodata = file_get_contents($serverlogofile);
+$serverlogodata = explode( "\n", $serverlogodata );
+$cnt = count( $serverlogodata );
+for( $i=0;$i<$cnt;$i++ ){
+    $serverlogo_link[$i] = ($serverlogodata[$i]);
+}
+
 $servernamefile = "../server/servername.txt";
 
 $serverinfofile = '../server/info.txt';
@@ -231,6 +239,17 @@ if( !empty($_POST['btn_submit']) ) {
 
 	$servericon = $_POST['servericon'];
 
+	$serverlogo_onoff = $_POST['serverlogo_onoff'];
+
+	$serverlogo_light = $_POST['serverlogo_light'];
+	$serverlogo_dark = $_POST['serverlogo_dark'];
+
+	if($serverlogo_onoff === "true"){
+		$saveserverlogo = $serverlogo_light."\n".$serverlogo_dark;
+	}else{
+		$saveserverlogo = "";
+	}
+
 	$servername = $_POST['servername'];
 
 	$serverinfo = $_POST['serverinfo'];
@@ -281,6 +300,12 @@ if( !empty($_POST['btn_submit']) ) {
 	//鯖icon
 	$file = fopen($servericonfile, 'w');
 	$data = $servericon;
+	fputs($file, $data);
+	fclose($file);
+
+	//鯖ロゴ
+	$file = fopen($serverlogofile, 'w');
+	$data = $saveserverlogo;
 	fputs($file, $data);
 	fclose($file);
 
@@ -385,6 +410,38 @@ require('../logout/logout.php');
 						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。</div>
 						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty(file_get_contents($servericonfile)) ){ echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
+
+					<div>
+						<p>サーバーロゴ機能のオンオフ</p>
+						<div class="switch_button">
+							<?php if(!empty(file_get_contents($serverlogofile))){?>
+								<input id="serverlogo_onoff" class="switch_input" type='checkbox' name="serverlogo_onoff" value="true" checked/>
+								<label for="serverlogo_onoff" class="switch_label"></label>
+							<?php }else{?>
+								<input id="serverlogo_onoff" class="switch_input" type='checkbox' name="serverlogo_onoff" value="true" />
+								<label for="serverlogo_onoff" class="switch_label"></label>
+							<?php }?>
+						</div>
+					</div>
+					<div id="serverlogo">
+						<p>サーバーロゴ</p>
+						<div class="p2">サーバーの左上に表示されているuwuzuのロゴを独自のロゴに置き換えるときに使用します。<br>自動的に角が丸くなります。<br>URLより設定してください。<br>背景透過画像を推奨します。</div>
+						<div class="p2">ログイン後のロゴ</div>
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serverlogo_link[0]) ){ echo htmlspecialchars($serverlogo_link[0], ENT_QUOTES, 'UTF-8'); } ?>">
+						<div class="p2">ログイン画面と利用規約などドキュメントページのロゴ</div>
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serverlogo_link[1]) ){ echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8'); } ?>">
+					</div>
+					<script>
+					if ($("#serverlogo_onoff").prop("checked")) {
+						$('#serverlogo').show();
+					}else{
+						$('#serverlogo').hide();
+					}
+					$('#serverlogo_onoff').change(function(){
+						$('#serverlogo').toggle();
+					});
+					</script>
+					
 					<div>
 						<p>サーバー名</p>
 						<div class="p2">サーバー名です。</div>

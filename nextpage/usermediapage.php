@@ -54,7 +54,14 @@ if (!empty($pdo)) {
     $userQuery->execute();
     $userData = $userQuery->fetch();    
     
-    $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = '' AND (photo1 NOT IN('none') OR photo2 NOT IN('none') OR video1 NOT IN('none')) ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
+    $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = '' AND (
+        (photo1 IS NOT NULL AND photo1 != '' AND photo1 != 'none') OR
+        (photo2 IS NOT NULL AND photo2 != '' AND photo2 != 'none') OR
+        (photo3 IS NOT NULL AND photo3 != '' AND photo3 != 'none') OR
+        (photo4 IS NOT NULL AND photo4 != '' AND photo4 != 'none') OR
+        (video1 IS NOT NULL AND video1 != '' AND video1 != 'none')
+      ) ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");      
+      
 	$messageQuery->bindValue(':userid', $uwuzuid);
 	$messageQuery->execute();
 	$message_array = $messageQuery->fetchAll();

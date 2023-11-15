@@ -27,3 +27,4 @@ console.log(
     "",
     "uwuzuサーバー運営者及びuwuzu開発者がCookie情報等を要求することはありません。",
 );
+

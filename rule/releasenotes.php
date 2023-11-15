@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 
 <?php
+$serverlogofile = "../server/serverlogo.txt";
+$serverlogodata = file_get_contents($serverlogofile);
+$serverlogodata = explode( "\n", $serverlogodata );
+$cnt = count( $serverlogodata );
+for( $i=0;$i<$cnt;$i++ ){
+    $serverlogo_link[$i] = ($serverlogodata[$i]);
+}
+
 $servernamefile = "../server/servername.txt";
 
 //-------------------------------------
@@ -39,6 +47,14 @@ function processMarkdownAndWrapEmptyLines($markdownText) {
     // 箇条書き（-）をHTMLのul/liタグに変換
     $markdownText = preg_replace('/^- (.+)/m', '<ul><li>$1</li></ul>', $markdownText);
 
+    // リリースノートの項目わけ
+    $markdownText = preg_replace('/^new: (.+)/m', '<div class="fxbx"><div class="new"><p>New</p></div><p>$1</p></div>', $markdownText);
+    $markdownText = preg_replace('/^fix: (.+)/m', '<div class="fxbx"><div class="fix"><p>Fix</p></div><p>$1</p></div>', $markdownText);
+    $markdownText = preg_replace('/^chg: (.+)/m', '<div class="fxbx"><div class="chg"><p>Chg</p></div><p>$1</p></div>', $markdownText);
+    $markdownText = preg_replace('/^del: (.+)/m', '<div class="fxbx"><div class="del"><p>Del</p></div><p>$1</p></div>', $markdownText);
+
+    $markdownText = preg_replace('/^    (.+)/m', '<div class="space_tab"><p>$1</p></div>', $markdownText);
+
     // 空行の前に何もない行をHTMLのpタグに変換
     $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
 
@@ -62,6 +78,8 @@ foreach ($srelease as $release) {
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <title><?php echo $uwuzuinfo[0]?> リリースノート - <?php echo file_get_contents($servernamefile);?></title>
 </head>
 
@@ -69,9 +87,15 @@ foreach ($srelease as $release) {
 <body>
 
 <div class="topbox">
-    <div class="logo">
-        <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
-    </div>
+    <?php if(!empty($serverlogo_link[1])){ ?>
+        <div class="logo">
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+        </div>
+    <?php }else{?>
+        <div class="logo">
+            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+        </div>
+    <?php }?>
 </div>
 
 <div class="terms">

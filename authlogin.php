@@ -2,6 +2,14 @@
 
 $servernamefile = "server/servername.txt";
 
+$serverlogofile = "server/serverlogo.txt";
+$serverlogodata = file_get_contents($serverlogofile);
+$serverlogodata = explode( "\n", $serverlogodata );
+$cnt = count( $serverlogodata );
+for( $i=0;$i<$cnt;$i++ ){
+    $serverlogo_link[$i] = ($serverlogodata[$i]);
+}
+
 require('db.php');
 
 
@@ -122,13 +130,13 @@ if( !empty($_POST['btn_submit']) ) {
                 // 通知用SQL作成
                 $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
         
-                $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
+                $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
+                $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+                $stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+                $stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
 
-                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                $stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
 
                 // SQLクエリの実行
                 $res = $stmt->execute();
@@ -189,13 +197,13 @@ if( !empty($_POST['btn_submit']) ) {
                         // 通知用SQL作成
                         $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
                 
-                        $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                        $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                        $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-                
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                        $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
+                        $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
+                        $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+                        $stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+                        $stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+
+                        $stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
                 
                         // SQLクエリの実行
                         $res = $stmt->execute();
@@ -253,9 +261,15 @@ $pdo = null;
 <body>
 
 <div class="leftbox">
-    <div class="logo">
-        <img src="img/uwuzulogo.svg">
-    </div>
+    <?php if(!empty($serverlogo_link[1])){ ?>
+        <div class="logo">
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+        </div>
+    <?php }else{?>
+        <div class="logo">
+            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+        </div>
+    <?php }?>
 
     <div class="textbox">
         <h1>二段階認証</h1>

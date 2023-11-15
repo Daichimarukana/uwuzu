@@ -26,8 +26,8 @@ class MessageDisplay {
         echo '    </div>';
             
         // 投稿内のHTMLコードを表示する部分
-        echo '    <h3>' . htmlentities($this->value['title']) . '</h3>';
-        echo '    <p>' . nl2br(htmlentities($this->value['msg'])) . '</p>';
+        echo '    <h3>' . $this->value['title'] . '</h3>';
+        echo '    <p>' . nl2br($this->value['msg']) . '</p>';
         echo '    <a href="' . htmlentities($this->value['url']) . '">詳細をみる</a>';
             
         echo '</div>';

@@ -296,6 +296,87 @@ if( !empty($_POST['btn_submit']) ) {
 		}
 	}
 
+	if (empty($_FILES['upload_images3']['name'])) {
+		$photo3 = "none";
+	} else {
+
+		if (empty($_FILES['upload_images2']['name'])){
+			$error_message[] = '画像2から画像を選択してください！！！';
+		}
+		// アップロードされたファイル情報
+		$uploadedFile3 = $_FILES['upload_images3'];
+
+		if( 10000000 < $uploadedFile3["size"] ) {
+			$error_message[] = 'ファイルサイズが大きすぎます！';
+		}
+		// アップロードされたファイルの拡張子を取得
+		$extension3 = pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION);
+		
+		// 新しいファイル名を生成（uniqid + 拡張子）
+		$newFilename3 = uniqid() . '-'.$userid.'.' . $extension3;
+		
+		// 保存先のパスを生成
+		$uploadedPath3 = '../ueuseimages/' . $newFilename3;
+		
+		// ファイルを移動
+		$result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
+		
+		if ($result3) {
+			$photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
+		} else {
+			$errnum = $uploadedFile3['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
+		}
+	}
+
+	if (empty($_FILES['upload_images4']['name'])) {
+		$photo4 = "none";
+	} else {
+
+		if (empty($_FILES['upload_images3']['name'])){
+			$error_message[] = '画像3から画像を選択してください！！！';
+		}
+		// アップロードされたファイル情報
+		$uploadedFile4 = $_FILES['upload_images4'];
+
+		if( 10000000 < $uploadedFile4["size"] ) {
+			$error_message[] = 'ファイルサイズが大きすぎます！';
+		}
+		// アップロードされたファイルの拡張子を取得
+		$extension4 = pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION);
+		
+		// 新しいファイル名を生成（uniqid + 拡張子）
+		$newFilename4 = uniqid() . '-'.$userid.'.' . $extension4;
+		
+		// 保存先のパスを生成
+		$uploadedPath4 = '../ueuseimages/' . $newFilename4;
+		
+		// ファイルを移動
+		$result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);
+		
+		if ($result4) {
+			$photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
+		} else {
+			$errnum = $uploadedFile4['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
+		}
+	}
+
+
 	if (empty($_FILES['upload_videos1']['name'])) {
 		$video1 = "none";
 	} else {
@@ -350,7 +431,7 @@ if( !empty($_POST['btn_submit']) ) {
             try {
 
                 // SQL作成
-                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi, :nsfw)");
+                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
         
                 $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                 $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
@@ -359,6 +440,8 @@ if( !empty($_POST['btn_submit']) ) {
 
 				$stmt->bindParam(':photo1', $photo1, PDO::PARAM_STR);
 				$stmt->bindParam(':photo2', $photo2, PDO::PARAM_STR);
+				$stmt->bindParam(':photo3', $photo3, PDO::PARAM_STR);
+				$stmt->bindParam(':photo4', $photo4, PDO::PARAM_STR);
 				$stmt->bindParam(':video1', $video1, PDO::PARAM_STR);
                 $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
@@ -389,13 +472,13 @@ if( !empty($_POST['btn_submit']) ) {
 						$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
 
 
-						$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+						$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
 						$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-						$stmt->bindParam(':url', $url, PDO::PARAM_STR);
-						$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-						$stmt->bindParam(':title', $title, PDO::PARAM_STR);
+						$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+						$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+						$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
 
-						$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+						$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
 
 						// SQLクエリの実行
 						$res = $stmt->execute();
@@ -468,6 +551,9 @@ if ("serviceWorker" in navigator) {
 <body>
 
 	<div>
+		<div id="clipboard" class="online" style="display:none;">
+			<p>🗒️📎 ユーズのURLをコピーしました！</p>
+		</div>
 		<div id="offline" class="offline" style="display:none;">
 			<p>🦖💨 インターネットへの接続が切断されました...</p>
 		</div>
@@ -498,13 +584,21 @@ if ("serviceWorker" in navigator) {
 					<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8'); } ?></textarea>
 					<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
 					<div class="fxbox">
-						<label for="upload_images" id="images" title="画像1">
+					<label for="upload_images" id="images" title="画像1">
 						<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
 						<input type="file" name="upload_images" id ="upload_images" accept="image/*">
 						</label>
 						<label for="upload_images2" id="images2" style="display: none" title="画像2">
 						<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
 						<input type="file" name="upload_images2" id ="upload_images2" accept="image/*">
+						</label>
+						<label for="upload_images3" id="images3" style="display: none" title="画像3">
+						<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
+						<input type="file" name="upload_images3" id ="upload_images3" accept="image/*">
+						</label>
+						<label for="upload_images4" id="images4" style="display: none" title="画像4">
+						<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
+						<input type="file" name="upload_images4" id ="upload_images4" accept="image/*">
 						</label>
 						<label for="upload_videos1" id="videos1" title="動画1">
 						<svg><use xlink:href="../img/sysimage/video_1.svg#video"></use></svg>
@@ -532,6 +626,29 @@ if ("serviceWorker" in navigator) {
 				});
 				file_reader.readAsText(e.target.files[0]);
 			});
+			document.getElementById("upload_images4").addEventListener('change', function(e){
+			var file_reader = new FileReader();
+			// ファイルの読み込みを行ったら実行
+			file_reader.addEventListener('load', function(e) {
+				const element = document.querySelector('#images4');
+				const createElement = '<p>画像を選択しました。</p>';
+				element.insertAdjacentHTML('afterend', createElement);
+			});
+			file_reader.readAsText(e.target.files[0]);
+			});
+
+			document.getElementById("upload_images3").addEventListener('change', function(e){
+			var file_reader = new FileReader();
+			// ファイルの読み込みを行ったら実行
+			file_reader.addEventListener('load', function(e) {
+				const element = document.querySelector('#images3');
+				const createElement = '<p>画像を選択しました。</p>';
+				element.insertAdjacentHTML('afterend', createElement);
+				$("#images4").show();
+			});
+			file_reader.readAsText(e.target.files[0]);
+			});
+
 			document.getElementById("upload_images2").addEventListener('change', function(e){
 			var file_reader = new FileReader();
 			// ファイルの読み込みを行ったら実行
@@ -539,6 +656,7 @@ if ("serviceWorker" in navigator) {
 				const element = document.querySelector('#images2');
 				const createElement = '<p>画像を選択しました。</p>';
 				element.insertAdjacentHTML('afterend', createElement);
+				$("#images3").show();
 			});
 			file_reader.readAsText(e.target.files[0]);
 			});
@@ -828,6 +946,37 @@ $(document).on('click', '.addabi', function (event) {
 			$("#offline").show();
 		}
 	}
+
+	$(document).on('click', '.share', function (event) {
+
+		var domain = "<?php echo $domain;?>";
+		var share_uniqid = $(this).attr('data-uniqid');
+		var share_userid = $(this).attr('data-userid');
+
+		if (typeof navigator.share === 'undefined') {
+			navigator.clipboard.writeText("https://"+domain+"/!"+share_uniqid+"")
+			$("#clipboard").show();
+			window.setTimeout(function(){
+				$("#clipboard").hide();
+			}, 5000);
+			return;
+		}
+
+		var shareData = {
+			title: ''+share_userid+'さんのID '+share_uniqid+' のユーズ - uwuzu',
+			text: '',
+			url: "https://"+domain+"/!"+share_uniqid+"",
+		};
+
+		navigator.share(shareData)
+		.then(function () {
+			// シェア完了後の処理
+		})
+		.catch(function (error) {
+			// シェア失敗時の処理
+		});
+
+	});
 
 	var osho_gats = document.getElementById('osho_gats');
 	$(document).on('click', '.os_exit_btn', function (event) {

@@ -2,6 +2,14 @@
 
 $servernamefile = "../server/servername.txt";
 
+$serverlogofile = "../server/serverlogo.txt";
+$serverlogodata = file_get_contents($serverlogofile);
+$serverlogodata = explode( "\n", $serverlogodata );
+$cnt = count( $serverlogodata );
+for( $i=0;$i<$cnt;$i++ ){
+    $serverlogo_link[$i] = ($serverlogodata[$i]);
+}
+
 require('../db.php');
 
 
@@ -241,9 +249,15 @@ $pdo = null;
 <body>
 
 <div class="leftbox">
-    <div class="logo">
-        <img src="../img/uwuzulogo.svg">
-    </div>
+    <?php if(!empty(htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8'))){ ?>
+        <div class="logo">
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+        </div>
+    <?php }else{?>
+        <div class="logo">
+            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+        </div>
+    <?php }?>
 
     <div class="textbox">
         <h1>二段階認証</h1>

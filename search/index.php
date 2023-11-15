@@ -260,7 +260,6 @@ $pdo = null;
 
 <script>
 $(document).ready(function() {
-
 	if(ueusetext.value){
 		loadPosts();
 	}
@@ -268,6 +267,13 @@ $(document).ready(function() {
 	$(document).on('click', '.search_btn', function(event) {
 		loadPosts();
 	});
+
+    window.document.onkeydown = function(event){
+        if (event.key === 'Enter') {
+            loadPosts();
+        }
+    }
+
 
 	var isLoading = false;
 

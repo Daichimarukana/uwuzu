@@ -880,7 +880,7 @@ main h1{
 }
 .select_utl{
     margin: 0px;
-    background-color: var(--background-color);
+    background-color: var(--tl-color);
     border: none;
     width: auto;
     text-align: center;
@@ -896,7 +896,7 @@ main h1{
     margin-top: 0px;
     margin-bottom: 0px;
     font-size: 16px;
-    background: var(--background-color);
+    background: var(--tl-color);
     color: var(--dark-subtext-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
@@ -943,7 +943,7 @@ main h1{
     object-fit: cover;
     margin: 0px;
     width: 100%;
-    height: 10dvh;
+    height: auto;
     vertical-align:top;
 }
 .ueuse{
@@ -1192,7 +1192,21 @@ main h1{
     margin-left: auto;
     margin-right: auto;
 }
-
+.ueuse .photo3 a{
+    width: 48%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ueuse .photo3_btm a{
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.ueuse .photo4 a{
+    width: 48%;
+    margin-left: auto;
+    margin-right: auto;
+}
 
 .ueuse .photo1 a img{
     object-fit: cover;
@@ -1220,6 +1234,48 @@ main h1{
     border: 1px solid var(--border-color);
 }
 
+.ueuse .photo3{
+    display: flex;
+    flex-wrap: wrap;
+}
+.ueuse .photo3_btm{
+    display: block;
+    width: 100%;
+}
+.ueuse .photo3 a img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 200px;
+    border: 1px solid var(--border-color);
+}
+.ueuse .photo3_btm a img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    min-width: 100%;
+    height: 200px;
+    border: 1px solid var(--border-color);
+}
+.ueuse .photo4{
+    display: flex;
+    flex-wrap: wrap;
+}
+.ueuse .photo4 a img{
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 200px;
+    border: 1px solid var(--border-color);
+}
 .ueuse .video1 video{
     object-fit: cover;
     border-radius: 10px;
@@ -1537,7 +1593,7 @@ main h1{
     width:auto;
     padding: 8px auto;
 
-    margin-left: auto;
+    margin-left: 6px;
     margin-right: 6px;
     margin-top: 2px;
     margin-bottom: 2px;
@@ -1569,7 +1625,7 @@ main h1{
     display: block;
     width:auto;
 
-    margin-left: auto;
+    margin-left: 6px;
     margin-right: 6px;
     margin-top: 2px;
     margin-bottom: 2px;
@@ -1596,6 +1652,78 @@ main h1{
 .ueuse .favbox .addabi svg {
     margin-top: -12px;
     margin-right: 0px;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 250ms ease-out;
+}
+
+.ueuse .favbox .share{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: auto;
+    margin-right: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: var(--sub-color);
+
+    border-radius: 50px;
+    color:var(--main-color);
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.ueuse .favbox .share:hover{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+
+    margin-left: auto;
+    margin-right: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: var(--main-color);
+
+    border-radius: 50px;
+    color: var(--sub-color);;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.ueuse .favbox .share svg {
+    margin-top: -6px;
+    margin-right: 0px;
+    margin-left: -2px;
     width: 24px;
     height: 24px;
     fill: currentColor;
@@ -2515,7 +2643,7 @@ label>input {
     margin-left: 0px;
     margin-right: auto;
     margin-top: 2px;
-    width: 120px;
+    height: 44px;
 }
 
 .terms{
@@ -2603,7 +2731,110 @@ label>input {
     font-weight: normal;
     font-size: 16px;
     text-align: left;
-    color: var(--background-color)FFF;
+    color: var(--background-color);
+}
+
+.terms .fxbx{
+    display: flex;
+}
+.terms .fxbx .new{
+    height: fit-content;
+    margin:0px;
+    margin-right: 6px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding:0px 8px;
+    border: 1px solid #00b96c;
+    text-align: center;
+    border-radius: 15px;
+}
+.terms .fxbx .new p{
+    line-height: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #00b96c;
+    font-size: 14px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+    vertical-align:middle;
+    align-items: center;
+}
+.terms .fxbx .fix{
+    height: fit-content;
+    margin:0px;
+    margin-right: 6px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding:0px 8px;
+    border: 1px solid #e6890f;
+    text-align: center;
+    border-radius: 15px;
+}
+.terms .fxbx .fix p{
+    line-height: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #e6890f;
+    font-size: 14px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+    vertical-align:middle;
+    align-items: center;
+}
+.terms .fxbx .chg{
+    height: fit-content;
+    margin:0px;
+    margin-right: 6px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding:0px 8px;
+    border: 1px solid #1d9bf0;
+    text-align: center;
+    border-radius: 15px;
+}
+.terms .fxbx .chg p{
+    line-height: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #1d9bf0;
+    font-size: 14px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+    vertical-align:middle;
+    align-items: center;
+}
+.terms .fxbx .del{
+    height: fit-content;
+    margin:0px;
+    margin-right: 6px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding:0px 8px;
+    border: 1px solid #FF4848;
+    text-align: center;
+    border-radius: 15px;
+}
+.terms .fxbx .del p{
+    line-height: 12px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #FF4848;
+    font-size: 14px;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+    vertical-align:middle;
+    align-items: center;
+}
+.terms .space_tab{
+    margin-left: 45px;
 }
 
 
@@ -2618,7 +2849,6 @@ label>input {
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: normal;
 }
-
 .terms .p3{
     margin-top: 24px;
     text-align: left;
@@ -2758,6 +2988,15 @@ label>input {
     text-align: left;
     overflow-wrap:break-word;
     color: var(--text-color);
+}
+.rightbox .noticebox a{
+    margin-top: auto;
+    margin-bottom: auto;
+    font-size: 16px;
+    color:var(--link-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
 }
 
 .rightbox .noticebox img{
@@ -3967,7 +4206,7 @@ summary {
 
 .f_c_area{
     margin: 0px;
-    background-color: var(--background-color);
+    background-color: var(--tl-color);
     border: none;
     width: auto;
     text-align: center;
@@ -4493,7 +4732,7 @@ summary {
         width:auto;
         padding: 8px auto;
 
-        margin-left: auto;
+        margin-left: 6px;
         margin-right: 6px;
         margin-top: 2px;
         margin-bottom: 2px;
@@ -4525,7 +4764,7 @@ summary {
         display: block;
         width:auto;
 
-        margin-left: auto;
+        margin-left: 6px;
         margin-right: 6px;
         margin-top: 2px;
         margin-bottom: 2px;
@@ -4557,6 +4796,70 @@ summary {
         width: 24px;
         height: 24px;
         fill: currentColor;
+        transition: all 250ms ease-out;
+    }
+
+    .ueuse .favbox .share{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:auto;
+        padding: 8px auto;
+
+        margin-left: auto;
+        margin-right: 6px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 12px;
+        padding-right: 12px;
+
+
+        background-color: var(--sub-color);
+
+        border-radius: 50px;
+        color:var(--main-color);
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
+        transition: all 250ms ease-out;
+    }
+
+    .ueuse .favbox .share:hover{
+        cursor: pointer;
+        border: none;
+        display: block;
+        width:auto;
+
+        margin-left: auto;
+        margin-right: 6px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 12px;
+        padding-right: 12px;
+
+
+        background-color: var(--main-color);
+
+        border-radius: 50px;
+        color: var(--sub-color);;
+        font-size: 16px;
+        font-family: 'Zen Maru Gothic', sans-serif;
+        font-weight: normal;
+        text-decoration:none;
+        text-align: center;
+        transition: box-shadow 250ms ease-in-out;
+        transition: width 250ms ease-out;
         transition: all 250ms ease-out;
     }
 
@@ -4906,14 +5209,45 @@ summary {
         display: flex;
     }
     
-    .ueuse .photo2 img{
+    .ueuse .photo2 a img{
         object-fit: cover;
         border-radius: 10px;
         margin-top: 12px;
         margin-left: auto;
         margin-right: auto;
-        width: 47%;
-        height: auto;
+        width: 100%;
+        height: 25dvh;
+        border: 1px solid var(--border-color);
+    }
+
+    .ueuse .photo3 a img{
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 12px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        height: 20dvh;
+        border: 1px solid var(--border-color);
+    }
+    .ueuse .photo3_btm a img{
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 6px;
+        margin-left: auto;
+        margin-right: auto;
+        min-width: 100%;
+        height: 25dvh;
+        border: 1px solid var(--border-color);
+    }
+    .ueuse .photo4 a img{
+        object-fit: cover;
+        border-radius: 10px;
+        margin-top: 8px;
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        height: 20dvh;
         border: 1px solid var(--border-color);
     }
     
@@ -5128,6 +5462,7 @@ summary {
         margin-top: 12px;
         margin-left: auto;
         margin-right: auto;
+        margin-bottom: 48px
     }
 
     .modal-content .fbtn{
@@ -5596,6 +5931,14 @@ summary {
         background-color: var(--main-color);
         color: var(--sub-color);;
     }
+    .ueuse .favbox .share{
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
+    }
+    .ueuse .favbox .share:hover{
+        background-color: var(--main-color);
+        color: var(--sub-color);;
+    }
     .ueuse hr{
         border-top: 1px solid var(--dark-subtext-color);
     }
@@ -5754,6 +6097,9 @@ summary {
     
     .rightbox .noticebox p{
         color: var(--background-color);
+    }
+    .rightbox .noticebox a{
+        color:var(--main-color);
     }
 
     .rightbox .noticebox .makeup p{

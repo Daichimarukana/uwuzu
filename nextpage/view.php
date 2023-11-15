@@ -55,10 +55,10 @@ function replaceEmojisWithImages($postText) {
         }
     }, $postTextWithImages);
 
-    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9_]+)/u';
+    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_]+)/u';
     $postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
         $hashtags = $matches[1];
-            return "<a class = 'hashtags' href='/search?q=".urlencode('#').$hashtags."'>".'#'.$hashtags."</a>";
+        return "<a class='hashtags' href='/search?q=" . urlencode('#') . $hashtags . "'>" . '#' . $hashtags . "</a>";
     }, $postTextWithImagesAndUsernames);
 
     return $postTextWithHashtags;
@@ -157,7 +157,22 @@ class MessageDisplay {
             }
             echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['ueuse'])))) . '</h1></h2></h3></font></center></p>';
             
-            if (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
+            if (!empty($this->value['photo4']) && $this->value['photo4'] !== 'none') {
+                echo '    <div class="photo4">';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo4']).'" target=”_blank”><img src="'.htmlentities($this->value['photo4']).'" alt="画像4" title="画像4"></a>';
+                echo '    </div>';
+            } elseif (!empty($this->value['photo3']) && $this->value['photo3'] !== 'none') {
+                echo '    <div class="photo3">';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
+                echo '        <div class="photo3_btm">';
+                echo '            <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3"></a>';
+                echo '        </div>';
+                echo '    </div>';
+            } elseif (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
                 echo '    <div class="photo2">';
                 echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
                 echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
@@ -196,6 +211,7 @@ class MessageDisplay {
                 echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_1.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }
             echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlentities($this->value['reply_count']).'</a>';
+            echo '<button name="share" id="share" class="share" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/share_1.svg#share_1"></use></svg></button>';
             if($this->value['account'] === $this->userid){
                 if(!($this->value['role'] === "ice")){
                     if($this->value['abi'] === "none"){

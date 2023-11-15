@@ -71,6 +71,8 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - ueuse(text) 投稿内容保存用
 - photo1(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
 - photo2(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- photo3(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- photo4(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
 - video1(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
 - datetime(datetime) 投稿日時保存用
 - favorite(text) いいね保存用
@@ -128,6 +130,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
 - privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
 - servaricon.txt : サーバーアイコンのURL
+- servarlogo.txt : サーバーロゴのURL
 - servername.txt : サーバー名(てすとさば)
 - serverstop.txt : サーバー停止ページで表示するメッセージ
 - terms.txt : 利用規約(サーバーの利用規約を記載)

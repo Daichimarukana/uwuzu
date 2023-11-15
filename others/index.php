@@ -518,6 +518,10 @@ require('../logout/logout.php');
 		<h1>API</h1>
 		<p>APIの簡単な使用法です。</p>
 		<hr>
+		<li>サーバー情報取得API</li>
+		<p>https://[ドメイン名(uwuzu.netなど)]/api/serverinfo-api</p>
+		<p>これによりサーバーの各種情報を取得できます。</p>
+		<hr>
 		<li>ユーザー情報取得API</li>
 		<p>https://[ドメイン名(uwuzu.netなど)]/api/userdata-api?userid=[ユーザーID]</p>
 		<p>これによりユーザーのユーザーネーム(user_name)、プロフィール(profile)、登録日時(registered_date)、フォローしている人一覧(follow)、フォロワー一覧(follower)、フォロー・フォロワー数(follow_cnt,follower_cnt)が取得できます。</p>

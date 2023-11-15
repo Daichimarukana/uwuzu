@@ -131,13 +131,13 @@ if (htmlentities(isset($_POST['uniqid'])) && htmlentities(isset($_POST['abitext'
                         $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
 
 
-                        $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                        $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                        $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                        $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
+						$stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
+						$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+						$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+						$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
 
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+						$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
 
                         // SQLクエリの実行
                         $res2 = $stmt->execute();

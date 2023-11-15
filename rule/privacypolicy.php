@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 
 <?php
+$serverlogofile = "../server/serverlogo.txt";
+$serverlogodata = file_get_contents($serverlogofile);
+$serverlogodata = explode( "\n", $serverlogodata );
+$cnt = count( $serverlogodata );
+for( $i=0;$i<$cnt;$i++ ){
+    $serverlogo_link[$i] = ($serverlogodata[$i]);
+}
+
 $servernamefile = "../server/servername.txt";
 
 //-------------------------------------
@@ -53,15 +61,23 @@ foreach ($sprivacypolicy as $privacypolicy) {
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <title>プライバシーポリシー - <?php echo file_get_contents($servernamefile);?></title>
 </head>
 
 <body>
 
 <div class="topbox">
-    <div class="logo">
-        <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
-    </div>
+    <?php if(!empty($serverlogo_link[1])){ ?>
+        <div class="logo">
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+        </div>
+    <?php }else{?>
+        <div class="logo">
+            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+        </div>
+    <?php }?>
 </div>
 
 <div class="terms">

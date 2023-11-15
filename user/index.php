@@ -233,11 +233,14 @@ if( !empty($pdo) ) {
 		foreach ($matches[0] as $url) {
 			// ドメイン部分を抽出
 			$parsedUrl = parse_url($url);
-			$domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
-	
+			if (!isset($parsedUrl['path'])) {
+				$parsedUrl['path'] = '';
+			}
+			$domain = $parsedUrl['host'].(strlen($parsedUrl['path']) > 24 ? substr($parsedUrl['path'], 0, 24) . '...' : $parsedUrl['path']);
+			
 			// 不要な文字を削除してaタグを生成
 			$urlWithoutSpaces = preg_replace('/\s+/', '', $url);
-			$link = "<a href='$urlWithoutSpaces' target='_blank'>$domain</a>";
+			$link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
 	
 			// URLをドメインのみを表示するaタグで置き換え
 			$postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
@@ -363,7 +366,7 @@ if( !empty($pdo) ) {
 if (!empty($_POST['follow'])) {
     // フォローボタンが押された場合の処理
     $followerList = explode(',', $userdata['follower']);
-    if (!in_array($userid, $followerList)) {
+    if (!(in_array($userid, $followerList))) {
         // 自分が相手をフォローしていない場合、相手のfollowerカラムと自分のfollowカラムを更新
         $followerList[] = $userid;
         $newFollowerList = implode(',', $followerList);
@@ -395,13 +398,13 @@ if (!empty($_POST['follow'])) {
 			$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
 
 
-			$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-			$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-			$stmt->bindParam(':url', $url, PDO::PARAM_STR);
-			$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-			$stmt->bindParam(':title', $title, PDO::PARAM_STR);
+			$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
+			$stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
+			$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+			$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+			$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
 
-			$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+			$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
 
 			// SQLクエリの実行
 			$res = $stmt->execute();
@@ -559,6 +562,9 @@ $pdo = null;
 <body>
 
 	<div>
+		<div id="clipboard" class="online" style="display:none;">
+			<p>🗒️📎 ユーズのURLをコピーしました！</p>
+		</div>
 		<div id="offline" class="offline" style="display:none;">
 			<p>🦖💨 インターネットへの接続が切断されました...</p>
 		</div>
@@ -1301,6 +1307,37 @@ $(document).ready(function() {
 			$("#offline").show();
 		}
 	}
+	
+	$(document).on('click', '.share', function (event) {
+
+		var domain = "<?php echo $domain;?>";
+		var share_uniqid = $(this).attr('data-uniqid');
+		var share_userid = $(this).attr('data-userid');
+
+		if (typeof navigator.share === 'undefined') {
+			navigator.clipboard.writeText("https://"+domain+"/!"+share_uniqid+"")
+			$("#clipboard").show();
+			window.setTimeout(function(){
+				$("#clipboard").hide();
+			}, 5000);
+			return;
+		}
+
+		var shareData = {
+			title: ''+share_userid+'さんのID '+share_uniqid+' のユーズ - uwuzu',
+			text: '',
+			url: "https://"+domain+"/!"+share_uniqid+"",
+		};
+
+		navigator.share(shareData)
+		.then(function () {
+			// シェア完了後の処理
+		})
+		.catch(function (error) {
+			// シェア失敗時の処理
+		});
+
+	});
 
 });
 </script>
