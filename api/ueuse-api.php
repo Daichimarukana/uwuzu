@@ -1,5 +1,5 @@
 <?php
-header("Content-Type: application/json; charset=utf-8");
+header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
 
 if(isset($_GET['ueuseid'])) { 
 

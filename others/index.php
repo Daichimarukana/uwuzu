@@ -32,9 +32,6 @@ session_name('uwuzu_s_id');
 session_start();
 session_regenerate_id(true);
 
-$userid = htmlentities($_SESSION['userid']);
-$username = htmlentities($_SESSION['username']);
-
 // 管理者としてログインしているか確認
 if( empty($_SESSION['admin_login']) || $_SESSION['admin_login'] !== true ) {
 	// ログインページへリダイレクト
@@ -59,7 +56,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -68,11 +65,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
-	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -105,7 +104,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -114,11 +113,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
-	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($res['username']); // クッキーから取得した値をセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -476,6 +477,7 @@ require('../logout/logout.php');
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
@@ -554,10 +556,61 @@ require('../logout/logout.php');
 			<p>以下のボタンよりアクセストークンを削除できます。ボタンを押すとすぐに削除されますのでご注意ください。</p>
 			<input type="submit" class = "irobutton" name="token_off_submit" value="アクセストークン削除">
 		<?php }?>
+		<hr>
+		<div class="p2" id="help_me">もしものときは</div>
+
         </form>
+
+		<div id="help_me_Modal" class="modal">
+			<div class="modal-content">
+				<h1>もしものときは</h1>
+				<p>こんにちは、uwuzu開発者のだいちまるです。<br>ここを見ているということはなにかあったのでしょうか...<br>心配です。</p>
+				<p>もし炎上をしてしまったり、インターネットによる心身のつらさなどに襲われ生きづらかったり周りと触れづらい状態にあるならば信頼できる人への相談や失踪をして、インターネットの海から離れるのも良いかもしれません。</p>
+				<p>インターネットが全てではないですし、このサーバーからいなくなるだけでも気が楽になるかもしれません。</p>
+				<p>一度ゆっくり休んでから人生を再開してみてはいかがでしょうか、自分を第一に、自分を大事に。<br>そして、インターネットは情報の海であることを忘れないように。</p>
+
+				<form method="post" id="deleteForm">
+					<div class="btn_area">
+						<input type="button" id="cancelButton" class="fbtn" value="とじる">
+					</div>
+				</form>
+			</div>
+		</div>
 	</main>
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
 </body>
 </html>
+
+<script>
+$(document).ready(function() {
+
+	var modal = document.getElementById('help_me_Modal');
+    var cancelButton = document.getElementById('cancelButton');
+	var modalMain = $('.modal-content');
+
+	$('#help_me').on('click', function() {
+        modal.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        cancelButton.addEventListener('click', () => { // 追加
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal.style.display = 'none';
+			}, 150);
+        });
+    });
+    $(function(){
+        $("input"). keydown(function(e) {
+            if ((e.which && e.which === 13) || (e.keyCode && e.keyCode === 13)) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+    });
+});
+</script>

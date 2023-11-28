@@ -2,26 +2,19 @@
 
 $servernamefile = "../server/servername.txt";
 
-$serverinfofile = '../server/info.txt';
-$serverinfo = file_get_contents($serverinfofile);
-
-$servertermsfile = '../server/terms.txt';
-$serverterms = file_get_contents($servertermsfile);
-
-$serverprvfile = '../server/privacypolicy.txt';
-$serverprv = file_get_contents($serverprvfile);
-
 $contactfile = "../server/contact.txt";
 
 $adminfile = "../server/admininfo.txt";
 
 $serverstopfile = "../server/serverstop.txt";
 
-$onlyuserfile = "../server/onlyuser.txt";
+$htaccessfile = "../.htaccess";
 
-$err404imagefile = "../server/404imagepath.txt";
-
-$robots = "../robots.txt";
+if(!empty(file_get_contents($serverstopfile))){
+    $serverstop = htmlspecialchars(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8'); 
+}else{
+    $serverstop = "";
+}
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -58,7 +51,7 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
     );
-    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
 } catch(PDOException $e) {
 
@@ -186,107 +179,91 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-
-if( !empty($_POST['btn_submit']) ) {
-
-    // 空白除去
-	$target_userid = $_POST['target_userid'];
-
-	if (!empty($pdo)) {
-		$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-        ));
-
-		$rerole = $dbh->prepare("SELECT * FROM account WHERE userid = :userid");
-
-		$rerole->bindValue(':userid', $target_userid);
-		// SQL実行
-		$rerole->execute();
-
-		$userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
-
-		if(empty($userdata)){
-			$error_message[] = "ユーザーがいません";
-		}else{
-			$_SESSION['userdata'] = $userdata;
-
-			// リダイレクト先のURLへ転送する
-			$url = 'userinfo';
-			header('Location: ' . $url, true, 303);
-		
-			// すべての出力を終了
-			exit;
-		}
-
-	}
-}
-
-if( !empty($_POST['report_done']) ) {
-
-	$report_id = $_POST['report_id'];
-
-	if (!empty($pdo)) {
-		$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-        ));
-
-		$newchk = "done";
-		// トランザクション開始
-		$pdo->beginTransaction();
+if( !empty($pdo) ) {
 	
-		try {
+	// データベース接続の設定
+	$dbh = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+	));
 
-			$stmt = $pdo->prepare("UPDATE report SET admin_chk = :adchk WHERE uniqid = :uniqid");
-	
-			$stmt->bindValue(':adchk', $newchk, PDO::PARAM_STR);
-	
-			$stmt->bindValue(':uniqid', $report_id , PDO::PARAM_STR);
-	
-			// SQLクエリの実行
-			$res = $stmt->execute();
-	
-			// コミット
-			$res = $pdo->commit();
-	
-			if ($res) {
-				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-				header("Location:".$url."");
-				exit;  
-			} else {
-				$error_message[] = '発行に失敗しました。';
-			}
-	
-		} catch (Exception $e) {
-			$error_message[] = "えらー";
-			// エラーが発生した時はロールバック
-			$pdo->rollBack();
-		}
+	$userQuery = $dbh->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
+	$userQuery->bindValue(':userid', $userid);
+	$userQuery->execute();
+	$userData = $userQuery->fetch();
 
-	}
-}
-require('../logout/logout.php');
+	$role = $userData["role"];
 
-if(isset($_GET['q'])){ 
-	$keyword = htmlentities($_GET['q']);
-}else{
-	$keyword = "";
+	$dbh = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+
+	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
+
+    $rerole->bindValue(':userid', $userid);
+    // SQL実行
+    $rerole->execute();
+
+    $userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
+
+	
 }
 
 if (!empty($pdo)) {
     
-    $sql = "SELECT * FROM report WHERE admin_chk = 'none' ORDER BY datetime DESC";
-    $allreport = $pdo->query($sql);    
+    $sql = "SELECT code,used,datetime FROM invitation ORDER BY datetime DESC";
+    $invcode = $pdo->query($sql);    
 
-    while ($row = $allreport->fetch(PDO::FETCH_ASSOC)) {
+    while ($row = $invcode->fetch(PDO::FETCH_ASSOC)) {
 
-        $reports[] = $row;
+        $codes[] = $row;
     }
 }
 
+if( !empty($_POST['btn_submit']) ) {
+
+    // 空白除去
+	$serverstop = $_POST['serverstop'];
+
+	//鯖停止
+	$file = fopen($serverstopfile, 'w');
+	$data = $serverstop;
+	fputs($file, $data);
+	fclose($file);
+
+	$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	header("Location:".$url."");
+	exit;  
+}
+
+if( !empty($_POST['serverstop_btn_submit']) ) {
+
+    // htaccess用意
+	$htaccess = "
+ErrorDocument 403 /errorpage/serverstop.php
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !=/errorpage/serverstop.php
+RewriteCond %{REQUEST_URI} !=/css/home.css
+RewriteCond %{REQUEST_URI} !=/css/color.css
+RewriteCond %{REQUEST_URI} !=/js/console_notice.js
+RewriteCond %{REQUEST_URI} !=/js/unsupported.js
+RewriteCond %{REQUEST_URI} !=/img/uwuzulogo.svg
+RewriteCond %{REQUEST_URI} !=/favicon/apple-touch-icon-180x180.png
+RewriteCond %{REQUEST_URI} !=/favicon/icon-192x192.png
+RewriteRule ^.*$ - [R=403,L]
+";
+
+	// 上書き保存
+	$file = fopen($htaccessfile, 'w');
+	$data = $htaccess;
+	fputs($file, $data);
+	fclose($file);
+
+	$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	header("Location:".$url."");
+	exit;  
+}
+
+require('../logout/logout.php');
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -299,7 +276,7 @@ if (!empty($pdo)) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ユーザー管理 - <?php echo file_get_contents($servernamefile);?></title>
+<title>メンテナンス - <?php echo file_get_contents($servernamefile);?></title>
 
 </head>
 
@@ -314,67 +291,33 @@ if (!empty($pdo)) {
 			<?php endforeach; ?>
 		</ul>
 	<?php endif; ?>
-	<div class="admin_settings">
-		<?php require('settings_left_menu.php');?>
+		<div class="admin_settings">
+			<?php require('settings_left_menu.php');?>
 		
-		<div class="admin_right">       
-			<form class="formarea" enctype="multipart/form-data" method="post">
-				<h1>ユーザー管理</h1>
-				<div>
-					<p>ユーザーID</p>
-					<div class="p2">「@」は外してください。</div>
-					<input id="target_userid" placeholder="admin" class="inbox" type="text" name="target_userid" value="<?php if( !empty($keyword) ){ echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); } ?>">
-				</div>
+			<div class="admin_right">
+				<form class="formarea" enctype="multipart/form-data" method="post">
+					<h1>メンテナンス</h1>
 
-				<input type="submit" class = "irobutton" name="btn_submit" value="検索">
-
-				<section class="inner">
-					<div id="postContainer">
-						
-
+					<div>
+						<p>サーバー停止時表示メッセージ</p>
+						<div class="p2">ここに入力してあるメッセージがサーバー停止時に表示されます。</div>
+						<textarea id="serverstop" placeholder="現在サーバーは止まっておりません。" class="inbox" type="text" name="serverstop"><?php $s_stop = explode("\r", $serverstop); foreach ($s_stop as $info) { echo $info; }?></textarea>
 					</div>
-				</section>
 
-				<div id="loading" class="loading" style="display: none;">
-					🤔
-				</div>
+					<input type="submit" class = "irobutton" name="btn_submit" value="保存&更新">
+				</form>
 
-				<hr>
-			</form>
-			<div class="formarea">
-				<h1>通報</h1>
-				<?php if(!(empty($reports))){?>
-						<?php foreach ($reports as $value) {?>
-							<div class="server_code">
-								<details>
-									<summary>@<?php if( !empty($value["userid"]) ){ echo htmlentities($value["userid"]); }?></summary>
-									<hr>
-									<p>通報先アカウント名:@<?php echo htmlentities($value["userid"]);?></p>
-									<p>通報元アカウント名:@<?php echo htmlentities($value["report_userid"]);?></p>
-									<hr>
-									<p>通報元アカウントよりメッセージ</p>
-									<p><?php echo nl2br(htmlentities($value["msg"]));?></p>
-									<hr>
-									<p>通報日時:<?php echo htmlentities($value["datetime"]);?></p>
-									<hr>
-									<p>アカウント操作を行う場合は上の「ユーザーID」にアカウントをしたいユーザーIDを入れて対応してください。</p>
-									<form enctype="multipart/form-data" method="post">
-										<div class="delbox">
-											<p>解決ボタンを押すとこの件は解決済みとなります。</p>
-											<input type="text" name="report_id" value="<?php echo htmlentities($value["uniqid"]);?>" style="display:none;" >
-											<input type="submit" name="report_done" class="delbtn" value="解決">
-										</div>
-									</form>
-								</details>
-							</div>
-						<?php }?>
-				<?php }else{?>
-					<p>通報されたアカウントはありません。</p>
-				<?php }?>
+				<form class="formarea" enctype="multipart/form-data" method="post">
+					<h1>サーバー停止</h1>
+					<p>下のボタンを押すとサーバーへのアクセス時にすべてのアクセスがに対して上のサーバー停止時表示メッセージを表示します。<br>サーバーを止める必要がある際に使用してください。<br>復旧には現在の.htaccessファイルを上書きしていただく必要があります。<br>今現在の.htaccessファイルをFTPソフトなどからダウンロードすることを強く推奨します。</p>
 
+					<p class="errmsg">サーバーを停止するとこの画面にもログインができなくなります。<br>また、復旧時に今現在の.htaccessファイルを上書きする必要があります。<br>.htaccessファイルとサーバー管理権限はお持ちですか？<br>お持ちでない方は作業を中断してください。</p>
+
+					<div class="p2">サーバー停止</div>
+					<input type="submit" class = "irobutton" name="serverstop_btn_submit" value="サーバー停止">
+				</form>
 			</div>
 		</div>
-	</div>
 	</main>
 
 	<?php require('../require/rightbox.php');?>
@@ -383,3 +326,14 @@ if (!empty($pdo)) {
 </body>
 
 </html>
+<script>
+    $(function(){
+        $("input"). keydown(function(e) {
+            if ((e.which && e.which === 13) || (e.keyCode && e.keyCode === 13)) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+    });
+</script>

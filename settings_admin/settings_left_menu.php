@@ -8,5 +8,6 @@
     <a href="ad_admin" class="admin_leftbtn">広告</a>
     <a href="moderation_admin" class="admin_leftbtn">モデレーション</a>
     <a href="customize_admin" class="admin_leftbtn">カスタマイズ</a>
+    <a href="maintenance_admin" class="admin_leftbtn">メンテナンス</a>
 </div>
 <?php ?>

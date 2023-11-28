@@ -281,7 +281,7 @@ body{
     margin-left: 12px;
     margin-right: 12px;
     margin-bottom: 12px;
-    background-color: var(--background-color)FFF;
+    background-color: var(--background-color);
     width: 240px;
     height: 100%;
     margin-left: 0px;
@@ -1284,6 +1284,18 @@ main h1{
     margin-right: auto;
     width: 100%;
     height: 350px;
+    border: 1px solid var(--border-color);
+}
+.ueuse .youtube_and_nicovideo_player{
+    margin-top: 12px;
+    width: 100%;
+    height: fit-content;
+}
+.ueuse .youtube_and_nicovideo_player iframe{
+    border: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
     border: 1px solid var(--border-color);
 }
 
@@ -3139,22 +3151,24 @@ label>input {
 }
 
 .emjtex .fx{
-    display: flex;
+    display: block;
+    max-width: 100%;
 }
 
 .emjtex img{
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 4px;
+    margin-left: 6px;
     margin-right: 4px;
-    height: 64px;
+    max-height: 64px;
+    max-width: 98%;
 }
 
 .emjtex h3{
     overflow-wrap:  break-word;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 12px;
+    margin-left: 6px;
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
@@ -3166,7 +3180,7 @@ label>input {
     overflow-wrap:  break-word;
     margin-top: 12px;
     margin-bottom: auto;
-    margin-left: 12px;
+    margin-left: 6px;
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
@@ -5046,13 +5060,15 @@ summary {
         
         top: 0;
         left: 0;
-        width: 90%;
+        width: 100%;
         margin-left: 0px;
         margin-right: 0px;
         height: 44px;
         padding-top: 0.0%;
         padding-bottom: 0.2%;
-        padding-left: 10%;
+        padding-left: 0;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .topbox .logo img{
@@ -5261,7 +5277,6 @@ summary {
         height: auto;
         border: 1px solid var(--border-color);
     }
-
 
 
     .notification .flebox a{

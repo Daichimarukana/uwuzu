@@ -3,11 +3,6 @@
 function processMarkdownAndWrapEmptyLines($markdownText){
 
     $markdownText = preg_replace('/^\[\[buruburu (.+)\]\]/m', '<p class="buruburu">$1</p>', $markdownText);//←ここ！！！！！！！！！！！！！！
-    // コード（#code）をHTMLのdiv class="code"タグに変換
-    $markdownText = preg_replace('/^#code (.+)/m', '<div class="code"><p>$1</p></div>', $markdownText);
-
-    // 画像（#img）をHTMLのimgタグに変換
-    $markdownText = preg_replace('/^#img (.+)/m', '<img src="$1">', $markdownText);
 
     // タイトル（#、##、###）をHTMLのhタグに変換
     $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
@@ -15,7 +10,7 @@ function processMarkdownAndWrapEmptyLines($markdownText){
     $markdownText = preg_replace('/^### (.+)/m', '<h3>$1</h3>', $markdownText);
 
     // 箇条書き（-）をHTMLのul/liタグに変換
-    $markdownText = preg_replace('/^- (.+)/m', '<ul><li>$1</li></ul>', $markdownText);
+    $markdownText = preg_replace('/^- (.+)/m', '<p>・ $1</p>', $markdownText);
 
     // 空行の前に何もない行をHTMLのpタグに変換
     $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
@@ -64,6 +59,9 @@ function replaceEmojisWithImages($postText) {
     return $postTextWithHashtags;
 }
 function replaceURLsWithLinks($postText) {
+
+    $postText = str_replace('&#039;', '\'', $postText);
+
     // URLを正規表現を使って検出
     $pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
     preg_match_all($pattern, $postText, $matches);
@@ -83,6 +81,68 @@ function replaceURLsWithLinks($postText) {
 
         // URLをドメインのみを表示するaタグで置き換え
         $postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
+    }
+
+    return $postText;
+}
+function YouTube_and_nicovideo_Links($postText) {
+    // URLを正規表現を使って検出
+    $pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
+    preg_match_all($pattern, $postText, $matches);
+
+    if(empty($url)){
+        $postText = "";
+    }
+
+    // 検出したURLごとに処理を行う
+    foreach ($matches[0] as $url) {
+        // ドメイン部分を抽出
+        $parsedUrl = parse_url($url);
+        if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com"){
+
+            if (isset($parsedUrl['query'])) {
+                if(false !== strpos($parsedUrl['query'], 'v=')) {
+                    $video_id = str_replace('v=', '', htmlentities($parsedUrl['query']));
+                    $iframe = true;
+                }else{
+                    $video_id = str_replace('/', '', htmlentities($parsedUrl['path']));
+                    $iframe = true;
+                }
+            }elseif(isset($parsedUrl['path'])){
+                $video_id = str_replace('/', '', htmlentities($parsedUrl['path']));
+                $iframe = true;
+            }else{
+                $video_id = "";
+                $iframe = false;
+            }
+            // 不要な文字を削除してaタグを生成
+            if($iframe == true){
+                $link = '<iframe src="https://www.youtube-nocookie.com/embed/'.$video_id.'" rel="0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+            }else{
+                $link = "";
+            }
+            // URLをドメインのみを表示するaタグで置き換え
+            $postText = $link;
+        }elseif($parsedUrl['host'] == "nicovideo.jp" || $parsedUrl['host'] == "www.nicovideo.jp"){
+
+            if(isset($parsedUrl['path'])){
+                $video_id = str_replace('/watch/', '', htmlentities($parsedUrl['path']));
+                $iframe = true;
+            }else{
+                $video_id = "";
+                $iframe = false;
+            }
+            // 不要な文字を削除してaタグを生成
+            if($iframe == true){
+                $link = '<iframe src="https://embed.nicovideo.jp/watch/'.$video_id.'"</iframe>';
+            }else{
+                $link = "";
+            }
+            // URLをドメインのみを表示するaタグで置き換え
+            $postText = $link;
+        }else{
+            $postText = "";
+        }
     }
 
     return $postText;
@@ -186,6 +246,10 @@ class MessageDisplay {
                 echo '    <div class="video1">';
                 echo '        <video controls src="' . htmlentities($this->value['video1']) . '"></video>';
                 echo '    </div>';
+            }elseif (!empty(YouTube_and_nicovideo_Links($this->value['ueuse']))) {
+                echo '    <div class="youtube_and_nicovideo_player">';
+                echo '    '.YouTube_and_nicovideo_Links($this->value['ueuse']).'';
+                echo '    </iframe></div>';
             }
 
             if(!($this->value['abi'] == "none")){

@@ -19,13 +19,16 @@ $termsfile = "../server/terms.txt";
 $termsdata = file_get_contents($termsfile);
 
 ?>
-
 <html lang="ja">
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="/css/home.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <title>404 Not found - <?php echo file_get_contents($servernamefile);?></title>
 </head>
 
@@ -33,7 +36,7 @@ $termsdata = file_get_contents($termsfile);
 
 <div class="topbox">
     <div class="logo">
-        <img src="/img/uwuzulogo.svg">
+        <a href="../index.php"><img src="/img/uwuzulogo.svg"></a>
     </div>
 </div>
 
@@ -62,3 +65,59 @@ $termsdata = file_get_contents($termsfile);
 </body>
 
 </html>
+<script>
+    const nowTime = new Date().getHours();
+    const $background = $("body");
+    
+    if(nowTime >= 0 && nowTime < 4){
+        $background.addClass("night")
+    }
+
+</script>
+<style>
+.night .terms{
+    padding: 12px;
+    background:linear-gradient(#000315, #4c5f78);
+    border-radius:12px;
+}
+.night .terms .err404 h1{
+    margin-top: 64px;
+    line-height:64px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    font-size: 64px;
+    text-align: center;
+    color: #f5f5f5;
+}
+.night .terms .err404 p{
+    margin-top: 2px;
+    margin-bottom: 2px;
+    line-height:32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+    text-align: center;
+    color: #f5f5f5;
+}
+.night .terms .p2c{
+    margin-top: 0px;
+    margin-bottom: 10px;
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: #CCC;
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+.night .terms .p3{
+    margin-top: 24px;
+    text-align: left;
+    word-wrap: break-word;
+    line-height: 24px;
+    color: #f5f5f5;
+    font-size: 22px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+</style>

@@ -1,3 +1,4 @@
+/*-----Console Notice-----*/
 console.log(
     "%c警告!!!%c\nもし誰かにここに%cコピペ%cしろと言われたりCookieというものをコピーしろなどと言われているのであればその行為は%c今すぐやめて%cください。",
     "color:white; background-color:#FF4848; padding:4px; border-radius:4px; font-weight: bold; font-size: 16pt",
@@ -27,4 +28,3 @@ console.log(
     "",
     "uwuzuサーバー運営者及びuwuzu開発者がCookie情報等を要求することはありません。",
 );
-

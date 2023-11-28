@@ -27,9 +27,6 @@ session_name('uwuzu_s_id');
 session_start();
 session_regenerate_id(true);
 
-$userid = htmlentities($_SESSION['userid']);
-$username = htmlentities($_SESSION['username']);
-
 try {
 
     $option = array(
@@ -46,7 +43,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -55,11 +52,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
-	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -92,7 +91,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -101,11 +100,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
-	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($res['username']); // クッキーから取得した値をセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -271,6 +272,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>

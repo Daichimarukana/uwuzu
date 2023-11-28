@@ -1,5 +1,5 @@
 <?php
-
+$servericonfile = "server/servericon.txt";
 $servernamefile = "server/servername.txt";
 
 $serverlogofile = "server/serverlogo.txt";
@@ -185,9 +185,18 @@ $pdo = null;
 ?>
 <!DOCTYPE html>
 <html lang="ja">
-<head>
+<head prefix="og:http://ogp.me/ns#">
 <meta charset="utf-8">
+<!--OGPはじまり-->
+<meta property="og:title" content="ログイン - <?php echo file_get_contents($servernamefile);?>">
+<meta property="og:description" content="<?php echo file_get_contents($servernamefile);?>にログイン">
+<meta property="og:url" content="https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); ?>/login">
+<meta property="og:image" content="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ログイン - <?php echo file_get_contents($servernamefile);?>">
+<!--OGPここまで-->
 <link rel="stylesheet" href="css/style.css">
+<script src="js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">

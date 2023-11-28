@@ -44,7 +44,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -53,11 +53,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
-	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -90,7 +92,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -99,11 +101,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
-	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($res['username']); // クッキーから取得した値をセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -178,6 +182,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -193,6 +198,11 @@ $pdo = null;
 	<?php require('../require/leftbox.php');?>
 	
 	<main class="outer">
+		<div>
+			<div id="clipboard" class="online" style="display:none;">
+				<p>🗒️📎 ユーズのURLをコピーしました！</p>
+			</div>
+		</div>
 
 		<?php if( !empty($error_message) ): ?>
 			<ul class="errmsg">
@@ -412,19 +422,20 @@ $(document).ready(function() {
 
 		$(document).on('click', '.addabi', function (event) {
 
-		abimodal.style.display = 'block';
-		modalMain.addClass("slideUp");
-		modalMain.removeClass("slideDown");
+			abimodal.style.display = 'block';
+			modalMain.addClass("slideUp");
+			modalMain.removeClass("slideDown");
 
-		var uniqid2 = $(this).attr('data-uniqid2');
-		var postAbiElement = $(this).closest('.addabi');
+			var uniqid2 = $(this).attr('data-uniqid2');
+			var postAbiElement = $(this).closest('.addabi');
 
-		AbiCancelButton.addEventListener('click', () => {
-			modalMain.removeClass("slideUp");
-			modalMain.addClass("slideDown");
-			window.setTimeout(function(){
-				abimodal.style.display = 'none';
-			}, 150);
+			AbiCancelButton.addEventListener('click', () => {
+				modalMain.removeClass("slideUp");
+				modalMain.addClass("slideDown");
+				window.setTimeout(function(){
+					abimodal.style.display = 'none';
+				}, 150);
+			});
 		});
 
 		$('#AbiForm').off('submit').on('submit', function (event) {
@@ -467,6 +478,36 @@ $(document).ready(function() {
 				});
 			}
 		});
+
+		$(document).on('click', '.share', function (event) {
+
+			var domain = "<?php echo $domain;?>";
+			var share_uniqid = $(this).attr('data-uniqid');
+			var share_userid = $(this).attr('data-userid');
+
+			if (typeof navigator.share === 'undefined') {
+				navigator.clipboard.writeText("https://"+domain+"/!"+share_uniqid+"")
+				$("#clipboard").show();
+				window.setTimeout(function(){
+					$("#clipboard").hide();
+				}, 5000);
+				return;
+			}
+
+			var shareData = {
+				title: ''+share_userid+'さんのID '+share_uniqid+' のユーズ - uwuzu',
+				text: '',
+				url: "https://"+domain+"/!"+share_uniqid+"",
+			};
+
+			navigator.share(shareData)
+			.then(function () {
+				// シェア完了後の処理
+			})
+			.catch(function (error) {
+				// シェア失敗時の処理
+			});
+
 		});
 });
 

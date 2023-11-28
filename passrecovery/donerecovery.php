@@ -16,6 +16,7 @@ for( $i=0;$i<$cnt;$i++ ){
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/style.css">
+<script src="../js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">

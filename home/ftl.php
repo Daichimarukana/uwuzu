@@ -51,7 +51,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -60,11 +60,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_SESSION['userid']); // セッションに格納されている値をそのままセット
-	$username = htmlentities($_SESSION['username']); // セッションに格納されている値をそのままセット
+	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -97,7 +99,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -106,11 +108,13 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		exit;
 	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
 	// セッションに値をセット
-	$userid = htmlentities($_COOKIE['userid']); // クッキーから取得した値をセット
-	$username = htmlentities($_COOKIE['username']); // クッキーから取得した値をセット
+	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($res['username']); // クッキーから取得した値をセット
 	$loginid = htmlentities($res["loginid"]);
 	$role = htmlentities($res["role"]);
 	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
 	$_SESSION['admin_login'] = true;
 	$_SESSION['userid'] = $userid;
 	$_SESSION['username'] = $username;
@@ -188,6 +192,39 @@ function get_mentions_userid($postText) {
 
     return $mentionedUsers;
 }
+function rotate($image, $exif)
+{
+    $orientation = $exif['Orientation'] ?? 1;
+
+    switch ($orientation) {
+        case 1: //no rotate
+            break;
+        case 2: //FLIP_HORIZONTAL
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 3: //ROTATE 180
+            $image = imagerotate($image, 180, 0);
+            break;
+        case 4: //FLIP_VERTICAL
+            imageflip($image, IMG_FLIP_VERTICAL);
+            break;
+        case 5: //ROTATE 270 FLIP_HORIZONTAL
+            $image = imagerotate($image, 270, 0);
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 6: //ROTATE 90
+            $image = imagerotate($image, 270, 0);
+            break;
+        case 7: //ROTATE 90 FLIP_HORIZONTAL
+            $image = imagerotate($image, 90, 0);
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 8: //ROTATE 270
+            $image = imagerotate($image, 90, 0);
+            break;
+    }
+    return $image;
+}
 
 if( !empty($_POST['btn_submit']) ) {
 
@@ -240,6 +277,19 @@ if( !empty($_POST['btn_submit']) ) {
 		
 		// ファイルを移動
 		$result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
+
+		// EXIF削除
+		if($extension == "jpg" || $extension == "jpeg"){
+			$gd = imagecreatefromjpeg($uploadedPath);
+			$w = imagesx($gd);
+			$h = imagesy($gd);
+			$gd_out = imagecreatetruecolor($w,$h);
+			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
+			$exif = exif_read_data($uploadedPath); 
+			$gd_out = rotate($gd_out, $exif);
+			imagejpeg($gd_out, $uploadedPath);
+			imagedestroy($gd_out);
+		}
 		
 		if ($result) {
 			$photo1 = $uploadedPath; // 保存されたファイルのパスを使用
@@ -280,6 +330,19 @@ if( !empty($_POST['btn_submit']) ) {
 		
 		// ファイルを移動
 		$result2 = move_uploaded_file($uploadedFile2['tmp_name'], $uploadedPath2);
+
+		// EXIF削除
+		if($extension2 == "jpg" || $extension2 == "jpeg"){
+			$gd = imagecreatefromjpeg($uploadedPath2);
+			$w = imagesx($gd);
+			$h = imagesy($gd);
+			$gd_out = imagecreatetruecolor($w,$h);
+			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
+			$exif = exif_read_data($uploadedPath2); 
+			$gd_out = rotate($gd_out, $exif);
+			imagejpeg($gd_out, $uploadedPath2);
+			imagedestroy($gd_out);
+		}
 		
 		if ($result2) {
 			$photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
@@ -320,6 +383,19 @@ if( !empty($_POST['btn_submit']) ) {
 		
 		// ファイルを移動
 		$result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
+
+		// EXIF削除
+		if($extension3 == "jpg" || $extension3 == "jpeg"){
+			$gd = imagecreatefromjpeg($uploadedPath3);
+			$w = imagesx($gd);
+			$h = imagesy($gd);
+			$gd_out = imagecreatetruecolor($w,$h);
+			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
+			$exif = exif_read_data($uploadedPath3); 
+			$gd_out = rotate($gd_out, $exif);
+			imagejpeg($gd_out, $uploadedPath3);
+			imagedestroy($gd_out);
+		}
 		
 		if ($result3) {
 			$photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
@@ -360,6 +436,19 @@ if( !empty($_POST['btn_submit']) ) {
 		
 		// ファイルを移動
 		$result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);
+
+		// EXIF削除
+		if($extension4 == "jpg" || $extension4 == "jpeg"){
+			$gd = imagecreatefromjpeg($uploadedPath4);
+			$w = imagesx($gd);
+			$h = imagesy($gd);
+			$gd_out = imagecreatetruecolor($w,$h);
+			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
+			$exif = exif_read_data($uploadedPath4); 
+			$gd_out = rotate($gd_out, $exif);
+			imagejpeg($gd_out, $uploadedPath4);
+			imagedestroy($gd_out);
+		}
 		
 		if ($result4) {
 			$photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
@@ -464,7 +553,7 @@ if( !empty($_POST['btn_submit']) ) {
 						$touserid = $mentionedUser;
 						$datetime = date("Y-m-d H:i:s");
 						$msg = "" . $ueuse . "";
-						$title = "" . $username . "さんにメンションされました！";
+						$title = "" . $userid . "さんにメンションされました！";
 						$url = "/!" . $uniqid . "~" . $userid . "";
 						$userchk = 'none';
 
@@ -528,6 +617,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
 <link rel="manifest" href="../manifest/manifest.json" />

@@ -1,5 +1,5 @@
 <?php
-header("Content-Type: application/json; charset=utf-8");
+header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
 
 $mojisizefile = "../server/textsize.txt";
 
@@ -63,7 +63,7 @@ for( $i=0;$i<$cnt;$i++ ){
     /*-------------------*/
     $sql = "SELECT title, note, account, datetime FROM notice ORDER BY datetime DESC";
     $notice_array = $pdo->query($sql);
-    
+
     while ($row = $notice_array->fetch(PDO::FETCH_ASSOC)) {
     
         $notices[] = $row;
@@ -110,6 +110,11 @@ for( $i=0;$i<$cnt;$i++ ){
                 "max_ueuse_length" => (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8'),
 
                 "invitation_code" => $invitation_code,
+
+                "usage" => [
+                    "users" => $count1,
+                    "ueuse" => $count2,
+                ],
 
             ),
 
