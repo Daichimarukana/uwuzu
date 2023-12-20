@@ -1,5 +1,6 @@
 <?php
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 $mojisizefile = "../server/textsize.txt";
 
@@ -29,6 +30,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -47,7 +49,7 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -56,7 +58,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -73,21 +75,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -104,7 +114,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -121,21 +131,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -155,13 +173,18 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
 $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
+
+//-----------------URLから取得----------------
+if(isset($_GET['text'])) { 
+    $ueuse = htmlentities($_GET['text']);
+}
 
 //-------------------------------------------
 function get_mentions_userid($postText) {
@@ -589,7 +612,7 @@ if( !empty($_POST['btn_submit']) ) {
         	}
 
             if( $res ) {
-				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];;
 				header("Location:".$url."");
 				exit;  
             } else {
@@ -616,9 +639,9 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
-<script src="../js/nsfw_event.js"></script>
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/nsfw_event.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="manifest" href="../manifest/manifest.json" />
 <script>
 if ("serviceWorker" in navigator) {
@@ -632,8 +655,8 @@ if ("serviceWorker" in navigator) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<link rel="stylesheet" href="../css/home.css">
-<title>ローカルタイムライン - <?php echo file_get_contents($servernamefile);?></title>
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<title>ローカルタイムライン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -676,7 +699,7 @@ if ("serviceWorker" in navigator) {
 					document.write(msg);
 					</script></p>
 					<div class="rp"><?php echo date("Y年n月j日")?></div>
-					<button class="os_exit_btn">とじる</button>
+					<button id="os_exit_btn" class="ueusebtn">とじる</button>
 				</div>
 			</div>
 			<?php }?>
@@ -849,10 +872,11 @@ $(document).ready(function() {
         isLoading = true;
 		$("#loading").show();
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
         $.ajax({
             url: '../nextpage/nextpage.php', // PHPファイルへのパス
             method: 'GET',
-            data: { page: pageNumber, userid: userid },
+            data: { page: pageNumber, userid: userid , account_id: account_id },
             dataType: 'html',
 			timeout: 300000,
             success: function(response) {
@@ -1094,7 +1118,7 @@ $(document).ready(function() {
 	});
 
 	var osho_gats = document.getElementById('osho_gats');
-	$(document).on('click', '.os_exit_btn', function (event) {
+	$('#os_exit_btn').on('click', function() {
 		document.cookie = "event=done; max-age=86400";
 		osho_gats.style.display = 'none';
 	});

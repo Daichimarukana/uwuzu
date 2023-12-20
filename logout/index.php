@@ -1,5 +1,7 @@
 <?php
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
 if (isset($_SERVER['HTTP_COOKIE'])) {
     $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
     foreach($cookies as $cookie) {
@@ -23,6 +25,7 @@ if (isset($_SERVER['HTTP_COOKIE'])) {
         setcookie('username', '', time()-1000, '');
     }
 }
+$_SESSION = null;
 ?>
 
 <!DOCTYPE html>
@@ -30,12 +33,12 @@ if (isset($_SERVER['HTTP_COOKIE'])) {
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css">
-<script src="../js/console_notice.js"></script>
+<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ログアウト完了 - <?php echo file_get_contents($servernamefile);?></title>
+<title>ログアウト完了 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 <script src="../js/back.js"></script>

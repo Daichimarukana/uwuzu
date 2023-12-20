@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- ホスト: ひみつ
--- 生成日時: 2023-11-15 14:03:33
--- サーバのバージョン： 10.4.28-MariaDB
--- PHP のバージョン: 8.2.4
+-- ホスト: 127.0.0.1
+-- 生成日時: 2023-12-20 14:33:47
+-- サーバのバージョン： 10.4.32-MariaDB
+-- PHP のバージョン: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -75,9 +75,6 @@ CREATE TABLE `ads` (
 CREATE TABLE `emoji` (
   `sysid` int(11) NOT NULL,
   `emojifile` varchar(512) NOT NULL,
-  `emojitype` varchar(256) NOT NULL,
-  `emojicontent` mediumblob NOT NULL,
-  `emojisize` int(11) NOT NULL,
   `emojiname` varchar(512) NOT NULL,
   `emojiinfo` text NOT NULL,
   `emojidate` datetime NOT NULL

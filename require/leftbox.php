@@ -1,16 +1,11 @@
 <?php 
-$serverlogofile = "../server/serverlogo.txt";
-$serverlogodata = file_get_contents($serverlogofile);
-$serverlogodata = explode( "\n", $serverlogodata );
-$cnt = count( $serverlogodata );
-for( $i=0;$i<$cnt;$i++ ){
-    $serverlogo_link[$i] = ($serverlogodata[$i]);
-}
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 ?>
 <div class="userleftbox">
-    <?php if(!empty($serverlogo_link[0])){ ?>
+    <?php if(!empty($serversettings["serverinfo"]["server_logo_home"])){ ?>
     <div class="logo">
-        <img src=<?php echo htmlspecialchars($serverlogo_link[0], ENT_QUOTES, 'UTF-8');?>>
+        <img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_home"], ENT_QUOTES, 'UTF-8');?>>
     </div>
     <?php }else{?>
     <div class="logo">

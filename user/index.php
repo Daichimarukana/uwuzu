@@ -1,6 +1,8 @@
 <?php
 
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
 
 $domain = $_SERVER['HTTP_HOST'];
 
@@ -27,6 +29,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -44,7 +47,7 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -53,7 +56,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -70,21 +73,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -101,7 +112,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -118,21 +129,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -152,7 +171,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -180,20 +199,60 @@ if( !empty($pdo) ) {
 
 	$uwuzuid = htmlentities(str_replace('@'.$domain, '', $uwuzuid2));
 
+	// プロフィールの絵文字対応
+	function replaceProfileEmojiImages($postText) {
+		// プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
+		$emojiPattern = '/:(\w+):/';
+		$postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
+			$emojiName = $matches[1];
+			//絵文字path取得
+			$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+			));
+			$emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
+			$emoji_Query->bindValue(':emojiname', $emojiName);
+			$emoji_Query->execute();
+			$emoji_row = $emoji_Query->fetch();
+			if(empty($emoji_row["emojifile"])){
+				$emoji_path = "img/sysimage/errorimage/emoji_404.png";
+			}else{
+				$emoji_path = $emoji_row["emojifile"];
+			}
+			return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
+		}, $postText);
+		return $postTextWithImages;
+	}
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
 		// ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
 		$emojiPattern = '/:(\w+):/';
 		$postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
 			$emojiName = $matches[1];
-			return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt=':$emojiName:' title=':$emojiName:'>";
+			//絵文字path取得
+			$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+			));
+			$emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
+			$emoji_Query->bindValue(':emojiname', $emojiName);
+			$emoji_Query->execute();
+			$emoji_row = $emoji_Query->fetch();
+			if(empty($emoji_row["emojifile"])){
+				$emoji_path = "img/sysimage/errorimage/emoji_404.png";
+			}else{
+				$emoji_path = $emoji_row["emojifile"];
+			}
+			return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
 		}, $postText);
 		
 		// @username を検出してリンクに置き換える
 		$usernamePattern = '/@(\w+)/';
 		$postTextWithImagesAndUsernames = preg_replace_callback($usernamePattern, function($matches) {
 			$username = $matches[1];
-
+	
 			$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -211,21 +270,23 @@ if( !empty($pdo) ) {
 				return "<a class = 'mta' href='/@".$mentionsuserData["userid"]."'>@".$mentionsuserData["username"]."</a>";
 			}
 		}, $postTextWithImages);
-
-		$hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9_]+)/u';
+	
+		$hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_]+)/u';
 		$postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
 			$hashtags = $matches[1];
-				return "<a class = 'hashtags' href='/search?q=".urlencode('#').$hashtags."'>".'#'.$hashtags."</a>";
+			return "<a class='hashtags' href='/search?q=" . urlencode('#') . $hashtags . "'>" . '#' . $hashtags . "</a>";
 		}, $postTextWithImagesAndUsernames);
-
+	
 		return $postTextWithHashtags;
 	}
 
 	function replaceURLsWithLinks($postText) {
+		$postText = str_replace('&#039;', '\'', $postText);
+
 		// URLを正規表現を使って検出
 		$pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
 		preg_match_all($pattern, $postText, $matches);
-	
+
 		// 検出したURLごとに処理を行う
 		foreach ($matches[0] as $url) {
 			// ドメイン部分を抽出
@@ -233,16 +294,26 @@ if( !empty($pdo) ) {
 			if (!isset($parsedUrl['path'])) {
 				$parsedUrl['path'] = '';
 			}
-			$domain = $parsedUrl['host'].(strlen($parsedUrl['path']) > 24 ? substr($parsedUrl['path'], 0, 24) . '...' : $parsedUrl['path']);
-			
+			if (!isset($parsedUrl['query'])) {
+				$parsedUrl['query'] = '';
+			}
+
+			$nochk_domain = $parsedUrl['host'].$parsedUrl['path'].$parsedUrl['query'];
+
+			if(strlen($nochk_domain) > 47){
+				$domain = mb_substr($nochk_domain, 0, 48, "UTF-8")."...";
+			}else{
+				$domain = $nochk_domain;
+			}
+
 			// 不要な文字を削除してaタグを生成
 			$urlWithoutSpaces = preg_replace('/\s+/', '', $url);
 			$link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
-	
+
 			// URLをドメインのみを表示するaタグで置き換え
 			$postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
 		}
-	
+
 		return $postText;
 	}
 
@@ -544,16 +615,16 @@ $pdo = null;
 <head>
 <script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
-<script src="../js/nsfw_event.js"></script>
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/nsfw_event.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="../css/home.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんのプロフィール - <?php echo file_get_contents($servernamefile);?></title>
+<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんのプロフィール - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -617,7 +688,7 @@ $pdo = null;
 			</div>
 			<div class="icon">
 				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
-				<h2><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?></h2>
+				<h2><?php echo replaceProfileEmojiImages(htmlentities($userData['username'], ENT_QUOTES, 'UTF-8')); ?></h2>
 				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?><!--<span>@<?php /*echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); */?></span>--></p>
 			</div>
 
@@ -708,7 +779,7 @@ $pdo = null;
 		<?php if(!($role === "ice")){?>
 			<div id="myModal" class="modal">
 				<div class="modal-content">
-					<p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをフォロー解除しますか？</p>
+					<p><?php echo replaceProfileEmojiImages(htmlentities($userData['username'], ENT_QUOTES, 'UTF-8')); ?>さんをフォロー解除しますか？</p>
 					<form class="btn_area" method="post">
 						<input type="submit" id="openModalButton" class="fbtn_no" name="unfollow" value="フォロー解除">
 						<input type="button" id="closeModal" class="fbtn" value="キャンセル">
@@ -784,8 +855,8 @@ $pdo = null;
 
 			<div id="account_BlockModal" class="modal">
 				<div class="modal-content">
-					<h1><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんをブロックしますか？</h1>
-					<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントをブロックしますか？<br>ブロックするとフォローが解除され、検索以外のLTL、FTL等で<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿が表示されなくなります。<br>また、相手からこのアカウントを閲覧することもできなくなります。<br>※ブロックしたことは相手には通知されません。<br><br>ブロックを解除するときはこのアカウントのユーザーページ(このページ)から解除を行ってください。</p>
+					<h1><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんをブロックしますか？</h1>
+					<p><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんのアカウントをブロックしますか？<br>ブロックするとフォローが解除され、検索以外のLTL、FTL等で<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿が表示されなくなります。<br>また、相手からこのアカウントを閲覧することもできなくなります。<br>※ブロックしたことは相手には通知されません。<br><br>ブロックを解除するときはこのアカウントのユーザーページ(このページ)から解除を行ってください。</p>
 					<form class="btn_area" method="post">
 						<input type="submit" id="deleteButton2" class="fbtn_no" name="send_block_submit" value="ブロック">
 						<input type="button" id="cancelButton2" class="fbtn" value="キャンセル">
@@ -795,8 +866,8 @@ $pdo = null;
 
 			<div id="account_un_BlockModal" class="modal">
 				<div class="modal-content">
-					<h1><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのブロックを解除しますか？</h1>
-					<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントをブロック解除しますか？<br>ブロック解除すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿の閲覧が可能になりフォローすることもできるようになります。</p>
+					<h1><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんのブロックを解除しますか？</h1>
+					<p><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんのアカウントをブロック解除しますか？<br>ブロック解除すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿の閲覧が可能になりフォローすることもできるようになります。</p>
 					<form class="btn_area" method="post">
 						<input type="submit" id="deleteButton3" class="fbtn_no" name="send_un_block_submit" value="ブロック解除">
 						<input type="button" id="cancelButton3" class="fbtn" value="キャンセル">
@@ -807,7 +878,7 @@ $pdo = null;
 
 			<div id="FollowerUserModal" class="modal">
 				<div class="modal-content">
-					<p><?php echo htmlentities($userData["username"], ENT_QUOTES, 'UTF-8');?>さんをフォローしているユーザー</p>
+					<p><?php echo replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'));?>さんをフォローしているユーザー</p>
 					<?php 
 					if(!empty($follower_userdata)){
 						foreach ($follower_userdata as $value) {
@@ -815,14 +886,14 @@ $pdo = null;
 								echo "<div class='action_userlist'>";
 								echo "<a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'><img src=".htmlentities($value['iconname'], ENT_QUOTES, 'UTF-8')."></a>";
 								echo "<div class='userabout'>";
-								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".htmlentities($value['username'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".replaceEmojisWithImages(htmlentities($value['username'], ENT_QUOTES, 'UTF-8'))."</a></div>";
 								echo "<div class='userid'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."</a></div>";
 								echo "</div>";
 								echo "</div>";
 							}
 						}
 					}else{
-						echo "<p>".htmlentities($userData["username"], ENT_QUOTES, 'UTF-8')."さんは誰にもフォローされていません。</p>";
+						echo "<p>".replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'))."さんは誰にもフォローされていません。</p>";
 					}
 					?>
 					<div class="btn_area">
@@ -833,7 +904,7 @@ $pdo = null;
 
 			<div id="FollowUserModal" class="modal">
 				<div class="modal-content">
-					<p><?php echo htmlentities($userData["username"], ENT_QUOTES, 'UTF-8');?>さんがフォローしているユーザー</p>
+					<p><?php echo replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'));?>さんがフォローしているユーザー</p>
 					<?php 
 					if(!empty($follow_userdata)){
 						foreach ($follow_userdata as $value) {
@@ -841,14 +912,14 @@ $pdo = null;
 								echo "<div class='action_userlist'>";
 								echo "<a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'><img src=".htmlentities($value['iconname'], ENT_QUOTES, 'UTF-8')."></a>";
 								echo "<div class='userabout'>";
-								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".htmlentities($value['username'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".replaceEmojisWithImages(htmlentities($value['username'], ENT_QUOTES, 'UTF-8'))."</a></div>";
 								echo "<div class='userid'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."</a></div>";
 								echo "</div>";
 								echo "</div>";
 							}
 						}
 					}else{
-						echo "<p>".htmlentities($userData["username"], ENT_QUOTES, 'UTF-8')."さんは誰もフォローしていません。</p>";
+						echo "<p>".replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'))."さんは誰もフォローしていません。</p>";
 					}
 					?>
 					<div class="btn_area">
@@ -884,11 +955,12 @@ $(document).ready(function() {
 		$("#error").hide();
 		var uwuzuid = '<?php echo $uwuzuid; ?>';
 		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
 		if(mode == 'allueuse'){
 			$.ajax({
 				url: '../nextpage/userpage.php', // PHPファイルへのパス
 				method: 'GET',
-				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				data: { page: pageNumber, id: uwuzuid ,userid: userid, account_id: account_id},
 				dataType: 'html',
 				timeout: 300000,
 				success: function(response) {
@@ -907,7 +979,7 @@ $(document).ready(function() {
 			$.ajax({
 				url: '../nextpage/usermediapage.php', // PHPファイルへのパス
 				method: 'GET',
-				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				data: { page: pageNumber, id: uwuzuid ,userid: userid, account_id: account_id},
 				dataType: 'html',
 				timeout: 300000,
 				success: function(response) {
@@ -926,7 +998,7 @@ $(document).ready(function() {
 			$.ajax({
 				url: '../nextpage/userlikepage.php', // PHPファイルへのパス
 				method: 'GET',
-				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				data: { page: pageNumber, id: uwuzuid ,userid: userid, account_id: account_id},
 				dataType: 'html',
 				timeout: 300000,
 				success: function(response) {
@@ -946,7 +1018,7 @@ $(document).ready(function() {
 			$.ajax({
 				url: '../nextpage/userpage.php', // PHPファイルへのパス
 				method: 'GET',
-				data: { page: pageNumber, id: uwuzuid ,userid: userid},
+				data: { page: pageNumber, id: uwuzuid ,userid: userid, account_id: account_id},
 				dataType: 'html',
 				timeout: 300000,
 				success: function(response) {

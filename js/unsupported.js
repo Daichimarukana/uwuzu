@@ -62,7 +62,11 @@ if(ua2.indexOf("windows nt") !== -1) {
 
 /*SSL*/
 if (location.protocol == 'http:') {
-	user_agent_ssl = "not_ssl";
+    if (location.hostname == 'localhost'){
+        user_agent_ssl = "not_ssl";
+    }else{
+        user_agent_ssl = "not_ssl_bad";
+    }
 } else if (location.protocol == 'https:') {
 	user_agent_ssl = "ssl";
 } else {
@@ -89,7 +93,10 @@ if (user_agent_browser == 'Microsoft_Internet_Explorer' || user_agent_browser ==
 } else if (user_agent_ssl == 'Other') {
     user_agent_access = 'bad';
     errcode = 'NONE_SSL';
-} else {
+} else if (user_agent_ssl == 'not_ssl_bad') {
+    user_agent_access = 'bad';
+    errcode = 'NONE_SSL_SERVER';
+}else{
     user_agent_access = 'ok';
     errcode = 'NONE_ERROR';
 }

@@ -20,12 +20,11 @@ for( $i=0;$i<$cnt;$i++ ){
     $uwuzuinfo[$i] = ($softwaredata[$i]);
 }
 
-$servernamefile = "../server/servername.txt";
-
-$onlyuserfile = "../server/onlyuser.txt";
-$onlyuser = file_get_contents($onlyuserfile);
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 
 // 変数の初期化
@@ -84,13 +83,13 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css">
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="apple-touch-icon" type="../image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>uwuzuへようこそ！！！ - <?php echo file_get_contents($servernamefile);?></title>
+<title>uwuzuへようこそ！！！ - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 

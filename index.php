@@ -4,6 +4,7 @@
 require('db.php');
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 
 
@@ -50,19 +51,10 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
         }
     }
 }
-$servericonfile = "server/servericon.txt";
 
-//-------------------------
+$serversettings_file = "server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
-$servernamefile = "server/servername.txt";
-
-$serverlogofile = "server/serverlogo.txt";
-$serverlogodata = file_get_contents($serverlogofile);
-$serverlogodata = explode( "\n", $serverlogodata );
-$cnt = count( $serverlogodata );
-for( $i=0;$i<$cnt;$i++ ){
-    $serverlogo_link[$i] = ($serverlogodata[$i]);
-}
 
 //------------------------
 
@@ -74,13 +66,6 @@ $serverinfo = file_get_contents($serverinfofile);
 $domain = $_SERVER['HTTP_HOST'];
 
 //------------------------
-
-$contactfile = "server/contact.txt";
-
-//------------------------
-
-$onlyuserfile = "server/onlyuser.txt";
-$onlyuser = file_get_contents($onlyuserfile);
 
 // データベースに接続
 try {
@@ -113,15 +98,19 @@ $count2 = $result2->num_rows;
 <head prefix="og:http://ogp.me/ns#">
 <meta charset="utf-8">
 <!--OGPはじまり-->
-<meta property="og:title" content="<?php echo file_get_contents($servernamefile);?>">
+<meta property="og:title" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>">
 <meta property="og:description" content="<?php echo htmlentities($serverinfo);?>">
 <meta property="og:url" content="https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); ?>/">
-<meta property="og:image" content="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+<meta property="og:image" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="<?php echo file_get_contents($servernamefile);?>">
+<meta property="og:site_name" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>"/>
+<meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
-<link rel="stylesheet" href="css/style.css">
-<script src="js/unsupported.js"></script>
+<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <link rel="manifest" href="manifest/manifest.json" />
@@ -135,7 +124,7 @@ if ("serviceWorker" in navigator) {
 }
 </script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?php echo file_get_contents($servernamefile);?></title>
+<title><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
     
@@ -165,17 +154,17 @@ if ("serviceWorker" in navigator) {
             <?php endforeach; ?>
         </ul>
     <?php endif; ?>
-        <h1><?php echo htmlspecialchars(file_get_contents($servernamefile));?>へようこそ！</h1>
-        <?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+        <h1><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>へようこそ！</h1>
+        <?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8')) ){ ?>
             <div class="servericon">
-                <img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+                <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>">
                 <div class="textzone">
-                    <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
+                    <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
                     <div class="p2c"><?php echo $domain;?></div>
                 </div>
             </div>
         <?php }else{?>
-            <div class="p3"><?php echo htmlspecialchars(file_get_contents($servernamefile));?></div>
+            <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
             <div class="p2c"><?php echo $domain;?></div>
         <?php }?>
 
@@ -185,9 +174,9 @@ if ("serviceWorker" in navigator) {
             echo $info.'<br>';
         }?></p>
 
-        <a class="maillink" href="mailto:<?php echo htmlspecialchars(file_get_contents($contactfile));?>">お問い合わせ : <?php echo file_get_contents($contactfile);?></a>
+        <a class="maillink" href="mailto:<?php echo htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8');?>">お問い合わせ : <?php echo htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8');?></a>
 
-        <?php if($onlyuser === "true"){?>
+        <?php if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){?>
             <p>このサーバーには招待コードがないと登録できません。<br>招待コードはお手元にありますか？</p>
             <div class="btnbox">
                 <a href="new.php" class="irobutton">アカウント登録</a>

@@ -42,9 +42,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 
 ### emoji
 - sysid(INT)(AUTO_INCREMENT) アカウントが追加されるとカウントされるシステム用ID
-- emojifile(varchar(512)) 絵文字ファイル名保存用
-- emojitype(varchar(256)) 絵文字拡張子保存用
-- emojicontent(mediumblob) 絵文字画像保存用
+- emojifile(varchar(512)) 絵文字ファイルパス保存用
 - emojiname(varchar(512)) 「:emoji:」のような絵文字名保存用
 - emojiinfo(text) 絵文字についての説明保存用
 - emojidate(datetime) 絵文字登録日時保存用
@@ -122,19 +120,14 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 
 - 404imagepath.txt : 404ページに表示する画像パス保存用
 - 503imagepath.txt : 503ページに表示する画像パス保存用
-- activitypub.txt : ActivityPub機能のオンオフ(trueまたはfalse)
-- admininfo.txt : 管理者名(てすとまる/@sampledayo)
 - banurldomain.txt : 投稿禁止URLドメイン
 - banuserid.txt : 登録禁止ユーザーid
-- contact.txt : 管理者への連絡用メアド(sample@test.com)
 - info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
 - privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
-- servaricon.txt : サーバーアイコンのURL
-- servarlogo.txt : サーバーロゴのURL
-- servername.txt : サーバー名(てすとさば)
 - serverstop.txt : サーバー停止ページで表示するメッセージ
 - terms.txt : 利用規約(サーバーの利用規約を記載)
 - textsize.txt : 最大文字数
+- serversettings.ini : サーバー情報保存ファイル
 - uwuzuabout.txt : このファイル(uwuzuを改造した場合は書き換え)
 - uwuzuinfo.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
 - uwuzurelease.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)

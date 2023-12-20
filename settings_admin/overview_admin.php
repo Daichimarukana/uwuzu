@@ -1,7 +1,6 @@
 <?php
-$servericonfile = "../server/servericon.txt";
-
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 $serverinfofile = '../server/info.txt';
 $serverinfo = file_get_contents($serverinfofile);
@@ -11,19 +10,6 @@ $serverterms = file_get_contents($servertermsfile);
 
 $serverprvfile = '../server/privacypolicy.txt';
 $serverprv = file_get_contents($serverprvfile);
-
-$contactfile = "../server/contact.txt";
-
-$adminfile = "../server/admininfo.txt";
-
-$serverstopfile = "../server/serverstop.txt";
-
-$onlyuserfile = "../server/onlyuser.txt";
-
-$err404imagefile = "../server/404imagepath.txt";
-
-$robots = "../robots.txt";
-
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -51,6 +37,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -67,7 +54,7 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -76,7 +63,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -93,21 +80,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -124,7 +119,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -141,21 +136,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -175,7 +178,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 
 if(!($res["admin"] === "yes")){
 	header("Location: ../login.php");
@@ -211,14 +214,14 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>サーバー概要 - <?php echo file_get_contents($servernamefile);?></title>
+<title>サーバー概要 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -239,22 +242,22 @@ require('../logout/logout.php');
 			<div class="admin_right">
 				<div class="formarea">
 					<h1>サーバー概要</h1>
-					<?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+					<?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8')) ){ ?>
 						<div class="servericon">
-							<img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+							<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
 						</div>
 					<?php }?>
 					<p>サーバー名</p>
-					<p><?php if( !empty(file_get_contents($servernamefile)) ){ echo htmlspecialchars(file_get_contents($servernamefile), ENT_QUOTES, 'UTF-8'); } ?></p>
+					<p><?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'); } ?></p>
 					<hr>
 					<p>サーバー紹介メッセージ</p>
 					<p><?php $sinfo = explode("\n", $serverinfo); foreach ($sinfo as $info) { echo nl2br(htmlspecialchars($info)); }?></p>
 					<hr>
 					<p>サーバー管理者の名前</p>
-					<p><?php if( !empty(file_get_contents($adminfile)) ){ echo htmlspecialchars(file_get_contents($adminfile), ENT_QUOTES, 'UTF-8'); } ?></p>
+					<p><?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8')) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8'); } ?></p>
 					<hr>
 					<p>サーバーへのお問い合わせ用メールアドレス</p>
-					<p><?php if( !empty(file_get_contents($contactfile)) ){ echo htmlspecialchars(file_get_contents($contactfile), ENT_QUOTES, 'UTF-8'); } ?></p>
+					<p><?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8')) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8'); } ?></p>
 					<hr>
 					<p>統計情報</p>
 					<div class="overview">

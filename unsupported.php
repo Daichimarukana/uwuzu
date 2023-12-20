@@ -1,10 +1,7 @@
 <?php 
 
-$servericonfile = "server/servericon.txt";
-
-//-------------------------
-
-$servernamefile = "server/servername.txt";
+$serversettings_file = "server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 //------------------------
 
@@ -16,8 +13,6 @@ $serverinfo = file_get_contents($serverinfofile);
 $domain = $_SERVER['HTTP_HOST'];
 
 //------------------------
-
-$contactfile = "server/contact.txt";
 
 $softwarefile = "server/uwuzuinfo.txt";
 $softwaredata = file_get_contents($softwarefile);
@@ -50,6 +45,8 @@ if($errcode == "UNSUPPORTED_BROWSER"){
     $errabout = "Cookieが無効になっています。";
 }elseif($errcode == "NONE_SSL"){
     $errabout = "http通信で表示されていません。";
+}elseif($errcode == "NONE_SSL_SERVER"){
+    $errabout = "サーバー側でSSLが設定されていません。サーバー管理者にuwuzuの動作にSSLの設定が必要であることを伝えてください。";
 }else{
     $errabout = "エラーコードの説明はありません。";
 }
@@ -63,14 +60,14 @@ if($errcode == "UNSUPPORTED_BROWSER"){
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?php echo file_get_contents($servernamefile);?></title>
+<title><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 <body>
 
 <main>
     <div class="server_icon_zone">
-        <img src=<?php echo htmlentities(file_get_contents($servericonfile));?>>
+        <img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>>
     </div>
     <h1>お使いの環境での利用はできません</h1>
     <div class="maintext">
@@ -96,7 +93,7 @@ if($errcode == "UNSUPPORTED_BROWSER"){
 </main>
 <hr>
 <div class="center_text">
-    <p><?php echo htmlentities(file_get_contents($servernamefile));?></p>
+    <p><?php echo htmlentities($serversettings["serverinfo"]["server_name"]);?></p>
     <p><?php echo $domain;?></p>
     <div class="p2"><?php echo htmlentities($uwuzuinfo[0]);?><br>Version <?php echo htmlentities($uwuzuinfo[1]);?></div>
 </div>

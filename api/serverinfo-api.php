@@ -3,24 +3,16 @@ header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Orig
 
 $mojisizefile = "../server/textsize.txt";
 
-$adminfile = "../server/admininfo.txt";
-
-$servernamefile = "../server/servername.txt";
-
-$servericonfile = "../server/servericon.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 $serverinfofile = '../server/info.txt';
 $serverinfo = file_get_contents($serverinfofile);
-
-$contactfile = "../server/contact.txt";
 
 $domain = $_SERVER['HTTP_HOST'];
 
 $softwarefile = "../server/uwuzuinfo.txt";
 $softwaredata = file_get_contents($softwarefile);
-
-$onlyuserfile = "../server/onlyuser.txt";
-$onlyuser = file_get_contents($onlyuserfile);
 
 $softwaredata = explode( "\n", $softwaredata );
 $cnt = count( $softwaredata );
@@ -69,15 +61,15 @@ for( $i=0;$i<$cnt;$i++ ){
         $notices[] = $row;
     }
 
-    if($onlyuser === "true"){
+    if(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8') === "true"){
         $openregit = false;
-    }elseif($onlyuser === "false"){
+    }elseif(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8') === "false"){
         $openregit = true;
     }else{
         $openregit = false;
     }
 
-    if($onlyuser === "true"){
+    if(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8') === "true"){
         $invitation_code = true;
     }else{
         $invitation_code = false;
@@ -96,13 +88,13 @@ for( $i=0;$i<$cnt;$i++ ){
 
         $item = [
             "server_info" => array(
-                "server_name" => file_get_contents($servernamefile),
-                "server_icon" => file_get_contents($servericonfile),
+                "server_name" => htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'),
+                "server_icon" => htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'),
                 "server_description" => $serverinfo,
 
                 "adminstor" => array(
-                    "name" => file_get_contents($adminfile),
-                    "email" => file_get_contents($contactfile),
+                    "name" => htmlspecialchars($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8'),
+                    "email" => htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8'),
                 ),
 
                 "terms_url" => "https://".$domain."/rule/terms",

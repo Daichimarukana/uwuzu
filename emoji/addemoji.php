@@ -1,6 +1,8 @@
 <?php
 
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -24,6 +26,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -41,7 +44,7 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -50,7 +53,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -67,21 +70,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -98,7 +109,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -115,21 +126,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -149,7 +168,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 
 if(!($res["admin"] === "yes")){
 	header("Location: ../login.php");
@@ -192,15 +211,87 @@ if( !empty($pdo) ) {
 }
 
 
+function rotate($image, $exif)
+{
+    $orientation = $exif['Orientation'] ?? 1;
 
+    switch ($orientation) {
+        case 1: //no rotate
+            break;
+        case 2: //FLIP_HORIZONTAL
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 3: //ROTATE 180
+            $image = imagerotate($image, 180, 0);
+            break;
+        case 4: //FLIP_VERTICAL
+            imageflip($image, IMG_FLIP_VERTICAL);
+            break;
+        case 5: //ROTATE 270 FLIP_HORIZONTAL
+            $image = imagerotate($image, 270, 0);
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 6: //ROTATE 90
+            $image = imagerotate($image, 270, 0);
+            break;
+        case 7: //ROTATE 90 FLIP_HORIZONTAL
+            $image = imagerotate($image, 90, 0);
+            imageflip($image, IMG_FLIP_HORIZONTAL);
+            break;
+        case 8: //ROTATE 270
+            $image = imagerotate($image, 90, 0);
+            break;
+    }
+    return $image;
+}
 if( !empty($_POST['btn_submit']) ) {
 	$emojiname = $_POST['emojiname'];
     $emojiinfo = $_POST['emojiinfo'];
 
     if (!empty($_FILES['image']['name'])) {
-        $img = $_FILES['image'];
+        // アップロードされたファイル情報
+		$uploadedFile = $_FILES['image'];
+
+		// アップロードされたファイルの拡張子を取得
+		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+		
+		// 新しいファイル名を生成（uniqid + 拡張子）
+		$newFilename = uniqid() . '.' . $extension;
+		
+		// 保存先のパスを生成
+		$uploadedPath = 'emojiimage/' . $newFilename;
+		
+		// ファイルを移動
+		$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+
+		// EXIF削除
+		if($extension == "jpg" || $extension == "jpeg"){
+			$gd = imagecreatefromjpeg('../'.$uploadedPath);
+			$w = imagesx($gd);
+			$h = imagesy($gd);
+			$gd_out = imagecreatetruecolor($w,$h);
+			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
+			$exif = exif_read_data('../'.$uploadedPath); 
+			$gd_out = rotate($gd_out, $exif);
+			imagejpeg($gd_out, '../'.$uploadedPath);
+			imagedestroy($gd_out);
+		}
+		
+		if ($result) {
+			$emoji_path = $uploadedPath; // 保存されたファイルのパスを使用
+		} else {
+			$errnum = $uploadedFile['error'];
+			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+		}
     }else{
-        $error_message[] = '画像を選択してください～';
+		$error_message[] = '画像を選択してください';
     }
 
 
@@ -251,19 +342,9 @@ if( !empty($_POST['btn_submit']) ) {
         try {
 
             // SQL作成
-            $stmt = $pdo->prepare("INSERT INTO emoji (emojifile, emojitype, emojicontent, emojisize, emojiname, emojiinfo, emojidate) VALUES ( :emojifile, :emojitype, :emojicontent, :emojisize, :emojiname, :emojiinfo, :emojidate)");
-
-
-            
-            $name = $img['name'];
-            $type = $img['type'];
-            $content = file_get_contents($img['tmp_name']);
-            $size = $img['size'];
+            $stmt = $pdo->prepare("INSERT INTO emoji (emojifile, emojiname, emojiinfo, emojidate) VALUES ( :emojifile, :emojiname, :emojiinfo, :emojidate)");
     
-            $stmt->bindValue(':emojifile', $name, PDO::PARAM_STR);
-            $stmt->bindValue(':emojitype', $type, PDO::PARAM_STR);
-            $stmt->bindValue(':emojicontent', $content, PDO::PARAM_STR);
-            $stmt->bindValue(':emojisize', $size, PDO::PARAM_INT);
+            $stmt->bindValue(':emojifile', $emoji_path, PDO::PARAM_STR);
 
             // 値をセット
             $stmt->bindParam( ':emojiname', $emojiname, PDO::PARAM_STR);
@@ -312,14 +393,14 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>絵文字登録 - <?php echo file_get_contents($servernamefile);?></title>
+<title>絵文字登録 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 

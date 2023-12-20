@@ -1,6 +1,6 @@
 <?php
-
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -25,6 +25,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -45,7 +46,7 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -54,7 +55,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -71,21 +72,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -102,7 +111,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -119,21 +128,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -153,7 +170,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -312,6 +329,12 @@ if (!empty($_POST['report'])) {
 	$admin_chk = "none";
 	$touserid = $userData['userid'];
 
+	//管理者取得
+	$adminQuery = $pdo->prepare("SELECT userid FROM account WHERE admin = :adminid");
+	$adminQuery->bindValue(':adminid', "yes");
+	$adminQuery->execute();
+	$admin_res = $adminQuery->fetchAll();
+
 	// トランザクション開始
 	$pdo->beginTransaction();
 
@@ -334,6 +357,44 @@ if (!empty($_POST['report'])) {
 		// コミット
 		$res = $pdo->commit();
 
+		foreach ($admin_res as $to_admin) {
+		
+			$pdo->beginTransaction();
+
+			try {
+				$touserid2 = $to_admin["userid"];//管理者宛通知
+				$datetime = date("Y-m-d H:i:s");
+				$msg = "通報情報をご確認ください！";
+				$title = "🚨" . $touserid . "さんが通報されました！🚨";
+				$url = "/settings_admin/useradmin";
+				$userchk = 'none';
+
+				// 通知用SQL作成
+				$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+
+
+				$stmt->bindParam(':touserid', htmlentities($touserid2), PDO::PARAM_STR);
+				$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+				$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+				$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+				$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+
+				$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
+
+				// SQLクエリの実行
+				$res = $stmt->execute();
+
+				// コミット
+				$res = $pdo->commit();
+
+			} catch(Exception $e) {
+
+				// エラーが発生した時はロールバック
+				$pdo->rollBack();
+			}
+	
+		}
+
 	} catch(Exception $e) {
 
 		// エラーが発生した時はロールバック
@@ -341,7 +402,7 @@ if (!empty($_POST['report'])) {
 	}
 
 	if( $res ) {
-		header("Location:success");
+		header("Location:success?q=".var_dump($admin_res["userid"]));
         exit;
 	} else {
 		$error_message[] = $e->getMessage();
@@ -363,14 +424,14 @@ $pdo = null;
 <html lang="ja">
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/console_notice.js"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんを通報 - <?php echo file_get_contents($servernamefile);?></title>
+<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんを通報 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -389,9 +450,9 @@ $pdo = null;
 		<form class="formarea" enctype="multipart/form-data" method="post">
 				<h1>通報</h1>
 				<div class="p2">通報先アカウント名</div>
-				<p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p>@<?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?></p>
 				<div class="p2">通報先id</div>
-				<p><?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
+				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
 				<div class="p2">プロフィール</div>
 				<p><?php echo nl2br(htmlentities($userData['profile'], ENT_QUOTES, 'UTF-8')); ?></p>
 				<hr>

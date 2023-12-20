@@ -16,7 +16,6 @@
     <div class="modal-content">
         <p>メニュー</p>
         <div class="bot_menu_area">
-            <a href="/others" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/others.svg#others"></use></svg><div>その他</div></a>
             <a href="/emoji" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/emoji.svg#emoji"></use></svg><div>絵文字</div></a>
             <a href="/@<?php echo $userid; ?>" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/profile.svg#profile"></use></svg><div>プロフィール</div></a>
             <a href="/settings" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/settings.svg#settings"></use></svg><div>設定</div></a>

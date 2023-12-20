@@ -515,6 +515,17 @@ main h1{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
 }
 
+.userheader .icon h2 img{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 32px;
+    width: auto;
+    vertical-align: text-top;
+    border-radius: 0px;
+}
+
 .userheader h2{
     word-wrap: break-word;
     margin-left: 12px;
@@ -996,6 +1007,16 @@ main h1{
     font-weight: bold;
 }
 
+.ueuse .flebox a .u_name img{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 18px;
+    width: auto;
+    vertical-align: text-top;
+    border-radius: 0px;
+}
 
 
 
@@ -2463,6 +2484,16 @@ label>input {
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
+.modal-content p img{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 18px;
+    width: auto;
+    vertical-align: text-top;
+    border-radius: 0px;
+}
 
 .modal-content h1{
     font-size: 24px;
@@ -2470,6 +2501,16 @@ label>input {
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
+}
+.modal-content h1 img{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 24px;
+    width: auto;
+    vertical-align: middle;
+    border-radius: 0px;
 }
 
 .modal-content .btn_area{
@@ -2590,6 +2631,16 @@ label>input {
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
+}
+.modal-content .action_userlist .userabout .username a img{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 18px;
+    width: auto;
+    vertical-align: text-top;
+    border-radius: 0px;
 }
 .modal-content .action_userlist .userabout .userid a{
     line-height: 20px;
@@ -3262,6 +3313,15 @@ label>input {
     font-weight: bold;
 }
 
+.notification2 p img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 32px;
+    vertical-align: middle;
+}
+
 .notification2 h3{
     overflow-wrap:  break-word;
     margin-top: auto;
@@ -3369,6 +3429,15 @@ label>input {
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
+}
+
+.notification p img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 32px;
+    vertical-align: middle;
 }
 
 .notification h3{
@@ -3630,7 +3699,7 @@ hr{
     padding-right: 24px;
     padding-top: 8px;
     padding-bottom: 8px;
-    color:#FCFAF2;
+    color:#F5F4F0;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
@@ -3642,7 +3711,7 @@ hr{
     padding-right: 24px;
 }
 .hny .textmain h1{
-    background-color: var(--main-color);
+    background-color: #dcae64;
     text-align: left;
     color:#FCFAF2;
     font-family: 'BIZ UDPGothic', sans-serif;
@@ -4305,6 +4374,34 @@ summary {
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
 .online p{
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-left: 12px;
+    margin-right: 12px;
+    line-height: 24px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-size: 16px;
+    color:var(--tl-color);
+    color: transparent; 
+    text-shadow: 0 0 0 var(--tl-color);
+    text-align: center;
+}
+.new_ueuse{
+    position: absolute;
+    animation: slideDownOffline 5.0s ease-in-out forwards;
+    margin-top: 32px;
+    margin-right: auto;
+    margin-left: auto;
+    right: 0;
+    left: 0;
+    width: fit-content;
+    height: 32px;
+    z-index: 9999;
+    background-color: var(--main-color);
+    border-radius: 20px;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .3);
+}
+.new_ueuse p{
     margin-top: 4px;
     margin-bottom: 4px;
     margin-left: 12px;
@@ -5595,17 +5692,10 @@ summary {
     }
 
     .hny{
-        position: absolute;
-        animation: slideDownhny 5.0s ease-in-out forwards;
         border-radius: 10px;
         overflow: hidden;
-        box-shadow:0 0px 32px 0 rgba(0, 0, 0, .15);
         margin: 12px;
         border: 1px solid var(--border-color);
-    }
-    @keyframes slideDownhny {
-        0%, 100% { transform: translateY(-40dvh); }
-        20%, 90% { transform: translateY(0px); }
     }
     .hny .top{
         background-color: #CB4042;
@@ -5618,7 +5708,7 @@ summary {
         font-weight: bold;
     }
     .hny .textmain{
-        background-color: var(--border-color);
+        background-color: #f5f4f0;
         padding-top: 8px;
         padding-bottom: 8px;
         padding-left: 24px;
@@ -5629,7 +5719,7 @@ summary {
         text-align: left;
         color:var(--text-color);
         font-family: 'BIZ UDPGothic', sans-serif;
-        word-wrap: break-word;
+        overflow-wrap:break-word;
         font-size: 22px;
         line-height: 32px;
         padding: 0px;
@@ -5640,7 +5730,7 @@ summary {
         text-align: left;
         color:var(--text-color);
         font-family: 'BIZ UDPGothic', sans-serif;
-        word-wrap: break-word;
+        overflow-wrap:break-word;
         font-size: 16px;
         line-height: 22px;
         font-weight: bold;
@@ -5650,7 +5740,7 @@ summary {
         text-align: right;
         color:var(--text-color);
         font-family: 'BIZ UDPGothic', sans-serif;
-        word-wrap: break-word;
+        overflow-wrap:break-word;
         font-size: 14px;
         line-height: 22px;
         font-weight: normal;

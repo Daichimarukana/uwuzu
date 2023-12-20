@@ -2,7 +2,8 @@
     <?php 
     require('../notice/notice.php');
 
-    $servernamefile = "../server/servername.txt";
+    $serversettings_file = "../server/serversettings.ini";
+    $serversettings = parse_ini_file($serversettings_file, true);
 
     //-------------------------------------
     
@@ -19,28 +20,40 @@
         $uwuzuinfo[$i] = ($softwaredata[$i]);
     }
     function replaceURLsWithLinks_forRightbox($postText) {
-        // URLを正規表現を使って検出
-        $pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
-        preg_match_all($pattern, $postText, $matches);
-    
-        // 検出したURLごとに処理を行う
-        foreach ($matches[0] as $url) {
-            // ドメイン部分を抽出
-            $parsedUrl = parse_url($url);
-            if (!isset($parsedUrl['path'])) {
-                $parsedUrl['path'] = '';
-            }
-            $domain = $parsedUrl['host'].(strlen($parsedUrl['path']) > 24 ? substr($parsedUrl['path'], 0, 24) . '...' : $parsedUrl['path']);
-            
-            // 不要な文字を削除してaタグを生成
-            $urlWithoutSpaces = preg_replace('/\s+/', '', $url);
-            $link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
-    
-            // URLをドメインのみを表示するaタグで置き換え
-            $postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
-        }
-    
-        return $postText;
+        $postText = str_replace('&#039;', '\'', $postText);
+
+		// URLを正規表現を使って検出
+		$pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
+		preg_match_all($pattern, $postText, $matches);
+
+		// 検出したURLごとに処理を行う
+		foreach ($matches[0] as $url) {
+			// ドメイン部分を抽出
+			$parsedUrl = parse_url($url);
+			if (!isset($parsedUrl['path'])) {
+				$parsedUrl['path'] = '';
+			}
+			if (!isset($parsedUrl['query'])) {
+				$parsedUrl['query'] = '';
+			}
+
+			$nochk_domain = $parsedUrl['host'].$parsedUrl['path'].$parsedUrl['query'];
+
+			if(strlen($nochk_domain) > 47){
+				$domain = mb_substr($nochk_domain, 0, 48, "UTF-8")."...";
+			}else{
+				$domain = $nochk_domain;
+			}
+
+			// 不要な文字を削除してaタグを生成
+			$urlWithoutSpaces = preg_replace('/\s+/', '', $url);
+			$link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
+
+			// URLをドメインのみを表示するaタグで置き換え
+			$postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
+		}
+
+		return $postText;
     }
     ?>
     <div class="noticearea">
@@ -65,7 +78,7 @@
     <div class="btmbox">
         <h1>サーバー情報</h1>
         <h2>Server</h2>
-        <h3><?php echo file_get_contents($servernamefile);?></h3>
+        <h3><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></h3>
         <p><?php echo $domain;?></p>
         <a href="/rule/terms">利用規約</a><a href="/rule/privacypolicy">プライバシーポリシー</a><a href="/rule/serverabout">詳細</a>
         <h2>Software</h2>

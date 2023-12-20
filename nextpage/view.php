@@ -17,14 +17,53 @@ function processMarkdownAndWrapEmptyLines($markdownText){
 
     return $markdownText;
 }
-
-// ユーズ内の絵文字を画像に置き換える
+//Profile
+function replaceProfileEmojiImages($postText) {
+    // プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
+    $emojiPattern = '/:(\w+):/';
+    $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
+        $emojiName = $matches[1];
+        //絵文字path取得
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        ));
+        $emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
+        $emoji_Query->bindValue(':emojiname', $emojiName);
+        $emoji_Query->execute();
+        $emoji_row = $emoji_Query->fetch();
+        if(empty($emoji_row["emojifile"])){
+            $emoji_path = "img/sysimage/errorimage/emoji_404.png";
+        }else{
+            $emoji_path = $emoji_row["emojifile"];
+        }
+        return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
+    }, $postText);
+    return $postTextWithImages;
+}
+// ユーズ内の絵文字やhashtagを画像に置き換える
 function replaceEmojisWithImages($postText) {
     // ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
     $emojiPattern = '/:(\w+):/';
     $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
         $emojiName = $matches[1];
-        return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt=':$emojiName:' title=':$emojiName:'>";
+        //絵文字path取得
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        ));
+        $emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
+        $emoji_Query->bindValue(':emojiname', $emojiName);
+        $emoji_Query->execute();
+        $emoji_row = $emoji_Query->fetch();
+        if(empty($emoji_row["emojifile"])){
+            $emoji_path = "img/sysimage/errorimage/emoji_404.png";
+        }else{
+            $emoji_path = $emoji_row["emojifile"];
+        }
+        return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
     }, $postText);
     
     // @username を検出してリンクに置き換える
@@ -73,8 +112,18 @@ function replaceURLsWithLinks($postText) {
         if (!isset($parsedUrl['path'])) {
             $parsedUrl['path'] = '';
         }
-        $domain = $parsedUrl['host'].(strlen($parsedUrl['path']) > 24 ? substr($parsedUrl['path'], 0, 24) . '...' : $parsedUrl['path']);
-        
+        if (!isset($parsedUrl['query'])) {
+            $parsedUrl['query'] = '';
+        }
+
+        $nochk_domain = $parsedUrl['host'].$parsedUrl['path'].$parsedUrl['query'];
+
+        if(strlen($nochk_domain) > 47){
+            $domain = mb_substr($nochk_domain, 0, 48, "UTF-8")."...";
+        }else{
+            $domain = $nochk_domain;
+        }
+
         // 不要な文字を削除してaタグを生成
         $urlWithoutSpaces = preg_replace('/\s+/', '', $url);
         $link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
@@ -169,7 +218,7 @@ class MessageDisplay {
             echo '    <div class="flebox">';
             
             echo '        <a href="/@' . htmlentities($this->value['account']) . '"><img src="'. htmlentities('../'.$this->value['iconname']) . '"></a>';
-            echo '        <a href="/@' . htmlentities($this->value['account']) . '">' . htmlentities($this->value['username']) . '</a>';
+            echo '        <a href="/@' . htmlentities($this->value['account']) . '"><div class="u_name">' . replaceProfileEmojiImages(htmlentities($this->value['username'])) . '</div></a>';
             echo '        <div class="idbox">';
             echo '            <a href="/@' . htmlentities($this->value['account']) . '">@' . htmlentities($this->value['account']) . '</a>';
             echo '        </div>';
@@ -219,27 +268,27 @@ class MessageDisplay {
             
             if (!empty($this->value['photo4']) && $this->value['photo4'] !== 'none') {
                 echo '    <div class="photo4">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo4']).'" target=”_blank”><img src="'.htmlentities($this->value['photo4']).'" alt="画像4" title="画像4"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo4']).'" target=”_blank”><img src="'.htmlentities($this->value['photo4']).'" alt="画像4" title="画像4" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo3']) && $this->value['photo3'] !== 'none') {
                 echo '    <div class="photo3">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '        <div class="photo3_btm">';
-                echo '            <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3"></a>';
+                echo '            <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '        </div>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
                 echo '    <div class="photo2">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo1']) && $this->value['photo1'] !== 'none') {
                 echo '    <div class="photo1">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1"></a>';
+                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '    </div>';
             }
             if (!empty($this->value['video1']) && $this->value['video1'] !== 'none') {

@@ -16,20 +16,11 @@ function random($length = 32)
 
 require('db.php');
 
-$servernamefile = "server/servername.txt";
-
-$serverlogofile = "server/serverlogo.txt";
-$serverlogodata = file_get_contents($serverlogofile);
-$serverlogodata = explode( "\n", $serverlogodata );
-$cnt = count( $serverlogodata );
-for( $i=0;$i<$cnt;$i++ ){
-    $serverlogo_link[$i] = ($serverlogodata[$i]);
-}
-
-$onlyuserfile = "server/onlyuser.txt";
-$onlyuser = file_get_contents($onlyuserfile);
+$serversettings_file = "server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 
 // 変数の初期化
@@ -193,12 +184,12 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="css/style.css">
-<script src="js/unsupported.js"></script>
+<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>アカウント登録 - <?php echo file_get_contents($servernamefile);?></title>
+<title>アカウント登録 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 
@@ -207,9 +198,9 @@ $pdo = null;
 
 
 <div class="leftbox">
-    <?php if(!empty($serverlogo_link[1])){ ?>
+    <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
@@ -233,7 +224,7 @@ $pdo = null;
 
         <?php 
 
-        $title = file_get_contents($servernamefile);
+        $title = htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');
 
         $name = $userid;
 

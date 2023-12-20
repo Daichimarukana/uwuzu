@@ -1,6 +1,7 @@
 <?php
-$activitypub_file = "../../server/activitypub.txt";
-if(file_get_contents($activitypub_file) === "true"){
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
     header("Content-Type: application/json; charset=utf-8");
 
     $domain = $_SERVER['HTTP_HOST'];

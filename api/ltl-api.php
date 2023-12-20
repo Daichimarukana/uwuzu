@@ -36,7 +36,7 @@ if(isset($_GET['limit'])) {
 
 
         if (!empty($pdo)) {
-            $sql = "SELECT account, username, uniqid, rpuniqid, ueuse, datetime, photo1, photo2, video1, favorite, abi, abidate FROM ueuse WHERE rpuniqid = '' ORDER BY datetime DESC LIMIT " . intval($offset) . ", " . intval($itemsPerPage);
+            $sql = "SELECT account, username, uniqid, rpuniqid, ueuse, datetime, photo1, photo2, video1, favorite, abi, abidate, nsfw FROM ueuse WHERE rpuniqid = '' ORDER BY datetime DESC LIMIT " . intval($offset) . ", " . intval($itemsPerPage);
             $message_array = $pdo->query($sql);    
         
             while ($row = $message_array->fetch(PDO::FETCH_ASSOC)) {
@@ -77,6 +77,7 @@ if(isset($_GET['limit'])) {
                         'datetime' => htmlentities($ueusedata["datetime"]),
                         'abi' => htmlentities($ueusedata["abi"]),
                         'abidatetime' => htmlentities($ueusedata["abidate"]),
+                        'nsfw' => htmlentities($ueusedata["nsfw"]),
                     ];
             
                     $response[$ueusedata["uniqid"]] = $item; // ループ内で $response にデータを追加

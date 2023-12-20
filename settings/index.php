@@ -1,6 +1,7 @@
 <?php
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
-$servernamefile = "../server/servername.txt";
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -24,6 +25,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -41,7 +43,7 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -50,7 +52,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -67,21 +69,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -98,7 +108,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -115,21 +125,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -149,7 +167,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -190,7 +208,11 @@ if( !empty($pdo) ) {
 
 if( !empty($_POST['btn_submit']) ) {
 
-	$im_bot = $_POST['im_bot'];
+	if( !empty($_POST['im_bot']) ) {
+		$im_bot = $_POST['im_bot'];
+	}else{
+		$im_bot = "false";
+	}
 
 	if($im_bot === "true"){
 		$saveim_bot = "bot";
@@ -230,8 +252,8 @@ if( !empty($_POST['btn_submit']) ) {
 		$error_message[] = '表示名を入力してください。';
 	} else {
         // 文字数を確認
-        if( 25 < mb_strlen($username, 'UTF-8') ) {
-			$error_message[] = 'ユーザーネームは25文字以内で入力してください。';
+        if( 50 < mb_strlen($username, 'UTF-8') ) {
+			$error_message[] = 'ユーザーネームは50文字以内で入力してください。';
 		}
     }
 
@@ -768,14 +790,14 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>設定 - <?php echo file_get_contents($servernamefile);?></title>
+<title>設定 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -854,7 +876,7 @@ $pdo = null;
 			<hr>
 			<div>
                 <p>ユーザーid</p>
-                <input id="passchk_userid" type="text" class="inbox" name="passchk_userid" oncopy="return false" onpaste="return false" oncontextmenu="return false" style="-webkit-text-security:disc;" value="">
+                <input id="passchk_userid" type="text" class="inbox" name="passchk_userid" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="">
             </div>
 			<div>
                 <p>新しいパスワード</p>

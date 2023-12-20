@@ -1,14 +1,7 @@
 <?php
-$servericonfile = "server/servericon.txt";
-$servernamefile = "server/servername.txt";
+$serversettings_file = "server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
-$serverlogofile = "server/serverlogo.txt";
-$serverlogodata = file_get_contents($serverlogofile);
-$serverlogodata = explode( "\n", $serverlogodata );
-$cnt = count( $serverlogodata );
-for( $i=0;$i<$cnt;$i++ ){
-    $serverlogo_link[$i] = ($serverlogodata[$i]);
-}
 
 require('db.php');
 
@@ -35,6 +28,7 @@ $password = null;
 $_SESSION["password"]="";
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 
 try {
@@ -95,9 +89,6 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
 }
 
 if( !empty($_POST['btn_submit']) ) {
-
-
-    //$row['userid'] = "daichimarukn";
 
     $userid = $_POST['userid'];
     $password = $_POST['password'];
@@ -188,28 +179,32 @@ $pdo = null;
 <head prefix="og:http://ogp.me/ns#">
 <meta charset="utf-8">
 <!--OGPはじまり-->
-<meta property="og:title" content="ログイン - <?php echo file_get_contents($servernamefile);?>">
-<meta property="og:description" content="<?php echo file_get_contents($servernamefile);?>にログイン">
+<meta property="og:title" content="ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>">
+<meta property="og:description" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>にログイン">
 <meta property="og:url" content="https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); ?>/login">
-<meta property="og:image" content="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+<meta property="og:image" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="ログイン - <?php echo file_get_contents($servernamefile);?>">
+<meta property="og:site_name" content="ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>"/>
+<meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
-<link rel="stylesheet" href="css/style.css">
-<script src="js/unsupported.js"></script>
+<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ログイン - <?php echo file_get_contents($servernamefile);?></title>
+<title>ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 <script src="js/back.js"></script>
 <body>
 
 <div class="leftbox">
-    <?php if(!empty($serverlogo_link[1])){ ?>
+    <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
@@ -231,17 +226,13 @@ $pdo = null;
             <?php endif; ?>
 
             <form class="formarea" method="post">
-                <!--ユーザーネーム関係-->
                 <div>
                     <label for="userid">ユーザーID</label>
                     <input onInput="checkForm(this)" id="userid" class="inbox" type="text" name="userid" value="<?php if( !empty($_SESSION['userid']) ){ echo htmlentities( $_SESSION['userid'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
-                <!--個人情報関係-->
-
-                <!--アカウント関連-->
                 <div>
                     <label for="password">パスワード</label>
-                    <input onInput="checkForm(this)" id="password" class="inbox" type="password" name="password" maxlength="32" value="<?php if( !empty($_SESSION['password']) ){ echo htmlentities( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
+                    <input id="password" class="inbox" type="password" name="password" maxlength="32" value="<?php if( !empty($_SESSION['password']) ){ echo htmlentities( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
                 
                 <input type="submit" name="btn_submit" class="irobutton" value="ログイン">

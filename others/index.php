@@ -4,8 +4,10 @@ function random_token($length = 64)
 {
     return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
 }
+$domain = $_SERVER['HTTP_HOST'];
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
-$servernamefile = "../server/servername.txt";
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
     $hashCreateTime = $sec.floor($msec*1000000);
@@ -29,16 +31,9 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
-
-// 管理者としてログインしているか確認
-if( empty($_SESSION['admin_login']) || $_SESSION['admin_login'] !== true ) {
-	// ログインページへリダイレクト
-	header("Location: ../login.php");
-	exit;
-}
-
 
 try {
 
@@ -54,7 +49,7 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -63,7 +58,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -80,21 +75,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -111,7 +114,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -128,21 +131,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -162,7 +173,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -476,14 +487,14 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>その他の項目 - <?php echo file_get_contents($servernamefile);?></title>
+<title>その他の項目 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -521,29 +532,29 @@ require('../logout/logout.php');
 		<p>APIの簡単な使用法です。</p>
 		<hr>
 		<li>サーバー情報取得API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/serverinfo-api</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/serverinfo-api</p>
 		<p>これによりサーバーの各種情報を取得できます。</p>
 		<hr>
 		<li>ユーザー情報取得API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/userdata-api?userid=[ユーザーID]</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/userdata-api?userid=[ユーザーID]</p>
 		<p>これによりユーザーのユーザーネーム(user_name)、プロフィール(profile)、登録日時(registered_date)、フォローしている人一覧(follow)、フォロワー一覧(follower)、フォロー・フォロワー数(follow_cnt,follower_cnt)が取得できます。</p>
 		<hr>
 		<li>単独投稿取得API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/ueuse-api?ueuseid=[投稿の詳細ページのリンクより投稿のID(!より後、~より手前の文字列)]</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/ueuse-api?ueuseid=[投稿の詳細ページのリンクより投稿のID(!より後、~より手前の文字列)]</p>
 		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。</p>
 		<hr>
 		<li>ローカルタイムライン投稿取得API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
 		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。<br>page=は指定しなくても動作します。(https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数])</p>
 		<hr>
 		<li>投稿API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=post&ueuse=[投稿の内容]</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=post&ueuse=[投稿の内容]</p>
 		<hr>
 		<li>アクセストークンからユーザー情報取得API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=getuser</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getuser</p>
 		<hr>
 		<li>返信API</li>
-		<p>https://[ドメイン名(uwuzu.netなど)]/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]</p>
+		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]</p>
 		<hr>
 		<?php 
 			if(empty($userData['token'])){

@@ -8,6 +8,9 @@ $banurldomainfile = "../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
 $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 
+//投稿及び返信レート制限↓(分):デフォで60件/分まで
+$max_ueuse_rate_limit = 60;
+
 header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
 
 function createUniqId(){
@@ -152,105 +155,124 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                     echo json_encode($response, JSON_UNESCAPED_UNICODE);
                     exit;
                 }else{
-                    // 書き込み日時を取得
-                    $username = $userData["username"];
-                    $userid = $userData["userid"];
-                    $datetime = date("Y-m-d H:i:s");
-                    $uniqid = createUniqId();
-                    $abi = "none";
-                    $nones = "none";
 
-                    // トランザクション開始
-                    $pdo->beginTransaction();
-
-                    try {
-
-                        // SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
-                
-                        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                        $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                        $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                        $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':photo1', $nones, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo2', $nones, PDO::PARAM_STR);
-                        $stmt->bindParam(':video1', $nones, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-
-                        // SQLクエリの実行
-                        $res = $stmt->execute();
-
-                        // コミット
-                        $res = $pdo->commit();
-
-                        $mentionedUsers = get_mentions_userid($ueuse);
-
-                        foreach ($mentionedUsers as $mentionedUser) {
-                        
-                            $pdo->beginTransaction();
-
-                            try {
-                                $touserid = $mentionedUser;
-                                $datetime = date("Y-m-d H:i:s");
-                                $msg = "" . $ueuse . "";
-                                $title = "" . $username . "さんにメンションされました！";
-                                $url = "/!" . $uniqid . "~" . $userid . "";
-                                $userchk = 'none';
-
-                                // 通知用SQL作成
-                                $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
-
-
-                                $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                                $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                                $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                                $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                                $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-
-                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                                // SQLクエリの実行
-                                $res = $stmt->execute();
-
-                                // コミット
-                                $res = $pdo->commit();
-
-                            } catch(Exception $e) {
-
-                                // エラーが発生した時はロールバック
-                                $pdo->rollBack();
-                            }
+                    $old_datetime = date("Y-m-d H:i:00");
+                    $now_datetime = date("Y-m-d H:i:00",strtotime("+1 minute"));
+                    $rate_Query = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND TIME(datetime) BETWEEN :old_datetime AND :now_datetime");
+                    $rate_Query->bindValue(':userid', $userData["userid"]);
+                    $rate_Query->bindValue(':old_datetime', $old_datetime);
+                    $rate_Query->bindValue(':now_datetime', $now_datetime);
+                    $rate_Query->execute();
+                    $rate_count = $rate_Query->rowCount();
+                    if(!($rate_count > $max_ueuse_rate_limit-1)){
                     
+                        // 書き込み日時を取得
+                        $username = $userData["username"];
+                        $userid = $userData["userid"];
+                        $datetime = date("Y-m-d H:i:s");
+                        $uniqid = createUniqId();
+                        $abi = "none";
+                        $nones = "none";
+
+                        // トランザクション開始
+                        $pdo->beginTransaction();
+
+                        try {
+
+                            // SQL作成
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
+                    
+                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':photo1', $nones, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo2', $nones, PDO::PARAM_STR);
+                            $stmt->bindParam(':video1', $nones, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+
+                            // SQLクエリの実行
+                            $res = $stmt->execute();
+
+                            // コミット
+                            $res = $pdo->commit();
+
+                            $mentionedUsers = get_mentions_userid($ueuse);
+
+                            foreach ($mentionedUsers as $mentionedUser) {
+                            
+                                $pdo->beginTransaction();
+
+                                try {
+                                    $touserid = $mentionedUser;
+                                    $datetime = date("Y-m-d H:i:s");
+                                    $msg = "" . $ueuse . "";
+                                    $title = "" . $username . "さんにメンションされました！";
+                                    $url = "/!" . $uniqid . "~" . $userid . "";
+                                    $userchk = 'none';
+
+                                    // 通知用SQL作成
+                                    $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+
+
+                                    $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                                    $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                                    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                                    $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                                    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+
+                                    $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                                    // SQLクエリの実行
+                                    $res = $stmt->execute();
+
+                                    // コミット
+                                    $res = $pdo->commit();
+
+                                } catch(Exception $e) {
+
+                                    // エラーが発生した時はロールバック
+                                    $pdo->rollBack();
+                                }
+                        
+                            }
+
+                        } catch(Exception $e) {
+
+                            // エラーが発生した時はロールバック
+                            $pdo->rollBack();
                         }
 
-                    } catch(Exception $e) {
+                        if( $res ) {
+                            $response = array(
+                                'uniqid' => $uniqid,
+                                'userid' => $userid,
+                            );
+                            
+                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                        } else {
+                            $err = "db_error_".$e->getMessage();
+                            $response = array(
+                                'error_code' => $err,
+                            );
+                            
+                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                        }
 
-                        // エラーが発生した時はロールバック
-                        $pdo->rollBack();
-                    }
-
-                    if( $res ) {
-                        $response = array(
-                            'uniqid' => $uniqid,
-                            'userid' => $userid,
-                        );
-                        
-                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                    } else {
-                        $err = "db_error_".$e->getMessage();
+                        // プリペアドステートメントを削除
+                        $stmt = null;
+                    }else{
+                        $err = "over_rate_limit ";
                         $response = array(
                             'error_code' => $err,
                         );
                         
                         echo json_encode($response, JSON_UNESCAPED_UNICODE);
                     }
-
-                    // プリペアドステートメントを削除
-                    $stmt = null;
                 }
             }
         }else{
@@ -365,151 +387,170 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                     echo json_encode($response, JSON_UNESCAPED_UNICODE);
                     exit;
                 }else{
+                    
                     $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                         PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
                     ));
+
+                    $old_datetime = date("Y-m-d H:i:00");
+                    $now_datetime = date("Y-m-d H:i:00",strtotime("+1 minute"));
+                    $rate_Query = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND TIME(datetime) BETWEEN :old_datetime AND :now_datetime");
+                    $rate_Query->bindValue(':userid', $userData["userid"]);
+                    $rate_Query->bindValue(':old_datetime', $old_datetime);
+                    $rate_Query->bindValue(':now_datetime', $now_datetime);
+                    $rate_Query->execute();
+                    $rate_count = $rate_Query->rowCount();
+                    if(!($rate_count > $max_ueuse_rate_limit-1)){
                 
-                    $resultQuery = $dbh->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid");
-                    $resultQuery->bindValue(':uniqid', $rpuniqid);
-                    $resultQuery->execute();
-                    $resultData = $resultQuery->fetch();
+                        $resultQuery = $dbh->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid");
+                        $resultQuery->bindValue(':uniqid', $rpuniqid);
+                        $resultQuery->execute();
+                        $resultData = $resultQuery->fetch();
 
-                    if($resultData > 0){
+                        if($resultData > 0){
 
-                        // 書き込み日時を取得
-                        $username = $userData["username"];
-                        $userid = $userData["userid"];
-                        $datetime = date("Y-m-d H:i:s");
-                        $uniqid = createUniqId();
-                        $abi = "none";
-                        $nones = "none";
+                            // 書き込み日時を取得
+                            $username = $userData["username"];
+                            $userid = $userData["userid"];
+                            $datetime = date("Y-m-d H:i:s");
+                            $uniqid = createUniqId();
+                            $abi = "none";
+                            $nones = "none";
 
-                        $touserid2 = $resultData["account"];
+                            $touserid2 = $resultData["account"];
 
-                        // トランザクション開始
-                        $pdo->beginTransaction();
-
-                        try {
-
-                            // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, rpuniqid, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :rpuniqid, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
-                    
-                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                            $stmt->bindParam(':rpuniqid', $rpuniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':photo1', $nones, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo2', $nones, PDO::PARAM_STR);
-                            $stmt->bindParam(':video1', $nones, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-
-                            // SQLクエリの実行
-                            $res = $stmt->execute();
-
-                            // コミット
-                            $res = $pdo->commit();
-
+                            // トランザクション開始
                             $pdo->beginTransaction();
 
-                            $msg = ''.$ueuse.'';
-                            $title = ''.$username.'さんが返信しました！';
-                            $url = "https://".$domain."/!".$uniqid."~".$userid."";
-                            $userchk = 'none';
-                            // 通知用SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
-                    
-                            $stmt->bindParam(':touserid', $touserid2, PDO::PARAM_STR);
-                            $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                            $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                            $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                            try {
 
-                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                                // SQL作成
+                                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, rpuniqid, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :rpuniqid, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
+                        
+                                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                                $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                                $stmt->bindParam(':rpuniqid', $rpuniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
 
-                            // SQLクエリの実行
-                            $res = $stmt->execute();
+                                $stmt->bindParam(':photo1', $nones, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo2', $nones, PDO::PARAM_STR);
+                                $stmt->bindParam(':video1', $nones, PDO::PARAM_STR);
 
-                            // コミット
-                            $res = $pdo->commit();
+                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-                            $mentionedUsers = get_mentions_userid($ueuse);
+                                $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
 
-                            foreach ($mentionedUsers as $mentionedUser) {
-                            
+                                // SQLクエリの実行
+                                $res = $stmt->execute();
+
+                                // コミット
+                                $res = $pdo->commit();
+
                                 $pdo->beginTransaction();
 
-                                try {
-                                    $touserid = $mentionedUser;
-                                    $datetime = date("Y-m-d H:i:s");
-                                    $msg = "" . $ueuse . "";
-                                    $title = "" . $username . "さんにメンションされました！";
-                                    $url = "/!" . $uniqid . "~" . $userid . "";
-                                    $userchk = 'none';
-
-                                    // 通知用SQL作成
-                                    $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
-
-
-                                    $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
-                                    $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
-                                    $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
-                                    $stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
-                                    $stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
-
-                                    $stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
-
-                                    // SQLクエリの実行
-                                    $res = $stmt->execute();
-
-                                    // コミット
-                                    $res = $pdo->commit();
-
-                                } catch(Exception $e) {
-
-                                    // エラーが発生した時はロールバック
-                                    $pdo->rollBack();
-                                }
+                                $msg = ''.$ueuse.'';
+                                $title = ''.$username.'さんが返信しました！';
+                                $url = "https://".$domain."/!".$uniqid."~".$userid."";
+                                $userchk = 'none';
+                                // 通知用SQL作成
+                                $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
                         
+                                $stmt->bindParam(':touserid', $touserid2, PDO::PARAM_STR);
+                                $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                                $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                                $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                                $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                                // SQLクエリの実行
+                                $res = $stmt->execute();
+
+                                // コミット
+                                $res = $pdo->commit();
+
+                                $mentionedUsers = get_mentions_userid($ueuse);
+
+                                foreach ($mentionedUsers as $mentionedUser) {
+                                
+                                    $pdo->beginTransaction();
+
+                                    try {
+                                        $touserid = $mentionedUser;
+                                        $datetime = date("Y-m-d H:i:s");
+                                        $msg = "" . $ueuse . "";
+                                        $title = "" . $username . "さんにメンションされました！";
+                                        $url = "/!" . $uniqid . "~" . $userid . "";
+                                        $userchk = 'none';
+
+                                        // 通知用SQL作成
+                                        $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+
+
+                                        $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
+                                        $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
+                                        $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+                                        $stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+                                        $stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+
+                                        $stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
+
+                                        // SQLクエリの実行
+                                        $res = $stmt->execute();
+
+                                        // コミット
+                                        $res = $pdo->commit();
+
+                                    } catch(Exception $e) {
+
+                                        // エラーが発生した時はロールバック
+                                        $pdo->rollBack();
+                                    }
+                            
+                                }
+
+                            } catch(Exception $e) {
+
+                                // エラーが発生した時はロールバック
+                                $pdo->rollBack();
                             }
 
-                        } catch(Exception $e) {
+                            if( $res ) {
+                                $response = array(
+                                    'uniqid' => $uniqid,
+                                    'userid' => $userid,
+                                );
+                                
+                                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                            } else {
+                                $err = "db_error_".$e->getMessage();
+                                $response = array(
+                                    'error_code' => $err,
+                                );
+                                
+                                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                            }
+                            // プリペアドステートメントを削除
+                            $stmt = null;
 
-                            // エラーが発生した時はロールバック
-                            $pdo->rollBack();
-                        }
-
-                        if( $res ) {
-                            $response = array(
-                                'uniqid' => $uniqid,
-                                'userid' => $userid,
-                            );
-                            
-                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        } else {
-                            $err = "db_error_".$e->getMessage();
+                        }else{
+                            $err = "post_not_found";
                             $response = array(
                                 'error_code' => $err,
-                            );
-                            
+                            ); 
                             echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                            exit;
                         }
-                        // プリペアドステートメントを削除
-                        $stmt = null;
-
                     }else{
-                        $err = "post_not_found";
+                        $err = "over_rate_limit ";
                         $response = array(
                             'error_code' => $err,
-                        ); 
+                        );
+                        
                         echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        exit;
                     }
                 }
             }

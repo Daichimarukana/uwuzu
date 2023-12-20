@@ -11,13 +11,13 @@ function createUniqId(){
 
 require('../db.php');
 
-$servernamefile = "../server/servername.txt";
-
-$onlyuserfile = "../server/onlyuser.txt";
-$onlyuser = file_get_contents($onlyuserfile);
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
+
 
 // 変数の初期化
 $current_date = null;
@@ -84,7 +84,7 @@ if( !empty($_POST['btn_submit']) ) {
 
     $profile = $_POST['profile'];
 
-    if($onlyuser === "true"){
+    if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
         $invitationcode = $_POST['invitationcode'];
     }
 
@@ -195,7 +195,7 @@ if( !empty($_POST['btn_submit']) ) {
 
     $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
-    if($onlyuser === "true"){
+    if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
         $query = $dbh->prepare('SELECT * FROM invitation WHERE code = :code limit 1');
 
         $query->execute(array(':code' => $invitationcode));
@@ -435,12 +435,12 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css">
-<script src="../js/unsupported.js"></script>
+<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <link rel="apple-touch-icon" type="../image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>管理者アカウント登録 - <?php echo file_get_contents($servernamefile);?></title>
+<title>管理者アカウント登録 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 
@@ -514,7 +514,7 @@ $pdo = null;
                 <div class="p2">プロフィールページに掲載され公開されます。<br>※サービス管理者が確認できます。</div>
                 <input id="profile" type="text" placeholder="" class="inbox" name="profile" value="<?php if( !empty($_SESSION['profile']) ){ echo htmlspecialchars( $_SESSION['profile'], ENT_QUOTES, 'UTF-8'); } ?>">
             </div>
-            <?php if($onlyuser === "true"){?>
+            <?php if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){?>
                 <div>
                     <p>招待コード</p>
                     <div class="p2">招待コードがないとこのサーバーには登録できません。</div>

@@ -1,15 +1,6 @@
 <?php
-$servericonfile = "../server/servericon.txt";
-
-$serverlogofile = "../server/serverlogo.txt";
-$serverlogodata = file_get_contents($serverlogofile);
-$serverlogodata = explode( "\n", $serverlogodata );
-$cnt = count( $serverlogodata );
-for( $i=0;$i<$cnt;$i++ ){
-    $serverlogo_link[$i] = ($serverlogodata[$i]);
-}
-
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 $serverinfofile = '../server/info.txt';
 $serverinfo = file_get_contents($serverinfofile);
@@ -19,16 +10,6 @@ $serverterms = file_get_contents($servertermsfile);
 
 $serverprvfile = '../server/privacypolicy.txt';
 $serverprv = file_get_contents($serverprvfile);
-
-$contactfile = "../server/contact.txt";
-
-$adminfile = "../server/admininfo.txt";
-
-$serverstopfile = "../server/serverstop.txt";
-
-$onlyuserfile = "../server/onlyuser.txt";
-
-$activitypub_file = "../server/activitypub.txt";
 
 $err404imagefile = "../server/404imagepath.txt";
 
@@ -60,6 +41,7 @@ $res = null;
 $option = null;
 
 session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
 session_start();
 session_regenerate_id(true);
 
@@ -76,7 +58,7 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
 	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
@@ -85,7 +67,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] === $res["userid"]){
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
 	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
@@ -102,21 +84,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -133,7 +123,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 	if(empty($res["userid"])){
 		header("Location: ../login.php");
 		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] === $res["userid"]){
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
 	// セッションに値をセット
 	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
 	$username = htmlentities($res['username']); // クッキーから取得した値をセット
@@ -150,21 +140,29 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true) {
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('username', $username,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
 		'expires' => time() + 60 * 60 * 24 * 14,
 		'path' => '/',
 		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
 	]);
 	}else{
 		header("Location: ../login.php");
@@ -184,7 +182,7 @@ if(empty($userid)){
 if(empty($username)){
 	header("Location: ../login.php");
 	exit;
-} 
+}
 
 if(!($res["admin"] === "yes")){
 	header("Location: ../login.php");
@@ -239,8 +237,6 @@ if (!empty($pdo)) {
 
 if( !empty($_POST['btn_submit']) ) {
 
-    // 空白除去
-
 	$servericon = $_POST['servericon'];
 
 	$serverlogo_onoff = $_POST['serverlogo_onoff'];
@@ -248,10 +244,9 @@ if( !empty($_POST['btn_submit']) ) {
 	$serverlogo_light = $_POST['serverlogo_light'];
 	$serverlogo_dark = $_POST['serverlogo_dark'];
 
-	if($serverlogo_onoff === "true"){
-		$saveserverlogo = $serverlogo_light."\n".$serverlogo_dark;
-	}else{
-		$saveserverlogo = "";
+	if(!($serverlogo_onoff === "true")){
+		$serverlogo_light = "";
+		$serverlogo_dark = "";
 	}
 
 	$servername = $_POST['servername'];
@@ -263,15 +258,19 @@ if( !empty($_POST['btn_submit']) ) {
 	$servermailadds = $_POST['servermailadds'];
 
 	$onlyuser = $_POST['onlyuser'];
-
 	if($onlyuser === "true"){
 		$saveonlyuser = "true";
 	}else{
 		$saveonlyuser = "false";
 	}
+	$activitypub = $_POST['activitypub'];
+	if($activitypub === "true"){
+		$saveactivitypub = "true";
+	}else{
+		$saveactivitypub = "false";
+	}
 
 	$postrobots = $_POST['robots'];
-
 	if($postrobots === "true"){
 		//GPTBotによるクロールを拒否
 		$file = fopen($robots, 'w');
@@ -286,64 +285,38 @@ if( !empty($_POST['btn_submit']) ) {
 		fclose($file);
 	}
 
-	$activitypub = $_POST['activitypub'];
-
-	if($activitypub === "true"){
-		$saveactivitypub = "true";
-	}else{
-		$saveactivitypub = "false";
-	}
-
-
 	$serverterms = $_POST['serverterms'];
 
 	$serverprv = $_POST['serverprv'];
 
-	//鯖icon
-	$file = fopen($servericonfile, 'w');
-	$data = $servericon;
+	$server_new_settings = '
+	;サーバーの基本情報
+	[serverinfo]
+	;サーバー名
+	server_name = "'.$servername.'"
+	;サーバーアイコンのアドレス
+	server_icon = "'.$servericon.'"
+	;サーバーロゴのアドレス
+	server_logo_home  = "'.$serverlogo_light.'"
+	server_logo_login = "'.$serverlogo_dark.'"
+	;管理者関係
+	server_admin = "'.$serveradminname.'"
+	server_admin_mailadds = "'.$servermailadds.'"
+	;招待のオンオフ
+	server_invitation = "'.$saveonlyuser.'"
+	server_activitypub = "'.$saveactivitypub.'"
+	';
+
+	//サーバー設定上書き
+	$file = fopen($serversettings_file, 'w');
+	$data = $server_new_settings;
 	fputs($file, $data);
 	fclose($file);
 
-	//鯖ロゴ
-	$file = fopen($serverlogofile, 'w');
-	$data = $saveserverlogo;
-	fputs($file, $data);
-	fclose($file);
-
-	//鯖名
-	$file = fopen($servernamefile, 'w');
-	$data = $servername;
-	fputs($file, $data);
-	fclose($file);
-
+	
 	//鯖紹介
 	$file = fopen($serverinfofile, 'w');
 	$data = $serverinfo;
-	fputs($file, $data);
-	fclose($file);
-
-	//鯖管理者名
-	$file = fopen($adminfile, 'w');
-	$data = $serveradminname;
-	fputs($file, $data);
-	fclose($file);
-
-	//鯖管理者メアド
-	$file = fopen($contactfile, 'w');
-	$data = $servermailadds;
-	fputs($file, $data);
-	fclose($file);
-
-	//招待制にするか
-	$file = fopen($onlyuserfile, 'w');
-	$data = $saveonlyuser;
-	fputs($file, $data);
-	fclose($file);
-
-	//ActivityPub
-	$file = fopen($activitypub_file, 'w');
-	$data = $saveactivitypub;
 	fputs($file, $data);
 	fclose($file);
 
@@ -369,14 +342,14 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>サーバー設定 - <?php echo file_get_contents($servernamefile);?></title>
+<title>サーバー設定 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -397,21 +370,21 @@ require('../logout/logout.php');
 			<div class="admin_right">
 				<form class="formarea" enctype="multipart/form-data" method="post">
 					<h1>サーバー設定</h1>
-					<?php if( !empty(file_get_contents($servericonfile)) ){ ?>
+					<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
 					<div class="servericon">
-						<img src="<?php echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); ?>">
+						<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
 					</div>
 					<?php }?>
 					<div>
 						<p>サーバーアイコン</p>
 						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。</div>
-						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty(file_get_contents($servericonfile)) ){ echo htmlspecialchars(file_get_contents($servericonfile), ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
 						<p>サーバーロゴ機能のオンオフ</p>
 						<div class="switch_button">
-							<?php if(!empty(file_get_contents($serverlogofile))){?>
+							<?php if(!empty($serversettings["serverinfo"]["server_logo_home"]&&$serversettings["serverinfo"]["server_logo_login"])){?>
 								<input id="serverlogo_onoff" class="switch_input" type='checkbox' name="serverlogo_onoff" value="true" checked/>
 								<label for="serverlogo_onoff" class="switch_label"></label>
 							<?php }else{?>
@@ -424,9 +397,9 @@ require('../logout/logout.php');
 						<p>サーバーロゴ</p>
 						<div class="p2">サーバーの左上に表示されているuwuzuのロゴを独自のロゴに置き換えるときに使用します。<br>自動的に角が丸くなります。<br>URLより設定してください。<br>背景透過画像を推奨します。</div>
 						<div class="p2">ログイン後のロゴ</div>
-						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serverlogo_link[0]) ){ echo htmlspecialchars($serverlogo_link[0], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_home"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_logo_home"], ENT_QUOTES, 'UTF-8'); } ?>">
 						<div class="p2">ログイン画面と利用規約などドキュメントページのロゴ</div>
-						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serverlogo_link[1]) ){ echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_login"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 					<script>
 					if ($("#serverlogo_onoff").prop("checked")) {
@@ -442,7 +415,7 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバー名</p>
 						<div class="p2">サーバー名です。</div>
-						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty(file_get_contents($servernamefile)) ){ echo htmlspecialchars(file_get_contents($servernamefile), ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty($serversettings["serverinfo"]["server_name"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
@@ -454,19 +427,19 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバー管理者の名前</p>
 						<div class="p2">サーバー管理者名です。</div>
-						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty(file_get_contents($adminfile)) ){ echo htmlspecialchars(file_get_contents($adminfile), ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty($serversettings["serverinfo"]["server_admin"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
 						<p>サーバーへのお問い合わせ用メールアドレス</p>
 						<div class="p2">ユーザーからのお問い合わせメアドです。</div>
-						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty(file_get_contents($contactfile)) ){ echo htmlspecialchars(file_get_contents($contactfile), ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty($serversettings["serverinfo"]["server_admin_mailadds"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
 						<p>招待制にするかどうか</p>
 						<div class="switch_button">
-							<?php if(file_get_contents($onlyuserfile) === "true"){?>
+							<?php if($serversettings["serverinfo"]["server_invitation"] === "true"){?>
 								<input id="onlyuser" class="switch_input" type='checkbox' name="onlyuser" value="true" checked/>
 								<label for="onlyuser" class="switch_label"></label>
 							<?php }else{?>
@@ -493,7 +466,7 @@ require('../logout/logout.php');
 						<p>ActivityPubサーバーとして認識されるようにするか</p>
 						<div class="p2">ActivityPubの仮実装をオンにするかです。inboxに入ってきた内容には今現在これといったレスポンスを返しません。<br>また、publicKeyも返却しません。<br>現状ActivityPubサーバーと連合を組むことは出来ません。(リモートユーザーの確認程度なら出来ます。)<br>オフの状態だと410 Goneを返します。</div>
 						<div class="switch_button">
-							<?php if(file_get_contents($activitypub_file) === "true"){?>
+							<?php if($serversettings["serverinfo"]["server_activitypub"] === "true"){?>
 								<input id="activitypub" class="switch_input" type='checkbox' name="activitypub" value="true" checked/>
 								<label for="activitypub" class="switch_label"></label>
 							<?php }else{?>
@@ -520,36 +493,7 @@ require('../logout/logout.php');
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
-	
-<script>
-$(document).ready(function() {
 
-	$(document).on('click', '.delbtn', function (event) {
-
-        var code = $(this).attr('del-code');
-		var userid = '<?php echo $userid; ?>';
-		var account_id = '<?php echo $loginid; ?>';
-		var codeElement = $(this).closest('.server_code');
-
-		$.ajax({
-			url: 'code_delete.php',
-			method: 'POST',
-			data: { code: code, userid: userid, account_id: account_id },
-			dataType: 'json',
-			success: function (response) {
-				if (response.success) {
-					codeElement.remove();
-				} else {
-					// 削除失敗時の処理
-				}
-			},
-			error: function () {
-				// エラー時の処理
-			}
-		});
-    });
-});
-</script>
 </body>
 
 </html>

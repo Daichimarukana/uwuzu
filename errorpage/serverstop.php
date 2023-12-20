@@ -1,7 +1,8 @@
 <?php
 $serverstopfile = "../server/serverstop.txt";
 
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 $domain = $_SERVER['HTTP_HOST'];
 
@@ -17,14 +18,14 @@ if(!empty(file_get_contents($serverstopfile))){
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/css/home.css?<?php echo date('Ymd-Hi'); ?>">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js"></script>
-<script src="/js/console_notice.js"></script>
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="/js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>サーバー停止中 - <?php echo file_get_contents($servernamefile);?></title>
+<title>サーバー停止中 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 
@@ -38,7 +39,7 @@ if(!empty(file_get_contents($serverstopfile))){
 
 <div class="terms">
 
-    <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
+    <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
     <div class="p2c"><?php echo $domain;?></div>
     <div class="err404">
     <h1>サーバー停止中</h1>

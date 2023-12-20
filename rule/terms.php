@@ -1,23 +1,14 @@
 <!DOCTYPE html>
 
 <?php
-$serverlogofile = "../server/serverlogo.txt";
-$serverlogodata = file_get_contents($serverlogofile);
-$serverlogodata = explode( "\n", $serverlogodata );
-$cnt = count( $serverlogodata );
-for( $i=0;$i<$cnt;$i++ ){
-    $serverlogo_link[$i] = ($serverlogodata[$i]);
-}
-
-$servernamefile = "../server/servername.txt";
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 //-------------------------------------
 
 $domain = $_SERVER['HTTP_HOST'];
 
 //------------------------
-
-$contactfile = "../server/contact.txt";
 
 $termsfile = "../server/terms.txt";
 $termsdata = file_get_contents($termsfile);
@@ -59,21 +50,21 @@ foreach ($sterms as $terms) {
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css">
-<script src="../js/unsupported.js"></script>
-<script src="../js/console_notice.js"></script>
+<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>利用規約 - <?php echo file_get_contents($servernamefile);?></title>
+<title>利用規約 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 <body>
 
 <div class="topbox">
-    <?php if(!empty($serverlogo_link[1])){ ?>
+    <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serverlogo_link[1], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
@@ -84,8 +75,8 @@ foreach ($sterms as $terms) {
 
 <div class="terms">
 
-    <h1><?php echo file_get_contents($servernamefile);?>利用規約</h1>
-    <div class="p3"><?php echo file_get_contents($servernamefile);?></div>
+    <h1><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>利用規約</h1>
+    <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
     <div class="p2c"><?php echo $domain;?></div>
 
     <p><?php echo $htmltext;?></p>
