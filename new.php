@@ -607,8 +607,8 @@ $pdo = null;
             </div>
 
             <div class="btn_area">
-                <a href="rule/terms.php" class="fbtn">利用規約</a>
-                <a href="rule/privacypolicy.php" class="fbtn">プライバシーポリシー</a>
+                <a href="rule/terms.php" target="_blank" class="fbtn">利用規約</a>
+                <a href="rule/privacypolicy.php" target="_blank" class="fbtn">プライバシーポリシー</a>
             </div>
 
             <p>登録を押すと利用規約とプライバシーポリシーに同意したこととなります。<br>未確認の場合は上のボタンよりお読みください。</p>

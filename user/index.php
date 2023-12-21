@@ -267,7 +267,7 @@ if( !empty($pdo) ) {
 			if(empty($mentionsuserData)){
 				return "@$username";
 			}else{
-				return "<a class = 'mta' href='/@".$mentionsuserData["userid"]."'>@".$mentionsuserData["username"]."</a>";
+				return "<a class = 'mta' href='/@".htmlentities($mentionsuserData["userid"])."'>@".replaceProfileEmojiImages(htmlentities($mentionsuserData["username"]))."</a>";
 			}
 		}, $postTextWithImages);
 	

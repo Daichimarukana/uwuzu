@@ -171,6 +171,44 @@ if( !empty($_POST['btn_submit']) ) {
 
     clearstatcache();
 
+    if (isset($_SERVER['HTTP_COOKIE'])) {
+        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+        foreach($cookies as $cookie) {
+            $parts = explode('=', $cookie);
+            $name = trim($parts[0]);
+            setcookie($name, '', time()-1000);
+        }
+    }
+
+    setcookie('userid', $userid,[
+        'expires' => time() + 60 * 60 * 24 * 14,
+        'path' => '/',
+        'samesite' => 'lax',
+        'secure' => true,
+        'httponly' => true,
+    ]);
+    setcookie('loginid', $userData["loginid"],[
+        'expires' => time() + 60 * 60 * 24 * 14,
+        'path' => '/',
+        'samesite' => 'lax',
+        'secure' => true,
+        'httponly' => true,
+    ]);
+    setcookie('username', $username,[
+        'expires' => time() + 60 * 60 * 24 * 14,
+        'path' => '/',
+        'samesite' => 'lax',
+        'secure' => true,
+        'httponly' => true,
+    ]);
+    setcookie('admin_login', true,[
+        'expires' => time() + 60 * 60 * 24 * 14,
+        'path' => '/',
+        'samesite' => 'lax',
+        'secure' => true,
+        'httponly' => true,
+    ]);
+
     $_SESSION['admin_login'] = true;
     $_SESSION['userid'] = $userid;
     $_SESSION['loginid'] = $userData["loginid"];

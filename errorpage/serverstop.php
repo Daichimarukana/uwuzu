@@ -32,9 +32,15 @@ if(!empty(file_get_contents($serverstopfile))){
 <body>
 
 <div class="topbox">
-    <div class="logo">
-        <a href="../index.php"><img src="/img/uwuzulogo.svg"></a>
-    </div>
+    <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
+        <div class="logo">
+            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
+        </div>
+    <?php }else{?>
+        <div class="logo">
+            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+        </div>
+    <?php }?>
 </div>
 
 <div class="terms">

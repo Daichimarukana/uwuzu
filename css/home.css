@@ -1132,6 +1132,14 @@ main h1{
     font-weight: bold;
     transition: all 250ms ease-out;
 }
+.ueuse .mta img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 14px;
+    vertical-align: middle;
+}
 .ueuse .mta:hover{
     font-size: 14px;
     background-color: var(--main-color);
@@ -1368,6 +1376,15 @@ main h1{
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
+.ueuse .abi .back h1 img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 16px;
+    vertical-align: middle;
+}
+
 .ueuse .abi h1{
     overflow-wrap: break-word;
     margin-top: auto;

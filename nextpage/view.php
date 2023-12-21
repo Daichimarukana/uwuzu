@@ -85,7 +85,7 @@ function replaceEmojisWithImages($postText) {
         if(empty($mentionsuserData)){
             return "@$username";
         }else{
-            return "<a class = 'mta' href='/@".$mentionsuserData["userid"]."'>@".$mentionsuserData["username"]."</a>";
+            return "<a class = 'mta' href='/@".htmlentities($mentionsuserData["userid"])."'>@".replaceProfileEmojiImages(htmlentities($mentionsuserData["username"]))."</a>";
         }
     }, $postTextWithImages);
 
@@ -304,7 +304,7 @@ class MessageDisplay {
             if(!($this->value['abi'] == "none")){
                 echo '<div class="abi">';
                 echo '  <div class="back">';
-                echo '<h1>' . htmlentities($this->value['username']) . 'さんが追記しました</h1>';
+                echo '<h1>' . replaceProfileEmojiImages(htmlentities($this->value['username'])) . 'さんが追記しました</h1>';
                 echo '  </div>';
                 echo '<p>'.processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['abi'])))) . '</p>';
                 echo '<div class="h3s">追記日時 : '. date("Y年m月d日 H:i", strtotime(htmlentities($this->value['abidate']))) . '</div>';
