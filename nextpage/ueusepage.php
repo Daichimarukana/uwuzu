@@ -45,11 +45,12 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
         if($result2["loginid"] === $loginid){
             $userid = htmlentities($_GET['userid']);
 
-            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
             $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
             $aduserinfoQuery->execute();
             $res = $aduserinfoQuery->fetch();
             $myblocklist = htmlentities($res["blocklist"]);
+            $mybookmark = htmlentities($res["bookmark"]);
 
             $ueuseid = htmlentities(isset($_GET['id'])) ? htmlentities($_GET['id']) : '';
 
@@ -70,9 +71,11 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 ));
 
                 // 投稿内容の取得（新しい順に取得）
-                $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT $offset, $itemsPerPage");
-                $messageQuery->bindValue(':ueuseid', $ueuseid);
-                $messageQuery->bindValue(':rpueuseid', $ueuseid);
+                $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
+                $messageQuery->bindValue(':ueuseid', $ueuseid, PDO::PARAM_STR);
+                $messageQuery->bindValue(':rpueuseid', $ueuseid, PDO::PARAM_STR);
+                $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                 $messageQuery->execute();
                 $message_array = $messageQuery->fetchAll();    
                     
@@ -84,8 +87,10 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 foreach ($message_array as $row) {
                     if(!(empty($row["rpuniqid"]))){
                         if(!($row["rpuniqid"] == $ueuseid)){
-                            $up_messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT $offset, $itemsPerPage");
+                            $up_messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
                             $up_messageQuery->bindValue(':ueuseid', $row["rpuniqid"]);
+                            $up_messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                            $up_messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                             $up_messageQuery->execute();
                             $up_messageData = $up_messageQuery->fetchAll();
                             if(!(empty($up_messageData))){
@@ -145,6 +150,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 if(!empty($messages)){
                     foreach ($messages as $value) {
                         if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8'))) {
+                            $value["bookmark"] = $mybookmark;
+
                             $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
 
                             // コンマで区切って配列に分割し、要素数を数える

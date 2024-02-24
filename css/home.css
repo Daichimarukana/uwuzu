@@ -132,8 +132,11 @@ body{
     transition: border 350ms ease-in-out;
     transition: border-bottom 150ms ease-out;
     border: 1px solid var(--border-color);
-  }
-  
+}
+textarea{
+    height: 200px;
+    resize: vertical;
+}
 .inbox::placeholder {
     color: var(--subtext-color);
 }
@@ -1065,9 +1068,78 @@ main h1{
     color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+.ueuse .inline{
+    width: fit-content;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    background-color: #DDDDDD;
+    color: #323232;
+    border-radius: 5px;
+    font-size: calc(100% - 2px);
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
     font-weight: bold;
+    vertical-align: top;
 }
 
+.ueuse .quote{
+    width: fit-content;
+    border-left: 5px solid;
+    border-radius: 5px;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.ueuse .blur{
+    position: relative;
+    background-color: #323232;
+    width: fit-content;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #323232;
+    border-radius: 5px;
+    transition: 0.5s;
+}
+.ueuse .blur:hover{
+    background-color: var(--ueuse-color);
+    color: var(--text-color);
+}
+
+.ueuse .unixtime{
+    width: fit-content;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    border: solid 1px #CCC;
+    color: #323232;
+    border-radius: 25px;
+    font-size: calc(100% - 2px);
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+    vertical-align: top;
+}
 
 .ueuse h1{
     overflow-wrap:  break-word;
@@ -1354,7 +1426,7 @@ main h1{
     color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
+    font-weight: normal;
 }
 
 .ueuse .abi .back{
@@ -1780,6 +1852,83 @@ main h1{
     transition: all 250ms ease-out;
 }
 
+.ueuse .favbox .bookmark{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+    padding: 8px auto;
+
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: var(--sub-color);
+
+    border-radius: 50px;
+    color:var(--main-color);
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.ueuse .favbox .bookmark:hover{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
+
+    margin-left: 6px;
+    margin-right: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+
+
+    background-color: var(--main-color);
+
+    border-radius: 50px;
+    color: var(--sub-color);;
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+.ueuse .favbox .bookmark_after{
+    background-color: var(--main-color);
+    color: var(--sub-color);;
+}
+
+.ueuse .favbox .bookmark svg {
+    margin-top: -6px;
+    margin-right: 0px;
+    margin-left: -2px;
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+    transition: all 250ms ease-out;
+}
+
 .ueuse .favbox img{
     margin-left: 0px;
     width: 24px;
@@ -1949,7 +2098,7 @@ main h1{
     padding-right: 24px;
     padding-top: 24px;
     padding-bottom: 24px;
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
     border: 1px solid var(--border-color);
     width: auto;
 }
@@ -1992,10 +2141,13 @@ main h1{
     border: none;
     resize: none;
     font-size: 18px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
 }
 
 .sendbox .fxbox{
     display: flex;
+    flex-wrap: wrap;
 }
 
 .sendbox label > input {
@@ -2029,6 +2181,7 @@ main h1{
     transition: box-shadow 250ms ease-in-out;
     transition: width 250ms ease-out;
     transition: all 250ms ease-out;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
 }
 .sendbox label:hover{
     background-color: var(--main-color);
@@ -2037,6 +2190,12 @@ main h1{
 }
 .sendbox label:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+}
+.sendbox .label_set{
+    background-color: var(--sub-color);
+    color: var(--main-color);
+    border: 1px solid var(--main-color);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .0);
 }
 .sendbox label svg{
     margin: auto;
@@ -2087,6 +2246,7 @@ main h1{
 }
 .sendbox .fxbox .nsfw_input:checked + .nsfw_label {
     background-color: #FF4848;
+    color: #ffebeb;
 } 
 .sendbox .fxbox .nsfw_button {
     position: relative;
@@ -2101,6 +2261,21 @@ main h1{
     height: 24px;
 }
 
+.sendbox .fxbox .moji_cnt{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    margin-right: 6px;
+    font-size: 16px;
+    color: var(--main-color);
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: normal;
+}
+.sendbox .fxbox .red{
+    color: #FF4848;
+}
+
 
 .ueusebtn{
     cursor: pointer;
@@ -2108,7 +2283,7 @@ main h1{
     display: block;
     width:20%;
     padding: 8px auto;
-    margin-left: auto;
+    margin-left: 6px;
     margin-right: 0px;
 
     padding-top: 6px;
@@ -2135,8 +2310,13 @@ main h1{
     width:21%;
 }
 .ueusebtn:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .0);
     width:19%;
+}
+.ueusebtn:disabled{
+    pointer-events: none;
+    background-color: #CCC;
+    color: #FFF;
 }
 /*--------------------------*/
 
@@ -2273,6 +2453,7 @@ main h1{
 }
 
 .formarea{
+    margin-bottom: 16px;
     padding-top: 16px;
     padding-bottom: 16px;
     padding-left: 32px;
@@ -3201,6 +3382,53 @@ label>input {
     padding: 12px;
     width: auto;
 }
+.emojibox_flex{
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: 12px;
+    width: auto;
+    display: flex;
+}
+.emojibox_flex .right_box{
+    margin-left: auto;
+    margin-right: 0px;
+    vertical-align: middle;
+}
+.emojibox_button{
+
+    cursor: pointer;
+    border: none;
+    display: block;
+    padding: 6px;
+    width:38px;
+    height: 38px;
+    margin-left: auto;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    background-color: var(--sub-color);
+    border-radius: 50px;
+    color:var(--main-color);
+    font-size: 16px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: all 250ms ease-out;
+}
+.emojibox_button:hover{
+    background-color: #ffebeb;
+    color: #ff4848;
+}
+.emojibox_button svg{
+    width: 28px;
+    height: 28px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 6px;
+    fill: currentColor;
+}
+
 
 .emojizone{
     margin-left: 0px;
@@ -3268,114 +3496,9 @@ label>input {
     font-weight: bold;
 }
 
-
-.notification2{
-    animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
-    margin: 12px;
-    border-radius: 10px;
-    padding-left: 24px;
-    padding-right: 24px;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    background-color: var(--sub-color);
-    border: 1px solid var(--border-color);
-    width: auto;
+.this{
+    background-color: var(--sub-color)!important;
 }
-
-.notification2 .flebox{
-    display: flex;
-}
-
-.notification2 .flebox a{
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 12px;
-    font-size: 18px;
-    color:var(--text-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
-}
-
-.notification2 .flebox .idbox{
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 6px;
-    border-radius: 10px;
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
-}
-.notification2 .flebox .idbox a{
-    margin-top: 6px;
-    margin-bottom: 6px;
-    margin-left: 8px;
-    margin-right: 8px;
-    text-align: center;
-    font-size: 12px;
-    color:var(--subtext-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-}
-
-.notification2 p{
-    line-height: 20px;
-    overflow-wrap:  break-word;
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 12px;
-    font-size: 16px;
-    color:var(--text-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
-}
-
-.notification2 p img{
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 4px;
-    margin-right: 4px;
-    height: 32px;
-    vertical-align: middle;
-}
-
-.notification2 h3{
-    overflow-wrap:  break-word;
-    margin-top: auto;
-    margin-bottom: 6px;
-    margin-left: 12px;
-    font-size: 24px;
-    color:var(--text-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
-}
-
-
-.notification2 .flebox .time{
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: auto;
-    margin-right: 12px;
-    text-align: right;
-    font-size: 12px;
-    color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
-}
-
-.notification2 a{
-    overflow-wrap:  break-word;
-    margin-top: 24px;
-    margin-bottom: auto;
-    margin-left: 12px;
-    font-size: 16px;
-    color:var(--link-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
-}
-
-
 .notification{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
     margin: 12px;
@@ -3414,7 +3537,30 @@ label>input {
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
-
+.notification .flebox .icon img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+}
+.notification .flebox .icon a{
+    margin:0px;
+}
+.notification .flebox .username{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 8px;
+}
+.notification .flebox .username a{
+    margin:0px;
+    color:var(--subtext-color);
+    font-size: 14px;
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
 .notification .flebox .idbox{
     margin-top: auto;
     margin-bottom: auto;
@@ -3447,7 +3593,159 @@ label>input {
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: bold;
 }
+.notification p{
+    line-height:20px;
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 16px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+.notification .inline{
+    width: fit-content;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    background-color: #DDDDDD;
+    color: #323232;
+    border-radius: 5px;
+    font-size: calc(100% - 2px);
+    text-decoration: none;
+    font-family: 'BIZ UDGothic', sans-serif;
+    font-weight: bold;
+    vertical-align: top;
+}
 
+.notification .quote{
+    width: fit-content;
+    border-left: 5px solid;
+    border-radius: 5px;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+
+.notification .blur{
+    position: relative;
+    background-color: #323232;
+    width: fit-content;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    color: #323232;
+    border-radius: 5px;
+    transition: 0.5s;
+}
+.notification .blur:hover{
+    background-color: var(--notification-color);
+    color: var(--text-color);
+}
+
+.notification h1{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 48px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification h2{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 32px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification h3{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 24px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification center{
+    overflow-wrap:  break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: auto;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+
+.notification .mta{
+    line-height: 30px;
+    background-color: var(--sub-color);
+    padding: 6px;
+    border-radius: 25px;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 3px;
+    margin-right: 3px;
+    font-size: 14px;
+    color:var(--main-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+    transition: all 250ms ease-out;
+}
+.notification .mta img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 14px;
+    vertical-align: middle;
+}
+.notification .mta:hover{
+    font-size: 14px;
+    background-color: var(--main-color);
+    color:var(--sub-color);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+}
+
+
+.notification a{
+    margin-top: auto;
+    margin-bottom: auto;
+    font-size: 16px;
+    color:var(--link-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
 .notification p img{
     margin-top: auto;
     margin-bottom: auto;
@@ -3457,17 +3755,33 @@ label>input {
     vertical-align: middle;
 }
 
-.notification h3{
-    overflow-wrap:  break-word;
+.notification h1 img{
     margin-top: auto;
-    margin-bottom: 6px;
-    margin-left: 12px;
-    font-size: 24px;
-    color:var(--text-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 64px;
+    vertical-align: middle;
 }
+
+.notification h2 img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 48px;
+    vertical-align: middle;
+}
+
+.notification h3 img{
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    height: 48px;
+    vertical-align: middle;
+}
+
 
 
 .notification .flebox .time{
@@ -3485,7 +3799,7 @@ label>input {
     overflow-wrap:  break-word;
     margin-top: 24px;
     margin-bottom: auto;
-    margin-left: 12px;
+    margin-left: 0px;
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
@@ -3667,7 +3981,7 @@ hr{
 .tlchange{
     border-radius: 10px;
     margin: 12px;
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
     border: 1px solid var(--border-color);
     width: auto;
     text-align: center;
@@ -3806,6 +4120,63 @@ hr{
     margin-left: 0px;
 }
 
+input[type=radio] {
+    display: none;
+}
+.radiobtn_label {
+    height: 32px;
+    position: relative;
+    cursor: pointer;
+    padding-left:8px;
+    padding-right: 8px;
+    padding-top: 5px;
+
+    background: var(--dark-subtext-color);
+
+    display: inline-block;
+    border-radius: 25px;
+    transition: 0.4s;
+    box-sizing: border-box;
+
+    color:var(--dark-text-color);
+    font-family: 'BIZ UDPGothic', sans-serif;
+    word-wrap: break-word;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: normal;
+}
+.radiobtn_label::after {
+    content: "";
+    position: absolute;
+    margin-top: 16px;
+    margin-left: 16px;
+    margin-bottom: 16px;
+    margin-right: 12px;
+    width: 0px;
+    height: 0px;
+    border-radius: 50%;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    background: var(--dark-subtext-color);
+    box-shadow: 0 0 0px rgba(0, 0, 0, 0.0);
+    transition: 0.2s;
+}
+.radiobtn_input:checked + .radiobtn_label {
+    background-color: var(--main-color);
+    padding-left: 30px;
+} 
+.radiobtn_input:checked + .radiobtn_label::after {
+    margin-top: 8px;
+    margin-left: 8px;
+    margin-bottom: 8px;
+    margin-right: 4px;
+    width: 16px;
+    height: 16px;
+    background: var(--background-color);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: 0.2s;
+}
 
 summary {
     font-weight: bold;
@@ -4296,12 +4667,37 @@ summary {
 .servericon{
     text-align: center;
 }
+.servericon .up{
+    margin-top: -74px;
+}
 .servericon img{
     object-fit: cover;
     width: 100px;
     height: 100px;
     border-radius: 15px;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    box-shadow:0 0px 0px 0 rgba(0, 0, 0, .0);
+    margin: 0px;
+}
+
+.serverhead{
+    text-align: center;
+}
+.serverhead img {
+    object-fit: cover;
+    width: 60%;
+    height: 220px;
+    border-radius: 10px;
+    margin: 0px;
+}
+.serverhead_set{
+    text-align: center;
+}
+.serverhead_set img{
+    object-fit: cover;
+    width: 100%;
+    height: 160px;
+    border-radius: 10px;
+    margin: 0px;
 }
 
 .f_c_area{
@@ -4357,6 +4753,7 @@ summary {
     background-color: #FF4848;
     border-radius: 20px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    text-decoration: none;
 }
 .offline p{
     margin-top: 4px;
@@ -4389,6 +4786,7 @@ summary {
     background-color: #1d9bf0;
     border-radius: 20px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    text-decoration: none;
 }
 .online p{
     margin-top: 4px;
@@ -4417,6 +4815,8 @@ summary {
     background-color: var(--main-color);
     border-radius: 20px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .3);
+    text-decoration: none;
+    cursor: pointer;
 }
 .new_ueuse p{
     margin-top: 4px;
@@ -4436,8 +4836,20 @@ summary {
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
 /*------------------------------------------------------------------------------------------------------------*/
-
-@media screen and (max-width:1010px) {
+@media screen and (min-width:768px) and ( max-width:1024px) {
+    .rightbox{
+        display: none;
+    }
+    main{
+        margin-right: 0px;
+        width: 72%;
+    }
+    .userleftbox{
+        padding: 16px;
+        width: 28%;
+    }
+}
+@media screen and (max-width:768px) {
     body{
         width: 100%;
         display: block;
@@ -4666,7 +5078,7 @@ summary {
         margin-right: 0px;
         margin-top: 0px;
         margin-bottom: 0px;
-        background-color: none;
+        background-color: var(--background-color);
         padding-top: 0.5dvh;
         padding-bottom: 0.5dvh;
 
@@ -4714,6 +5126,19 @@ summary {
         height: 24px;
     }
 
+    .ueuse .favbox .favbtn{
+        width:auto;
+        margin-left: 0px;
+        margin-right: 12px;
+        margin-top: 2px;
+        margin-bottom: 2px;
+
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
     .ueuse .favbox .favbtn svg {
         margin-top: -4px;
         margin-right: 4px;
@@ -4732,55 +5157,16 @@ summary {
     }
 
     .ueuse .favbox .tuduki{
-    
-        display: block;
         width:auto;
-        padding: 8px auto;
-
         margin-left: 0px;
         margin-right: 12px;
         margin-top: 2px;
         margin-bottom: 2px;
-    
-    
+
         padding-top: 2px;
         padding-bottom: 2px;
-        padding-left: 12px;
-        padding-right: 12px;
-
-
-        background-color: var(--sub-color);
-
-        border-radius: 50px;
-        color:var(--main-color);
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-    }
-
-    .ueuse .favbox .tuduki:hover{
-        background-color: var(--main-color);
-        margin-left: 0px;
-        margin-right: 12px;
-        margin-top: 2px;
-        margin-bottom: 2px;
-    
-    
-        padding-top: 2px;
-        padding-bottom: 2px;
-        padding-left: 12px;
-        padding-right: 12px;
-
-        width:auto;
-        border-radius: 50px;
-        color:var(--sub-color);
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        font-size: 16px;
-        text-decoration:none;
-        text-align: center;
+        padding-left: 8px;
+        padding-right: 8px;
     }
     .ueuse .favbox .tuduki svg {
         margin-top: -8px;
@@ -4792,131 +5178,27 @@ summary {
     }
 
     .ueuse .favbox .delbtn{
-        cursor: pointer;
-        border: none;
-        display: block;
         width:60px;
-        padding: 8px auto;
-
         margin-left: 6px;
         margin-right: 0px;
         margin-top: 2px;
         margin-bottom: 2px;
-
         padding-top: 2px;
         padding-bottom: 2px;
-
-
-        background-color: var(--background-color);
-
-        border-radius: 50px;
-        color:#FF4848;
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
+        padding-left: 2px;
+        padding-right: 2px;
     }
-
-    .ueuse .favbox .delbtn:hover{
-        cursor: pointer;
-        border: none;
-        display: block;
-        width:60px;
-        padding: 8px auto;
-
-        margin-left: 6px;
-        margin-right: 0px;
-        margin-top: 2px;
-        margin-bottom: 2px;
-
-        padding-top: 2px;
-        padding-bottom: 2px;
-
-
-        background-color: #FF4848;
-
-        border-radius: 50px;
-        color: var(--background-color);;
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
-    }
-
-
-
     .ueuse .favbox .addabi{
-        cursor: pointer;
-        border: none;
-        display: block;
         width:auto;
-        padding: 8px auto;
-
         margin-left: 6px;
         margin-right: 6px;
         margin-top: 2px;
         margin-bottom: 2px;
-
-
         padding-top: 2px;
         padding-bottom: 2px;
-        padding-left: 12px;
-        padding-right: 12px;
-
-
-        background-color: var(--sub-color);
-
-        border-radius: 50px;
-        color:var(--main-color);
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
+        padding-left: 8px;
+        padding-right: 8px;
     }
-
-    .ueuse .favbox .addabi:hover{
-        cursor: pointer;
-        border: none;
-        display: block;
-        width:auto;
-
-        margin-left: 6px;
-        margin-right: 6px;
-        margin-top: 2px;
-        margin-bottom: 2px;
-
-        padding-top: 2px;
-        padding-bottom: 2px;
-        padding-left: 12px;
-        padding-right: 12px;
-
-
-        background-color: var(--main-color);
-
-        border-radius: 50px;
-        color: var(--sub-color);;
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
-    }
-    
     .ueuse .favbox .addabi svg {
         margin-top: -8px;
         margin-right: 0px;
@@ -4928,69 +5210,28 @@ summary {
     }
 
     .ueuse .favbox .share{
-        cursor: pointer;
-        border: none;
-        display: block;
         width:auto;
-        padding: 8px auto;
-
         margin-left: auto;
         margin-right: 6px;
         margin-top: 2px;
         margin-bottom: 2px;
-
-
         padding-top: 2px;
         padding-bottom: 2px;
-        padding-left: 12px;
-        padding-right: 12px;
-
-
-        background-color: var(--sub-color);
-
-        border-radius: 50px;
-        color:var(--main-color);
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
+        padding-left: 8px;
+        padding-right: 8px;
     }
 
-    .ueuse .favbox .share:hover{
-        cursor: pointer;
-        border: none;
-        display: block;
+    .ueuse .favbox .bookmark{
         width:auto;
-
-        margin-left: auto;
+        margin-left: 6px;
         margin-right: 6px;
         margin-top: 2px;
         margin-bottom: 2px;
-
         padding-top: 2px;
         padding-bottom: 2px;
-        padding-left: 12px;
-        padding-right: 12px;
-
-
-        background-color: var(--main-color);
-
-        border-radius: 50px;
-        color: var(--sub-color);;
-        font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
-        font-weight: normal;
-        text-decoration:none;
-        text-align: center;
-        transition: box-shadow 250ms ease-in-out;
-        transition: width 250ms ease-out;
-        transition: all 250ms ease-out;
+        padding-left: 8px;
+        padding-right: 8px;
     }
-
     .ueuse{
         animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
         margin: 12px;
@@ -5828,6 +6069,7 @@ summary {
     }
 
     .bot_menu_area{
+        margin-bottom: 16px;
         display: flex;
         flex-wrap : wrap;
         width: 100%;
@@ -5872,6 +6114,42 @@ summary {
     }
     .online{
         margin-top: 12px;
+    }
+
+    .servericon{
+        text-align: center;
+    }
+    .servericon .up{
+        margin-top: -74px;
+    }
+    .servericon img{
+        object-fit: cover;
+        width: 100px;
+        height: 100px;
+        border-radius: 15px;
+        box-shadow:0 0px 0px 0 rgba(0, 0, 0, .0);
+        margin: 0px;
+    }
+
+    .serverhead{
+        text-align: center;
+    }
+    .serverhead img{
+        object-fit: cover;
+        width: 100%;
+        height: 140px;
+        border-radius: 10px;
+        margin: 0px;
+    }
+    .serverhead_set{
+        text-align: center;
+    }
+    .serverhead_set img{
+        object-fit: cover;
+        width: 100%;
+        height: 160px;
+        border-radius: 10px;
+        margin: 0px;
     }
 }
 
@@ -5949,6 +6227,22 @@ summary {
     
     .ueuse p{
         color:var(--background-color);
+    }
+    .ueuse .inline{
+        background-color: #323232;
+        color: #F5F5F5;
+    }
+    
+    .ueuse .quote{
+        color:var(--dark-text-color);
+    }
+    .ueuse .blur{
+        background-color: #DDDDDD;
+        color: #DDDDDD;
+    }
+    .ueuse .blur:hover{
+        background-color: var(--dark-ueuse-color);
+        color: var(--dark-text-color);
     }
     
     
@@ -6061,6 +6355,19 @@ summary {
         background-color: var(--main-color);
         color: var(--sub-color);;
     }
+    .ueuse .favbox .bookmark{
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
+    }
+    .ueuse .favbox .bookmark:hover{
+        background-color: var(--main-color);
+        color: var(--sub-color);;
+    }
+    .ueuse .favbox .bookmark_after{
+        background-color: var(--main-color);
+        color: var(--sub-color);
+    }
+
     .ueuse hr{
         border-top: 1px solid var(--dark-subtext-color);
     }
@@ -6451,33 +6758,10 @@ summary {
         color: var(--background-color);
     }
 
-    .notification2{
-        background-color: #3a3333;
-        border: none;
+    .this{
+        background-color: var(--link-color) !important;
+        border: none !important;
     }
-
-    .notification2 .flebox a{
-        color:var(--dark-subtext-color)5;
-    }
-    
-    .notification2 p{
-        color:var(--background-color);
-    }
-    
-    .notification2 h3{
-        color:var(--dark-subtext-color);
-    }
-    
-    
-    .notification2 .flebox .time{
-        color:var(--dark-subtext-color);
-    }
-    
-    .notification2 a{
-        color:var(--main-color);
-    }
-
-
 
     .notification{
         background-color: var(--dark-sub-color);
@@ -6495,10 +6779,63 @@ summary {
     .notification h3{
         color:var(--dark-subtext-color);
     }
+
+    .notification .inline{
+        width: fit-content;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding-left: 6px;
+        padding-right: 6px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        background-color: #DDDDDD;
+        color: #323232;
+        border-radius: 5px;
+        font-size: calc(100% - 2px);
+        text-decoration: none;
+        font-family: 'BIZ UDGothic', sans-serif;
+        font-weight: bold;
+        vertical-align: top;
+    }
+    
+    .notification .quote{
+        width: fit-content;
+        border-left: 5px solid;
+        border-radius: 5px;
+        margin-left: 4px;
+        margin-right: 4px;
+        padding-left: 6px;
+        padding-right: 6px;
+        padding-top: 4px;
+        padding-bottom: 4px;
+        color:var(--text-color);
+        text-decoration: none;
+        font-family: 'BIZ UDPGothic', sans-serif;
+        font-weight: normal;
+    }
+    
+    .notification .blur{
+        background-color: #F5F5F5;
+        color: #F5F5F5;
+    }
+    .notification .blur:hover{
+        background-color: var(--notification-color);
+        color: var(--dark-text-color);
+    }
     
     
     .notification .flebox .time{
         color:var(--dark-subtext-color);
+    }
+
+    .notification .mta{
+        background-color: #302c2c;
+    }
+    .notification .mta:hover{
+        font-size: 14px;
+        background-color: var(--main-color);
+        color:var(--dark-background-color);
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     }
     
     .notification a{
@@ -6649,5 +6986,14 @@ summary {
 
     .userheader .profile p a{
         color:var(--main-color);
+    }
+
+    .emojibox_button{
+        background-color: var(--dark-sub-color);
+        color:var(--main-color);
+    }
+    .emojibox_button:hover{
+        background-color: #3a3333;
+        color: #ff4848;
     }
 }

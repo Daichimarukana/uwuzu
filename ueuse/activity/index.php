@@ -1,9 +1,10 @@
 <?php
-$serversettings_file = "../server/serversettings.ini";
+$serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
-if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
-        
-    header("Content-Type: application/json; charset=utf-8");
+if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') == "true"){
+    header("Content-Type: application/json");
+    header("charset=utf-8");
+    header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];
 

@@ -45,11 +45,12 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
     if(!(empty($result2["loginid"]))){
         if($result2["loginid"] === $loginid){
 
-            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
             $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
             $aduserinfoQuery->execute();
             $res = $aduserinfoQuery->fetch();
             $myblocklist = htmlentities($res["blocklist"]);
+            $mybookmark = htmlentities($res["bookmark"]);
 
             $itemsPerPage = 15; // 1ページあたりのユーズ数
             $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
@@ -59,8 +60,18 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
             if (!empty($pdo)) {
                 
-                $sql = "SELECT * FROM ueuse WHERE rpuniqid = '' ORDER BY datetime DESC LIMIT $offset, $itemsPerPage";
-                $message_array = $pdo->query($sql);    
+                $sql = "SELECT ueuse.* 
+                        FROM ueuse 
+                        LEFT JOIN account ON ueuse.account = account.userid 
+                        WHERE ueuse.rpuniqid = '' AND account.role != 'ice'
+                        ORDER BY ueuse.datetime DESC 
+                        LIMIT :offset, :itemsPerPage";
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                $stmt->execute();
+                $message_array = $stmt;
 
                 while ($row = $message_array->fetch(PDO::FETCH_ASSOC)) {
 
@@ -118,6 +129,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                                 // コンマで区切って配列に分割し、要素数を数える
                                 $favIds = explode(',', $fav);
                                 $value["favcnt"] = count($favIds)-1;
+
+                                $value["bookmark"] = $mybookmark;
                         
                                 $messageDisplay = new MessageDisplay($value, $userid); // $userid をコンストラクタに渡す
                                 $messageDisplay->display();

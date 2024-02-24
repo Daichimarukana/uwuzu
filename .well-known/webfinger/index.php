@@ -1,8 +1,10 @@
 <?php
-$serversettings_file = "../server/serversettings.ini";
+$serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
-    header("Content-Type: application/json; charset=utf-8");
+    header("Content-Type: application/json");
+    header("charset=utf-8");
+    header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];
 
@@ -19,23 +21,24 @@ if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUO
         // 接続エラーのときエラー内容を取得する
         $error_message[] = $e->getMessage();
     }
+    if(isset($_GET['resource'])){
+        $user = htmlentities($_GET['resource']);
 
-    $user = htmlentities($_GET['resource']);
+        $userid = str_replace('acct:','', str_replace('@'.$domain.'', '', $user));
 
-    $userid = str_replace('acct:','', str_replace('@'.$domain.'', '', $user));
+        $item = array(
+            "subject" => "acct:".$userid.'@'.$domain.'',
+            "links" => [
+                array(
+                    "rel" => "self",
+                    "type" => "application/activity+json",
+                    "href" => "https://".$domain."/actor/?actor=@".$userid.'',
+                ),
+            ],
+        );
 
-    $item = array(
-        "subject" => "acct:".$userid.'@'.$domain.'',
-        "links" => [
-            array(
-                "rel" => "self",
-                "type" => "application/activity+json",
-                "href" => "https://".$domain."/actor/?actor=@".$userid.'',
-            ),
-        ],
-    );
-
-    echo json_encode($item, JSON_UNESCAPED_UNICODE);
+        echo json_encode($item, JSON_UNESCAPED_UNICODE);
+    }
 }else{
     header("HTTP/1.1 410 Gone");
 }

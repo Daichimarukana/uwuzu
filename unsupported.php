@@ -76,7 +76,7 @@ if($errcode == "UNSUPPORTED_BROWSER"){
         <br>詳細は下記のリンクよりご確認ください。</p>
     </div>
 
-        <a href="https://uwuzu.com/support" class="infobtn">詳細</a>
+        <a href="https://uwuzu.com/docs/uwuzusupport" class="infobtn">詳細</a>
     
     <div class="maintext">
         <h3>エラー内容</h3>

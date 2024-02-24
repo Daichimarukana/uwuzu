@@ -9,15 +9,15 @@ $serversettings = parse_ini_file($serversettings_file, true);
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>残念なお知らせ - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="back.js"></script>
+<script src="../back.js"></script>
 <body>
 
 

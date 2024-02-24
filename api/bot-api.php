@@ -11,7 +11,9 @@ $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 //投稿及び返信レート制限↓(分):デフォで60件/分まで
 $max_ueuse_rate_limit = 60;
 
-header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
+header("Content-Type: application/json");
+header("charset=utf-8");
+header("Access-Control-Allow-Origin: *");
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -21,7 +23,13 @@ function createUniqId(){
 
     return base_convert($hashCreateTime,10,36);
 }
-
+function decode_yajirushi($postText){
+    $postText = str_replace('&larr;', '←', $postText);
+    $postText = str_replace('&darr;', '↓', $postText);
+    $postText = str_replace('&uarr;', '↑', $postText);
+    $postText = str_replace('&rarr;', '→', $postText);
+    return $postText;
+}
 function get_mentions_userid($postText) {
     // @useridを検出する
     $usernamePattern = '/@(\w+)/';
@@ -77,14 +85,16 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                 }
                 // 禁止url確認
                 for($i = 0; $i < count($banurl); $i++) {
-                    if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
-                        $err = "contains_prohibited_url";
-                        $response = array(
-                            'error_code' => $err,
-                        );
-                        
-                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        exit;
+                    if(!($banurl[$i] == "")){
+                        if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+                            $err = "contains_prohibited_url";
+                            $response = array(
+                                'error_code' => $err,
+                            );
+                            
+                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                            exit;
+                        }
                     }
                 }
             }
@@ -201,7 +211,7 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                             // コミット
                             $res = $pdo->commit();
 
-                            $mentionedUsers = get_mentions_userid($ueuse);
+                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
                             foreach ($mentionedUsers as $mentionedUser) {
                             
@@ -266,7 +276,7 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                         // プリペアドステートメントを削除
                         $stmt = null;
                     }else{
-                        $err = "over_rate_limit ";
+                        $err = "over_rate_limit";
                         $response = array(
                             'error_code' => $err,
                         );
@@ -309,14 +319,16 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                 }
                 // 禁止url確認
                 for($i = 0; $i < count($banurl); $i++) {
-                    if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
-                        $err = "contains_prohibited_url";
-                        $response = array(
-                            'error_code' => $err,
-                        );
-                        
-                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        exit;
+                    if(!($banurl[$i] == "")){
+                        if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+                            $err = "contains_prohibited_url";
+                            $response = array(
+                                'error_code' => $err,
+                            );
+                            
+                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                            exit;
+                        }
                     }
                 }
             }
@@ -472,7 +484,7 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                                 // コミット
                                 $res = $pdo->commit();
 
-                                $mentionedUsers = get_mentions_userid($ueuse);
+                                $mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
                                 foreach ($mentionedUsers as $mentionedUser) {
                                 
@@ -490,13 +502,13 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                                         $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
 
 
-                                        $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
-                                        $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
-                                        $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
-                                        $stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
-                                        $stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+                                        $stmt->bindParam(':touserid', decode_yajirushi(htmlspecialchars_decode($touserid), PDO::PARAM_STR));
+                                        $stmt->bindParam(':msg', decode_yajirushi(htmlspecialchars_decode($msg), PDO::PARAM_STR));
+                                        $stmt->bindParam(':url', decode_yajirushi(htmlspecialchars_decode($url), PDO::PARAM_STR));
+                                        $stmt->bindParam(':userchk', decode_yajirushi(htmlspecialchars_decode($userchk), PDO::PARAM_STR));
+                                        $stmt->bindParam(':title', decode_yajirushi(htmlspecialchars_decode($title), PDO::PARAM_STR));
 
-                                        $stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
+                                        $stmt->bindParam(':datetime', decode_yajirushi(htmlspecialchars_decode($datetime), PDO::PARAM_STR));
 
                                         // SQLクエリの実行
                                         $res = $stmt->execute();
@@ -647,16 +659,16 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                     $userdata["follower_cnt"] = count($followercnts)-1;
 
                     $response = array(
-                        'user_name' => htmlentities($userdata["username"]),
-                        'user_id' => htmlentities($userdata["userid"]),
-                        'profile' => htmlentities($userdata["profile"]),
-                        'user_icon' => htmlentities("https://".$domain."/".$userdata["iconname"]),
-                        'user_header' => htmlentities("https://".$domain."/".$userdata["headname"]),
-                        'registered_date' => htmlentities($userdata["datetime"]),
-                        'follow' => htmlentities($userdata["follow"]),
-                        'follow_cnt' => htmlentities($userdata["follow_cnt"]),
-                        'follower' => htmlentities($userdata["follower"]),
-                        'follower_cnt' => htmlentities($userdata["follower_cnt"]),
+                        'user_name' => decode_yajirushi(htmlspecialchars_decode($userdata["username"])),
+                        'user_id' => decode_yajirushi(htmlspecialchars_decode($userdata["userid"])),
+                        'profile' => decode_yajirushi(htmlspecialchars_decode($userdata["profile"])),
+                        'user_icon' => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userdata["iconname"])),
+                        'user_header' => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userdata["headname"])),
+                        'registered_date' => decode_yajirushi(htmlspecialchars_decode($userdata["datetime"])),
+                        'follow' => decode_yajirushi(htmlspecialchars_decode($userdata["follow"])),
+                        'follow_cnt' => decode_yajirushi(htmlspecialchars_decode($userdata["follow_cnt"])),
+                        'follower' => decode_yajirushi(htmlspecialchars_decode($userdata["follower"])),
+                        'follower_cnt' => decode_yajirushi(htmlspecialchars_decode($userdata["follower_cnt"])),
                     );
                 }
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);;

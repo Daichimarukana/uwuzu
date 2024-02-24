@@ -2,7 +2,33 @@
 <?php 
 function processMarkdownAndWrapEmptyLines($markdownText){
 
-    $markdownText = preg_replace('/^\[\[buruburu (.+)\]\]/m', '<p class="buruburu">$1</p>', $markdownText);//←ここ！！！！！！！！！！！！！！
+    //\___________________[注意]__________________\
+    // \____ここの順番を変えるとうまく動かなくなります___\
+    //  \______Markdownうまく動くところを探すべし______\
+
+    $markdownText = preg_replace('/\[\[buruburu (.+)\]\]/m', '<span class="buruburu">$1</span>', $markdownText);//ぶるぶる
+
+    $markdownText = preg_replace('/(^|[^`])`([^`\n]+)`($|[^`])/m', '$1<span class="inline">$2</span>$3', $markdownText);//Inline Code
+
+    /*$markdownText = preg_replace_callback('/^\[\[time (\d+)\]\]/m', function($matches) {
+        $timestamp = $matches[1];
+        return '<span class="unixtime">' . date("Y/m/d H:i:s", $timestamp) . '</span>';
+    }, $markdownText);*/
+
+    $markdownText = preg_replace('/\*\*\*(.*?)\*\*\*/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+    $markdownText = preg_replace('/\_\_\_(.*?)\_\_\_/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+
+    $markdownText = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $markdownText);//太字
+    $markdownText = preg_replace('/\_\_(.*?)\_\_/', '<b>$1</b>', $markdownText);//太字
+
+    $markdownText = preg_replace('/\*(.*?)\*/', '<i>$1</i>', $markdownText);//斜体
+    $markdownText = preg_replace('/\_(.*?)\_/', '<i>$1</i>', $markdownText);//斜体
+
+    $markdownText = preg_replace('/\~\~(.*?)\~\~/m', '<s>$1</s>', $markdownText);//打ち消し線
+
+    $markdownText = preg_replace('/&gt;&gt;&gt; (.*)/m', '<span class="quote">$1</span>', $markdownText);//>>> 引用
+
+    $markdownText = preg_replace('/\|\|(.*)\|\|/m', '<span class="blur">$1</span>', $markdownText);//黒塗り
 
     // タイトル（#、##、###）をHTMLのhタグに変換
     $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
@@ -11,7 +37,7 @@ function processMarkdownAndWrapEmptyLines($markdownText){
 
     // 箇条書き（-）をHTMLのul/liタグに変換
     $markdownText = preg_replace('/^- (.+)/m', '<p>・ $1</p>', $markdownText);
-
+    
     // 空行の前に何もない行をHTMLのpタグに変換
     $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
 
@@ -147,7 +173,7 @@ function YouTube_and_nicovideo_Links($postText) {
     foreach ($matches[0] as $url) {
         // ドメイン部分を抽出
         $parsedUrl = parse_url($url);
-        if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com"){
+        if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com" || $parsedUrl['host'] == "m.youtube.com"){
 
             if (isset($parsedUrl['query'])) {
                 if(false !== strpos($parsedUrl['query'], 'v=')) {
@@ -237,12 +263,15 @@ class MessageDisplay {
             echo '        <div class="time">';
             $datetime = strtotime(htmlentities($this->value['datetime']));
             $today = strtotime(date("Y-m-d"));
+            $tomorrow = date('Y-m-d', strtotime('+1 day'));
             if (date("md", $datetime) == "0101") {
                 if (date("Y", $datetime) == date("Y")) {
                     echo "元日 " . date("H:i", $datetime);
                 } else {
                     echo date("Y年m月d日 H:i", $datetime);
                 }
+            } elseif ($datetime >= $tomorrow) {
+                echo date("Y年m月d日 H:i", $datetime) . " (未来)";
             } elseif ($datetime >= $today) {
                 echo "今日 " . date("H:i", $datetime);
             } elseif (date("Y", $datetime) == date("Y")) {
@@ -325,6 +354,14 @@ class MessageDisplay {
             }
             echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlentities($this->value['reply_count']).'</a>';
             echo '<button name="share" id="share" class="share" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/share_1.svg#share_1"></use></svg></button>';
+            
+            $bookmarkList = explode(',', $this->value['bookmark']);
+            if (in_array($this->value['uniqid'], $bookmarkList)) {
+                echo '<button name="bookmark" id="bookmark" class="bookmark bookmark_after" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>';
+            }else{
+                echo '<button name="bookmark" id="bookmark" class="bookmark" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>';
+            }
+                
             if($this->value['account'] === $this->userid){
                 if(!($this->value['role'] === "ice")){
                     if($this->value['abi'] === "none"){

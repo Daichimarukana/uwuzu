@@ -83,9 +83,9 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="../image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">

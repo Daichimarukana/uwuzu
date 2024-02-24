@@ -1,5 +1,7 @@
 <?php
-header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
+header("Content-Type: application/json");
+header("charset=utf-8");
+header("Access-Control-Allow-Origin: *");
 
 $mojisizefile = "../server/textsize.txt";
 
@@ -20,6 +22,13 @@ for( $i=0;$i<$cnt;$i++ ){
     $uwuzuinfo[$i] = ($softwaredata[$i]);
 }
 
+function decode_yajirushi($postText){
+    $postText = str_replace('&larr;', '←', $postText);
+    $postText = str_replace('&darr;', '↓', $postText);
+    $postText = str_replace('&uarr;', '↑', $postText);
+    $postText = str_replace('&rarr;', '→', $postText);
+    return $postText;
+}
     require('../db.php');
 
     $datetime = array();
@@ -61,15 +70,7 @@ for( $i=0;$i<$cnt;$i++ ){
         $notices[] = $row;
     }
 
-    if(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8') === "true"){
-        $openregit = false;
-    }elseif(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8') === "false"){
-        $openregit = true;
-    }else{
-        $openregit = false;
-    }
-
-    if(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8') === "true"){
+    if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
         $invitation_code = true;
     }else{
         $invitation_code = false;
@@ -77,10 +78,10 @@ for( $i=0;$i<$cnt;$i++ ){
 
         foreach ($notices as $value) {
             $notices = array(
-                "title" => htmlentities($value['title']),
-                "note" => htmlentities($value['note']),
-                "editor" => htmlentities($value['account']),
-                "datetime" => htmlentities($value['datetime']),
+                "title" => decode_yajirushi(htmlspecialchars_decode($value['title'])),
+                "note" => decode_yajirushi(htmlspecialchars_decode($value['note'])),
+                "editor" => decode_yajirushi(htmlspecialchars_decode($value['account'])),
+                "datetime" => decode_yajirushi(htmlspecialchars_decode($value['datetime'])),
             );
 
             $notice[] = $notices;

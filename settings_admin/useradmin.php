@@ -187,7 +187,7 @@ $notificationcount = $notiData['notification_count'];
 if( !empty($_POST['btn_submit']) ) {
 
     // 空白除去
-	$target_userid = $_POST['target_userid'];
+	$target_userid = htmlentities(str_replace('@', '', $_POST['target_userid']));
 
 	if (!empty($pdo)) {
 		$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
@@ -205,7 +205,7 @@ if( !empty($_POST['btn_submit']) ) {
 		$userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
 
 		if(empty($userdata)){
-			$error_message[] = "ユーザーがいません";
+			$error_message[] = "ユーザーがいません(USER_NOT_FOUND)";
 		}else{
 			$_SESSION['userdata'] = $userdata;
 
@@ -254,11 +254,11 @@ if( !empty($_POST['report_done']) ) {
 				header("Location:".$url."");
 				exit;  
 			} else {
-				$error_message[] = '発行に失敗しました。';
+				$error_message[] = '発行に失敗しました。(REGISTERED_DAME)';
 			}
 	
 		} catch (Exception $e) {
-			$error_message[] = "えらー";
+			$error_message[] = "えらー(ERROR)";
 			// エラーが発生した時はロールバック
 			$pdo->rollBack();
 		}
@@ -289,10 +289,10 @@ if (!empty($pdo)) {
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -319,7 +319,6 @@ if (!empty($pdo)) {
 				<h1>ユーザー管理</h1>
 				<div>
 					<p>ユーザーID</p>
-					<div class="p2">「@」は外してください。</div>
 					<input id="target_userid" placeholder="admin" class="inbox" type="text" name="target_userid" value="<?php if( !empty($keyword) ){ echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); } ?>">
 				</div>
 

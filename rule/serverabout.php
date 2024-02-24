@@ -49,15 +49,18 @@ try {
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
-$result = $mysqli->query("SELECT userid FROM account ORDER BY datetime");
-
-/* 結果セットの行数を取得します */
+//User
+$result = $mysqli->query("SELECT userid FROM account");
 $count1 = $result->num_rows;
-
-$result2 = $mysqli->query("SELECT uniqid FROM ueuse ORDER BY datetime");
-
-/* 結果セットの行数を取得します */
+//ueuse
+$result2 = $mysqli->query("SELECT uniqid FROM ueuse");
 $count2 = $result2->num_rows;
+//emoji
+$result3 = $mysqli->query("SELECT sysid FROM emoji");
+$count3 = $result3->num_rows;
+//bot
+$result4 = $mysqli->query("SELECT userid FROM account WHERE sacinfo = 'bot'");
+$count4 = $result4->num_rows;
 
 
 ?>
@@ -65,9 +68,9 @@ $count2 = $result2->num_rows;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -92,11 +95,24 @@ $count2 = $result2->num_rows;
 <div class="terms">
 
     <h1>サーバー情報</h1>
-    <?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8')) ){ ?>
+    <!--(サーバーアイコン)-->
+    <?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+        <div class="serverhead">
+            <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
+        </div>
+        <?php }?>
+        <?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
         <div class="servericon">
-            <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+            <?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+                <div class="up">
+                    <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+                </div>
+            <?php }else{?>
+                <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+            <?php }?>
         </div>
     <?php }?>
+    <!--(サーバーアイコンここまで)-->
     <div class="sp3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
     <div class="sp2c"><?php echo $domain;?></div>
     <hr>
@@ -115,8 +131,26 @@ $count2 = $result2->num_rows;
     <hr>
 
     <h4>統計情報</h4>
-    <p>ユーザー数 : <?php echo $count1."<br>"?></p>
-    <p>投稿数 : <?php echo $count2."<br>"?></p>
+    <div class="overview">
+        <div class="overview_cnt_l">
+            <div class="p2">ユーザー数</div>
+            <p><b><?php echo htmlentities($count1);?></b></p>
+        </div>
+        <div class="overview_cnt_r">
+            <div class="p2">投稿数</div>
+            <p><b><?php echo htmlentities($count2);?></b></p>
+        </div>
+    </div>
+    <div class="overview">
+        <div class="overview_cnt_l">
+            <div class="p2">カスタム絵文字数</div>
+            <p><b><?php echo htmlentities($count3);?></b></p>
+        </div>
+        <div class="overview_cnt_r">
+            <div class="p2">Botアカウント数</div>
+            <p><b><?php echo htmlentities($count4);?></b></p>
+        </div>
+    </div>
 
     <?php if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') == "true"){?>
     <hr>

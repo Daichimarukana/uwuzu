@@ -262,7 +262,7 @@ if( !empty($_POST['code_btn_submit']) ) {
 		header("Location:".$url."");
 		exit;  
 	} else {
-		$error_message[] = '発行に失敗しました。';
+		$error_message[] = '発行に失敗しました。(REGISTERED_DAME)';
 	}
 
     // プリペアドステートメントを削除
@@ -274,10 +274,10 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">

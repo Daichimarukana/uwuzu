@@ -455,6 +455,7 @@ if (!empty($_POST['follow'])) {
 		$pdo->beginTransaction();
 
 		try {
+			$fromuserid = $userid;
 			$touserid = $userData["userid"];
 			$datetime = date("Y-m-d H:i:s");
 			$msg = "".$userid."さんにフォローされました。";
@@ -463,9 +464,9 @@ if (!empty($_POST['follow'])) {
 			$userchk = 'none';
 
 			// 通知用SQL作成
-			$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+			$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
-
+			$stmt->bindParam(':fromuserid', htmlentities($fromuserid), PDO::PARAM_STR);
 			$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
 			$stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
 			$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
@@ -491,7 +492,7 @@ if (!empty($_POST['follow'])) {
             header("Location:" . $url);
             exit;
         } else {
-            $error_message[] = '更新に失敗しました。';
+            $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
         }
 	}
 
@@ -524,7 +525,7 @@ if (!empty($_POST['follow'])) {
             header("Location:" . $url);
             exit;
         } else {
-            $error_message[] = '更新に失敗しました。';
+            $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
         }
 
         $stmt = null;
@@ -566,7 +567,7 @@ if (!empty($_POST['send_block_submit'])) {
             header("Location:" . $url);
             exit;
         } else {
-            $error_message[] = '更新に失敗しました。';
+            $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
         }
 
         $stmt = null;
@@ -577,7 +578,7 @@ if (!empty($_POST['send_block_submit'])) {
 		header("Location:" . $url);
 		exit;
 	} else {
-		$error_message[] = '更新に失敗しました。';
+		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
 	}
 
 } elseif (!empty($_POST['send_un_block_submit'])) {
@@ -596,7 +597,7 @@ if (!empty($_POST['send_block_submit'])) {
 		header("Location:" . $url);
 		exit;
 	} else {
-		$error_message[] = '更新に失敗しました。';
+		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
 	}
 }
 
@@ -615,9 +616,9 @@ $pdo = null;
 <head>
 <script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/nsfw_event.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
+<script src="../js/nsfw_event.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="../css/home.css">
@@ -826,7 +827,7 @@ $pdo = null;
 
 			<div id="error" class="error" style="display: none;">
 				<h1>エラー</h1>
-				<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
+				<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。<br>(NETWORK_HUKANZEN_STOP)</p>
 			</div>
 
 			<div id="myDelModal" class="modal">
@@ -1118,44 +1119,82 @@ $(document).ready(function() {
 	
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
-	event.preventDefault();
+		event.preventDefault();
 
-	var postUniqid = $(this).data('uniqid');
-	var userid = '<?php echo $userid; ?>';
-	var account_id = '<?php echo $loginid; ?>';
-	var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
+		var postUniqid = $(this).data('uniqid');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
 
-	var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
+		var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
 
-	var $this = $(this); // ボタン要素を変数に格納
+		var $this = $(this); // ボタン要素を変数に格納
 
-	$.ajax({
-		url: '../favorite/favorite.php',
-		method: 'POST',
-		data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
-		dataType: 'json',
-		success: function(response) {
-			if (response.success) {
-				// いいね成功時の処理
-				if (isLiked) {
-					$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
-					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
+		$.ajax({
+			url: '../favorite/favorite.php',
+			method: 'POST',
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+			dataType: 'json',
+			success: function(response) {
+				if (response.success) {
+					// いいね成功時の処理
+					if (isLiked) {
+						$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
+						$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
+					} else {
+						$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
+						$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
+					}
+
+					var newFavoriteList = response.newFavorite.split(',');
+					var likeCount = newFavoriteList.length - 1;
+					likeCountElement.text(likeCount); // いいね数を更新
 				} else {
-					$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
-					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
+					// いいね失敗時の処理
 				}
-
-				var newFavoriteList = response.newFavorite.split(',');
-				var likeCount = newFavoriteList.length - 1;
-				likeCountElement.text(likeCount); // いいね数を更新
-			} else {
-				// いいね失敗時の処理
+			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+			error: function() {
+				// エラー時の処理
 			}
-		}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
-		error: function() {
-			// エラー時の処理
-		}
+		});
+
 	});
+
+	
+	$(document).on('click', '.bookmark, .bookmark_after', function(event) {
+
+		event.preventDefault();
+
+		var postUniqid = $(this).data('uniqid');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
+
+		var isLiked = $(this).hasClass('bookmark_after'); // 現在のいいねの状態を判定
+
+		var $this = $(this); // ボタン要素を変数に格納
+
+		$.ajax({
+			url: '../bookmark/bookmark.php',
+			method: 'POST',
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+			dataType: 'json',
+			success: function(response) {
+				if (response.success) {
+					// いいね成功時の処理
+					if (isLiked) {
+						$this.removeClass('bookmark_after'); // クラスを削除していいねを取り消す
+					} else {
+						$this.addClass('bookmark_after'); // クラスを追加していいねを追加する
+					}
+				} else {
+					// いいね失敗時の処理
+				}
+			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+			error: function() {
+				// エラー時の処理
+			}
+		});
 	});
 
 

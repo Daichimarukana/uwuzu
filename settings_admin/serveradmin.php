@@ -239,6 +239,8 @@ if( !empty($_POST['btn_submit']) ) {
 
 	$servericon = $_POST['servericon'];
 
+	$serverhead = $_POST['serverhead'];
+
 	$serverlogo_onoff = $_POST['serverlogo_onoff'];
 
 	$serverlogo_light = $_POST['serverlogo_light'];
@@ -296,6 +298,8 @@ if( !empty($_POST['btn_submit']) ) {
 	server_name = "'.$servername.'"
 	;サーバーアイコンのアドレス
 	server_icon = "'.$servericon.'"
+	;サーバーヘッダーのアドレス
+	server_head = "'.$serverhead.'"
 	;サーバーロゴのアドレス
 	server_logo_home  = "'.$serverlogo_light.'"
 	server_logo_login = "'.$serverlogo_dark.'"
@@ -342,10 +346,10 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -370,15 +374,33 @@ require('../logout/logout.php');
 			<div class="admin_right">
 				<form class="formarea" enctype="multipart/form-data" method="post">
 					<h1>サーバー設定</h1>
-					<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
-					<div class="servericon">
-						<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+					<!--(サーバーアイコン)-->
+					<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+					<div class="serverhead_set">
+						<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
 					</div>
 					<?php }?>
+					<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
+					<div class="servericon">
+						<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+							<div class="up">
+								<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+							</div>
+						<?php }else{?>
+							<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+						<?php }?>
+					</div>
+					<?php }?>
+					<!--(サーバーアイコンここまで)-->
 					<div>
 						<p>サーバーアイコン</p>
-						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。</div>
+						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。(設定しなくても大丈夫です。)</div>
 						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); } ?>">
+					</div>
+					<div>
+						<p>サーバーヘッダー</p>
+						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。(設定しなくても大丈夫です。)</div>
+						<input id="serverhead" placeholder="https://~" class="inbox" type="text" name="serverhead" value="<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>

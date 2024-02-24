@@ -147,8 +147,9 @@ if( !empty($_POST['btn_submit']) ) {
         $url = '/settings';
         $userchk = 'none';
         // 通知用SQL作成
-        $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+        $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
+        $stmt->bindParam(':fromuserid', htmlentities("uwuzu-fromsys"), PDO::PARAM_STR);
         $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
         $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
         $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
@@ -241,6 +242,31 @@ if( !empty($_POST['btn_submit2']) ) {
                     
 
 
+// プロフィールの絵文字対応
+function replaceProfileEmojiImages($postText) {
+    // プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
+    $emojiPattern = '/:(\w+):/';
+    $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
+        $emojiName = $matches[1];
+        //絵文字path取得
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+        ));
+        $emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
+        $emoji_Query->bindValue(':emojiname', $emojiName);
+        $emoji_Query->execute();
+        $emoji_row = $emoji_Query->fetch();
+        if(empty($emoji_row["emojifile"])){
+            $emoji_path = "img/sysimage/errorimage/emoji_404.png";
+        }else{
+            $emoji_path = $emoji_row["emojifile"];
+        }
+        return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
+    }, $postText);
+    return $postTextWithImages;
+}
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -250,8 +276,8 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/unsupported.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
@@ -268,14 +294,14 @@ $pdo = null;
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
     <div class="textbox">
         <h1>確認</h1>
 
-        <p>あなたは <?php if( !empty($row["username"]) ){ echo htmlentities( $row["username"], ENT_QUOTES, 'UTF-8'); } ?> ですか？</p>
+        <p>あなたは <?php if( !empty($row["username"]) ){ echo replaceProfileEmojiImages(htmlentities( $row["username"], ENT_QUOTES, 'UTF-8')); } ?> ですか？</p>
 
             <?php if( !empty($error_message) ): ?>
                 <ul class="errmsg">
@@ -287,8 +313,8 @@ $pdo = null;
 
             <div class="myarea">
                 <img src="<?php echo htmlentities($userData['iconname']); ?>">
-                <p>名前</p>
-                <h2><?php if( !empty($row["username"]) ){ echo htmlentities( $row["username"], ENT_QUOTES, 'UTF-8'); } ?></h2>
+                <p>ユーザー名</p>
+                <h2><?php if( !empty($row["username"]) ){ echo replaceProfileEmojiImages(htmlentities( $row["username"], ENT_QUOTES, 'UTF-8')); } ?></h2>
                 <div class="roleboxes">
                     <?php foreach ($roles as $roleId): ?>
                         <?php $roleData = $roleDataArray[$roleId]; ?>

@@ -5,6 +5,9 @@ $serversettings = parse_ini_file($serversettings_file, true);
 $domain = $_SERVER['HTTP_HOST'];
 
 $mojisizefile = "../server/textsize.txt";
+$mojisize = (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8');
+//投稿及び返信レート制限↓(分):デフォで60件/分まで
+$max_ueuse_rate_limit = 60;
 
 $banurldomainfile = "../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
@@ -20,6 +23,9 @@ function createUniqId(){
 }
 
 require('../db.php');
+//関数呼び出し
+//- EXIF
+require('../function/function.php');
 
 // タイムゾーン設定
 date_default_timezone_set('Asia/Tokyo');
@@ -221,40 +227,6 @@ function get_mentions_userid($postText) {
 
     return $mentionedUsers;
 }
-function rotate($image, $exif)
-{
-    $orientation = $exif['Orientation'] ?? 1;
-
-    switch ($orientation) {
-        case 1: //no rotate
-            break;
-        case 2: //FLIP_HORIZONTAL
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 3: //ROTATE 180
-            $image = imagerotate($image, 180, 0);
-            break;
-        case 4: //FLIP_VERTICAL
-            imageflip($image, IMG_FLIP_VERTICAL);
-            break;
-        case 5: //ROTATE 270 FLIP_HORIZONTAL
-            $image = imagerotate($image, 270, 0);
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 6: //ROTATE 90
-            $image = imagerotate($image, 270, 0);
-            break;
-        case 7: //ROTATE 90 FLIP_HORIZONTAL
-            $image = imagerotate($image, 90, 0);
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 8: //ROTATE 270
-            $image = imagerotate($image, 90, 0);
-            break;
-    }
-    return $image;
-}
-
 
 
 if( !empty($_POST['btn_submit']) ) {
@@ -276,253 +248,58 @@ if( !empty($_POST['btn_submit']) ) {
 
 	// メッセージの入力チェック
 	if( empty($ueuse) ) {
-		$error_message[] = '内容を入力してください。';
+		$error_message[] = '内容を入力してください。(INPUT_PLEASE)';
 	} else {
         // 文字数を確認
         if( (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8') < mb_strlen($ueuse, 'UTF-8') ) {
-			$error_message[] = '内容は'.htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8').'文字以内で入力してください。';
+			$error_message[] = '内容は'.htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8').'文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
 		}
 
 		// 禁止url確認
 		for($i = 0; $i < count($banurl); $i++) {
-			if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
-				$error_message[] = '投稿が禁止されているURLが含まれています。';
+			if(!($banurl[$i] == "")){
+				if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+					$error_message[] = '投稿が禁止されているURLが含まれています。(INPUT_CONTAINS_PROHIBITED_URL)';
+				}
 			}
 		}
     }
 
 
-	
-	if (empty($_FILES['upload_images']['name'])) {
-		$photo1 = "none";
-	} else {
-		// アップロードされたファイル情報
-		$uploadedFile = $_FILES['upload_images'];
-
-		// アップロードされたファイルの拡張子を取得
-		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
-		
-		// 保存先のパスを生成
-		$uploadedPath = '../ueuseimages/' . $newFilename;
-		
-		// ファイルを移動
-		$result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
-
-		// EXIF削除
-		if($extension == "jpg" || $extension == "jpeg"){
-			$gd = imagecreatefromjpeg($uploadedPath);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data($uploadedPath); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, $uploadedPath);
-			imagedestroy($gd_out);
-		}
-		
-		if ($result) {
-			$photo1 = $uploadedPath; // 保存されたファイルのパスを使用
+	$old_datetime = date("Y-m-d H:i:00");
+	$now_datetime = date("Y-m-d H:i:00",strtotime("+1 minute"));
+	$rate_Query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND TIME(datetime) BETWEEN :old_datetime AND :now_datetime");
+	$rate_Query->bindValue(':userid', $userid);
+	$rate_Query->bindValue(':old_datetime', $old_datetime);
+	$rate_Query->bindValue(':now_datetime', $now_datetime);
+	$rate_Query->execute();
+	$rate_count = $rate_Query->rowCount();
+	if(!($rate_count > $max_ueuse_rate_limit-1)){
+		if (empty($_FILES['upload_images']['name'])) {
+			$photo1 = "none";
 		} else {
-			$errnum = $uploadedFile['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-		}
-	}
+			// アップロードされたファイル情報
+			$uploadedFile = $_FILES['upload_images'];
 
-	if (empty($_FILES['upload_images2']['name'])) {
-		$photo2 = "none";
-	} else {
-
-		if (empty($_FILES['upload_images']['name'])){
-			$error_message[] = '画像1から画像を選択してください！！！';
-		}
-		// アップロードされたファイル情報
-		$uploadedFile2 = $_FILES['upload_images2'];
-
-		if( 10000000 < $uploadedFile2["size"] ) {
-			$error_message[] = 'ファイルサイズが大きすぎます！';
-		}
-		// アップロードされたファイルの拡張子を取得
-		$extension2 = pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename2 = uniqid() . '-'.$userid.'.' . $extension2;
-		
-		// 保存先のパスを生成
-		$uploadedPath2 = '../ueuseimages/' . $newFilename2;
-		
-		// ファイルを移動
-		$result2 = move_uploaded_file($uploadedFile2['tmp_name'], $uploadedPath2);
-
-		// EXIF削除
-		if($extension2 == "jpg" || $extension2 == "jpeg"){
-			$gd = imagecreatefromjpeg($uploadedPath2);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data($uploadedPath2); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, $uploadedPath2);
-			imagedestroy($gd_out);
-		}
-		
-		if ($result2) {
-			$photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile2['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-		}
-	}
-
-	if (empty($_FILES['upload_images3']['name'])) {
-		$photo3 = "none";
-	} else {
-
-		if (empty($_FILES['upload_images2']['name'])){
-			$error_message[] = '画像2から画像を選択してください！！！';
-		}
-		// アップロードされたファイル情報
-		$uploadedFile3 = $_FILES['upload_images3'];
-
-		if( 10000000 < $uploadedFile3["size"] ) {
-			$error_message[] = 'ファイルサイズが大きすぎます！';
-		}
-		// アップロードされたファイルの拡張子を取得
-		$extension3 = pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename3 = uniqid() . '-'.$userid.'.' . $extension3;
-		
-		// 保存先のパスを生成
-		$uploadedPath3 = '../ueuseimages/' . $newFilename3;
-		
-		// ファイルを移動
-		$result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
-
-		// EXIF削除
-		if($extension3 == "jpg" || $extension3 == "jpeg"){
-			$gd = imagecreatefromjpeg($uploadedPath3);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data($uploadedPath3); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, $uploadedPath3);
-			imagedestroy($gd_out);
-		}
-		
-		if ($result3) {
-			$photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile3['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
-		}
-	}
-
-	if (empty($_FILES['upload_images4']['name'])) {
-		$photo4 = "none";
-	} else {
-
-		if (empty($_FILES['upload_images3']['name'])){
-			$error_message[] = '画像3から画像を選択してください！！！';
-		}
-		// アップロードされたファイル情報
-		$uploadedFile4 = $_FILES['upload_images4'];
-
-		if( 10000000 < $uploadedFile4["size"] ) {
-			$error_message[] = 'ファイルサイズが大きすぎます！';
-		}
-		// アップロードされたファイルの拡張子を取得
-		$extension4 = pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename4 = uniqid() . '-'.$userid.'.' . $extension4;
-		
-		// 保存先のパスを生成
-		$uploadedPath4 = '../ueuseimages/' . $newFilename4;
-		
-		// ファイルを移動
-		$result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);
-
-		// EXIF削除
-		if($extension4 == "jpg" || $extension4 == "jpeg"){
-			$gd = imagecreatefromjpeg($uploadedPath4);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data($uploadedPath4); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, $uploadedPath4);
-			imagedestroy($gd_out);
-		}
-		
-		if ($result4) {
-			$photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile4['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
-		}
-	}
-
-	if (empty($_FILES['upload_videos1']['name'])) {
-		$video1 = "none";
-	} else {
-		// アップロードされたファイル情報
-		$uploadedFile3 = $_FILES['upload_videos1'];
-		
-		// アップロードされたファイルの拡張子を取得
-		$extension3 = strtolower(pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION)); // 小文字に変換
-
-		// サポートされている動画フォーマットの拡張子を配列で定義
-		$supportedExtensions = array("mp4", "avi", "mov", "webm");
-
-		if (in_array($extension3, $supportedExtensions)) {
-			// 正しい拡張子の場合、新しいファイル名を生成
-			$newFilename3 = uniqid() . '-'.$userid.'.' . $extension3;
+			// アップロードされたファイルの拡張子を取得
+			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+			
 			// 保存先のパスを生成
-			$uploadedPath3 = '../ueusevideos/' . $newFilename3;
-		
+			$uploadedPath = '../ueuseimages/' . $newFilename;
+			
 			// ファイルを移動
-			$result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
-		
-			if ($result3) {
-				$video1 = $uploadedPath3; // 保存されたファイルのパスを使用
+			$result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
+
+			// EXIF削除
+			delete_exif($extension, $uploadedPath);
+			
+			if ($result) {
+				$photo1 = $uploadedPath; // 保存されたファイルのパスを使用
 			} else {
-				$errnum = $uploadedFile3['error'];
+				$errnum = $uploadedFile['error'];
 				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
 				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
 				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
@@ -532,51 +309,216 @@ if( !empty($_POST['btn_submit']) ) {
 				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
 				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 			}
-		} else {
-			$error_message[] = '対応していないファイル形式です！';
 		}
-		
-		
-		
-	}
 
-	if( empty($error_message) ) {
-		
-		    // 書き込み日時を取得
-            $datetime = date("Y-m-d H:i:s");
+		if (empty($_FILES['upload_images2']['name'])) {
+			$photo2 = "none";
+		} else {
+
+			if (empty($_FILES['upload_images']['name'])){
+				$error_message[] = '画像1から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+			}
+			// アップロードされたファイル情報
+			$uploadedFile2 = $_FILES['upload_images2'];
+
+			if( 10000000 < $uploadedFile2["size"] ) {
+				$error_message[] = 'ファイルサイズが大きすぎます！(PHOTO_OVER_MAX_SIZE)';
+			}
+			// アップロードされたファイルの拡張子を取得
+			$extension2 = pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename2 = uniqid() . '-'.$userid.'.' . $extension2;
+			
+			// 保存先のパスを生成
+			$uploadedPath2 = '../ueuseimages/' . $newFilename2;
+			
+			// ファイルを移動
+			$result2 = move_uploaded_file($uploadedFile2['tmp_name'], $uploadedPath2);
+
+			// EXIF削除
+			delete_exif($extension2, $uploadedPath2);
+			
+			if ($result2) {
+				$photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
+			} else {
+				$errnum = $uploadedFile2['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			}
+		}
+
+		if (empty($_FILES['upload_images3']['name'])) {
+			$photo3 = "none";
+		} else {
+
+			if (empty($_FILES['upload_images2']['name'])){
+				$error_message[] = '画像2から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+			}
+			// アップロードされたファイル情報
+			$uploadedFile3 = $_FILES['upload_images3'];
+
+			if( 10000000 < $uploadedFile3["size"] ) {
+				$error_message[] = 'ファイルサイズが大きすぎます！(PHOTO_OVER_MAX_SIZE)';
+			}
+			// アップロードされたファイルの拡張子を取得
+			$extension3 = pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename3 = uniqid() . '-'.$userid.'.' . $extension3;
+			
+			// 保存先のパスを生成
+			$uploadedPath3 = '../ueuseimages/' . $newFilename3;
+			
+			// ファイルを移動
+			$result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
+
+			// EXIF削除
+			delete_exif($extension3, $uploadedPath3);
+			
+			if ($result3) {
+				$photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
+			} else {
+				$errnum = $uploadedFile3['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
+			}
+		}
+
+		if (empty($_FILES['upload_images4']['name'])) {
+			$photo4 = "none";
+		} else {
+
+			if (empty($_FILES['upload_images3']['name'])){
+				$error_message[] = '画像3から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+			}
+			// アップロードされたファイル情報
+			$uploadedFile4 = $_FILES['upload_images4'];
+
+			if( 10000000 < $uploadedFile4["size"] ) {
+				$error_message[] = 'ファイルサイズが大きすぎます！(PHOTO_OVER_MAX_SIZE)';
+			}
+			// アップロードされたファイルの拡張子を取得
+			$extension4 = pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename4 = uniqid() . '-'.$userid.'.' . $extension4;
+			
+			// 保存先のパスを生成
+			$uploadedPath4 = '../ueuseimages/' . $newFilename4;
+			
+			// ファイルを移動
+			$result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);
+
+			// EXIF削除
+			delete_exif($extension4, $uploadedPath4);
+			
+			if ($result4) {
+				$photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
+			} else {
+				$errnum = $uploadedFile4['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
+			}
+		}
+
+		if (empty($_FILES['upload_videos1']['name'])) {
+			$video1 = "none";
+		} else {
+			// アップロードされたファイル情報
+			$uploadedFile3 = $_FILES['upload_videos1'];
+			
+			// アップロードされたファイルの拡張子を取得
+			$extension3 = strtolower(pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION)); // 小文字に変換
+
+			// サポートされている動画フォーマットの拡張子を配列で定義
+			$supportedExtensions = array("mp4", "avi", "mov", "webm");
+
+			if (in_array($extension3, $supportedExtensions)) {
+				// 正しい拡張子の場合、新しいファイル名を生成
+				$newFilename3 = uniqid() . '-'.$userid.'.' . $extension3;
+				// 保存先のパスを生成
+				$uploadedPath3 = '../ueusevideos/' . $newFilename3;
+			
+				// ファイルを移動
+				$result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
+			
+				if ($result3) {
+					$video1 = $uploadedPath3; // 保存されたファイルのパスを使用
+				} else {
+					$errnum = $uploadedFile3['error'];
+					if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+					if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+					if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+					if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+					if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+					if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+					if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+					$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+				}
+			} else {
+				$error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
+			}
+			
+			
+			
+		}
+
+		if( empty($error_message) ) {
+			
+			// 書き込み日時を取得
+			$datetime = date("Y-m-d H:i:s");
 			$uniqid = createUniqId();
 			$abi = "none";
 
-            // トランザクション開始
-            $pdo->beginTransaction();
+			// トランザクション開始
+			$pdo->beginTransaction();
 
-            try {
+			try {
 
-                // SQL作成
-                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
-        
-                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+				// SQL作成
+				$stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+		
+				$stmt->bindParam(':username', $username, PDO::PARAM_STR);
+				$stmt->bindParam(':account', $userid, PDO::PARAM_STR);
 				$stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
 				$stmt->bindParam(':rpuniqid', $ueuseid, PDO::PARAM_STR);
-                $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+				$stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
 
 				$stmt->bindParam(':photo1', $photo1, PDO::PARAM_STR);
 				$stmt->bindParam(':photo2', $photo2, PDO::PARAM_STR);
 				$stmt->bindParam(':photo3', $photo3, PDO::PARAM_STR);
 				$stmt->bindParam(':photo4', $photo4, PDO::PARAM_STR);
 				$stmt->bindParam(':video1', $video1, PDO::PARAM_STR);
-                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
 				$stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
 
 				$stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
 
-                // SQLクエリの実行
-                $res = $stmt->execute();
+				// SQLクエリの実行
+				$res = $stmt->execute();
 
-                // コミット
-                $res = $pdo->commit();
+				// コミット
+				$res = $pdo->commit();
 
 				$pdo->beginTransaction();
 
@@ -584,24 +526,24 @@ if( !empty($_POST['btn_submit']) ) {
 				$title = ''.$userid.'さんが返信しました！';
 				$url = $_SERVER['REQUEST_URI'];
 				$userchk = 'none';
-                // 通知用SQL作成
-                $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
-        
-                $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+				// 通知用SQL作成
+				$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+		
+				$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+				$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
 				$stmt->bindParam(':url', $url, PDO::PARAM_STR);
 				$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
 				$stmt->bindParam(':title', $title, PDO::PARAM_STR);
 
-                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-                // SQLクエリの実行
-                $res = $stmt->execute();
+				// SQLクエリの実行
+				$res = $stmt->execute();
 
-                // コミット
-                $res = $pdo->commit();
+				// コミット
+				$res = $pdo->commit();
 
-				$mentionedUsers = get_mentions_userid($ueuse);
+				$mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
 				foreach ($mentionedUsers as $mentionedUser) {
 					
@@ -644,22 +586,25 @@ if( !empty($_POST['btn_submit']) ) {
 			
 				}
 
-            } catch(Exception $e) {
+			} catch(Exception $e) {
 
-                // エラーが発生した時はロールバック
-                $pdo->rollBack();
-        	}
+				// エラーが発生した時はロールバック
+				$pdo->rollBack();
+			}
 
-            if( $res ) {
+			if( $res ) {
 				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 				header("Location:".$url."");
 				exit;  
-            } else {
-                $error_message[] = $e->getMessage();
-            }
+			} else {
+				$error_message[] = $e->getMessage();
+			}
 
-            // プリペアドステートメントを削除
-            $stmt = null;
+			// プリペアドステートメントを削除
+			$stmt = null;
+		}
+	}else{
+		$error_message[] = "投稿回数のレート制限を超過しています。(OVER_RATE_LIMIT)";
 	}
 }
 
@@ -691,11 +636,11 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/nsfw_event.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
+<script src="../js/nsfw_event.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -728,7 +673,6 @@ $pdo = null;
 					<form method="post" enctype="multipart/form-data">
 						<div class="sendbox">
 							<textarea id="ueuse" placeholder="へんし～ん！！！" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlentities( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
-							<p>画像のEXIF情報(位置情報など)は削除されません。<br>情報漏洩に気をつけてくださいね…</p>
 							<div class="fxbox">
 							<label for="upload_images" id="images" title="画像1">
 							<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
@@ -751,12 +695,14 @@ $pdo = null;
 							<input type="file" name="upload_videos1" id ="upload_videos1" accept="video/*">
 							</label>
 
-								<div class="nsfw_button">
-									<input id="nsfw_chk" class="nsfw_input" type='checkbox' name="nsfw_chk" value="true"/>
-									<label for="nsfw_chk" class="nsfw_label" title="投稿をNSFW指定にする"><svg><use xlink:href="../img/sysimage/eye_1.svg#eye"></use></svg></label>
-								</div>
+							<div class="nsfw_button">
+								<input id="nsfw_chk" class="nsfw_input" type='checkbox' name="nsfw_chk" value="true"/>
+								<label for="nsfw_chk" class="nsfw_label" title="投稿をNSFW指定にする"><svg><use xlink:href="../img/sysimage/eye_1.svg#eye"></use></svg></label>
+							</div>
 
-								<input type="submit" class="ueusebtn" name="btn_submit" value="返信する">
+							<div class="moji_cnt" id="moji_cnt"><?php echo $mojisize; ?></div>
+
+							<input type="submit" class="ueusebtn" id='ueusebtn' name="btn_submit" value="返信する">
 							</div>
 						</div>
 					</form>
@@ -766,9 +712,7 @@ $pdo = null;
 					var file_reader = new FileReader();
 					// ファイルの読み込みを行ったら実行
 					file_reader.addEventListener('load', function(e) {
-						const element = document.querySelector('#videos1');
-						const createElement = '<p>動画を選択しました。</p>';
-						element.insertAdjacentHTML('afterend', createElement);
+						$('#videos1').addClass('label_set');
 					});
 					file_reader.readAsText(e.target.files[0]);
 				});
@@ -776,9 +720,7 @@ $pdo = null;
 				var file_reader = new FileReader();
 				// ファイルの読み込みを行ったら実行
 				file_reader.addEventListener('load', function(e) {
-					const element = document.querySelector('#images4');
-					const createElement = '<p>画像を選択しました。</p>';
-					element.insertAdjacentHTML('afterend', createElement);
+					$('#images4').addClass('label_set');
 				});
 				file_reader.readAsText(e.target.files[0]);
 				});
@@ -787,9 +729,7 @@ $pdo = null;
 				var file_reader = new FileReader();
 				// ファイルの読み込みを行ったら実行
 				file_reader.addEventListener('load', function(e) {
-					const element = document.querySelector('#images3');
-					const createElement = '<p>画像を選択しました。</p>';
-					element.insertAdjacentHTML('afterend', createElement);
+					$('#images3').addClass('label_set');
 					$("#images4").show();
 				});
 				file_reader.readAsText(e.target.files[0]);
@@ -799,9 +739,7 @@ $pdo = null;
 				var file_reader = new FileReader();
 				// ファイルの読み込みを行ったら実行
 				file_reader.addEventListener('load', function(e) {
-					const element = document.querySelector('#images2');
-					const createElement = '<p>画像を選択しました。</p>';
-					element.insertAdjacentHTML('afterend', createElement);
+					$('#images2').addClass('label_set');
 					$("#images3").show();
 				});
 				file_reader.readAsText(e.target.files[0]);
@@ -810,13 +748,24 @@ $pdo = null;
 				var file_reader = new FileReader();
 				// ファイルの読み込みを行ったら実行
 				file_reader.addEventListener('load', function(e) {
-					const element = document.querySelector('#images');
-					const createElement = '<p>画像を選択しました。</p>';
-					element.insertAdjacentHTML('afterend', createElement);
+					$('#images').addClass('label_set');
 					$("#images2").show();
 				});
 				file_reader.readAsText(e.target.files[0]);
 				});
+				$('#ueuse').on('input', function () {
+					var mojisize = '<?php echo $mojisize; ?>';
+					var mojicount = Number(mojisize) - $(this).val().length;
+					if(mojicount >= 0){
+						$('#moji_cnt').removeClass('red');
+						$('#moji_cnt').html(mojicount);
+						$('#ueusebtn').prop('disabled', false);
+					}else{
+						$('#moji_cnt').addClass('red');
+						$('#moji_cnt').html(mojicount);
+						$('#ueusebtn').prop('disabled', true);
+					}
+				})
 			</script>
 		<?php }else{?>
 			<h1>ユーズ</h1>
@@ -835,7 +784,7 @@ $pdo = null;
 			</div>
 		<div id="error" class="error" style="display: none;">
 			<h1>エラー</h1>
-			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
+			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。<br>(NETWORK_HUKANZEN_STOP)</p>
 		</div>
 	
 
@@ -960,7 +909,41 @@ $(document).ready(function() {
 		});
 	});
 
+	$(document).on('click', '.bookmark, .bookmark_after', function(event) {
 
+		event.preventDefault();
+
+		var postUniqid = $(this).data('uniqid');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
+
+		var isLiked = $(this).hasClass('bookmark_after'); // 現在のいいねの状態を判定
+
+		var $this = $(this); // ボタン要素を変数に格納
+
+		$.ajax({
+			url: '../bookmark/bookmark.php',
+			method: 'POST',
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+			dataType: 'json',
+			success: function(response) {
+				if (response.success) {
+					// いいね成功時の処理
+					if (isLiked) {
+						$this.removeClass('bookmark_after'); // クラスを削除していいねを取り消す
+					} else {
+						$this.addClass('bookmark_after'); // クラスを追加していいねを追加する
+					}
+				} else {
+					// いいね失敗時の処理
+				}
+			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+			error: function() {
+				// エラー時の処理
+			}
+		});
+	});
 
 
 

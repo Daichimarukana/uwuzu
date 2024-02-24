@@ -118,11 +118,11 @@ if( !empty($_POST['btn_submit']) ) {
     // ... (前略)
         // IDの入力チェック
 	if( empty($userid) ) {
-		$error_message[] = 'ユーザーIDを入力してください。';
+		$error_message[] = 'ユーザーIDを入力してください。(USERID_INPUT_PLEASE)';
 	} else {
 
         if( empty($password) ) {
-            $error_message[] = 'パスワードを入力してください。';
+            $error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
         } else {
 
             if($result->rowCount() > 0) {
@@ -151,14 +151,14 @@ if( !empty($_POST['btn_submit']) ) {
                         }
                     }
                     else{
-                        $error_message[] = 'IDまたはパスワードが違います'; 
+                        $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)'; 
                     }
                 }else{
-                    $error_message[] = 'IDまたはパスワードが違います'; 
+                    $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)'; 
                 }
             }
             else {
-                $error_message[] = 'IDまたはパスワードが違います';
+                $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)';
             }
         }
 
@@ -190,8 +190,8 @@ $pdo = null;
 <meta name="twitter:title" content="ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>"/>
 <meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
-<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -208,7 +208,7 @@ $pdo = null;
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 

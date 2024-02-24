@@ -202,7 +202,7 @@ if( !empty($_POST['btn_submit']) ) {
 	$chkuserid = htmlentities($_POST['chkuserid']);
 
 	if( empty($chkuserid) ) {
-		$error_message[] = '確認用ユーザーIDを入力してください。';
+		$error_message[] = '確認用ユーザーIDを入力してください。(USERID_CHECK_INPUT_PLEASE)';
 	} else {
 		if($chkuserid === $userData["userid"]){
 			$userId = $userData["userid"]; // 削除対象のユーザーID
@@ -348,14 +348,14 @@ if( !empty($_POST['btn_submit']) ) {
 				header("Location:../index.php");
 				exit; 
 			} else {
-				$error_message[] = 'アカウント削除に失敗しました。';
+				$error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
 			}
 
 		
 			// プリペアドステートメントを削除
 			$stmt = null;
 		}else{
-			$error_message[] = '確認用ユーザーIDが違います';
+			$error_message[] = '確認用ユーザーIDが違います。(USERID_CHIGAUYANKE)';
 		}
     }
 
@@ -402,7 +402,7 @@ if( !empty($_POST['session_submit']) ) {
 			// すべての出力を終了
 			exit;
 		} else {
-			$error_message[] = 'セッションの終了に失敗しました。';
+			$error_message[] = 'セッションの終了に失敗しました。(END_OF_SESSION_DAME)';
 		}
 
 }
@@ -439,7 +439,7 @@ if( !empty($_POST['token_submit']) ) {
 			header('Location: ' . $url, true, 303);
 			exit; 
 		} else {
-			$error_message[] = 'トークンの発行に失敗しました。';
+			$error_message[] = 'トークンの発行に失敗しました。(CREATE_TOKEN_DAME)';
 		}
 
 }
@@ -473,7 +473,7 @@ if( !empty($_POST['token_off_submit']) ) {
 			header("Location:".$url."");
 			exit; 
 		} else {
-			$error_message[] = 'トークンの削除に失敗しました。';
+			$error_message[] = 'トークンの削除に失敗しました。(TOKEN_DELETE_DAME)';
 		}
 
 }
@@ -487,9 +487,9 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">

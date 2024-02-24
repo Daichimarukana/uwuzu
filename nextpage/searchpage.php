@@ -53,6 +53,12 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
             if (!empty($pdo)) {
                 if (!empty($keyword)) {
+                    $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
+                    $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
+                    $aduserinfoQuery->execute();
+                    $res = $aduserinfoQuery->fetch();
+                    $myblocklist = htmlentities($res["blocklist"]);
+                    $mybookmark = htmlentities($res["bookmark"]);
 
                     $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -133,6 +139,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                     }
                     if(!empty($messages)){
                         foreach ($messages as $value) {
+                            $value["bookmark"] = $mybookmark;
 
                             $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
 

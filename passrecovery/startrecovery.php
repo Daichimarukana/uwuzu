@@ -77,7 +77,7 @@ if( !empty($_POST['btn_submit']) ) {
         $password = $_POST['password'];
 
         if(empty($userauthcode)){
-            $error_message[] = "コードを入力してください。";
+            $error_message[] = "コードを入力してください。(AUTHCODE_INPUT_PLEASE)";
         }else{
 
             $discrepancy = 2;
@@ -87,7 +87,7 @@ if( !empty($_POST['btn_submit']) ) {
                 
                 // パスワードの入力チェック
                 if( empty($password) ) {
-                    $error_message[] = 'パスワードを入力してください。';
+                    $error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
                 } else {
 
                     $weakPasswords = array(
@@ -160,18 +160,18 @@ if( !empty($_POST['btn_submit']) ) {
                     // テスト用のパスワード（実際にはユーザー入力などから取得することになります。
 
                     if (isWeakPassword($password)) {
-                        $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。";
+                        $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。(PASSWORD_ZEIJAKU)";
                     } else {
                         
                     }
                     
                     if( 4 > mb_strlen($password, 'UTF-8') ) {
-                        $error_message[] = 'パスワードは4文字以上である必要があります。';
+                        $error_message[] = 'パスワードは4文字以上である必要があります。(PASSWORD_TODOITENAI_MIN_COUNT)';
                     }
 
                     // 文字数を確認
                     if( 100 < mb_strlen($password, 'UTF-8') ) {
-                        $error_message[] = 'パスワードは100文字以内で入力してください。';
+                        $error_message[] = 'パスワードは100文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
                     }
                 }
 
@@ -211,12 +211,12 @@ if( !empty($_POST['btn_submit']) ) {
                         // すべての出力を終了
                         exit;
                     } else {
-                        $error_message[] = 'パスワードの更新に失敗しました。';
+                        $error_message[] = 'パスワードの更新に失敗しました。(REGISTERED_DAME)';
                     }
                 }
                         
             }else {
-                $error_message[] = '二段階認証が出来ませんでした。再度お試しください。';
+                $error_message[] = '二段階認証が出来ませんでした。再度お試しください。(AUTHCODE_CHECK_DAME)';
             }
             
             // プリペアドステートメントを削除
@@ -233,15 +233,15 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="back.js"></script>
+<script src="../back.js"></script>
 <body>
 
 <div class="leftbox">

@@ -1,9 +1,10 @@
 <?php
-$serversettings_file = "../server/serversettings.ini";
+$serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
-        
-    header("Content-Type: application/json; charset=utf-8");
+    header("Content-Type: application/json");
+    header("charset=utf-8");
+    header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];
 
@@ -46,88 +47,65 @@ if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUO
             $messages[] = $row;
         }
     }
-    if(!(isset($_GET['page']))){
-        if(!empty($userData)){
-            if(!empty($messages)){
-                $item = array(
-                    "@context" => "https://www.w3.org/ns/activitystreams",
-                    "id" => "https://".$domain."/user/outbox/?actor=@".$userid."",
-                    "type" => "OrderedCollection",
-                    "totalItems" => count($messages),
-                    "last" => "https://".$domain."/user/outbox/?actor=@".$userid."&page=true",
-                );
 
-            }else{
-                $item = array(
-                    "item_not_found",
-                );
-            }
-            echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        }else{
-            $item = array(
-                "user_not_found",
-            );
-            echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        }
-    }elseif(htmlentities($_GET['page']) === "true"){
-        if (!empty($userData)) {
-            if (!empty($messages)) {
-                $orderedItems = array();
-        
-                foreach ($messages as $value) {
-                    $activity = array(
-                        "type" => "Create",
+    if (!empty($userData)) {
+        if (!empty($messages)) {
+            $orderedItems = array();
+    
+            foreach ($messages as $value) {
+                $activity = array(
+                    "type" => "Create",
+                    "@context" => "https://www.w3.org/ns/activitystreams",
+                    "id" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
+                    "url" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
+                    "published" => date(DATE_ATOM, strtotime($value["datetime"])),
+                    "to" => [
+                        "https://" . $domain . "/followers",
+                        "https://www.w3.org/ns/activitystreams#Public",
+                    ],
+                    "actor" => "https://" . $domain . "/actor/?actor=@" . $userid,
+                    "object" => array(
+                        "type" => "Note",
                         "@context" => "https://www.w3.org/ns/activitystreams",
-                        "id" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
-                        "url" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
+                        "id" => "https://" . $domain . "/!" . $value["uniqid"],
+                        "url" => "https://" . $domain . "/!" . $value["uniqid"],
                         "published" => date(DATE_ATOM, strtotime($value["datetime"])),
                         "to" => [
                             "https://" . $domain . "/followers",
                             "https://www.w3.org/ns/activitystreams#Public",
                         ],
-                        "actor" => "https://" . $domain . "/actor/?actor=@" . $userid,
-                        "object" => array(
-                            "type" => "Note",
-                            "@context" => "https://www.w3.org/ns/activitystreams",
-                            "id" => "https://" . $domain . "/notes/?note=" . $value["uniqid"],
-                            "url" => "https://" . $domain . "/notes/?note=" . $value["uniqid"],
-                            "published" => date(DATE_ATOM, strtotime($value["datetime"])),
-                            "to" => [
-                                "https://" . $domain . "/followers",
-                                "https://www.w3.org/ns/activitystreams#Public",
-                            ],
-                            "attributedTo" => "https://" . $domain . "/@" . $value["account"],
-                            "content" => nl2br($value["ueuse"]),
-                        ),
-                    );
-        
-                    $orderedItems[] = $activity;
-                }
-        
-                $item = array(
-                    "type" => "OrderedCollectionPage",
-                    "@context" => "https://www.w3.org/ns/activitystreams",
-                    "id" => "https://" . $domain . "/user/outbox/?actor=@" . $userid . "?page=true",
-                    "partOf" => "https://" . $domain . "/user/outbox/?actor=@" . $userid,
-                    "summary" => "outbox of " . $userid,
-                    "totalItems" => count($messages),
-                    "orderedItems" => $orderedItems,
+                        "attributedTo" => "https://" . $domain . "/@" . $value["account"],
+                        "content" => "".nl2br($value["ueuse"])."",
+                    ),
                 );
-        
-                echo json_encode($item, JSON_UNESCAPED_UNICODE);
-            } else {
-                $item = array(
-                    "type" => "item_not_found",
-                );
-                echo json_encode($item, JSON_UNESCAPED_UNICODE);
+    
+                $orderedItems[] = $activity;
             }
+    
+            $item = array(
+                "type" => "OrderedCollection",
+                "@context" => "https://www.w3.org/ns/activitystreams",
+                "id" => "https://" . $domain . "/user/outbox/?actor=@" . $userid . "?page=true",
+                "partOf" => "https://" . $domain . "/user/outbox/?actor=@" . $userid,
+                "summary" => "outbox of " . $userid,
+                "totalItems" => count($messages),
+                "orderedItems" => $orderedItems,
+            );
+    
+            echo json_encode($item, JSON_UNESCAPED_UNICODE);
         } else {
             $item = array(
-                "type" => "user_not_found",
+                "type" => "item_not_found",
             );
             echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        }        
-    }
+        }
+    } else {
+        $item = array(
+            "type" => "user_not_found",
+        );
+        echo json_encode($item, JSON_UNESCAPED_UNICODE);
+    }        
+
 }else{
     header("HTTP/1.1 410 Gone");
 }

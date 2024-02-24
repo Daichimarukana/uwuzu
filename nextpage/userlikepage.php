@@ -47,11 +47,12 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
             $uwuzuid = htmlentities(isset($_GET['id'])) ? htmlentities($_GET['id']) : '';
             $userid = htmlentities($_GET['userid']);
 
-            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
             $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
             $aduserinfoQuery->execute();
             $res = $aduserinfoQuery->fetch();
             $myblocklist = htmlentities($res["blocklist"]);
+            $mybookmark = htmlentities($res["bookmark"]);
 
             $itemsPerPage = 15; // 1ページあたりのユーズ数
             $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
@@ -71,12 +72,20 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $userQuery->bindValue(':userid', $uwuzuid);
                 $userQuery->execute();
                 $userData = $userQuery->fetch();    
-                
-                $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE favorite LIKE :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
-                $messageQuery->bindValue(':userid', '%,' . $uwuzuid . '%', PDO::PARAM_STR);
-                
-                $messageQuery->execute();
-                $message_array = $messageQuery->fetchAll();
+
+                $sql = "SELECT ueuse.* 
+                        FROM ueuse 
+                        LEFT JOIN account ON ueuse.account = account.userid 
+                        WHERE ueuse.favorite LIKE :userid AND account.role != 'ice'
+                        ORDER BY ueuse.datetime DESC 
+                        LIMIT :offset, :itemsPerPage";
+
+                $stmt = $pdo->prepare($sql);
+                $stmt->bindValue(':userid', '%,' . $uwuzuid . '%', PDO::PARAM_STR);
+                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                $stmt->execute();
+                $message_array = $stmt->fetchAll();
                 
                 $messages = array();
                 foreach ($message_array as $row) {
@@ -127,6 +136,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 if(!empty($messages)){
                     foreach ($messages as $value) {
                         if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8'))) {
+                            $value["bookmark"] = $mybookmark;
 
                             $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
 

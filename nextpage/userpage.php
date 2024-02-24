@@ -47,11 +47,12 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
             $uwuzuid = htmlentities(isset($_GET['id'])) ? htmlentities($_GET['id']) : '';
             $userid = htmlentities($_GET['userid']);
 
-            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
             $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
             $aduserinfoQuery->execute();
             $res = $aduserinfoQuery->fetch();
             $myblocklist = htmlentities($res["blocklist"]);
+            $mybookmark = htmlentities($res["bookmark"]);
 
             $itemsPerPage = 15; // 1ページあたりのユーズ数
             $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
@@ -72,8 +73,10 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $userQuery->execute();
                 $userData = $userQuery->fetch();    
                 
-                $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = ''ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
+                $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = ''ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
                 $messageQuery->bindValue(':userid', $uwuzuid);
+                $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                 $messageQuery->execute();
                 $message_array = $messageQuery->fetchAll();
                 
@@ -127,6 +130,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 if(!empty($messages)){
                     foreach ($messages as $value) {
                         if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8'))) {
+                            $value["bookmark"] = $mybookmark;
+                            
                             $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
 
                             // コンマで区切って配列に分割し、要素数を数える

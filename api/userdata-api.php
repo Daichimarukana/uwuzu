@@ -1,6 +1,14 @@
 <?php
-header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
-
+header("Content-Type: application/json");
+header("charset=utf-8");
+header("Access-Control-Allow-Origin: *");
+function decode_yajirushi($postText){
+    $postText = str_replace('&larr;', '←', $postText);
+    $postText = str_replace('&darr;', '↓', $postText);
+    $postText = str_replace('&uarr;', '↑', $postText);
+    $postText = str_replace('&rarr;', '→', $postText);
+    return $postText;
+}
 if(isset($_GET['userid'])) { 
 
 $search = htmlentities($_GET['userid']);
@@ -54,16 +62,16 @@ if (empty($userdata)){
     $userdata["follower_cnt"] = count($followercnts)-1;
 
     $response = array(
-        'user_name' => htmlentities($userdata["username"]),
-        'user_id' => htmlentities($userdata["userid"]),
-        'profile' => htmlentities($userdata["profile"]),
-        'user_icon' => htmlentities("https://".$domain."/".$userdata["iconname"]),
-        'user_header' => htmlentities("https://".$domain."/".$userdata["headname"]),
-        'registered_date' => htmlentities($userdata["datetime"]),
-        'follow' => htmlentities($userdata["follow"]),
-        'follow_cnt' => htmlentities($userdata["follow_cnt"]),
-        'follower' => htmlentities($userdata["follower"]),
-        'follower_cnt' => htmlentities($userdata["follower_cnt"]),
+        'user_name' => decode_yajirushi(htmlspecialchars_decode($userdata["username"])),
+        'user_id' => decode_yajirushi(htmlspecialchars_decode($userdata["userid"])),
+        'profile' => decode_yajirushi(htmlspecialchars_decode($userdata["profile"])),
+        'user_icon' => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userdata["iconname"])),
+        'user_header' => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userdata["headname"])),
+        'registered_date' => decode_yajirushi(htmlspecialchars_decode($userdata["datetime"])),
+        'follow' => decode_yajirushi(htmlspecialchars_decode($userdata["follow"])),
+        'follow_cnt' => decode_yajirushi(htmlspecialchars_decode($userdata["follow_cnt"])),
+        'follower' => decode_yajirushi(htmlspecialchars_decode($userdata["follower"])),
+        'follower_cnt' => decode_yajirushi(htmlspecialchars_decode($userdata["follower_cnt"])),
     );
 }
 echo json_encode($response, JSON_UNESCAPED_UNICODE);

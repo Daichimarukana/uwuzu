@@ -9,6 +9,9 @@ function createUniqId() {
     return base_convert($hashCreateTime, 10, 36);
 }
 
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
 require('../db.php');
 
 require('notificationview.php');
@@ -59,7 +62,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                     PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
                 ));
 
-                $messageQuery = $dbh->prepare("SELECT title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
+                $messageQuery = $dbh->prepare("SELECT fromuserid,title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
                 $messageQuery->bindValue(':userid', $userid);
                 $messageQuery->execute();
                 $message_array = $messageQuery->fetchAll();
@@ -77,6 +80,17 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
                 if (!empty($message_array)) {
                     foreach ($message_array as $value) {
+                        $value["servericon"] = htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');
+                        if(!(empty($value['fromuserid']))){
+                            if(!($value['fromuserid'] == "uwuzu-fromsys")){
+                                $userQuery = $dbh->prepare("SELECT username,iconname FROM account WHERE userid = :userid");
+                                $userQuery->bindValue(':userid', $value['fromuserid']);
+                                $userQuery->execute();
+                                $user_array = $userQuery->fetch();
+                                $value['fromusericon'] = "../".$user_array["iconname"];
+                                $value['fromusername'] = $user_array["username"];
+                            }
+                        }
                         $messageDisplay = new MessageDisplay($value); // userid を渡さない
                         $messageDisplay->display();
                     }

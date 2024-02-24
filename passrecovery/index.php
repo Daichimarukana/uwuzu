@@ -79,11 +79,11 @@ if( !empty($_POST['btn_submit']) ) {
     // ... (前略)
         // IDの入力チェック
 	if( empty($userid) ) {
-		$error_message[] = 'ユーザーIDを入力してください。';
+		$error_message[] = 'ユーザーIDを入力してください。(USERID_INPUT_PLEASE)';
 	} else {
 
         if( empty($mailadds) ) {
-            $error_message[] = 'メールアドレスを入力してください。';
+            $error_message[] = 'メールアドレスを入力してください。(INPUT_PLEASE)';
         } else {
 
             if($result->rowCount() > 0) {
@@ -109,14 +109,14 @@ if( !empty($_POST['btn_submit']) ) {
                         }
                     }
                     else{
-                        $error_message[] = 'IDまたはメールアドレスが違います'; 
+                        $error_message[] = 'IDまたはメールアドレスが違います(ID_OR_MAILADDS_CHIGAUYANKE)'; 
                     }
                 }else{
-                    $error_message[] = 'IDまたはメールアドレスが違います'; 
+                    $error_message[] = 'IDまたはメールアドレスが違います(ID_OR_MAILADDS_CHIGAUYANKE)'; 
                 }
             }
             else {
-                $error_message[] = 'IDまたはメールアドレスが違います';
+                $error_message[] = 'IDまたはメールアドレスが違います(ID_OR_MAILADDS_CHIGAUYANKE)';
             }
         }
 
@@ -136,15 +136,15 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>パスワードの復元 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="back.js"></script>
+<script src="../back.js"></script>
 <body>
 
 <div class="leftbox">

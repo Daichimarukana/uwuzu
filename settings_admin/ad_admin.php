@@ -192,65 +192,67 @@ if( !empty($_POST['ads_btn_submit']) ) {
 	$ads_memo = htmlentities($_POST['ads_memo']);
 
 	if(empty($ads_url)){
-		$error_message[] = "URLが入力されていません。";
+		$error_message[] = "URLが入力されていません。(INPUT_PLEASE)";
 	}
 	if(empty($ads_img_url)){
-		$error_message[] = "画像のURLが入力されていません。";
+		$error_message[] = "画像のURLが入力されていません。(INPUT_PLEASE)";
 	}
 	if(empty($ads_start_url)){
-		$error_message[] = "設置開始日時が入力されていません。";
+		$error_message[] = "設置開始日時が入力されていません。(INPUT_PLEASE)";
 	}
 	if(empty($ads_limit_url)){
-		$error_message[] = "設置終了日時が入力されていません。";
+		$error_message[] = "設置終了日時が入力されていません。(INPUT_PLEASE)";
 	}
 	if(empty($ads_memo_url)){
-		$error_message[] = "メモが入力されていません。";
+		$error_message[] = "メモが入力されていません。(INPUT_PLEASE)";
 	}
 
-	if (!empty($pdo)) {
-		// 書き込み日時を取得
-		$datetime = date("Y-m-d H:i:s");
-		$uniqid = createUniqId();
+	if(empty($error_message)){
+		if (!empty($pdo)) {
+			// 書き込み日時を取得
+			$datetime = date("Y-m-d H:i:s");
+			$uniqid = createUniqId();
 
-		// トランザクション開始
-		$pdo->beginTransaction();
+			// トランザクション開始
+			$pdo->beginTransaction();
 
-		try {
+			try {
 
-			// SQL作成
-			$stmt = $pdo->prepare("INSERT INTO ads (uniqid, url, image_url, memo, start_date, limit_date, datetime) VALUES (:uniqid, :url, :image_url, :memo, :start_date, :limit_date, :datetime)");
-	
-			$stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-			$stmt->bindParam(':url', $ads_url, PDO::PARAM_STR);
-			$stmt->bindParam(':image_url', $ads_img_url, PDO::PARAM_STR);
-			$stmt->bindParam(':memo', $ads_memo, PDO::PARAM_STR);
-			$stmt->bindParam(':start_date', $ads_start_date, PDO::PARAM_STR);
-			$stmt->bindParam(':limit_date', $ads_limit_date, PDO::PARAM_STR);
-			$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				// SQL作成
+				$stmt = $pdo->prepare("INSERT INTO ads (uniqid, url, image_url, memo, start_date, limit_date, datetime) VALUES (:uniqid, :url, :image_url, :memo, :start_date, :limit_date, :datetime)");
+		
+				$stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+				$stmt->bindParam(':url', $ads_url, PDO::PARAM_STR);
+				$stmt->bindParam(':image_url', $ads_img_url, PDO::PARAM_STR);
+				$stmt->bindParam(':memo', $ads_memo, PDO::PARAM_STR);
+				$stmt->bindParam(':start_date', $ads_start_date, PDO::PARAM_STR);
+				$stmt->bindParam(':limit_date', $ads_limit_date, PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-			// SQLクエリの実行
-			$res = $stmt->execute();
+				// SQLクエリの実行
+				$res = $stmt->execute();
 
-			// コミット
-			$res = $pdo->commit();
+				// コミット
+				$res = $pdo->commit();
 
-		} catch(Exception $e) {
+			} catch(Exception $e) {
 
-			// エラーが発生した時はロールバック
-			$pdo->rollBack();
+				// エラーが発生した時はロールバック
+				$pdo->rollBack();
+			}
+
+			if( $res ) {
+				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				header("Location:".$url."");
+				exit;  
+			} else {
+				$error_message[] = $e->getMessage();
+			}
+
+			// プリペアドステートメントを削除
+			$stmt = null;
+
 		}
-
-		if( $res ) {
-			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			header("Location:".$url."");
-			exit;  
-		} else {
-			$error_message[] = $e->getMessage();
-		}
-
-		// プリペアドステートメントを削除
-		$stmt = null;
-
 	}
 }
 if( !empty($_POST['ads_del']) ) {
@@ -303,10 +305,10 @@ if (!empty($pdo)) {
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -393,8 +395,10 @@ if (!empty($pdo)) {
 									</form>
 							</details>
 						</div>
+						<?php }?>
+					<?php }else{?>
+						<div class="tokonone" id="noueuse"><p>広告がありません</p></div>
 					<?php }?>
-				<?php }?>
 			</div>
 		</div>
 	</div>

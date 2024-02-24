@@ -1,0 +1,123 @@
+[uwuzu error code]
+----------(HTTP&UWUZU ACCESS ERR CODE)----------
+HTTP/1.1 410 Gone - 基本的にActivityPub機能がオフの時に表示されます。
+400 Bad Request - クライアント側のエラーによりサーバーが処理できない場合に表示されます。
+401 Unauthorized - アクセス権が無い・有効な認証資格がない場合に表示されます。
+403 Forbidden - アクセス権がない場合に表示されます。
+404 Not Found - ファイル及びリソースが見つからない場合に表示されます。
+500 Internal Server Error - サーバー側で処理できない重大なエラーが発生した際に表示されます。
+503 Service Unavailable - サーバーがリクエストを処理しきれない場合・アクセスが集中している場合に表示されます。
+ADMIN_SERVER_STOP - 管理者によりuwuzuの動作を停止している際に表示されます。
+
+----------(UWUZU API ERR CODE)----------
+input_not_found - APIを使用するにあたって必要な入力値がないもしくは不正な時に表示されます。
+content_to_[xxx]_characters - [xxx]に入る文字数を超過している場合に表示されます。
+contains_prohibited_url - 投稿禁止URLが含まれている場合に表示されます。
+this_account_has_been_frozen - Botのアカウントが凍結されている場合に表示されます。
+token_input_error - APIのアクセストークンが不正または使用できない際に表示されます。
+token_invalid - APIのアクセストークンが無効な時に表示されます。
+db_error_[xxx] - BDでエラーが発生した際に表示されます。
+over_rate_limit - 1分間あたりのレート制限を超過したさいに表示されます。
+post_not_found - ユーズが存在しない時に表示されます。
+ueuseid_not_found - ユーズが存在しない時に表示されます。
+critical_error_userdata_not_found - ユーザーデータがない時に表示されます。
+userid_not_found - ユーザーデータがない時に表示されます。
+
+----------(UWUZU ERR CODE)----------
+FILE_DEKASUGUI_PHP_INI_KAKUNIN - php.iniで設定されているファイルサイズ上限を上回っている時に表示されます。
+FILE_DEKASUGUI_HTML_KAKUNIN - HTMLフォームで指定されているファイルサイズ上限を上回っている時に表示されます。
+FILE_SUKOSHIDAKE_UPLOAD - アップロードされたファイルが一部のみアップロードされた場合に表示されます。
+FILE_UPLOAD_DEKINAKATTA - ファイルのアップロードができない場合に表示されます。
+TMP_FOLDER_NAI - テンポラリフォルダがない場合に表示されます。
+FILE_KAKIKOMI_SIPPAI - 記憶装置へのファイル書き込みに失敗した場合に表示されます。
+PHPINFO()_KAKUNIN - PHPの拡張モジュールによりアップロードが中止された場合に表示されます。
+
+INVITATION_CODE_INPUT_PLEASE - 招待コードが入力されていない時に表示されます。
+INVITATION_CODE_SHIYOUZUMI - 招待コードが使用済みの場合に表示されます。
+INVITATION_CODE_DEAD - 招待コードが無効です。
+
+USERNAME_INPUT_PLEASE - ユーザーネーム(表示名)が入力されていない時に表示されます。
+USERNAME_OVER_MAX_COUNT - ユーザーネーム(表示名)の文字数が最大文字数を超過している時に表示されます。
+
+USERID_INPUT_PLEASE - ユーザーIDが入力されていない時に表示されます。
+USERID_OVER_MAX_COUNT - ユーザーIDの文字数が最大文字数を超過している時に表示されます。
+USERID_SHIYOUZUMI - ユーザーIDがすでに使用されている時に表示されます。
+USERID_CHECK_INPUT_PLEASE - ユーザーID確認用IDが入力されていない場合に表示されます。
+USERID_CHIGAUYANKE - ユーザーID確認用IDがアカウント作成時のものと違う場合に表示されます。
+USERID_CONTAINS_PROHIBITED - 登録禁止ユーザーIDが入力された場合に表示されます。
+
+PASSWORD_INPUT_PLEASE - パスワードが入力されていない時に表示されます。
+PASSWORD_NEW_INPUT_PLEASE - 新しいパスワードが入力されていない場合に表示されます。
+PASSWORD_ZEIJAKU - パスワードが弱く、uwuzu側で受け入れられない場合に時に表示されます。
+PASSWORD_CHIGAUYANKE - 入力されたパスワードと再確認用のパスワードが違う時に表示されます。
+PASSWORD_TODOITENAI_MIN_COUNT - パスワードの最低文字数に届いておらず、uwuzu側で受け入れられない場合に表示されます。
+PASSWORD_OVER_MAX_COUNT - パスワードの最大文字数を超過している時に表示されます。
+
+PASS_AND_ID_CHIGAUYANKE - パスワードまたはユーザーIDが間違っている場合、もしくはその両方が間違っている場合に表示されます。
+
+REGISTERED_DAME - データの登録・更新に失敗した場合に表示されます。
+
+EMOJI_ID_INPUT_PLEASE - 絵文字IDが入力されていない時に表示されます。
+EMOJI_ID_OVER_MAX_COUNT - 絵文字IDの文字数が最大文字数を超過している時に表示されます。
+EMOJI_ID_SHIYOUZUMI - ユーザーIDがすでに使用されている時に表示されます。
+
+INPUT_PLEASE - 入力すべき場所に内容が無い場合に表示されます。
+INPUT_OVER_MAX_COUNT - 入力すべき場所に入力された内容が設定されている最大文字数を超過している際に表示されます。
+INPUT_CONTAINS_PROHIBITED_URL - 入力すべき場所に入力された内容に禁止されているURLが含まれている際に表示されます。
+
+PHOTO_SELECT_PLEASE - 正常に画像が選択されていない場合に表示されます。
+PHOTO_OVER_MAX_SIZE - 画像のファイルサイズが大きすぎる場合に表示されます。
+
+SORRY_FILE_HITAIOU - 対応していないファイル形式のファイルが読み込まれた場合に表示されます。
+
+NETWORK_HUKANZEN_STOP - サーバーとの通信時に不完全なデータが帰ってくる・ネットワークが切断される・タイムアウトエラーを起こすなどが起きた際に表示されます。
+
+取得に失敗しました。 - ユーズの取得に失敗・アカウント情報の認証ができなかった際に表示されます。
+
+ACCOUNT_DELETE_DAME - アカウントの削除に失敗した場合に表示されます。
+END_OF_SESSION_DAME - セッションの終了に失敗した場合に表示されます。
+CREATE_TOKEN_DAME - APIトークンの発行に失敗した場合に表示されます。
+TOKEN_DELETE_DAME - APIトークンの削除に失敗した場合に表示されます。
+
+ID_OR_MAILADDS_CHIGAUYANKE - 入力されたIDもしくはトークンが違う際に表示されます。
+
+AUTHCODE_INPUT_PLEASE - 二段階認証のコードが入力されていない場合に表示されます。
+AUTHCODE_CHECK_DAME - 二段階認証に失敗した場合に表示されます。
+AUTHCODE_GET_ACCOUNT_NOT_FOUND - 二段階認証するアカウントが存在しない・データが不完全・ネットワークが切断される・タイムアウトエラーを起こすなどが起きた際に表示されます。
+BACKUPCODE_DAME - バックアップコードが使用できない場合に表示されます。
+
+MAILADDS_CHECK_DAME - メールアドレスが実際に使用できる規格に準拠いているものか確認した際に使用できないと判断されると表示されます。
+
+PLUGIN_NOT_FOUND - プラグインフォルダ内にプラグインの入っているフォルダが見つからない際に表示されます。
+PLUGIN_MUKOU - プラグインが無効な場合に表示されます。
+
+PHPMailer Error: [xxx] - PHPMailerを使用している状態でメールエラーを引き起こした際にPHPMailerから返されるエラーです。
+
+ROLE_ID_INPUT_PLEASE - ロールIDが入力されていない場合に表示されます。
+ROLE_ID_SHIYOUZUMI - ロールIDがすでに使用されている時に表示されます。
+ROLE_HUYOZUMI - ロール付与先のユーザーにすでにロールが付与されている場合に表示されます。
+ROLE_OR_USER_NOT_FOUND - ロールまたはユーザーが存在しない場合に表示されます。
+
+USER_NOT_FOUND - ユーザーが存在しない場合に表示されます。
+USER_ICE_DAME - ユーザーを凍結失敗した際に表示されます。
+USER_WATER_DAME - ユーザーを解凍失敗した場合に表示されます。
+
+UNSUPPORTED_BROWSER - uwuzuが対応していないブラウザからアクセスされた場合に表示されます。
+UNSUPPORTED_OS - uwuzuが対応していないOS・端末からアクセスされた場合に表示されます。
+PLEASE_COOKIE_ON - Cookieが無効化されている場合に表示されます。
+NONE_SSL - HTTP通信で読み込まれていない場合に表示されます。
+NONE_SSL_SERVER - サーバー側でSSLの設定がされてない場合に表示されます。
+
+OVER_RATE_LIMIT - 投稿回数のレート制限を超過している場合に表示されます。
+
+BOOKMARK_NOT_DELETED - ブックマークの削除に失敗した場合に表示されます。
+
+ERROR - 想定されていないエラーが発生した際に表示されます。
+
+----------(OTHERS ERR CODE)----------
+Fatal error:[xxx] - php側で致命的なエラーが発生した場合に表示されます。
+Parse error:[xxx] - phpの構文に問題が合った際に表示されます。
+Warning:[xxx] - phpコードで軽微なエラーが発生した場合に表示されます。
+Notice:[xxx] - phpコードで軽微なエラーが発生した場合に表示されます。
+
+ERROR [xxx] ([xxx]):[xxx] - データベース側でエラーが発生した場合に表示されます。

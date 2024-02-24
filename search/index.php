@@ -200,13 +200,13 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/nsfw_event.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
+<script src="../js/nsfw_event.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <title>検索 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
@@ -251,7 +251,7 @@ $pdo = null;
 		</div>
 		<div id="error" class="error" style="display: none;">
 			<h1>エラー</h1>
-			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。</p>
+			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。<br>(NETWORK_HUKANZEN_STOP)</p>
 		</div>
 	</div>
 	</main>
@@ -341,47 +341,82 @@ $(document).ready(function() {
 
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
-	event.preventDefault();
+		event.preventDefault();
 
-	var postUniqid = $(this).data('uniqid');
-	var userid = '<?php echo $userid; ?>';
-	var account_id = '<?php echo $loginid; ?>';
-	var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
+		var postUniqid = $(this).data('uniqid');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
 
-	var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
+		var isLiked = $(this).hasClass('favbtn_after'); // 現在のいいねの状態を判定
 
-	var $this = $(this); // ボタン要素を変数に格納
+		var $this = $(this); // ボタン要素を変数に格納
 
-	$.ajax({
-		url: '../favorite/favorite.php',
-		method: 'POST',
-		data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
-		dataType: 'json',
-		success: function(response) {
-			if (response.success) {
-				// いいね成功時の処理
-				if (isLiked) {
-					$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
-					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
+		$.ajax({
+			url: '../favorite/favorite.php',
+			method: 'POST',
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+			dataType: 'json',
+			success: function(response) {
+				if (response.success) {
+					// いいね成功時の処理
+					if (isLiked) {
+						$this.removeClass('favbtn_after'); // クラスを削除していいねを取り消す
+						$this.find('use').attr('xlink:href', '../img/sysimage/favorite_1.svg#favorite'); // 画像を元の画像に戻す
+					} else {
+						$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
+						$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
+					}
+
+					var newFavoriteList = response.newFavorite.split(',');
+					var likeCount = newFavoriteList.length - 1;
+					likeCountElement.text(likeCount); // いいね数を更新
 				} else {
-					$this.addClass('favbtn_after'); // クラスを追加していいねを追加する
-					$this.find('use').attr('xlink:href', '../img/sysimage/favorite_2.svg#favorite'); // 画像を新しい画像に置き換える
+					// いいね失敗時の処理
 				}
-
-				var newFavoriteList = response.newFavorite.split(',');
-				var likeCount = newFavoriteList.length - 1;
-				likeCountElement.text(likeCount); // いいね数を更新
-			} else {
-				// いいね失敗時の処理
+			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+			error: function() {
+				// エラー時の処理
 			}
-		}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
-		error: function() {
-			// エラー時の処理
-		}
-	});
+		});
 	});
 
 
+	$(document).on('click', '.bookmark, .bookmark_after', function(event) {
+
+		event.preventDefault();
+
+		var postUniqid = $(this).data('uniqid');
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var likeCountElement = $(this).find('.like-count'); // いいね数を表示する要素
+
+		var isLiked = $(this).hasClass('bookmark_after'); // 現在のいいねの状態を判定
+
+		var $this = $(this); // ボタン要素を変数に格納
+
+		$.ajax({
+			url: '../bookmark/bookmark.php',
+			method: 'POST',
+			data: { uniqid: postUniqid, userid: userid, account_id: account_id  }, // ここに自分のユーザーIDを指定
+			dataType: 'json',
+			success: function(response) {
+				if (response.success) {
+					// いいね成功時の処理
+					if (isLiked) {
+						$this.removeClass('bookmark_after'); // クラスを削除していいねを取り消す
+					} else {
+						$this.addClass('bookmark_after'); // クラスを追加していいねを追加する
+					}
+				} else {
+					// いいね失敗時の処理
+				}
+			}.bind(this), // コールバック内でthisが適切な要素を指すようにbindする
+			error: function() {
+				// エラー時の処理
+			}
+		});
+	});
 
 
 

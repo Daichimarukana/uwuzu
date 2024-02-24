@@ -213,20 +213,35 @@ if( !empty($pdo) ) {
 
 
 if( !empty($_POST['btn_submit']) ) {
+	//$level = $_POST['notice_level'];
 	$title = $_POST['title'];
     $note = $_POST['note'];
 
     // IDの入力チェック
 	if( empty($title) ) {
-		$error_message[] = 'タイトルを入力してください！';
+		$error_message[] = 'タイトルを入力してください！(INPUT_PLEASE)';
 	} else {
 
         // 文字数を確認
         if( 1024 < mb_strlen($title, 'UTF-8') ) {
-			$error_message[] = 'タイトルは1024文字以内で入力してください。';
+			$error_message[] = 'タイトルは1024文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
 		}
 
     }
+
+	/*if( empty($level) ) {
+		$error_message[] = '緊急度レベルを指定してください！(INPUT_PLEASE)';
+	} else {
+		if($level == 'normal'){
+			$notice_level = 'normal';
+		}elseif($level == 'warning'){
+			$notice_level = 'warning';
+		}elseif($level == 'danger'){
+			$notice_level = 'danger';
+		}else{
+			$error_message[] = '緊急度レベルが正しく指定されていません！(ERROR)';
+		}
+    }*/
 
 	if( empty($error_message) ) {
 		
@@ -243,6 +258,7 @@ if( !empty($_POST['btn_submit']) ) {
 
 
             // 値をセット
+			//$stmt->bindParam( ':level', $notice_level, PDO::PARAM_STR);
             $stmt->bindParam( ':title', $title, PDO::PARAM_STR);
             $stmt->bindParam( ':note', $note, PDO::PARAM_STR);
 
@@ -267,7 +283,7 @@ if( !empty($_POST['btn_submit']) ) {
             header("Location:".$url."");
             exit;  
         } else {
-            $error_message[] = '配信に失敗しました。';
+            $error_message[] = '配信に失敗しました。(REGISTERED_DAME)';
         }
 
         // プリペアドステートメントを削除
@@ -290,9 +306,9 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -319,7 +335,21 @@ $pdo = null;
 
         <p>タイトルと内容を入力して配信してください。<br>削除と編集はここからは出来ません。<br>DB管理画面から行ってください。</p>
 
-            <!--ユーザーネーム関係-->
+			<!--<div>
+				<p>緊急度レベル</p>
+				<div class="p2">通常:右側に表示される通常の表示<br>警告:画面上部に常時表示<br>緊急:開いたときに画面中央にお知らせを表示(ウィンドウ)</div>
+				<div class="radio_btn_zone">
+					<input type="radio" name="notice_level" value="normal" id="normal" class="radiobtn_input" checked>
+					<label for="normal" class="radiobtn_label">通常</label>
+
+					<input type="radio" name="notice_level" value="warning" id="warning" class="radiobtn_input">
+					<label for="warning" class="radiobtn_label">警告</label>
+
+					<input type="radio" name="notice_level" value="danger" id="danger" class="radiobtn_input">
+					<label for="danger" class="radiobtn_label">緊急</label>
+				</div>
+			</div>-->
+
             <div>
                 <p>タイトル</p>
                 <input placeholder="ここにタイトル" class="inbox" type="text" name="title" value="<?php if( !empty($_SESSION['title']) ){ echo htmlspecialchars( $_SESSION['title'], ENT_QUOTES, 'UTF-8'); } ?>">

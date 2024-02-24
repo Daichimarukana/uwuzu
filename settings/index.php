@@ -11,6 +11,10 @@ function createUniqId(){
     return base_convert($hashCreateTime,10,36);
 }
 
+function random_key($moji_cnt = 16){
+    return substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyz', $moji_cnt)), 0, $moji_cnt);
+}
+
 require('../db.php');
 
 // 変数の初期化
@@ -45,7 +49,7 @@ try {
 
 if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist,mail_settings FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -101,7 +105,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 		
 } elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist,mail_settings FROM account WHERE userid = :userid");
 	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
 	$passQuery->execute();
 	$res = $passQuery->fetch();
@@ -175,6 +179,12 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
+//ページ内のみ使用変数-------------------------
+$mail_settings = htmlentities($res["mail_settings"]);
+//------------------------------------------
+//phpmailer--------------------------------------------
+require('../settings_admin/plugin_settings/phpmailer_settings.php');
+//------------------------------------------------------
 if( !empty($pdo) ) {
 	
 	// データベース接続の設定
@@ -200,7 +210,6 @@ if( !empty($pdo) ) {
     $rerole->execute();
 
     $userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
-
 	
 }
 
@@ -213,7 +222,6 @@ if( !empty($_POST['btn_submit']) ) {
 	}else{
 		$im_bot = "false";
 	}
-
 	if($im_bot === "true"){
 		$saveim_bot = "bot";
 	}else{
@@ -224,6 +232,22 @@ if( !empty($_POST['btn_submit']) ) {
 	$username = $_POST['username'];
 
     $mailadds = $_POST['mailadds'];
+
+	if( !empty($_POST['mail_important']) ) {
+		$mail_important = $_POST['mail_important'];
+	}else{
+		$mail_important = "false";
+	}
+	if($mail_important === "true"){
+		if(filter_var($mailadds, FILTER_VALIDATE_EMAIL)){
+			$savemail_important = "important";
+		}else{
+			$savemail_important = "none";
+			$error_message[] = 'メールアドレスが無効なため重要なお知らせをメールで受信する機能は使用できません。(MAILADDS_CHECK_DAME)';
+		}
+	}else{
+		$savemail_important = "none";
+	}
 
     $profile = $_POST['profile'];
 
@@ -249,11 +273,11 @@ if( !empty($_POST['btn_submit']) ) {
 
 	// ユーザーネームの入力チェック
 	if( empty($username) ) {
-		$error_message[] = '表示名を入力してください。';
+		$error_message[] = '表示名を入力してください。(USERNAME_INPUT_PLEASE)';
 	} else {
         // 文字数を確認
         if( 50 < mb_strlen($username, 'UTF-8') ) {
-			$error_message[] = 'ユーザーネームは50文字以内で入力してください。';
+			$error_message[] = 'ユーザーネームは50文字以内で入力してください。(USERNAME_OVER_MAX_COUNT)';
 		}
     }
 
@@ -264,13 +288,14 @@ if( !empty($_POST['btn_submit']) ) {
 
 	try {
 		// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot WHERE userid = :userid;");
+		$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot, mail_settings = :mail_settings WHERE userid = :userid;");
 
 		// 他の値をセット
 		$stmt->bindParam(':username', $username, PDO::PARAM_STR);
 		$stmt->bindParam(':mailadds', $mailadds, PDO::PARAM_STR);
 		$stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
 		$stmt->bindParam(':saveimbot', $saveim_bot, PDO::PARAM_STR);
+		$stmt->bindParam(':mail_settings', $savemail_important, PDO::PARAM_STR);
 
 		// 条件を指定
 		// 以下の部分を適切な条件に置き換えてください
@@ -293,7 +318,7 @@ if( !empty($_POST['btn_submit']) ) {
 		header("Location:".$url."");
 		exit; 
 	} else {
-		$error_message[] = '更新に失敗しました。';
+		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
 	}
 
     // プリペアドステートメントを削除
@@ -311,16 +336,16 @@ if( !empty($_POST['pass_submit']) ) {
 	$hashpassword = password_hash($password, PASSWORD_DEFAULT);
 
 	if(empty($pass_chk)){
-		$error_message[] = 'ユーザーidを入力してください。';
+		$error_message[] = 'ユーザーidを入力してください。(USERID_INPUT_PLEASE)';
 	}else{
 		if(!($pass_chk === $userData["userid"])){
-			$error_message[] = 'ユーザーidが不正です。';
+			$error_message[] = 'ユーザーidが不正です。(USERID_CHIGAUYANKE)';
 		}
 	}
 
 	// ユーザーネームの入力チェック
 	if( empty($password) ) {
-		$error_message[] = '新しいパスワードを入力してください。';
+		$error_message[] = '新しいパスワードを入力してください。(PASSWORD_NEW_INPUT_PLEASE)';
 	} else {
 
 		$weakPasswords = array(
@@ -393,17 +418,17 @@ if( !empty($_POST['pass_submit']) ) {
         // テスト用のパスワード（実際にはユーザー入力などから取得することになります。
 
         if (isWeakPassword($password)) {
-            $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。";
+            $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。(PASSWORD_ZEIJAKU)";
         } else {
             
         }
         // 文字数を確認
         if( 100 < mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは100文字以内で入力してください。';
+			$error_message[] = 'パスワードは100文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
 		}
 
 		if( 4 > mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは4文字以上である必要があります。';
+			$error_message[] = 'パスワードは4文字以上である必要があります。(PASSWORD_TODOITENAI_MIN_COUNT)';
 		}
     }
 
@@ -441,7 +466,7 @@ if( !empty($_POST['pass_submit']) ) {
 		header("Location:".$url."");
 		exit; 
 	} else {
-		$error_message[] = '更新に失敗しました。';
+		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
 	}
 
     // プリペアドステートメントを削除
@@ -547,7 +572,7 @@ if( !empty($_POST['img1btn_submit']) ) {
 			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 		}
     }else{
-		$error_message[] = 'ヘッダー画像を選択してください';
+		$error_message[] = 'ヘッダー画像を選択してください(PHOTO_SELECT_PLEASE)';
     }
 
     $options = array(
@@ -605,7 +630,7 @@ if( !empty($_POST['img1btn_submit']) ) {
 		header("Location:".$url."");
 		exit; 
     } else {
-        $error_message[] = '更新に失敗しました。';
+        $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
     }
 
     // プリペアドステートメントを削除
@@ -659,7 +684,7 @@ if( !empty($_POST['img2btn_submit']) ) {
 			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
 		}
     }else{
-		$error_message[] = 'アイコン画像を選択してください';
+		$error_message[] = 'アイコン画像を選択してください(PHOTO_SELECT_PLEASE)';
     }
 
 
@@ -718,7 +743,7 @@ if( !empty($_POST['img2btn_submit']) ) {
 		header("Location:".$url."");
 		exit; 
     } else {
-        $error_message[] = '更新に失敗しました。';
+        $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
     }
 
     // プリペアドステートメントを削除
@@ -774,7 +799,7 @@ if( !empty($_POST['auth_off_submit']) ) {
 			header("Location:".$url."");
 			exit; 
 		} else {
-			$error_message[] = '更新に失敗しました。';
+			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
 		}
 	
 		// プリペアドステートメントを削除
@@ -790,9 +815,9 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -868,6 +893,20 @@ $pdo = null;
 
 				<?php }elseif($userData['token']==='ice'){ ?>
 					<p>アカウントが凍結されているためBotであることの設定変更はできません。</p>
+				<?php }?>
+				
+				<?php if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){?>
+					<p>重要なお知らせをメールで受信する</p>
+					<div class="p2">あなたのアカウントが凍結された際やBANされた際にメールにてお知らせする機能です。<br>利用可能なメールアドレスを事前に設定しておく必要があります。</div>
+					<div class="switch_button">
+						<?php if(false !== strpos($mail_settings, 'important')) {?>
+							<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" checked/>
+							<label for="mail_important" class="switch_label"></label>
+						<?php }else{?>
+							<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" />
+							<label for="mail_important" class="switch_label"></label>
+						<?php }?>
+					</div>
 				<?php }?>
 							
 				<input type="submit" class = "irobutton" name="btn_submit" value="情報更新">

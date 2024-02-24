@@ -241,14 +241,14 @@ if( !empty($_POST['btn_submit']) ) {
                 header('Location: ' . $url, true, 303);
                 exit; 
             } else {
-                $error_message[] = '更新に失敗しました。';
+                $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
             }
         
             // プリペアドステートメントを削除
             $stmt = null;
         }
     } else {
-        $error_message[] = "二段階認証が出来ませんでした。再度お試しください。";
+        $error_message[] = "二段階認証が出来ませんでした。再度お試しください。(AUTHCODE_CHECK_DAME)";
     }
 }
 
@@ -262,9 +262,9 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">

@@ -195,16 +195,16 @@ if( !empty($_POST['role_btn_submit']) ) {
     $result3 = $query->fetch();
 
 	if(empty($rolename)){
-		$error_message[] = "ロール名が入力されていません。";
+		$error_message[] = "ロール名が入力されていません。(INPUT_PLEASE)";
 	}
 	if(empty($roleid)){
-		$error_message[] = "ロールのidが入力されていません。";
+		$error_message[] = "ロールのidが入力されていません。(ROLE_ID_INPUT_PLEASE)";
 	}elseif($result3 > 0){
-		$error_message[] = 'このロールのid('.$roleid.')は既に使用されています。他のidを作成してください。';
+		$error_message[] = 'このロールのid('.$roleid.')は既に使用されています。他のidを作成してください。(ROLE_ID_SHIYOUZUMI)';
 	}
 
 	if(empty($rolecolor)){
-		$error_message[] = "ロールの色が入力されていません。";
+		$error_message[] = "ロールの色が入力されていません。(INPUT_PLEASE)";
 	}
 
 	if (!empty($pdo)) {
@@ -260,17 +260,26 @@ if( !empty($_POST['role_del']) ) {
 		$deleteQuery->bindValue(':roleid', $role_id, PDO::PARAM_STR);
 		$res = $deleteQuery->execute();
 
-		try{
+		// ロールを削除したい全てのアカウントを取得
+		$query = $pdo->prepare("SELECT * FROM account WHERE role LIKE :pattern1 OR role LIKE :pattern2 OR role LIKE :pattern3");
+		$query->bindValue(':pattern1', "%,$role_id,%", PDO::PARAM_STR);
+		$query->bindValue(':pattern2', "%,$role_id", PDO::PARAM_STR);
+		$query->bindValue(':pattern3', "$role_id,%", PDO::PARAM_STR);
+		$query->execute();
+		$accounts = $query->fetchAll();
+
+		foreach ($accounts as $account) {
 			// フォローの更新
-			$updateFollowQuery = $pdo->prepare("UPDATE account SET role = REPLACE(role, :roleid, '') WHERE role LIKE :pattern");
-			$updateFollowQuery->bindValue(':roleid', ",$role_id", PDO::PARAM_STR);
-			$updateFollowQuery->bindValue(':pattern', "%,$role_id%", PDO::PARAM_STR);
-			$res = $updateFollowQuery->execute();
-	
-		} catch (Exception $e) {
-				
-			// エラーが発生した時はロールバック
-			$pdo->rollBack();
+			if (strpos($account['role'], ",$role_id,") !== false || strpos($account['role'], ",$role_id") !== false || strpos($account['role'], "$role_id,") !== false) {
+				$delrole_roleList = explode(',', $account['role']);
+				$delrole_roleList = array_diff($delrole_roleList, array($role_id));
+				$new_delrole_roleList = implode(',', $delrole_roleList);
+
+				$updateroleQuery = $pdo->prepare("UPDATE account SET role = :role WHERE userid = :userid");
+				$updateroleQuery->bindValue(':role', $new_delrole_roleList, PDO::PARAM_STR);
+				$updateroleQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
+				$updateroleQuery->execute();
+			}
 		}
 
 	} catch (Exception $e) {
@@ -310,7 +319,7 @@ if( !empty($_POST['send_add_role_submit']) ) {
 	if($result4 > 0 && $result5 > 0){
 
 		if (false !== strstr($result4["role"], ','.$add_roleid)) {
-			$error_message[] = "既に".$add_roleid."は付与済みです。";
+			$error_message[] = "既に".$add_roleid."は付与済みです。(ROLE_HUYOZUMI)";
 		}
 
 		$New_role_id = $result4["role"] . ',' . $add_roleid;
@@ -342,7 +351,54 @@ if( !empty($_POST['send_add_role_submit']) ) {
 			$stmt = null;
 		}
 	}else{
-		$error_message[] = "ロールがないまたはユーザーがいません。";
+		$error_message[] = "ロールがないまたはユーザーがいません。(ROLE_OR_USER_NOT_FOUND)";
+	}
+}
+if( !empty($_POST['send_del_role_submit']) ) {
+	$del_userid = htmlentities($_POST['del_userid']);
+	$del_roleid = htmlentities($_POST['del_roleid']);
+
+	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+	$query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+    $query->execute(array(':userid' => $del_userid));
+    $result4 = $query->fetch();
+
+	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+	$query = $dbh->prepare('SELECT * FROM role WHERE roleidname = :roleid limit 1');
+    $query->execute(array(':roleid' => $del_roleid));
+    $result5 = $query->fetch();
+
+	if($result4 > 0 && $result5 > 0){
+		$userQuery = $dbh->prepare("SELECT role FROM account WHERE userid = :userid");
+		$userQuery->bindValue(':userid', $del_userid);
+		$userQuery->execute();
+		$userData = $userQuery->fetch();
+
+		// ロール剥奪ボタンが押された場合の処理
+		$roleList = explode(',', $userData['role']);
+		if (in_array($del_roleid, $roleList)) {
+			// 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
+			$roleList = array_diff($roleList, array($del_roleid));
+			$newroleList = implode(',', $roleList);
+	
+			// UPDATE文を実行してフォロー情報を更新
+			$updateQuery = $pdo->prepare("UPDATE account SET role = :role WHERE userid = :userid");
+			$updateQuery->bindValue(':role', $newroleList, PDO::PARAM_STR);
+			$updateQuery->bindValue(':userid', $del_userid, PDO::PARAM_STR);
+			$res = $updateQuery->execute();
+	
+			if ($res) {
+				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				header("Location:" . $url);
+				exit;
+			} else {
+				$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+			}
+	
+			$stmt = null;
+		}
+	}else{
+		$error_message[] = "ロールがないまたはユーザーがいません。(ROLE_OR_USER_NOT_FOUND)";
 	}
 }
 
@@ -363,10 +419,10 @@ if (!empty($pdo)) {
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -405,7 +461,7 @@ if (!empty($pdo)) {
 				<div>
 					<p>ロールの色</p>
 					<div class="p2">ロールの色です。<br>HEXコードで入力してください。(#はつけないでください。)</div>
-					<input id="rolecolor" placeholder="256238" class="inbox" type="text" name="rolecolor" maxlength="6" value="">
+					<input id="rolecolor" onInput="checkForm(this)" placeholder="256238" class="inbox" type="text" name="rolecolor" maxlength="6" value="">
 				</div>
 
 				<input type="submit" class = "irobutton" name="role_btn_submit" value="作成">
@@ -415,6 +471,10 @@ if (!empty($pdo)) {
 					<h1>ロール付与</h1>
 					<p>特定のユーザーにロール付与するときに使用してください。</p>
 					<button id="addrole" class="irobutton">付与</button>
+					<hr>
+					<h1>ロール剥奪</h1>
+					<p>特定のユーザーからロールを剥奪する時に使用してください。</p>
+					<button id="delrole" class="irobutton">剥奪</button>
 					<hr>
 					<h1>ロール一覧</h1>
 					<?php if(!(empty($roles))){?>
@@ -454,12 +514,29 @@ if (!empty($pdo)) {
 			<p>ロール付与先のユーザーidと付与したいロールのidを入力してください。<br>なお、現時点ではここからロールの剥奪は出来ませんのでご注意ください。</p>
 			<form method="post" id="deleteForm">
 				<div class="p2">付与先ユーザーid</div>
-				<input type="text" id="add_userid" class="inbox" placeholder="admin" name="add_userid" value="">
+				<input type="text" id="add_userid" onInput="checkForm(this)" class="inbox" placeholder="admin" name="add_userid" value="">
 				<div class="p2">付与するロールid</div>
-				<input type="text" id="add_roleid" class="inbox" placeholder="role" name="add_roleid" value="">
+				<input type="text" id="add_roleid" onInput="checkForm(this)" class="inbox" placeholder="role" name="add_roleid" value="">
 				<div class="btn_area">
 					<input type="submit" id="deleteButton" class="fbtn_no" name="send_add_role_submit" value="付与">
 					<input type="button" id="cancelButton" class="fbtn" value="キャンセル">
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div id="account_delrole_Modal" class="modal">
+		<div class="modal-content">
+			<h1>ロール付与</h1>
+			<p>ロール付与先のユーザーidと付与したいロールのidを入力してください。<br>なお、現時点ではここからロールの剥奪は出来ませんのでご注意ください。</p>
+			<form method="post" id="delrole_Form">
+				<div class="p2">剥奪先ユーザーid</div>
+				<input type="text" id="del_userid" onInput="checkForm(this)" class="inbox" placeholder="admin" name="del_userid" value="">
+				<div class="p2">剥奪するロールid</div>
+				<input type="text" id="del_roleid" onInput="checkForm(this)" class="inbox" placeholder="role" name="del_roleid" value="">
+				<div class="btn_area">
+					<input type="submit" id="delrole_deleteButton" class="fbtn_no" name="send_del_role_submit" value="剥奪">
+					<input type="button" id="delrole_cancelButton" class="fbtn" value="キャンセル">
 				</div>
 			</form>
 		</div>
@@ -471,8 +548,7 @@ if (!empty($pdo)) {
 	<?php require('../require/botbox.php');?>
 
 </body>
-<script>
-$(document).ready(function() {
+<script type="text/javascript">
 	function checkForm(inputElement) {
 		var str = inputElement.value;
 		while (str.match(/[^A-Za-z\d_]/)) {
@@ -507,7 +583,32 @@ $(document).ready(function() {
 			}, 150);
         });
     });
-});
 
+	var modal2 = document.getElementById('account_delrole_Modal');
+    var delrole_deleteButton = document.getElementById('delrole_deleteButton');
+    var delrole_cancelButton = document.getElementById('delrole_cancelButton'); // 追加
+	var modalMain = $('.modal-content');
+
+    document.getElementById("delrole").addEventListener('click', function(){
+        modal2.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        delrole_deleteButton.addEventListener('click', () => {
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal2.style.display = 'none';
+			}, 150);
+        });
+
+        delrole_cancelButton.addEventListener('click', () => { // 追加
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal2.style.display = 'none';
+			}, 150);
+        });
+    });
 </script>
 </html>

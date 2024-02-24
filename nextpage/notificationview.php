@@ -1,4 +1,42 @@
 <?php 
+function processMarkdownAndWrapEmptyLines($markdownText){
+
+    //\___________________[注意]__________________\
+    // \____ここの順番を変えるとうまく動かなくなります___\
+    //  \______Markdownうまく動くところを探すべし______\
+
+    $markdownText = preg_replace('/\[\[buruburu (.+)\]\]/m', '<span class="buruburu">$1</span>', $markdownText);//ぶるぶる
+
+    $markdownText = preg_replace('/(^|[^`])`([^`\n]+)`($|[^`])/m', '$1<span class="inline">$2</span>$3', $markdownText);//Inline Code
+
+    $markdownText = preg_replace('/\*\*\*(.*?)\*\*\*/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+    $markdownText = preg_replace('/\_\_\_(.*?)\_\_\_/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+
+    $markdownText = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $markdownText);//太字
+    $markdownText = preg_replace('/\_\_(.*?)\_\_/', '<b>$1</b>', $markdownText);//太字
+
+    $markdownText = preg_replace('/\*(.*?)\*/', '<i>$1</i>', $markdownText);//斜体
+    $markdownText = preg_replace('/\_(.*?)\_/', '<i>$1</i>', $markdownText);//斜体
+
+    $markdownText = preg_replace('/\~\~(.*?)\~\~/m', '<s>$1</s>', $markdownText);//打ち消し線
+
+    $markdownText = preg_replace('/&gt;&gt;&gt; (.*)/m', '<span class="quote">$1</span>', $markdownText);//>>> 引用
+
+    $markdownText = preg_replace('/\|\|(.*)\|\|/m', '<span class="blur">$1</span>', $markdownText);//黒塗り
+
+    // タイトル（#、##、###）をHTMLのhタグに変換
+    $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
+    $markdownText = preg_replace('/^## (.+)/m', '<h2>$1</h2>', $markdownText);
+    $markdownText = preg_replace('/^### (.+)/m', '<h3>$1</h3>', $markdownText);
+
+    // 箇条書き（-）をHTMLのul/liタグに変換
+    $markdownText = preg_replace('/^- (.+)/m', '<p>・ $1</p>', $markdownText);
+    
+    // 空行の前に何もない行をHTMLのpタグに変換
+    $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
+
+    return $markdownText;
+}
 //Profile
 function replaceProfileEmojiImages($postText) {
     // プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
@@ -88,7 +126,7 @@ class MessageDisplay {
     
     public function display() {
         if($this->value['userchk'] === "none"){
-            echo '<div class="notification2">';
+            echo '<div class="notification this">';
         }else{
             echo '<div class="notification">';
         }
@@ -106,8 +144,28 @@ class MessageDisplay {
         echo '    </div>';
             
         // 投稿内のHTMLコードを表示する部分
+        if(!(empty($this->value['fromuserid']))){
+            echo '    <div class="flebox">';
+                echo '    <div class="icon">';
+                    if(($this->value['fromuserid'] == "uwuzu-fromsys")){
+                        if(!(empty($this->value["servericon"]))){
+                            echo '    <a href="/rule/serverabout"><img src="'.$this->value["servericon"].'"></a>';
+                        }else{
+                            echo '    <a href="/rule/serverabout"><img src="../img/uwuzuicon.png"></a>';
+                        }
+                    }else{
+                        echo '    <a href="/@'.$this->value['fromuserid'].'"><img src="' . $this->value['fromusericon'] . '"></a>';
+                    }
+                echo '    </div>';
+                if(($this->value['fromuserid'] == "uwuzu-fromsys")){
+                    echo '    <div class="username"><a href="/rule/serverabout">uwuzu</a></div>';
+                }else{
+                    echo '    <div class="username"><a href="/@'.$this->value['fromuserid'].'">'.$this->value['fromusername'].'</a></div>';
+                }
+            echo '    </div>';
+        }
         echo '    <h3>' . replaceEmojisWithImages($this->value['title']) . '</h3>';
-        echo '    <p>' . replaceEmojisWithImages(nl2br($this->value['msg'])) . '</p>';
+        echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(nl2br($this->value['msg']))) . '</p>';
         echo '    <a href="' . htmlentities($this->value['url']) . '">詳細をみる</a>';
             
         echo '</div>';

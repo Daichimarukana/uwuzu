@@ -2,7 +2,9 @@
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
-    header("Content-Type: application/json; charset=utf-8");
+    header("Content-Type: application/json");
+    header("charset=utf-8");
+    header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];
 
@@ -70,6 +72,12 @@ if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUO
                 "mediaType" => "image/".$icon_kakucho_ci."",
                 "url" => "https://".$domain."/".$userData["headname"]."",
             ),
+
+            /*"publicKey" => array(
+                "id" => "https://".$domain."/actor/?actor=@".$userid."#main-key",
+                "owner" => "https://".$domain."/actor/?actor=@".$userid."",
+                "publicKeyPem" => "ここにHTTP-Signature",
+            ),*/
         );
         echo json_encode($item, JSON_UNESCAPED_UNICODE);
     }else{

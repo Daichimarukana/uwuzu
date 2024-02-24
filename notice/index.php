@@ -1,0 +1,290 @@
+<?php
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
+
+function createUniqId(){
+    list($msec, $sec) = explode(" ", microtime());
+    $hashCreateTime = $sec.floor($msec*1000000);
+    
+    $hashCreateTime = strrev($hashCreateTime);
+
+    return base_convert($hashCreateTime,10,36);
+}
+require('../db.php');
+
+// 変数の初期化
+$datetime = array();
+$user_name = null;
+$message = array();
+$message_data = null;
+$error_message = array();
+$pdo = null;
+$stmt = null;
+$res = null;
+$option = null;
+
+session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
+session_start();
+session_regenerate_id(true);
+
+//------------------------------------------
+
+try {
+
+    $option = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+    );
+    $pdo = new PDO('mysql:charset=UTF8;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+
+} catch(PDOException $e) {
+
+    // 接続エラーのときエラー内容を取得する
+    $error_message[] = $e->getMessage();
+}
+
+
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: ../login.php");
+		exit;
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
+	// セッションに値をセット
+	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, [
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	}else{
+		header("Location: ../login.php");
+		exit;
+	}
+
+		
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: ../login.php");
+		exit;
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
+	// セッションに値をセット
+	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($res['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	}else{
+		header("Location: ../login.php");
+		exit;
+	}
+
+
+} else {
+	// ログインが許可されていない場合、ログインページにリダイレクト
+	header("Location: ../login.php");
+	exit;
+}
+if(empty($userid)){
+	header("Location: ../login.php");
+	exit;
+} 
+if(empty($username)){
+	header("Location: ../login.php");
+	exit;
+}
+$notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
+$notiQuery->bindValue(':userid', $userid);
+$notiQuery->execute();
+$notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
+
+$notificationcount = $notiData['notification_count'];
+
+//------------------通知--------------
+function replaceURLsWithLinks_forNotice($postText) {
+	$postText = str_replace('&#039;', '\'', $postText);
+
+	// URLを正規表現を使って検出
+	$pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
+	preg_match_all($pattern, $postText, $matches);
+
+	// 検出したURLごとに処理を行う
+	foreach ($matches[0] as $url) {
+		// ドメイン部分を抽出
+		$parsedUrl = parse_url($url);
+		if (!isset($parsedUrl['path'])) {
+			$parsedUrl['path'] = '';
+		}
+		if (!isset($parsedUrl['query'])) {
+			$parsedUrl['query'] = '';
+		}
+
+		$nochk_domain = $parsedUrl['host'].$parsedUrl['path'].$parsedUrl['query'];
+
+		if(strlen($nochk_domain) > 47){
+			$domain = mb_substr($nochk_domain, 0, 48, "UTF-8")."...";
+		}else{
+			$domain = $nochk_domain;
+		}
+
+		// 不要な文字を削除してaタグを生成
+		$urlWithoutSpaces = preg_replace('/\s+/', '', $url);
+		$link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
+
+		// URLをドメインのみを表示するaタグで置き換え
+		$postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
+	}
+
+	return $postText;
+}
+
+$sql = "SELECT title, note, account, datetime FROM notice ORDER BY datetime DESC";
+$notice_array = $pdo->query($sql);
+
+while ($row = $notice_array->fetch(PDO::FETCH_ASSOC)) {
+
+    $notices[] = $row;
+}
+
+//------------------------------------------------------
+
+require('../logout/logout.php');
+
+
+// データベースの接続を閉じる
+$pdo = null;
+
+?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
+<link rel="stylesheet" href="../css/home.css">
+<title>お知らせ - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+
+</head>
+
+<body>
+	<?php require('../require/leftbox.php');?>
+	<main>
+		<?php if( !empty($error_message) ): ?>
+			<ul class="errmsg">
+				<?php foreach( $error_message as $value ): ?>
+					<p>・ <?php echo $value; ?></p>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
+
+		<section>
+            <div class="emojibox">
+            <h1>お知らせ</h1>
+			</div>
+
+            <div class="inner">
+				<?php foreach ($notices as $value) {?>
+					<div class="notification">
+						<div class="flebox">
+							<div class="time"><?php echo date('Y年m月d日 H:i', strtotime($value['datetime']));?></div>
+						</div>
+						<h3><?php echo $value['title'];?></h3>
+						<br>
+						<p><?php echo replaceURLsWithLinks_forNotice(nl2br($value['note']));?></p>
+						<div class="makeup"><p>編集者 : <a href="/@<?php echo $value['account'];?>">@<?php echo $value['account'];?></a></p></div>
+					</div>
+				<?php }?>
+            </div>
+            
+		</section>
+
+	</main>
+
+	<?php require('../require/rightbox.php');?>
+	<?php require('../require/botbox.php');?>
+
+</body>
+
+</html>

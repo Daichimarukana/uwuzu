@@ -214,10 +214,10 @@ require('../logout/logout.php');
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -242,11 +242,24 @@ require('../logout/logout.php');
 			<div class="admin_right">
 				<div class="formarea">
 					<h1>サーバー概要</h1>
-					<?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8')) ){ ?>
-						<div class="servericon">
-							<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
-						</div>
+					<!--(サーバーアイコン)-->
+					<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+					<div class="serverhead">
+						<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
+					</div>
 					<?php }?>
+					<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
+					<div class="servericon">
+						<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+							<div class="up">
+								<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+							</div>
+						<?php }else{?>
+							<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+						<?php }?>
+					</div>
+					<?php }?>
+					<!--(サーバーアイコンここまで)-->
 					<p>サーバー名</p>
 					<p><?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'); } ?></p>
 					<hr>

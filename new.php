@@ -15,6 +15,9 @@ function createUniqId(){
 }
 
 require('db.php');
+//関数呼び出し
+//- EXIF
+require('function/function.php');
 
 $serversettings_file = "server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
@@ -91,39 +94,6 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
     }
 }
 
-function rotate($image, $exif)
-{
-    $orientation = $exif['Orientation'] ?? 1;
-
-    switch ($orientation) {
-        case 1: //no rotate
-            break;
-        case 2: //FLIP_HORIZONTAL
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 3: //ROTATE 180
-            $image = imagerotate($image, 180, 0);
-            break;
-        case 4: //FLIP_VERTICAL
-            imageflip($image, IMG_FLIP_VERTICAL);
-            break;
-        case 5: //ROTATE 270 FLIP_HORIZONTAL
-            $image = imagerotate($image, 270, 0);
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 6: //ROTATE 90
-            $image = imagerotate($image, 270, 0);
-            break;
-        case 7: //ROTATE 90 FLIP_HORIZONTAL
-            $image = imagerotate($image, 90, 0);
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 8: //ROTATE 270
-            $image = imagerotate($image, 90, 0);
-            break;
-    }
-    return $image;
-}
 
 if( !empty($_POST['btn_submit']) ) {
 
@@ -143,15 +113,6 @@ if( !empty($_POST['btn_submit']) ) {
     if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
         $invitationcode = $_POST['invitationcode'];
     }
-
-    //cookieに保存
-    setcookie("username",$username,time()+60*60*24*14);
-    setcookie("userid",$userid,time()+60*60*24*14);
-
-    setcookie("password",$password,time()+60*60*24*14);
-    setcookie("mailadds",$mailadds,time()+60*60*24*14);
-
-    setcookie("profile",$profile,time()+60*60*24*14);
 
     //----------------[icon image]-------------------------------
     if (empty($_FILES['image']['name'])) {
@@ -197,17 +158,7 @@ if( !empty($_POST['btn_submit']) ) {
 		$result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
 		
         // EXIF削除
-		if($extension == "jpg" || $extension == "jpeg"){
-			$gd = imagecreatefromjpeg($uploadedPath);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data($uploadedPath); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, $uploadedPath);
-			imagedestroy($gd_out);
-		}
+		delete_exif($extension, $uploadedPath);
 
 		if ($result) {
 			$iconName = $uploadedPath; // 保存されたファイルのパスを使用
@@ -273,14 +224,14 @@ if( !empty($_POST['btn_submit']) ) {
 
         // 招待コードの入力チェック
         if( empty($invitationcode) ) {
-            $error_message[] = '招待コードを入力してください。';
+            $error_message[] = '招待コードを入力してください。(INVITATION_CODE_INPUT_PLEASE)';
         } else {
             if($result > 0){
                 if($result["used"] === "true"){
-                    $error_message[] = 'この招待コード('.$invitationcode.')は既に使用されています。';
+                    $error_message[] = 'この招待コード('.$invitationcode.')は既に使用されています。(INVITATION_CODE_SHIYOUZUMI)';
                 }
             }else{
-                $error_message[] = 'この招待コード('.$invitationcode.')は使えません。';
+                $error_message[] = 'この招待コード('.$invitationcode.')は使えません。(INVITATION_CODE_DEAD)';
             }
 
         }
@@ -296,37 +247,37 @@ if( !empty($_POST['btn_submit']) ) {
 
 	// ユーザーネームの入力チェック
 	if( empty($username) ) {
-		$error_message[] = '表示名を入力してください。';
+		$error_message[] = '表示名を入力してください。(USERNAME_INPUT_PLEASE)';
 	} else {
         // 文字数を確認
         if( 50 < mb_strlen($username, 'UTF-8') ) {
-			$error_message[] = 'ユーザーネームは50文字以内で入力してください。';
+			$error_message[] = 'ユーザーネームは50文字以内で入力してください。(USERNAME_OVER_MAX_COUNT)';
 		}
     }
 
     // IDの入力チェック
 	if( empty($userid) ) {
-		$error_message[] = 'ユーザーIDを入力してください。';
+		$error_message[] = 'ユーザーIDを入力してください。(USERID_INPUT_PLEASE)';
 	} else {
 
         // 文字数を確認
         if( 20 < mb_strlen($userid, 'UTF-8') ) {
-			$error_message[] = 'IDは20文字以内で入力してください。';
+			$error_message[] = 'IDは20文字以内で入力してください。(USERID_OVER_MAX_COUNT)';
 		}
 
         if(in_array($userid, $banuserid) === true ){
-            $error_message[] = 'そのIDは登録禁止になっています。';
+            $error_message[] = 'そのIDは登録禁止になっています。(USERID_CONTAINS_PROHIBITED)';
         }
 
         if($result > 0){
-            $error_message[] = 'このID('.$userid.')は既に使用されています。他のIDを作成してください。'; //このE-mailは既に使用されています。
+            $error_message[] = 'このID('.$userid.')は既に使用されています。他のIDを作成してください。(USERID_SHIYOUZUMI)'; //このE-mailは既に使用されています。
         }
 
     }
 
     // パスワードの入力チェック
 	if( empty($password) ) {
-		$error_message[] = 'パスワードを入力してください。';
+		$error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
 	} else {
 
         $weakPasswords = array(
@@ -396,27 +347,21 @@ if( !empty($_POST['btn_submit']) ) {
             return in_array($passwords, $weakPasswords);
         }
 
-        // テスト用のパスワード（実際にはユーザー入力などから取得することになります。
-
         if (isWeakPassword($password)) {
-            $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。";
-        } else {
-            
+            $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。(PASSWORD_ZEIJAKU)";
         }
 
-        if ($chkpass == $password ){
-            
-        }else{
-            $error_message[] = '確認用パスワードが違います。';
+        if (!($chkpass == $password)){
+            $error_message[] = '確認用パスワードが違います。(PASSWORD_CHIGAUYANKE)';
         }
         
         if( 4 > mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは4文字以上である必要があります。';
+			$error_message[] = 'パスワードは4文字以上である必要があります。(PASSWORD_TODOITENAI_MIN_COUNT)';
 		}
 
         // 文字数を確認
         if( 100 < mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは100文字以内で入力してください。';
+			$error_message[] = 'パスワードは100文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
 		}
     }
 
@@ -459,7 +404,7 @@ if( !empty($_POST['btn_submit']) ) {
         // コミット
         $res = $pdo->commit();
 
-        if($onlyuser === "true"){
+        if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
             $pdo->beginTransaction();
 
             $stmt = $pdo->prepare("UPDATE invitation SET used = :used, datetime = :datetime WHERE code = :code;");
@@ -492,7 +437,7 @@ if( !empty($_POST['btn_submit']) ) {
         // すべての出力を終了
         exit;
     } else {
-        $error_message[] = '登録に失敗しました。';
+        $error_message[] = '登録に失敗しました。(REGISTERED_DAME)';
     }
 
     // プリペアドステートメントを削除
@@ -520,8 +465,8 @@ $pdo = null;
 <meta name="twitter:title" content="アカウント登録 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>"/>
 <meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
-<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -540,7 +485,7 @@ $pdo = null;
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 

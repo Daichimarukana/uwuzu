@@ -120,8 +120,8 @@ $count2 = $result2->num_rows;
 <meta name="twitter:title" content="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>"/>
 <meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
-<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <link rel="manifest" href="manifest/manifest.json" />
@@ -152,7 +152,7 @@ if ("serviceWorker" in navigator) {
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
@@ -166,18 +166,34 @@ if ("serviceWorker" in navigator) {
         </ul>
     <?php endif; ?>
         <h1><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?>へようこそ！</h1>
-        <?php if( !empty(htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8')) ){ ?>
-            <div class="servericon">
-                <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>">
-                <div class="textzone">
+
+            <!--(サーバーアイコン)-->
+                <?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+                    <div class="serverhead">
+                        <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
+                    </div>
+                <?php }?>
+                <?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
+                    <div class="servericon">
+                        <?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
+                            <div class="up">
+                                <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+                                <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
+                                <div class="p2c"><?php echo $domain;?></div>
+                            </div>
+                        <?php }else{?>
+                            <img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+                            <div class="textzone">
+                                <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
+                                <div class="p2c"><?php echo $domain;?></div>
+                            </div>
+                        <?php }?>
+                    </div>
+                <?php }else{?>
                     <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
                     <div class="p2c"><?php echo $domain;?></div>
-                </div>
-            </div>
-        <?php }else{?>
-            <div class="p3"><?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></div>
-            <div class="p2c"><?php echo $domain;?></div>
-        <?php }?>
+                <?php }?>
+            <!--(サーバーアイコンここまで)-->
 
         <p><?php
         $sinfo = explode("\n", $serverinfo);

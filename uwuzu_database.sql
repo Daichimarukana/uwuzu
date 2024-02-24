@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- ホスト: 127.0.0.1
--- 生成日時: 2023-12-20 14:33:47
+-- ホスト: XXX.XXX.XXX.XXX
+-- 生成日時: 2024-02-24 19:11:00
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- データベース: `account`
+-- データベース: `uwuzu_db`
 --
 
 -- --------------------------------------------------------
@@ -29,24 +29,26 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `account` (
   `sysid` int(11) NOT NULL,
-  `username` varchar(500) NOT NULL,
-  `userid` varchar(500) NOT NULL,
+  `username` varchar(512) NOT NULL,
+  `userid` varchar(512) NOT NULL,
   `password` varchar(1024) NOT NULL,
   `loginid` varchar(256) NOT NULL,
   `token` varchar(256) NOT NULL,
-  `mailadds` varchar(500) NOT NULL,
-  `profile` text NOT NULL,
+  `mailadds` varchar(512) NOT NULL,
+  `profile` mediumtext NOT NULL,
   `iconname` varchar(256) NOT NULL,
   `headname` varchar(256) NOT NULL,
   `role` varchar(1024) NOT NULL,
   `datetime` datetime NOT NULL,
-  `follow` text NOT NULL,
-  `follower` text NOT NULL,
-  `blocklist` text NOT NULL,
-  `admin` varchar(50) NOT NULL,
+  `follow` mediumtext NOT NULL,
+  `follower` mediumtext NOT NULL,
+  `bookmark` mediumtext NOT NULL,
+  `blocklist` mediumtext NOT NULL,
+  `admin` varchar(64) NOT NULL,
   `authcode` varchar(256) NOT NULL,
   `backupcode` varchar(256) NOT NULL,
-  `sacinfo` varchar(256) NOT NULL
+  `sacinfo` varchar(256) NOT NULL,
+  `mail_settings` mediumtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -60,7 +62,7 @@ CREATE TABLE `ads` (
   `uniqid` varchar(512) NOT NULL,
   `url` varchar(512) NOT NULL,
   `image_url` varchar(512) NOT NULL,
-  `memo` text NOT NULL,
+  `memo` mediumtext NOT NULL,
   `start_date` datetime NOT NULL,
   `limit_date` datetime NOT NULL,
   `datetime` datetime NOT NULL
@@ -76,7 +78,7 @@ CREATE TABLE `emoji` (
   `sysid` int(11) NOT NULL,
   `emojifile` varchar(512) NOT NULL,
   `emojiname` varchar(512) NOT NULL,
-  `emojiinfo` text NOT NULL,
+  `emojiinfo` mediumtext NOT NULL,
   `emojidate` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -89,7 +91,7 @@ CREATE TABLE `emoji` (
 CREATE TABLE `invitation` (
   `sysid` int(11) NOT NULL,
   `code` varchar(512) NOT NULL,
-  `used` varchar(25) NOT NULL,
+  `used` varchar(32) NOT NULL,
   `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -102,7 +104,7 @@ CREATE TABLE `invitation` (
 CREATE TABLE `notice` (
   `sysid` int(11) NOT NULL,
   `title` varchar(1024) NOT NULL,
-  `note` text NOT NULL,
+  `note` mediumtext NOT NULL,
   `account` varchar(256) NOT NULL,
   `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -115,11 +117,12 @@ CREATE TABLE `notice` (
 
 CREATE TABLE `notification` (
   `sysid` int(11) NOT NULL,
-  `touserid` varchar(500) NOT NULL,
-  `msg` text NOT NULL,
+  `fromuserid` varchar(512) NOT NULL,
+  `touserid` varchar(512) NOT NULL,
+  `msg` mediumtext NOT NULL,
   `url` varchar(512) NOT NULL,
   `datetime` datetime NOT NULL,
-  `userchk` varchar(25) NOT NULL,
+  `userchk` varchar(32) NOT NULL,
   `title` varchar(1024) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -132,11 +135,11 @@ CREATE TABLE `notification` (
 CREATE TABLE `report` (
   `sysid` int(11) NOT NULL,
   `uniqid` varchar(256) NOT NULL,
-  `userid` varchar(500) NOT NULL,
-  `report_userid` varchar(500) NOT NULL,
+  `userid` varchar(512) NOT NULL,
+  `report_userid` varchar(512) NOT NULL,
   `msg` text NOT NULL,
   `datetime` datetime NOT NULL,
-  `admin_chk` varchar(25) NOT NULL
+  `admin_chk` varchar(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -149,7 +152,7 @@ CREATE TABLE `role` (
   `sysid` int(11) NOT NULL,
   `rolename` varchar(512) NOT NULL,
   `roleauth` varchar(256) NOT NULL,
-  `rolecolor` varchar(25) NOT NULL,
+  `rolecolor` varchar(32) NOT NULL,
   `roleidname` varchar(512) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -165,17 +168,17 @@ CREATE TABLE `ueuse` (
   `account` varchar(256) NOT NULL,
   `uniqid` varchar(256) NOT NULL,
   `rpuniqid` varchar(256) NOT NULL,
-  `ueuse` text NOT NULL,
+  `ueuse` mediumtext NOT NULL,
   `photo1` varchar(512) NOT NULL,
   `photo2` varchar(512) NOT NULL,
   `photo3` varchar(512) NOT NULL,
   `photo4` varchar(512) NOT NULL,
   `video1` varchar(512) NOT NULL,
   `datetime` datetime NOT NULL,
-  `favorite` text NOT NULL,
-  `abi` text NOT NULL,
+  `favorite` mediumtext NOT NULL,
+  `abi` mediumtext NOT NULL,
   `abidate` datetime NOT NULL,
-  `nsfw` varchar(25) NOT NULL
+  `nsfw` varchar(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

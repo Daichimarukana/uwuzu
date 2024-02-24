@@ -362,6 +362,7 @@ if (!empty($_POST['report'])) {
 			$pdo->beginTransaction();
 
 			try {
+				$fromuserid = $userid;
 				$touserid2 = $to_admin["userid"];//管理者宛通知
 				$datetime = date("Y-m-d H:i:s");
 				$msg = "通報情報をご確認ください！";
@@ -370,9 +371,9 @@ if (!empty($_POST['report'])) {
 				$userchk = 'none';
 
 				// 通知用SQL作成
-				$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+				$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
-
+				$stmt->bindParam(':fromuserid', htmlentities('uwuzu-fromsys'), PDO::PARAM_STR);
 				$stmt->bindParam(':touserid', htmlentities($touserid2), PDO::PARAM_STR);
 				$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
 				$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
@@ -424,10 +425,10 @@ $pdo = null;
 <html lang="ja">
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
-<script src="../js/console_notice.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<script src="../js/console_notice.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../css/home.css?<?php echo date('Ymd-Hi'); ?>">
+<link rel="stylesheet" href="../css/home.css">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">

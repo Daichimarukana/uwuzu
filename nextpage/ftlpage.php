@@ -47,11 +47,12 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
         if($result2["loginid"] === $loginid){
             $userid = htmlentities($_GET['userid']);
 
-            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
             $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
             $aduserinfoQuery->execute();
             $res = $aduserinfoQuery->fetch();
             $myblocklist = htmlentities($res["blocklist"]);
+            $mybookmark = htmlentities($res["bookmark"]);
 
             $itemsPerPage = 15; // 1ページあたりのユーズ数
             $pageNumber = htmlentities(isset($_GET['page'])) ? htmlentities(intval($_GET['page'])) : 1;
@@ -79,11 +80,19 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $messages = array(); // 初期化
 
                 foreach ($followList as $followUserId) {
-                    $sql = "SELECT * FROM ueuse WHERE rpuniqid = '' AND account = :follow_account ORDER BY datetime DESC LIMIT $offset, $itemsPerPage";
+                    $sql = "SELECT ueuse.* 
+                            FROM ueuse 
+                            LEFT JOIN account ON ueuse.account = account.userid 
+                            WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :follow_account 
+                            ORDER BY ueuse.datetime DESC 
+                            LIMIT :offset, :itemsPerPage";
 
-                    $stmt = $dbh->prepare($sql);
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                    $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                     $stmt->bindValue(':follow_account', $followUserId, PDO::PARAM_STR);
                     $stmt->execute();
+                    $message_array = $stmt;
 
                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                         $messages[] = $row;
@@ -138,6 +147,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                     foreach ($messages as $value) {
                         if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8'))) {
                             if(!($value["role"] === "ice")){
+                                $value["bookmark"] = $mybookmark;
+                                
                                 $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
                         
                                 // コンマで区切って配列に分割し、要素数を数える

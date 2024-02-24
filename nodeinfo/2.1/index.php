@@ -1,27 +1,35 @@
 <?php
-$serversettings_file = "../server/serversettings.ini";
+$serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
+function decode_yajirushi($postText){
+    $postText = str_replace('&larr;', '←', $postText);
+    $postText = str_replace('&darr;', '↓', $postText);
+    $postText = str_replace('&uarr;', '↑', $postText);
+    $postText = str_replace('&rarr;', '→', $postText);
+    return $postText;
+}
 if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
-    header("Content-Type: application/json; charset=utf-8");
+    header("Content-Type: application/json");
+    header("charset=utf-8");
+    header("Access-Control-Allow-Origin: *");
 
     $mojisizefile = "../../server/textsize.txt";
 
-    $adminfile = "../../server/admininfo.txt";
+    $adminfile = htmlentities($serversettings["serverinfo"]["server_admin"]);
 
-    $servernamefile = "../../server/servername.txt";
+    $servernamefile = htmlentities($serversettings["serverinfo"]["server_name"]);
 
     $serverinfofile = '../../server/info.txt';
-    $serverinfo = file_get_contents($serverinfofile);
+    $serverinfo = htmlentities(file_get_contents($serverinfofile));
 
-    $contactfile = "../../server/contact.txt";
+    $contactfile = htmlentities($serversettings["serverinfo"]["server_admin_mailadds"]);
 
     $domain = $_SERVER['HTTP_HOST'];
 
     $softwarefile = "../../server/uwuzuinfo.txt";
-    $softwaredata = file_get_contents($softwarefile);
+    $softwaredata = htmlentities(file_get_contents($softwarefile));
 
-    $onlyuserfile = "../../server/onlyuser.txt";
-    $onlyuser = file_get_contents($onlyuserfile);
+    $onlyuser = htmlentities($serversettings["serverinfo"]["server_invitation"]);
 
     $softwaredata = explode( "\n", $softwaredata );
     $cnt = count( $softwaredata );
@@ -68,6 +76,7 @@ if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUO
         "software" => array(
             "name" => "uwuzu",
             "version" => "".str_replace("\r", '', $uwuzuinfo[1])."",
+            "homepage" => "https://www.uwuzu.com/",
             "repository" => "https://github.com/Daichimarukana/uwuzu",
         ),
         "protocols" => [
@@ -85,11 +94,11 @@ if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUO
             "localPosts" => $count2,
         ],
         "metadata" => [
-            "nodeName" => file_get_contents($servernamefile),
+            "nodeName" => $servernamefile,
             "nodeDescription" => $serverinfo,
             "maintainer" => array(
-                "name" => file_get_contents($adminfile),
-                "email" => file_get_contents($contactfile),
+                "name" => $adminfile,
+                "email" => $contactfile,
             ),
             "langs" => array(
                 "ja",

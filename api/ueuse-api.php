@@ -1,6 +1,14 @@
 <?php
-header("Content-Type: application/json; charset=utf-8; Access-Control-Allow-Origin: *;");
-
+header("Content-Type: application/json");
+header("charset=utf-8");
+header("Access-Control-Allow-Origin: *");
+function decode_yajirushi($postText){
+    $postText = str_replace('&larr;', '←', $postText);
+    $postText = str_replace('&darr;', '↓', $postText);
+    $postText = str_replace('&uarr;', '↑', $postText);
+    $postText = str_replace('&rarr;', '→', $postText);
+    return $postText;
+}
 if(isset($_GET['ueuseid'])) { 
 
 $ueuseid = htmlentities($_GET['ueuseid']);
@@ -61,18 +69,18 @@ if (empty($ueusedata)){
     $ueusedata["favorite_cnt"] = count($favcnts)-1;
 
     $response = array(
-        'userid' => htmlentities($ueusedata["account"]),
-        'user_name' => htmlentities($ueusedata["username"]),
-        'uniqid' => htmlentities($ueusedata["uniqid"]),
-        'ueuse' => htmlentities($ueusedata["ueuse"]),
-        'photo1' => htmlentities(str_replace('../', ''.$_SERVER['HTTP_HOST'].'/', $ueusedata["photo1"])),
-        'photo2' => htmlentities(str_replace('../', ''.$_SERVER['HTTP_HOST'].'/', $ueusedata["photo2"])),
-        'video1' => htmlentities(str_replace('../', ''.$_SERVER['HTTP_HOST'].'/', $ueusedata["video1"])),
-        'favorite' => htmlentities($ueusedata["favorite"]),
-        'favorite_cnt' => htmlentities($ueusedata["favorite_cnt"]),
-        'datetime' => htmlentities($ueusedata["datetime"]),
-        'abi' => htmlentities($ueusedata["abi"]),
-        'abidatetime' => htmlentities($ueusedata["abidate"]),
+        'userid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["account"])),
+        'user_name' => decode_yajirushi(htmlspecialchars_decode($ueusedata["username"])),
+        'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["uniqid"])),
+        'ueuse' => decode_yajirushi(htmlspecialchars_decode($ueusedata["ueuse"])),
+        'photo1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', ''.$_SERVER['HTTP_HOST'].'/', $ueusedata["photo1"]))),
+        'photo2' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', ''.$_SERVER['HTTP_HOST'].'/', $ueusedata["photo2"]))),
+        'video1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', ''.$_SERVER['HTTP_HOST'].'/', $ueusedata["video1"]))),
+        'favorite' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite"])),
+        'favorite_cnt' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite_cnt"])),
+        'datetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["datetime"])),
+        'abi' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abi"])),
+        'abidatetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abidate"])),
     );
 }
 echo json_encode($response, JSON_UNESCAPED_UNICODE);;

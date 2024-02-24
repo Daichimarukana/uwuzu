@@ -123,8 +123,9 @@ if( !empty($_POST['btn_submit']) ) {
                 $url = '/settings';
                 $userchk = 'none';
                 // 通知用SQL作成
-                $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+                $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
         
+                $stmt->bindParam(':fromuserid', htmlentities("uwuzu-fromsys"), PDO::PARAM_STR);
                 $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
                 $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
                 $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
@@ -159,7 +160,7 @@ if( !empty($_POST['btn_submit']) ) {
             // すべての出力を終了
             exit;
         }else{
-            $error_message[] = "そのバックアップコードは使用できません。";
+            $error_message[] = "そのバックアップコードは使用できません。(BACKUPCODE_DAME)";
         }
     }else{
 
@@ -173,7 +174,7 @@ if( !empty($_POST['btn_submit']) ) {
             $userauthcode = $_POST['usercode'];
 
             if(empty($userauthcode)){
-                $error_message[] = "コードを入力してください。";
+                $error_message[] = "コードを入力してください。(AUTHCODE_INPUT_PLEASE)";
             }else{
 
                 $discrepancy = 2;
@@ -190,8 +191,9 @@ if( !empty($_POST['btn_submit']) ) {
                         $url = '/settings';
                         $userchk = 'none';
                         // 通知用SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+                        $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
                 
+                        $stmt->bindParam(':fromuserid', htmlentities("uwuzu-fromsys"), PDO::PARAM_STR);
                         $stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
                         $stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
                         $stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
@@ -268,11 +270,11 @@ if( !empty($_POST['btn_submit']) ) {
                     exit;
                         
                 }else {
-                    $error_message[] = '二段階認証が出来ませんでした。再度お試しください。';
+                    $error_message[] = '二段階認証が出来ませんでした。再度お試しください。(AUTHCODE_CHECK_DAME)';
                 }
             }
         }else{
-            $error_message[] = 'データの取得が出来ませんでした。再度お試しください。';
+            $error_message[] = 'データの取得が出来ませんでした。再度お試しください。(AUTHCODE_GET_ACCOUNT_NOT_FOUND)';
         }
     }
 
@@ -286,8 +288,8 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="css/style.css?<?php echo date('Ymd-Hi'); ?>">
-<script src="js/unsupported.js?<?php echo date('Ymd-Hi'); ?>"></script>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -304,7 +306,7 @@ $pdo = null;
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="../img/uwuzulogo.svg"></a>
+            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
