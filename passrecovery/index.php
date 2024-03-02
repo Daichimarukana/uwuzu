@@ -84,8 +84,11 @@ if( !empty($_POST['btn_submit']) ) {
 
         if( empty($mailadds) ) {
             $error_message[] = 'メールアドレスを入力してください。(INPUT_PLEASE)';
-        } else {
-
+        }
+        if(!(preg_match("/^[a-zA-Z0-9_]+$/", $userid))){
+            $error_message[] = "IDは半角英数字で作成してください。(「_」は使用可能です。)(USERID_DONT_USE_WORD)";
+        }
+        if(empty($error_message)){
             if($result->rowCount() > 0) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
 
@@ -196,14 +199,12 @@ $pdo = null;
 
 <script type="text/javascript">
 
-function checkForm($this)
-{
-    var str=$this.value;
-    while(str.match(/[^A-Z^a-z\d\-]/))
-    {
-        str=str.replace(/[^A-Z^a-z\d\-]/,"");
+function checkForm(inputElement) {
+    var str = inputElement.value;
+    while (str.match(/[^A-Za-z\d_]/)) {
+        str = str.replace(/[^A-Za-z\d_]/, "");
     }
-    $this.value=str;
+    inputElement.value = str;
 }
 
 </script>

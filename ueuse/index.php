@@ -522,20 +522,22 @@ if( !empty($_POST['btn_submit']) ) {
 
 				$pdo->beginTransaction();
 
+				$fromuserid = $userid;
 				$msg = ''.$ueuse.'';
 				$title = ''.$userid.'さんが返信しました！';
 				$url = $_SERVER['REQUEST_URI'];
 				$userchk = 'none';
 				// 通知用SQL作成
-				$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+				$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 		
-				$stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-				$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-				$stmt->bindParam(':url', $url, PDO::PARAM_STR);
-				$stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-				$stmt->bindParam(':title', $title, PDO::PARAM_STR);
+				$stmt->bindParam(':fromuserid', htmlentities($fromuserid), PDO::PARAM_STR);
+				$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
+				$stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
+				$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
+				$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
+				$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
 
-				$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
 
 				// SQLクエリの実行
 				$res = $stmt->execute();
@@ -552,6 +554,7 @@ if( !empty($_POST['btn_submit']) ) {
 						$pdo->beginTransaction();
 
 						try {
+							$fromuserid = $userid;
 							$touserid = $mentionedUser;
 							$datetime = date("Y-m-d H:i:s");
 							$msg = "" . $ueuse . "";
@@ -560,9 +563,9 @@ if( !empty($_POST['btn_submit']) ) {
 							$userchk = 'none';
 
 							// 通知用SQL作成
-							$stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+							$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
-
+							$stmt->bindParam(':fromuserid', htmlentities($fromuserid), PDO::PARAM_STR);
 							$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
 							$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
 							$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);

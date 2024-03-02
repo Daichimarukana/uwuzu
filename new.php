@@ -101,14 +101,14 @@ if( !empty($_POST['btn_submit']) ) {
     //$row['userid'] = "daichimarukn";
 
     // 空白除去
-	$username = $_POST['username'];
-    $userid = $_POST['userid'];
+	$username = htmlentities($_POST['username']);
+    $userid = htmlentities($_POST['userid']);
 
-    $password = $_POST['password'];
-    $chkpass = $_POST['chkpass'];
-    $mailadds = $_POST['mailadds'];
+    $password = htmlentities($_POST['password']);
+    $chkpass = htmlentities($_POST['chkpass']);
+    $mailadds = htmlentities($_POST['mailadds']);
 
-    $profile = $_POST['profile'];
+    $profile = htmlentities($_POST['profile']);
 
     if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
         $invitationcode = $_POST['invitationcode'];
@@ -271,6 +271,10 @@ if( !empty($_POST['btn_submit']) ) {
 
         if($result > 0){
             $error_message[] = 'このID('.$userid.')は既に使用されています。他のIDを作成してください。(USERID_SHIYOUZUMI)'; //このE-mailは既に使用されています。
+        }
+
+        if(!(preg_match("/^[a-zA-Z0-9_]+$/", $userid))){
+            $error_message[] = "IDは半角英数字で入力してください。(「_」は使用可能です。)(USERID_DONT_USE_WORD)";
         }
 
     }

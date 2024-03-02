@@ -338,8 +338,12 @@ if( !empty($_POST['pass_submit']) ) {
 	if(empty($pass_chk)){
 		$error_message[] = 'ユーザーidを入力してください。(USERID_INPUT_PLEASE)';
 	}else{
-		if(!($pass_chk === $userData["userid"])){
-			$error_message[] = 'ユーザーidが不正です。(USERID_CHIGAUYANKE)';
+		if(!(preg_match("/^[a-zA-Z0-9_]+$/", $pass_chk))){
+            $error_message[] = "IDは半角英数字で作成してください。(「_」は使用可能です。)(USERID_DONT_USE_WORD)";
+        }else{
+			if(!($pass_chk === $userData["userid"])){
+				$error_message[] = 'ユーザーidが不正です。(USERID_CHIGAUYANKE)';
+			}
 		}
 	}
 

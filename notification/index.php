@@ -222,6 +222,10 @@ $pdo = null;
 		<div id="loading" class="loading" style="display: none;">
 			🤔
 		</div>
+		<div id="error" class="error" style="display: none;">
+			<h1>エラー</h1>
+			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。<br>(NETWORK_HUKANZEN_STOP)</p>
+		</div>
 
 	</main>
 
@@ -251,12 +255,19 @@ $(document).ready(function() {
             method: 'GET',
             data: { page: pageNumber, userid: userid , account_id: account_id },
             dataType: 'html',
+			timeout: 300000,
             success: function(response) {
                 $('#postContainer').append(response);
                 pageNumber++;
                 isLoading = false;
 				$("#loading").hide();
-            }
+				$("#error").hide();
+            },
+			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+				isLoading = false;
+				$("#loading").hide();
+				$("#error").show();
+			},
         });
     }
 

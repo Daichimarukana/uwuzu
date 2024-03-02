@@ -2130,7 +2130,7 @@ main h1{
 }
 
 .sendbox textarea{
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
     text-align: left;
     margin-left: auto;
     margin-right: auto;
@@ -5806,10 +5806,10 @@ summary {
         margin-bottom: 0px;
     }
     .modal-content {
-        margin-top:40dvh;
+        margin-top:35dvh;
         width: calc(100% - 48px);
         margin-bottom: 0px;
-        height: 55dvh;
+        height: 60dvh;
         max-height: 55dvh;
         overflow: scroll;
         padding: 24px;
@@ -6797,6 +6797,16 @@ summary {
         font-weight: bold;
         vertical-align: top;
     }
+
+    .notification h1{
+        color:var(--dark-text-color);
+    }
+    .notification h2{
+        color:var(--dark-text-color);
+    }
+    .notification h3{
+        color:var(--dark-text-color);
+    }
     
     .notification .quote{
         width: fit-content;
@@ -6808,7 +6818,7 @@ summary {
         padding-right: 6px;
         padding-top: 4px;
         padding-bottom: 4px;
-        color:var(--text-color);
+        color:var(--dark-text-color);
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: normal;

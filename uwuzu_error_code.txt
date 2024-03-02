@@ -45,6 +45,7 @@ USERID_SHIYOUZUMI - ユーザーIDがすでに使用されている時に表示�
 USERID_CHECK_INPUT_PLEASE - ユーザーID確認用IDが入力されていない場合に表示されます。
 USERID_CHIGAUYANKE - ユーザーID確認用IDがアカウント作成時のものと違う場合に表示されます。
 USERID_CONTAINS_PROHIBITED - 登録禁止ユーザーIDが入力された場合に表示されます。
+USERID_DONT_USE_WORD - 使用禁止文字が入力されている際に表示されます。
 
 PASSWORD_INPUT_PLEASE - パスワードが入力されていない時に表示されます。
 PASSWORD_NEW_INPUT_PLEASE - 新しいパスワードが入力されていない場合に表示されます。

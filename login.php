@@ -90,8 +90,8 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
 
 if( !empty($_POST['btn_submit']) ) {
 
-    $userid = $_POST['userid'];
-    $password = $_POST['password'];
+    $userid = htmlentities($_POST['userid']);
+    $password = htmlentities($_POST['password']);
 
 
     $options = array(
@@ -120,11 +120,14 @@ if( !empty($_POST['btn_submit']) ) {
 	if( empty($userid) ) {
 		$error_message[] = 'ユーザーIDを入力してください。(USERID_INPUT_PLEASE)';
 	} else {
-
+        if(!(preg_match("/^[a-zA-Z0-9_]+$/", $userid))){
+            $error_message[] = "IDは半角英数字で入力してください。(「_」は使用可能です。)(USERID_DONT_USE_WORD)";
+        }
         if( empty($password) ) {
             $error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
-        } else {
+        }
 
+        if(empty($error_message)){
             if($result->rowCount() > 0) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
 
@@ -161,12 +164,7 @@ if( !empty($_POST['btn_submit']) ) {
                 $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)';
             }
         }
-
     }
-
-    // ... (後略)
-
-
 
 }
 
