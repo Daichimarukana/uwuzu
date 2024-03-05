@@ -121,35 +121,39 @@ if( !empty($_POST['btn_submit']) ) {
 	} else {
 		// アップロードされたファイル情報
 		$uploadedFile = $_FILES['image'];
+        
+        if(check_mime_video($uploadedFile['tmp_name'])){
+            // アップロードされたファイルの拡張子を取得
+            $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+            
+            // 新しいファイル名を生成（uniqid + 拡張子）
+            $newFilename = uniqid() . '-'.$userid.'.' . $extension;
+            
+            // 保存先のパスを生成
+            $uploadedPath = 'usericons/' . $newFilename;
 
-		// アップロードされたファイルの拡張子を取得
-		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
-		
-		// 保存先のパスを生成
-		$uploadedPath = 'usericons/' . $newFilename;
-		
-		// ファイルを移動
-		$result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
-		
-        // EXIF削除
-		delete_exif($extension, $uploadedPath);
+            // EXIF削除
+            delete_exif($extension, $uploadedFile['tmp_name']);
 
-		if ($result) {
-			$iconName = $uploadedPath; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(1)エラーコード：' .$uploadedFile['error'].'';
-		}
+            // ファイルを移動
+            $result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
+
+            if ($result) {
+                $iconName = $uploadedPath; // 保存されたファイルのパスを使用
+            } else {
+                $errnum = $uploadedFile['error'];
+                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                $error_message[] = 'アップロード失敗！(1)エラーコード：' .$uploadedFile['error'].'';
+            }
+        }else{
+            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+        }
 	}
 
     //----------------[header image]-------------------------------
@@ -486,12 +490,12 @@ $pdo = null;
             <div>
                 <p>パスワード *</p>
                 <div class="p2">ログイン時に必要となります。<br>※サービス管理者が確認できません。</div>
-                <input onInput="checkForm(this)" placeholder="" class="inbox" id="password" type="text" name="password" value="<?php if( !empty($_SESSION['password']) ){ echo htmlspecialchars( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
+                <input placeholder="" class="inbox" id="password" type="text" name="password" value="<?php if( !empty($_SESSION['password']) ){ echo htmlspecialchars( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
             </div>
 
             <div>
                 <p>パスワード再確認 *</p>
-                <input onInput="checkForm(this)" placeholder="" class="inbox" oncopy="return false" onpaste="return false" oncontextmenu="return false" id="chkpass" type="text" style="-webkit-text-security:disc;" name="chkpass" value="<?php if( !empty($_SESSION['chkpass']) ){ echo htmlspecialchars( $_SESSION['chkpass'], ENT_QUOTES, 'UTF-8'); } ?>">
+                <input placeholder="" class="inbox" oncopy="return false" onpaste="return false" oncontextmenu="return false" id="chkpass" type="text" style="-webkit-text-security:disc;" name="chkpass" value="<?php if( !empty($_SESSION['chkpass']) ){ echo htmlspecialchars( $_SESSION['chkpass'], ENT_QUOTES, 'UTF-8'); } ?>">
             </div>
 
             <div>
@@ -527,7 +531,6 @@ $pdo = null;
 
 
 <script type="text/javascript">
-
 function checkForm(inputElement) {
     var str = inputElement.value;
     while (str.match(/[^A-Za-z\d_]/)) {

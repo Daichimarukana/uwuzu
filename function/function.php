@@ -44,8 +44,7 @@ function delete_exif($extension, $path){
 		"wdp",
 		"jxr",
 		"tiff",
-		"tif",
-		"png"
+		"tif"
 	);
 	if(in_array($extension,$exifimgext)){
 		$gd = imagecreatefromjpeg($path);
@@ -60,5 +59,39 @@ function delete_exif($extension, $path){
 	}
 }
 //----------EXIF_Delete----------
-
+//----------Check_Extension------
+//ファイル形式チェック(画像かどうか)
+function check_mime($tmp_name){
+    $tmp_ext = mime_content_type($tmp_name);
+    $safe_img_mime = array(
+		"image/gif",
+		"image/jpeg",
+		"image/png",
+		"image/svg+xml",
+		"image/webp",
+        "image/bmp",
+        "image/x-icon",
+        "image/tiff"
+	);
+	if(in_array($tmp_ext,$safe_img_mime)){
+        return $tmp_ext;
+    }else{
+        return false;
+    }
+}
+//ファイル形式チェック(画像かどうか)
+function check_mime_video($tmp_name){
+    $tmp_ext = mime_content_type($tmp_name);
+    $safe_vid_mime = array(
+		"video/mpeg",
+		"video/mp4",
+		"video/webm",
+		"video/x-msvideo",
+	);
+	if(in_array($tmp_ext,$safe_vid_mime)){
+        return $tmp_ext;
+    }else{
+        return false;
+    }
+}
 ?>

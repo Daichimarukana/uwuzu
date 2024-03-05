@@ -197,13 +197,13 @@ if( !empty($_POST['ads_btn_submit']) ) {
 	if(empty($ads_img_url)){
 		$error_message[] = "画像のURLが入力されていません。(INPUT_PLEASE)";
 	}
-	if(empty($ads_start_url)){
+	if(empty($ads_start_date)){
 		$error_message[] = "設置開始日時が入力されていません。(INPUT_PLEASE)";
 	}
-	if(empty($ads_limit_url)){
+	if(empty($ads_limit_date)){
 		$error_message[] = "設置終了日時が入力されていません。(INPUT_PLEASE)";
 	}
-	if(empty($ads_memo_url)){
+	if(empty($ads_memo)){
 		$error_message[] = "メモが入力されていません。(INPUT_PLEASE)";
 	}
 

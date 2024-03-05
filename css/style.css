@@ -201,7 +201,6 @@ body{
     height: 5dvh;
     border-radius: 15px;
     background-color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
     padding: 18px;
 }
 
@@ -299,7 +298,7 @@ body{
     padding-right: 32px;
     border-radius: 15px;
     background-color: var(--background-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    border: 1px solid var(--border-color);
     margin-top: 32px;
     text-align: center;
     margin-left: auto;
@@ -390,7 +389,7 @@ label > input {
     padding-right: 32px;
     border-radius: 15px;
     background-color: var(--background-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
+    border: 1px solid var(--border-color);
     margin-top: 64px;
     text-align: left;
     margin-left: auto;
@@ -480,13 +479,12 @@ label > input {
     font-size: 1em;
     line-height: 1.5;
     white-space: nowrap;
-    box-shadow:0px 0px 25px rgba(0,0,0,0.05) inset;
-    box-shadow:0px 0px 25px rgba(0,0,0,0.07);
+    box-shadow: 0px 0px 25px rgba(0,0,0,0.03);
     overflow-x: scroll; 
     overflow-y : scroll ;
     transition: border 350ms ease-in-out;
     transition: border-bottom 150ms ease-out;
-    border: 1px solid #f1f1f1;
+    border: 1px solid var(--border-color);
   }
   
 .inbox::placeholder {
@@ -799,6 +797,17 @@ p img{
     width: 32px;
     vertical-align: middle;
     border-radius: 5px;
+}
+.captcha_zone{
+    margin-top: 32px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    text-align: center;
+}
+.captcha_zone .p2{
+    text-align: left;
 }
 
 /*------------------------------------------------------------------------------------------------------------*/

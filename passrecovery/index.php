@@ -5,6 +5,9 @@ $serversettings = parse_ini_file($serversettings_file, true);
 
 
 require('../db.php');
+//hCaptcha--------------------------------------------
+require('../settings_admin/hCaptcha_settings/hCaptcha_settings.php');
+//----------------------------------------------------
 
 
 // 変数の初期化
@@ -53,6 +56,34 @@ if( !empty($_POST['btn_submit']) ) {
 
     $userid = $_POST['userid'];
     $mailadds = $_POST['mailadds'];
+
+    if(!empty(CAPTCHA && CAPTCHA == "true")){
+        if(isset($_POST['h-captcha-response'])){
+            $hcaptcha_token = htmlentities($_POST['h-captcha-response']);
+            if($hcaptcha_token){
+                $captcha_data = [
+                    'secret' => htmlentities(SEAC_KEY),
+                    'response' => $hcaptcha_token,
+                    'sitekey' => htmlentities(SITE_KEY)
+                ];
+                $options = [
+                    'http' => [
+                        'method'=> 'POST',
+                        'header'=> 'Content-Type: application/x-www-form-urlencoded',
+                        'content' => http_build_query($captcha_data, '', '&')
+                    ]
+                ];
+                $hCaptcha_result = json_decode(file_get_contents('https://hcaptcha.com/siteverify', false, stream_context_create($options)),true);
+                if(!($hCaptcha_result["success"] == true)){
+                    $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+                }
+            }else{
+                $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+            }
+        }else{
+            $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+        }
+    }
 
 
     $options = array(
@@ -141,6 +172,9 @@ $pdo = null;
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/style.css">
 <script src="../js/unsupported.js"></script>
+<?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<?php }?>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -186,6 +220,13 @@ $pdo = null;
                     <label for="mailadds">メールアドレス</label>
                     <input id="mailadds" class="inbox" type="text" name="mailadds" value="<?php if( !empty($_SESSION['mailadds']) ){ echo htmlentities( $_SESSION['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
+
+                <?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+                    <div class="captcha_zone">
+                        <div class="p2">パスワードを復元するためには人間である確認が必要です！<br>下のチェックボックスにチェックしてください。</div>
+                        <div class="h-captcha" data-sitekey="<?php echo htmlentities(SITE_KEY);?>"></div>
+                    </div>
+                <?php }?>
                 
                 <input type="submit" name="btn_submit" class="irobutton" value="次へ">
             </form>

@@ -1,6 +1,6 @@
 
 	<?php // メールサーバーの情報
-	define( 'MAIL_CHKS', 'false');// trueならPHPMailerが有効
+	define( 'MAIL_CHKS', '');// trueならPHPMailerが有効
 
 	define( 'MAIL_ADDS', '');
 	define( 'MAIL_HOST', '');

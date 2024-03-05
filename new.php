@@ -18,6 +18,9 @@ require('db.php');
 //関数呼び出し
 //- EXIF
 require('function/function.php');
+//hCaptcha--------------------------------------------
+require('settings_admin/hCaptcha_settings/hCaptcha_settings.php');
+//----------------------------------------------------
 
 $serversettings_file = "server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
@@ -114,6 +117,34 @@ if( !empty($_POST['btn_submit']) ) {
         $invitationcode = $_POST['invitationcode'];
     }
 
+    if(!empty(CAPTCHA && CAPTCHA == "true")){
+        if(isset($_POST['h-captcha-response'])){
+            $hcaptcha_token = htmlentities($_POST['h-captcha-response']);
+            if($hcaptcha_token){
+                $captcha_data = [
+                    'secret' => htmlentities(SEAC_KEY),
+                    'response' => $hcaptcha_token,
+                    'sitekey' => htmlentities(SITE_KEY)
+                ];
+                $options = [
+                    'http' => [
+                        'method'=> 'POST',
+                        'header'=> 'Content-Type: application/x-www-form-urlencoded',
+                        'content' => http_build_query($captcha_data, '', '&')
+                    ]
+                ];
+                $hCaptcha_result = json_decode(file_get_contents('https://hcaptcha.com/siteverify', false, stream_context_create($options)),true);
+                if(!($hCaptcha_result["success"] == true)){
+                    $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+                }
+            }else{
+                $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+            }
+        }else{
+            $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+        }
+    }
+
     //----------------[icon image]-------------------------------
     if (empty($_FILES['image']['name'])) {
         $localFilePathhead = 'img/deficon/icon.png';
@@ -145,34 +176,39 @@ if( !empty($_POST['btn_submit']) ) {
 		// アップロードされたファイル情報
 		$uploadedFile = $_FILES['image'];
 
-		// アップロードされたファイルの拡張子を取得
-		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
-		
-		// 保存先のパスを生成
-		$uploadedPath = 'usericons/' . $newFilename;
-		
-		// ファイルを移動
-		$result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
-		
-        // EXIF削除
-		delete_exif($extension, $uploadedPath);
+        if(check_mime($uploadedFile['tmp_name'])){
 
-		if ($result) {
-			$iconName = $uploadedPath; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(1)エラーコード：' .$uploadedFile['error'].'';
-		}
+            // アップロードされたファイルの拡張子を取得
+            $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+            
+            // 新しいファイル名を生成（uniqid + 拡張子）
+            $newFilename = uniqid() . '-'.$userid.'.' . $extension;
+            
+            // 保存先のパスを生成
+            $uploadedPath = 'usericons/' . $newFilename;
+
+            // EXIF削除
+            delete_exif($extension, $uploadedFile['tmp_name']);
+
+            // ファイルを移動
+            $result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
+
+            if ($result) {
+                $iconName = $uploadedPath; // 保存されたファイルのパスを使用
+            } else {
+                $errnum = $uploadedFile['error'];
+                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                $error_message[] = 'アップロード失敗！(1)エラーコード：' .$uploadedFile['error'].'';
+            }
+        }else{
+            $error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
+        }
 	}
 
     //----------------[header image]-------------------------------
@@ -471,6 +507,9 @@ $pdo = null;
 <!--OGPここまで-->
 <link rel="stylesheet" href="css/style.css">
 <script src="js/unsupported.js"></script>
+<?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<?php }?>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -561,6 +600,12 @@ $pdo = null;
             </div>
 
             <p>登録を押すと利用規約とプライバシーポリシーに同意したこととなります。<br>未確認の場合は上のボタンよりお読みください。</p>
+            <?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+                <div class="captcha_zone">
+                    <div class="p2">あなたは人間ですか？<br>もし人間であれば下のチェックボックスにチェックしてください！</div>
+                    <div class="h-captcha" data-sitekey="<?php echo htmlentities(SITE_KEY);?>"></div>
+                </div>
+            <?php }?>
             <?php if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){?>
                 <div>
                     <p>招待コード</p>

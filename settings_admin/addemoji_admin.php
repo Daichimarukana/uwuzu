@@ -221,33 +221,37 @@ if( !empty($_POST['btn_submit']) ) {
         // アップロードされたファイル情報
 		$uploadedFile = $_FILES['image'];
 
-		// アップロードされたファイルの拡張子を取得
-		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename = uniqid() . '.' . $extension;
-		
-		// 保存先のパスを生成
-		$uploadedPath = 'emojiimage/' . $newFilename;
-		
-		// ファイルを移動
-		$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+		if(check_mime($uploadedFile['tmp_name'])){
+			// アップロードされたファイルの拡張子を取得
+			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename = uniqid() . '.' . $extension;
+			
+			// 保存先のパスを生成
+			$uploadedPath = 'emojiimage/' . $newFilename;
 
-		// EXIF削除
-		delete_exif($extension2, $uploadedPath2);
-		
-		if ($result) {
-			$emoji_path = $uploadedPath; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			// EXIF削除
+			delete_exif($extension2, $uploadedFile['tmp_name']);
+
+			// ファイルを移動
+			$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+			
+			if ($result) {
+				$emoji_path = $uploadedPath; // 保存されたファイルのパスを使用
+			} else {
+				$errnum = $uploadedFile['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			}
+		}else{
+			$error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
 		}
     }else{
 		$error_message[] = '画像を選択してください';

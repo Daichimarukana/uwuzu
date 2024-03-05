@@ -16,6 +16,9 @@ function random_key($moji_cnt = 16){
 }
 
 require('../db.php');
+//関数呼び出し
+//- EXIF
+require('../function/function.php');
 
 // 変数の初期化
 $datetime = array();
@@ -497,83 +500,43 @@ if( !empty($_POST['logout']) ) {
     exit;
 }
 
-function rotate($image, $exif)
-{
-    $orientation = $exif['Orientation'] ?? 1;
-
-    switch ($orientation) {
-        case 1: //no rotate
-            break;
-        case 2: //FLIP_HORIZONTAL
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 3: //ROTATE 180
-            $image = imagerotate($image, 180, 0);
-            break;
-        case 4: //FLIP_VERTICAL
-            imageflip($image, IMG_FLIP_VERTICAL);
-            break;
-        case 5: //ROTATE 270 FLIP_HORIZONTAL
-            $image = imagerotate($image, 270, 0);
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 6: //ROTATE 90
-            $image = imagerotate($image, 270, 0);
-            break;
-        case 7: //ROTATE 90 FLIP_HORIZONTAL
-            $image = imagerotate($image, 90, 0);
-            imageflip($image, IMG_FLIP_HORIZONTAL);
-            break;
-        case 8: //ROTATE 270
-            $image = imagerotate($image, 90, 0);
-            break;
-    }
-    return $image;
-}
-
 if( !empty($_POST['img1btn_submit']) ) {
 
     if (!empty($_FILES['image2s']['name'])) {
         // アップロードされたファイル情報
 		$uploadedFile = $_FILES['image2s'];
 
-		// アップロードされたファイルの拡張子を取得
-		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
-		
-		// 保存先のパスを生成
-		$uploadedPath = 'userheads/' . $newFilename;
-		
-		// ファイルを移動
-		$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+		if(check_mime($uploadedFile['tmp_name'])){
+			// アップロードされたファイルの拡張子を取得
+			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+			
+			// 保存先のパスを生成
+			$uploadedPath = 'userheads/' . $newFilename;
 
-		// EXIF削除
-		if($extension == "jpg" || $extension == "jpeg"){
-			$gd = imagecreatefromjpeg('../'.$uploadedPath);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data('../'.$uploadedPath); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, '../'.$uploadedPath);
-			imagedestroy($gd_out);
-		}
-		
-		if ($result) {
-			$headName = $uploadedPath; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			// EXIF削除
+			delete_exif($extension, $uploadedFile['tmp_name']);
+
+			// ファイルを移動
+			$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+			
+			if ($result) {
+				$headName = $uploadedPath; // 保存されたファイルのパスを使用
+			} else {
+				$errnum = $uploadedFile['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			}
+		}else{
+			$error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
 		}
     }else{
 		$error_message[] = 'ヘッダー画像を選択してください(PHOTO_SELECT_PLEASE)';
@@ -649,43 +612,37 @@ if( !empty($_POST['img2btn_submit']) ) {
         // アップロードされたファイル情報
 		$uploadedFile = $_FILES['image'];
 
-		// アップロードされたファイルの拡張子を取得
-		$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-		
-		// 新しいファイル名を生成（uniqid + 拡張子）
-		$newFilename = uniqid() . '-'.$userid.'.' . $extension;
-		
-		// 保存先のパスを生成
-		$uploadedPath = 'usericons/' . $newFilename;
-		
-		// ファイルを移動
-		$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+		if(check_mime($uploadedFile['tmp_name'])){
+			// アップロードされたファイルの拡張子を取得
+			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+			
+			// 新しいファイル名を生成（uniqid + 拡張子）
+			$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+			
+			// 保存先のパスを生成
+			$uploadedPath = 'usericons/' . $newFilename;
 
-		// EXIF削除
-		if($extension == "jpg" || $extension == "jpeg"){
-			$gd = imagecreatefromjpeg('../'.$uploadedPath);
-			$w = imagesx($gd);
-			$h = imagesy($gd);
-			$gd_out = imagecreatetruecolor($w,$h);
-			imagecopyresampled($gd_out, $gd, 0,0,0,0, $w,$h,$w,$h);
-			$exif = exif_read_data('../'.$uploadedPath); 
-			$gd_out = rotate($gd_out, $exif);
-			imagejpeg($gd_out, '../'.$uploadedPath);
-			imagedestroy($gd_out);
-		}
-		
-		if ($result) {
-			$iconName = $uploadedPath; // 保存されたファイルのパスを使用
-		} else {
-			$errnum = $uploadedFile['error'];
-			if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-			if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-			if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-			if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-			if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-			if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-			if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-			$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			// EXIF削除
+			delete_exif($extension, $uploadedFile['tmp_name']);
+
+			// ファイルを移動
+			$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+			
+			if ($result) {
+				$iconName = $uploadedPath; // 保存されたファイルのパスを使用
+			} else {
+				$errnum = $uploadedFile['error'];
+				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+			}
+		}else{
+			$error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
 		}
     }else{
 		$error_message[] = 'アイコン画像を選択してください(PHOTO_SELECT_PLEASE)';

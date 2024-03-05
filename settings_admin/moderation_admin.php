@@ -24,6 +24,9 @@ function random_code($length = 8){
 }
 
 require('../db.php');
+//hCaptcha--------------------------------------------
+require('hCaptcha_settings/hCaptcha_settings.php');
+//----------------------------------------------------
 
 // 変数の初期化
 $datetime = array();
@@ -258,6 +261,27 @@ if( !empty($_POST['btn_submit']) ) {
 	fputs($file, $data);
 	fclose($file);
 
+
+	$Captcha_ONOFF = $_POST['hCaptcha_onoff'];
+
+	$Captcha_sitekey = $_POST['hCaptcha_sitekey'];
+	$Captcha_seackey = $_POST['hCaptcha_seackey'];
+
+	$New_hCaptcha_Settings = "
+	<?php // Captchaの認証情報
+	define( 'CAPTCHA', '".htmlentities($Captcha_ONOFF)."');// trueならhCaptchaが有効
+
+	define( 'SITE_KEY', '".htmlentities($Captcha_sitekey)."');
+	define( 'SEAC_KEY', '".htmlentities($Captcha_seackey)."');
+	?>
+	";
+
+	//設定上書き
+	$file = fopen('hCaptcha_settings/hCaptcha_settings.php', 'w');
+	$data = $New_hCaptcha_Settings;
+	fputs($file, $data);
+	fclose($file);
+
 	$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	header("Location:".$url."");
 	exit;  
@@ -315,6 +339,28 @@ require('../logout/logout.php');
 						<input id="max_textsize" placeholder="1024" class="inbox" type="number" min="1" max="16777216" name="max_textsize" value="<?php if( !empty(file_get_contents($mojisizefile)) ){ echo htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
+					<div>
+						<p>hCaptcha認証</p>
+						<div class="p2">hCaptchaを使用し、ログイン時とアカウント登録時に認証をすることができます。<br>もし人間でないと判断された場合はアカウント登録やログイン、パスワード変更を受け付けません。</div>
+						<p>hCaptchaのオンオフ</p>
+						<div class="switch_button">
+							<?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+								<input id="hCaptcha_onoff" class="switch_input" type='checkbox' name="hCaptcha_onoff" value="true" checked/>
+								<label for="hCaptcha_onoff" class="switch_label"></label>
+							<?php }else{?>
+								<input id="hCaptcha_onoff" class="switch_input" type='checkbox' name="hCaptcha_onoff" value="true" />
+								<label for="hCaptcha_onoff" class="switch_label"></label>
+							<?php }?>
+						</div>
+						<div id="hcaptcha">
+							<p>hCaptcha - 認証情報設定</p>
+							<div class="p2">サイトキー</div>
+							<input id="hcaptcha" placeholder="" class="inbox" type="text" name="hCaptcha_sitekey" value="<?php if( !empty(SITE_KEY) ){ echo htmlspecialchars(SITE_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+							<div class="p2">シークレットキー</div>
+							<input id="hcaptcha" placeholder="" class="inbox" type="text" name="hCaptcha_seackey" value="<?php if( !empty(SEAC_KEY) ){ echo htmlspecialchars(SEAC_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+						</div>
+					</div>
+
 					<input type="submit" class = "irobutton" name="btn_submit" value="保存&更新">
 				</form>
 			</div>
@@ -325,5 +371,27 @@ require('../logout/logout.php');
 	<?php require('../require/botbox.php');?>
 
 </body>
+<script>
+$(document).ready(function() {
+    $(function(){
+        $("input"). keydown(function(e) {
+            if ((e.which && e.which === 13) || (e.keyCode && e.keyCode === 13)) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+    });
+
+	if ($("#hCaptcha_onoff").prop("checked")) {
+		$('#hcaptcha').show();
+	}else{
+		$('#hcaptcha').hide();
+	}
+	$('#hCaptcha_onoff').change(function(){
+		$('#hcaptcha').toggle();
+	});
+});
+</script>
 
 </html>
