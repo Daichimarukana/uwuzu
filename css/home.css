@@ -488,6 +488,7 @@ main h1{
     width: auto;
     height:auto;
     margin-bottom: 12px;
+    overflow-wrap: break-all;
 }
 
 .userheader .hed img{
@@ -5706,7 +5707,7 @@ summary {
         overflow-wrap:  break-word;
         margin-top: 32px;
         margin-bottom: auto;
-        margin-left: -6px;
+        margin-left: 0px;
         font-size: 16px;
         color:var(--link-color);
         text-decoration: none;

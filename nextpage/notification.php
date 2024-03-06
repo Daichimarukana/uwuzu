@@ -73,7 +73,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
                 if (!empty($message_array)) {
                     foreach ($message_array as $value) {
-                        $value["servericon"] = htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');
+                        $value["servericon"] = htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8', false);
                         if(!(empty($value['fromuserid']))){
                             if(!($value['fromuserid'] == "uwuzu-fromsys")){
                                 $userQuery = $dbh->prepare("SELECT username,iconname FROM account WHERE userid = :userid");

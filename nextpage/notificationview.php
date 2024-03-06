@@ -39,6 +39,7 @@ function processMarkdownAndWrapEmptyLines($markdownText){
 }
 //Profile
 function replaceProfileEmojiImages($postText) {
+    $postText = str_replace('&#039;', '\'', $postText);
     // プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
     $emojiPattern = '/:(\w+):/';
     $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
@@ -63,6 +64,7 @@ function replaceProfileEmojiImages($postText) {
     return $postTextWithImages;
 }
 function replaceEmojisWithImages($postText) {
+    $postText = str_replace('&#039;', '\'', $postText);
     // ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
     $emojiPattern = '/:(\w+):/';
     $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
@@ -104,14 +106,14 @@ function replaceEmojisWithImages($postText) {
         if(empty($mentionsuserData)){
             return "@$username";
         }else{
-            return "<a class = 'mta' href='/@".htmlentities($mentionsuserData["userid"])."'>@".replaceProfileEmojiImages(htmlentities($mentionsuserData["username"]))."</a>";
+            return "<a class = 'mta' href='/@".htmlspecialchars($mentionsuserData["userid"], ENT_QUOTES, 'UTF-8', false)."'>@".replaceProfileEmojiImages(htmlspecialchars($mentionsuserData["username"], ENT_QUOTES, 'UTF-8', false))."</a>";
         }
     }, $postTextWithImages);
 
     $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_]+)/u';
     $postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
         $hashtags = $matches[1];
-        return "<a class='hashtags' href='/search?q=" . urlencode('#') . $hashtags . "'>" . '#' . $hashtags . "</a>";
+        return "<a class='hashtags' href='/search?q=" . urlencode('#') . htmlspecialchars($hashtags, ENT_QUOTES, 'UTF-8', false) . "'>" . '#' . htmlspecialchars($hashtags, ENT_QUOTES, 'UTF-8', false) . "</a>";
     }, $postTextWithImagesAndUsernames);
 
     return $postTextWithHashtags;
@@ -133,11 +135,11 @@ class MessageDisplay {
         echo '    <div class="flebox">';
             
         echo '        <div class="time">';
-        $day = date("Ymd", strtotime(htmlentities($this->value['datetime'])));
+        $day = date("Ymd", strtotime(htmlspecialchars($this->value['datetime'], ENT_QUOTES, 'UTF-8', false)));
         if ($day == date("Ymd")) {
-            echo date("今日 H:i", strtotime(htmlentities($this->value['datetime'])));
+            echo date("今日 H:i", strtotime(htmlspecialchars($this->value['datetime'], ENT_QUOTES, 'UTF-8', false)));
         } else {
-            echo date("Y年m月d日 H:i", strtotime(htmlentities($this->value['datetime'])));
+            echo date("Y年m月d日 H:i", strtotime(htmlspecialchars($this->value['datetime'], ENT_QUOTES, 'UTF-8', false)));
         }
         echo '        </div>';
             
@@ -149,24 +151,24 @@ class MessageDisplay {
                 echo '    <div class="icon">';
                     if(($this->value['fromuserid'] == "uwuzu-fromsys")){
                         if(!(empty($this->value["servericon"]))){
-                            echo '    <a href="/rule/serverabout"><img src="'.$this->value["servericon"].'"></a>';
+                            echo '    <a href="/rule/serverabout"><img src="'.htmlspecialchars($this->value["servericon"], ENT_QUOTES, 'UTF-8', false).'"></a>';
                         }else{
                             echo '    <a href="/rule/serverabout"><img src="../img/uwuzuicon.png"></a>';
                         }
                     }else{
-                        echo '    <a href="/@'.$this->value['fromuserid'].'"><img src="' . $this->value['fromusericon'] . '"></a>';
+                        echo '    <a href="/@'.htmlspecialchars($this->value['fromuserid'], ENT_QUOTES, 'UTF-8', false).'"><img src="' . htmlspecialchars($this->value['fromusericon'], ENT_QUOTES, 'UTF-8', false) . '"></a>';
                     }
                 echo '    </div>';
                 if(($this->value['fromuserid'] == "uwuzu-fromsys")){
                     echo '    <div class="username"><a href="/rule/serverabout">uwuzu</a></div>';
                 }else{
-                    echo '    <div class="username"><a href="/@'.$this->value['fromuserid'].'">'.$this->value['fromusername'].'</a></div>';
+                    echo '    <div class="username"><a href="/@'.htmlspecialchars($this->value['fromuserid'], ENT_QUOTES, 'UTF-8', false).'">'.htmlspecialchars($this->value['fromusername'], ENT_QUOTES, 'UTF-8', false).'</a></div>';
                 }
             echo '    </div>';
         }
-        echo '    <h3>' . replaceEmojisWithImages($this->value['title']) . '</h3>';
-        echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(nl2br($this->value['msg']))) . '</p>';
-        echo '    <a href="' . htmlentities($this->value['url']) . '">詳細をみる</a>';
+        echo '    <h3>' . replaceEmojisWithImages(htmlspecialchars($this->value['title'], ENT_QUOTES, 'UTF-8', false)) . '</h3>';
+        echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(nl2br(htmlspecialchars($this->value['msg'], ENT_QUOTES, 'UTF-8', false)))) . '</p>';
+        echo '    <a href="' . htmlspecialchars($this->value['url'], ENT_QUOTES, 'UTF-8', false) . '">詳細をみる</a>';
             
         echo '</div>';
     }

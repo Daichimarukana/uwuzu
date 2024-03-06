@@ -45,6 +45,7 @@ function processMarkdownAndWrapEmptyLines($markdownText){
 }
 //Profile
 function replaceProfileEmojiImages($postText) {
+    $postText = str_replace('&#039;', '\'', $postText);
     // プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
     $emojiPattern = '/:(\w+):/';
     $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
@@ -70,6 +71,7 @@ function replaceProfileEmojiImages($postText) {
 }
 // ユーズ内の絵文字やhashtagを画像に置き換える
 function replaceEmojisWithImages($postText) {
+    $postText = str_replace('&#039;', '\'', $postText);
     // ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
     $emojiPattern = '/:(\w+):/';
     $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
@@ -111,7 +113,7 @@ function replaceEmojisWithImages($postText) {
         if(empty($mentionsuserData)){
             return "@$username";
         }else{
-            return "<a class = 'mta' href='/@".htmlentities($mentionsuserData["userid"])."'>@".replaceProfileEmojiImages(htmlentities($mentionsuserData["username"]))."</a>";
+            return "<a class = 'mta' href='/@".htmlspecialchars($mentionsuserData["userid"], ENT_QUOTES, 'UTF-8', false)."'>@".replaceProfileEmojiImages(htmlspecialchars($mentionsuserData["username"], ENT_QUOTES, 'UTF-8', false))."</a>";
         }
     }, $postTextWithImages);
 
@@ -124,9 +126,6 @@ function replaceEmojisWithImages($postText) {
     return $postTextWithHashtags;
 }
 function replaceURLsWithLinks($postText) {
-
-    $postText = str_replace('&#039;', '\'', $postText);
-
     // URLを正規表現を使って検出
     $pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
     preg_match_all($pattern, $postText, $matches);
@@ -177,14 +176,14 @@ function YouTube_and_nicovideo_Links($postText) {
 
             if (isset($parsedUrl['query'])) {
                 if(false !== strpos($parsedUrl['query'], 'v=')) {
-                    $video_id = str_replace('v=', '', htmlentities($parsedUrl['query']));
+                    $video_id = str_replace('v=', '', htmlspecialchars($parsedUrl['query'], ENT_QUOTES, 'UTF-8', false));
                     $iframe = true;
                 }else{
-                    $video_id = str_replace('/', '', htmlentities($parsedUrl['path']));
+                    $video_id = str_replace('/', '', htmlspecialchars($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
                     $iframe = true;
                 }
             }elseif(isset($parsedUrl['path'])){
-                $video_id = str_replace('/', '', htmlentities($parsedUrl['path']));
+                $video_id = str_replace('/', '', htmlspecialchars($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
                 $iframe = true;
             }else{
                 $video_id = "";
@@ -201,7 +200,7 @@ function YouTube_and_nicovideo_Links($postText) {
         }elseif($parsedUrl['host'] == "nicovideo.jp" || $parsedUrl['host'] == "www.nicovideo.jp"){
 
             if(isset($parsedUrl['path'])){
-                $video_id = str_replace('/watch/', '', htmlentities($parsedUrl['path']));
+                $video_id = str_replace('/watch/', '', htmlspecialchars($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
                 $iframe = true;
             }else{
                 $video_id = "";
@@ -243,10 +242,10 @@ class MessageDisplay {
             }
             echo '    <div class="flebox">';
             
-            echo '        <a href="/@' . htmlentities($this->value['account']) . '"><img src="'. htmlentities('../'.$this->value['iconname']) . '"></a>';
-            echo '        <a href="/@' . htmlentities($this->value['account']) . '"><div class="u_name">' . replaceProfileEmojiImages(htmlentities($this->value['username'])) . '</div></a>';
+            echo '        <a href="/@' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><img src="'. htmlspecialchars('../'.$this->value['iconname'], ENT_QUOTES, 'UTF-8', false) . '"></a>';
+            echo '        <a href="/@' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><div class="u_name">' . replaceProfileEmojiImages(htmlspecialchars($this->value['username'], ENT_QUOTES, 'UTF-8', false)) . '</div></a>';
             echo '        <div class="idbox">';
-            echo '            <a href="/@' . htmlentities($this->value['account']) . '">@' . htmlentities($this->value['account']) . '</a>';
+            echo '            <a href="/@' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '">@' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '</a>';
             echo '        </div>';
             if(!empty($this->value['sacinfo'])){
                 if($this->value['sacinfo'] === "bot"){
@@ -261,7 +260,7 @@ class MessageDisplay {
             }
             
             echo '        <div class="time">';
-            $datetime = strtotime(htmlentities($this->value['datetime']));
+            $datetime = strtotime(htmlspecialchars($this->value['datetime'], ENT_QUOTES, 'UTF-8', false));
             $today = strtotime(date("Y-m-d"));
             $tomorrow = date('Y-m-d', strtotime('+1 day'));
             if (date("md", $datetime) == "0101") {
@@ -284,45 +283,45 @@ class MessageDisplay {
             echo '    </div>';
 
             if($this->value['nsfw'] === "true"){
-                echo '    <div class="nsfw" data-uniqid="' . htmlentities($this->value['uniqid']) . '">';
+                echo '    <div class="nsfw" data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '">';
                 echo '    <p>NSFW指定がされている投稿です！<br>職場や公共の場での表示には適さない場合があります。<br>表示ボタンを押すと表示されます。</p>';
                 echo '    <div class="btnzone">';
                 echo '    <input type="button" id="nsfw_view" class="mini_irobtn" value="表示">';
                 echo '    </div>';
                 echo '    </div>';
-                echo '    <div class="nsfw_main" data-uniqid="' . htmlentities($this->value['uniqid']) . '">';
+                echo '    <div class="nsfw_main" data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '">';
                 echo '    <div class="block">';
             }
-            echo '    <p>' . replaceEmojisWithImages(processMarkdownAndWrapEmptyLines(replaceURLsWithLinks(nl2br($this->value['ueuse'])))) . '</h1></h2></h3></font></center></p>';
+            echo '    <p>' . replaceEmojisWithImages(processMarkdownAndWrapEmptyLines(replaceURLsWithLinks(nl2br(htmlspecialchars($this->value['ueuse'], ENT_QUOTES, 'UTF-8', false))))) . '</h1></h2></h3></font></center></p>';
             
             if (!empty($this->value['photo4']) && $this->value['photo4'] !== 'none') {
                 echo '    <div class="photo4">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo4']).'" target=”_blank”><img src="'.htmlentities($this->value['photo4']).'" alt="画像4" title="画像4" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo2'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo2'], ENT_QUOTES, 'UTF-8', false).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo3'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo3'], ENT_QUOTES, 'UTF-8', false).'" alt="画像3" title="画像3" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo4'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo4'], ENT_QUOTES, 'UTF-8', false).'" alt="画像4" title="画像4" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo3']) && $this->value['photo3'] !== 'none') {
                 echo '    <div class="photo3">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo2'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo2'], ENT_QUOTES, 'UTF-8', false).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '        <div class="photo3_btm">';
-                echo '            <a href="'.htmlentities($this->value['photo3']).'" target=”_blank”><img src="'.htmlentities($this->value['photo3']).'" alt="画像3" title="画像3" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '            <a href="'.htmlspecialchars($this->value['photo3'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo3'], ENT_QUOTES, 'UTF-8', false).'" alt="画像3" title="画像3" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '        </div>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo2']) && $this->value['photo2'] !== 'none') {
                 echo '    <div class="photo2">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
-                echo '        <a href="'.htmlentities($this->value['photo2']).'" target=”_blank”><img src="'.htmlentities($this->value['photo2']).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo2'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo2'], ENT_QUOTES, 'UTF-8', false).'" alt="画像2" title="画像2" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '    </div>';
             } elseif (!empty($this->value['photo1']) && $this->value['photo1'] !== 'none') {
                 echo '    <div class="photo1">';
-                echo '        <a href="'.htmlentities($this->value['photo1']).'" target=”_blank”><img src="'.htmlentities($this->value['photo1']).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
+                echo '        <a href="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" target=”_blank”><img src="'.htmlspecialchars($this->value['photo1'], ENT_QUOTES, 'UTF-8', false).'" alt="画像1" title="画像1" onerror="this.onerror=null;this.src=\'../img/sysimage/errorimage/image_404.png\'"></a>';
                 echo '    </div>';
             }
             if (!empty($this->value['video1']) && $this->value['video1'] !== 'none') {
                 echo '    <div class="video1">';
-                echo '        <video controls src="' . htmlentities($this->value['video1']) . '"></video>';
+                echo '        <video controls src="' . htmlspecialchars($this->value['video1'], ENT_QUOTES, 'UTF-8', false) . '"></video>';
                 echo '    </div>';
             }elseif (!empty(YouTube_and_nicovideo_Links($this->value['ueuse']))) {
                 echo '    <div class="youtube_and_nicovideo_player">';
@@ -333,10 +332,10 @@ class MessageDisplay {
             if(!($this->value['abi'] == "none")){
                 echo '<div class="abi">';
                 echo '  <div class="back">';
-                echo '<h1>' . replaceProfileEmojiImages(htmlentities($this->value['username'])) . 'さんが追記しました</h1>';
+                echo '<h1>' . replaceProfileEmojiImages(htmlspecialchars($this->value['username'], ENT_QUOTES, 'UTF-8', false)) . 'さんが追記しました</h1>';
                 echo '  </div>';
-                echo '<p>'.processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br($this->value['abi'])))) . '</p>';
-                echo '<div class="h3s">追記日時 : '. date("Y年m月d日 H:i", strtotime(htmlentities($this->value['abidate']))) . '</div>';
+                echo '<p>'.processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br(htmlspecialchars($this->value['abi'], ENT_QUOTES, 'UTF-8', false))))) . '</p>';
+                echo '<div class="h3s">追記日時 : '. date("Y年m月d日 H:i", strtotime(htmlspecialchars($this->value['abidate'], ENT_QUOTES, 'UTF-8', false))) . '</div>';
                 echo '</div>';
             }
             if($this->value['nsfw'] === "true"){
@@ -348,27 +347,27 @@ class MessageDisplay {
             echo '<div class="favbox">';
             $favoriteList = explode(',', $this->value['favorite']);
             if (in_array($this->userid, $favoriteList)) {
-                echo '<button class="favbtn favbtn_after" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_2.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
+                echo '<button class="favbtn favbtn_after" id="favbtn"  data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" data-userid2="' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><svg><use xlink:href="../img/sysimage/favorite_2.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }else{
-                echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid2="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/favorite_1.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
+                echo '<button class="favbtn" id="favbtn"  data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" data-userid2="' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><svg><use xlink:href="../img/sysimage/favorite_1.svg#favorite" alt="いいね"></use></svg> <span class="like-count">' . htmlentities($this->value['favcnt']) . '</span></button>';
             }
-            echo '<a href="/!'.htmlentities($this->value['uniqid']). '~' . htmlentities($this->value['account']) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlentities($this->value['reply_count']).'</a>';
-            echo '<button name="share" id="share" class="share" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/share_1.svg#share_1"></use></svg></button>';
+            echo '<a href="/!'.htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false). '~' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>'.htmlspecialchars($this->value['reply_count'], ENT_QUOTES, 'UTF-8', false).'</a>';
+            echo '<button name="share" id="share" class="share" data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" data-userid="' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><svg><use xlink:href="../img/sysimage/share_1.svg#share_1"></use></svg></button>';
             
             $bookmarkList = explode(',', $this->value['bookmark']);
             if (in_array($this->value['uniqid'], $bookmarkList)) {
-                echo '<button name="bookmark" id="bookmark" class="bookmark bookmark_after" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>';
+                echo '<button name="bookmark" id="bookmark" class="bookmark bookmark_after" data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" data-userid="' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>';
             }else{
-                echo '<button name="bookmark" id="bookmark" class="bookmark" data-uniqid="' . htmlentities($this->value['uniqid']) . '" data-userid="' . htmlentities($this->value['account']) . '"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>';
+                echo '<button name="bookmark" id="bookmark" class="bookmark" data-uniqid="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" data-userid="' . htmlspecialchars($this->value['account'], ENT_QUOTES, 'UTF-8', false) . '"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>';
             }
                 
             if($this->value['account'] === $this->userid){
                 if(!($this->value['role'] === "ice")){
                     if($this->value['abi'] === "none"){
-                        echo '<button name="addabi" id="addabi" data-uniqid2="' . htmlentities($this->value['uniqid']) . '" class="addabi"><svg><use xlink:href="../img/sysimage/addabi_1.svg#addabi_1"></use></svg></button>';
+                        echo '<button name="addabi" id="addabi" data-uniqid2="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" class="addabi"><svg><use xlink:href="../img/sysimage/addabi_1.svg#addabi_1"></use></svg></button>';
                     }
                 }
-                echo '<input type="submit" name="delueuse" id="uniqid2" data-uniqid2="' . htmlentities($this->value['uniqid']) . '" class="delbtn" value="削除">';
+                echo '<input type="submit" name="delueuse" id="uniqid2" data-uniqid2="' . htmlspecialchars($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '" class="delbtn" value="削除">';
             }
             echo '</div>';
             echo '</div>';

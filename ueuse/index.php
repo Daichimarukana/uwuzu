@@ -499,23 +499,23 @@ if( !empty($_POST['btn_submit']) ) {
 
 				// SQL作成
 				$stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
-		
-				$stmt->bindParam(':username', $username, PDO::PARAM_STR);
-				$stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-				$stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-				$stmt->bindParam(':rpuniqid', $ueuseid, PDO::PARAM_STR);
-				$stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
 
-				$stmt->bindParam(':photo1', $photo1, PDO::PARAM_STR);
-				$stmt->bindParam(':photo2', $photo2, PDO::PARAM_STR);
-				$stmt->bindParam(':photo3', $photo3, PDO::PARAM_STR);
-				$stmt->bindParam(':photo4', $photo4, PDO::PARAM_STR);
-				$stmt->bindParam(':video1', $video1, PDO::PARAM_STR);
-				$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+				$stmt->bindParam(':username', htmlspecialchars($username, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':account', htmlspecialchars($userid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':uniqid', htmlspecialchars($uniqid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':rpuniqid', htmlspecialchars($ueuseid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':ueuse', htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+				$stmt->bindParam(':photo1', htmlspecialchars($photo1, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo2', htmlspecialchars($photo2, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo3', htmlspecialchars($photo3, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo4', htmlspecialchars($photo4, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':video1', htmlspecialchars($video1, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+				$stmt->bindParam(':nsfw', htmlspecialchars($save_nsfw, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+
+				$stmt->bindParam(':abi', htmlspecialchars($abi, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 				// SQLクエリの実行
 				$res = $stmt->execute();
@@ -533,14 +533,14 @@ if( !empty($_POST['btn_submit']) ) {
 				// 通知用SQL作成
 				$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 		
-				$stmt->bindParam(':fromuserid', htmlentities($fromuserid), PDO::PARAM_STR);
-				$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
-				$stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
-				$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
-				$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
-				$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+				$stmt->bindParam(':fromuserid', htmlspecialchars($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':touserid', htmlspecialchars($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':msg', htmlspecialchars($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':url', htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':userchk', htmlspecialchars($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':title', htmlspecialchars($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 				// SQLクエリの実行
 				$res = $stmt->execute();
@@ -568,14 +568,14 @@ if( !empty($_POST['btn_submit']) ) {
 							// 通知用SQL作成
 							$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
-							$stmt->bindParam(':fromuserid', htmlentities($fromuserid), PDO::PARAM_STR);
-							$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
-							$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-							$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
-							$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
-							$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+							$stmt->bindParam(':fromuserid', htmlspecialchars($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':touserid', htmlspecialchars($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':msg', htmlspecialchars($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':url', htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':userchk', htmlspecialchars($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':title', htmlspecialchars($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-							$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
+							$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 							// SQLクエリの実行
 							$res = $stmt->execute();

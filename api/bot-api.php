@@ -190,20 +190,22 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                         try {
 
                             // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, video1, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :video1, :datetime, :abi)");
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi)");
                     
-                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+                            $stmt->bindParam(':username', htmlspecialchars($username, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':account', htmlspecialchars($userid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':uniqid', htmlspecialchars($uniqid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':ueuse', htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-                            $stmt->bindParam(':photo1', $nones, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo2', $nones, PDO::PARAM_STR);
-                            $stmt->bindParam(':video1', $nones, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo1', htmlspecialchars($nones, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':photo2', htmlspecialchars($nones, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':photo3', htmlspecialchars($nones, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':photo4', htmlspecialchars($nones, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                            $stmt->bindParam(':video1', htmlspecialchars($nones, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                            $stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+                            $stmt->bindParam(':abi', htmlspecialchars($abi, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
                             // SQLクエリの実行
                             $res = $stmt->execute();
@@ -218,6 +220,7 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                                 $pdo->beginTransaction();
 
                                 try {
+                                    $fromuserid = $userid;
                                     $touserid = $mentionedUser;
                                     $datetime = date("Y-m-d H:i:s");
                                     $msg = "" . $ueuse . "";
@@ -226,16 +229,16 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                                     $userchk = 'none';
 
                                     // 通知用SQL作成
-                                    $stmt = $pdo->prepare("INSERT INTO notification (touserid, msg, url, datetime, userchk, title) VALUES (:touserid, :msg, :url, :datetime, :userchk, :title)");
+                                    $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
+                                    $stmt->bindParam(':fromuserid', htmlspecialchars($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                                    $stmt->bindParam(':touserid', htmlspecialchars($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                                    $stmt->bindParam(':msg', htmlspecialchars($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                                    $stmt->bindParam(':url', htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                                    $stmt->bindParam(':userchk', htmlspecialchars($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                                    $stmt->bindParam(':title', htmlspecialchars($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-                                    $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                                    $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                                    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                                    $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                                    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-
-                                    $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                                    $stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
                                     // SQLクエリの実行
                                     $res = $stmt->execute();

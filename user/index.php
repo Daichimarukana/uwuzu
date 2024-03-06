@@ -201,6 +201,7 @@ if( !empty($pdo) ) {
 
 	// プロフィールの絵文字対応
 	function replaceProfileEmojiImages($postText) {
+		$postText = str_replace('&#039;', '\'', $postText);
 		// プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
 		$emojiPattern = '/:(\w+):/';
 		$postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
@@ -226,6 +227,7 @@ if( !empty($pdo) ) {
 	}
 	// ユーズ内の絵文字を画像に置き換える
 	function replaceEmojisWithImages($postText) {
+		$postText = str_replace('&#039;', '\'', $postText);
 		// ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
 		$emojiPattern = '/:(\w+):/';
 		$postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
@@ -281,8 +283,6 @@ if( !empty($pdo) ) {
 	}
 
 	function replaceURLsWithLinks($postText) {
-		$postText = str_replace('&#039;', '\'', $postText);
-
 		// URLを正規表現を使って検出
 		$pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
 		preg_match_all($pattern, $postText, $matches);
@@ -466,14 +466,14 @@ if (!empty($_POST['follow'])) {
 			// 通知用SQL作成
 			$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
-			$stmt->bindParam(':fromuserid', htmlentities($fromuserid), PDO::PARAM_STR);
-			$stmt->bindParam(':touserid', htmlentities($touserid), PDO::PARAM_STR);
-			$stmt->bindParam(':msg', htmlentities($msg), PDO::PARAM_STR);
-			$stmt->bindParam(':url', htmlentities($url), PDO::PARAM_STR);
-			$stmt->bindParam(':userchk', htmlentities($userchk), PDO::PARAM_STR);
-			$stmt->bindParam(':title', htmlentities($title), PDO::PARAM_STR);
+			$stmt->bindParam(':fromuserid', htmlspecialchars($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+			$stmt->bindParam(':touserid', htmlspecialchars($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+			$stmt->bindParam(':msg', htmlspecialchars($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+			$stmt->bindParam(':url', htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+			$stmt->bindParam(':userchk', htmlspecialchars($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+			$stmt->bindParam(':title', htmlspecialchars($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-			$stmt->bindParam(':datetime', htmlentities($datetime), PDO::PARAM_STR);
+			$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 			// SQLクエリの実行
 			$res = $stmt->execute();
@@ -625,7 +625,7 @@ $pdo = null;
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんのプロフィール - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title><?php echo htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8', false); ?> さんのプロフィール - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -685,12 +685,12 @@ $pdo = null;
 				<!--ここまで！--->
 			<?php }else{?>
 			<div class="hed">
-				<img src="<?php echo htmlentities('../'.$userdata['headname']); ?>">
+				<img src="<?php echo htmlspecialchars('../'.$userdata['headname'], ENT_QUOTES, 'UTF-8', false); ?>">
 			</div>
 			<div class="icon">
-				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
-				<h2><?php echo replaceProfileEmojiImages(htmlentities($userData['username'], ENT_QUOTES, 'UTF-8')); ?></h2>
-				<p>@<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?><!--<span>@<?php /*echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); */?></span>--></p>
+				<img src="<?php echo htmlspecialchars('../'.$userdata['iconname'], ENT_QUOTES, 'UTF-8', false); ?>">
+				<h2><?php echo replaceProfileEmojiImages(htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8', false)); ?></h2>
+				<p>@<?php echo htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false); ?><!--<span>@<?php /*echo htmlentities($domain, ENT_QUOTES, 'UTF-8'); */?></span>--></p>
 			</div>
 
 			<div class="roleboxes">
@@ -698,15 +698,15 @@ $pdo = null;
 					<?php $roleData = $roleDataArray[$roleId]; ?>
 					<div class="rolebox" style="border: 1px solid <?php echo '#' . $roleData["rolecolor"]; ?>;">
 						<p style="color: <?php echo '#' . $roleData["rolecolor"]; ?>;">
-							<?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); }else{ echo("ロールが正常に設定されていません。");} ?>
+							<?php if (!empty($roleData["rolename"])) { echo htmlspecialchars($roleData["rolename"], ENT_QUOTES, 'UTF-8', false); }else{ echo("ロールが正常に設定されていません。");} ?>
 						</p>
 					</div>
 				<?php endforeach; ?>
 			</div>
 
-			<?php if (false === strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+			<?php if (false === strpos($myblocklist, ','.htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false))) {?>
 				<div class="profile">
-					<p><?php echo replaceEmojisWithImages(replaceURLsWithLinks(nl2br($profileText))); ?></p>
+					<p><?php echo replaceEmojisWithImages(replaceURLsWithLinks(nl2br(htmlspecialchars($profileText, ENT_QUOTES, 'UTF-8', false)))); ?></p>
 				</div>
 			<?php }else{?>
 				<div class="profile">
@@ -718,7 +718,7 @@ $pdo = null;
 		<div class="fzone">
 			<div class="time">
 				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
-				<p><?php if(htmlentities($userdata['role']) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
+				<p><?php if(htmlspecialchars($userdata['role'], ENT_QUOTES, 'UTF-8', false) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
 			</div>
 			
 			<?php if(!empty($follow_yes)){?>
@@ -727,8 +727,8 @@ $pdo = null;
 				</div>
 			<?php }?>
 
-			<?php if ($userid !== htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8')) {?>
-				<?php if (false !== strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+			<?php if ($userid !== htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false)) {?>
+				<?php if (false !== strpos($myblocklist, ','.htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false))) {?>
 					<div class="follow">
 						<a id="un_block" href="javascript:void(0);" class="report" title="ブロック解除"><svg><use xlink:href="../img/sysimage/unblock_1.svg#block"></use></svg></a>
 					</div>
@@ -740,7 +740,7 @@ $pdo = null;
 			<?php }?>
 			
 			<div class="follow">
-				<a href="/user/report?q=<?php echo htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'); ?>" class="report" title="通報"><svg><use xlink:href="../img/sysimage/report_1.svg#report"></use></svg></a>
+				<a href="/user/report?q=<?php echo htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false); ?>" class="report" title="通報"><svg><use xlink:href="../img/sysimage/report_1.svg#report"></use></svg></a>
 			</div>
 			<?php if ($userData['userid'] == $userid) { ?>
 				<div class="follow">
@@ -748,7 +748,7 @@ $pdo = null;
 				</div>
 			<?php } else { ?>
 				
-				<?php if (false === strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+				<?php if (false === strpos($myblocklist, ','.htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false))) {?>
 					<form method="post">
 						<div class="follow">
 							<?php
@@ -773,14 +773,14 @@ $pdo = null;
 		<div class="sp_time_area">
 			<div class="time">
 				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
-				<p><?php if(htmlentities($userdata['role']) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
+				<p><?php if(htmlspecialchars($userdata['role'], ENT_QUOTES, 'UTF-8', false) === "ice"){echo"このアカウントは凍結されています。";}; ?></p>
 			</div>
 		</div>
 
 		<?php if(!($role === "ice")){?>
 			<div id="myModal" class="modal">
 				<div class="modal-content">
-					<p><?php echo replaceProfileEmojiImages(htmlentities($userData['username'], ENT_QUOTES, 'UTF-8')); ?>さんをフォロー解除しますか？</p>
+					<p><?php echo replaceProfileEmojiImages(htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんをフォロー解除しますか？</p>
 					<form class="btn_area" method="post">
 						<input type="submit" id="openModalButton" class="fbtn_no" name="unfollow" value="フォロー解除">
 						<input type="button" id="closeModal" class="fbtn" value="キャンセル">
@@ -811,7 +811,7 @@ $pdo = null;
 		</div>
 
 		<hr>
-			<?php if (false === strpos($myblocklist, ','.htmlentities($userData['userid'], ENT_QUOTES, 'UTF-8'))) {?>
+			<?php if (false === strpos($myblocklist, ','.htmlspecialchars($userData['userid'], ENT_QUOTES, 'UTF-8', false))) {?>
 				<section class="inner">
 					<div id="postContainer">
 
@@ -822,7 +822,7 @@ $pdo = null;
 					🤔
 				</div>
 			<?php }else{?>
-				<div class="tokonone" id="noueuse"><p><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?>さんをブロックしているため投稿の閲覧は出来ません。</p></div>
+				<div class="tokonone" id="noueuse"><p><?php echo htmlspecialchars($userData['username'], ENT_QUOTES, 'UTF-8', false); ?>さんをブロックしているため投稿の閲覧は出来ません。</p></div>
 			<?php }?>
 
 			<div id="error" class="error" style="display: none;">
@@ -845,7 +845,7 @@ $pdo = null;
 					<p>ユーズに追記しますか？</p>
 					<p>※追記は削除出来ません。</p>
 					<form method="post" id="AbiForm">
-					<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+					<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlspecialchars( $_SESSION['abi'], ENT_QUOTES, 'UTF-8', false); } ?></textarea>
 					<div class="btn_area">
 						<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
 						<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">
@@ -856,8 +856,8 @@ $pdo = null;
 
 			<div id="account_BlockModal" class="modal">
 				<div class="modal-content">
-					<h1><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんをブロックしますか？</h1>
-					<p><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんのアカウントをブロックしますか？<br>ブロックするとフォローが解除され、検索以外のLTL、FTL等で<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿が表示されなくなります。<br>また、相手からこのアカウントを閲覧することもできなくなります。<br>※ブロックしたことは相手には通知されません。<br><br>ブロックを解除するときはこのアカウントのユーザーページ(このページ)から解除を行ってください。</p>
+					<h1><?php echo replaceProfileEmojiImages(htmlspecialchars($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんをブロックしますか？</h1>
+					<p><?php echo replaceProfileEmojiImages(htmlspecialchars($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんのアカウントをブロックしますか？<br>ブロックするとフォローが解除され、検索以外のLTL、FTL等で<?php echo htmlspecialchars($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんの投稿が表示されなくなります。<br>また、相手からこのアカウントを閲覧することもできなくなります。<br>※ブロックしたことは相手には通知されません。<br><br>ブロックを解除するときはこのアカウントのユーザーページ(このページ)から解除を行ってください。</p>
 					<form class="btn_area" method="post">
 						<input type="submit" id="deleteButton2" class="fbtn_no" name="send_block_submit" value="ブロック">
 						<input type="button" id="cancelButton2" class="fbtn" value="キャンセル">
@@ -867,8 +867,8 @@ $pdo = null;
 
 			<div id="account_un_BlockModal" class="modal">
 				<div class="modal-content">
-					<h1><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんのブロックを解除しますか？</h1>
-					<p><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8')); ?>さんのアカウントをブロック解除しますか？<br>ブロック解除すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんの投稿の閲覧が可能になりフォローすることもできるようになります。</p>
+					<h1><?php echo replaceProfileEmojiImages(htmlspecialchars($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんのブロックを解除しますか？</h1>
+					<p><?php echo replaceProfileEmojiImages(htmlspecialchars($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんのアカウントをブロック解除しますか？<br>ブロック解除すると<?php echo htmlspecialchars($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんの投稿の閲覧が可能になりフォローすることもできるようになります。</p>
 					<form class="btn_area" method="post">
 						<input type="submit" id="deleteButton3" class="fbtn_no" name="send_un_block_submit" value="ブロック解除">
 						<input type="button" id="cancelButton3" class="fbtn" value="キャンセル">
@@ -879,22 +879,22 @@ $pdo = null;
 
 			<div id="FollowerUserModal" class="modal">
 				<div class="modal-content">
-					<p><?php echo replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'));?>さんをフォローしているユーザー</p>
+					<p><?php echo replaceProfileEmojiImages(htmlspecialchars($userData["username"], ENT_QUOTES, 'UTF-8', false));?>さんをフォローしているユーザー</p>
 					<?php 
 					if(!empty($follower_userdata)){
 						foreach ($follower_userdata as $value) {
-							if (false === strpos($myblocklist, ',' . htmlentities($value['userid'], ENT_QUOTES, 'UTF-8'))) {
+							if (false === strpos($myblocklist, ',' . htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false))) {
 								echo "<div class='action_userlist'>";
-								echo "<a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'><img src=".htmlentities($value['iconname'], ENT_QUOTES, 'UTF-8')."></a>";
+								echo "<a href='/@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."'><img src=".htmlspecialchars($value['iconname'], ENT_QUOTES, 'UTF-8', false)."></a>";
 								echo "<div class='userabout'>";
-								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".replaceEmojisWithImages(htmlentities($value['username'], ENT_QUOTES, 'UTF-8'))."</a></div>";
-								echo "<div class='userid'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "<div class='username'><a href='/@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."'>".replaceEmojisWithImages(htmlspecialchars($value['username'], ENT_QUOTES, 'UTF-8', false))."</a></div>";
+								echo "<div class='userid'><a href='/@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."'>@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."</a></div>";
 								echo "</div>";
 								echo "</div>";
 							}
 						}
 					}else{
-						echo "<p>".replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'))."さんは誰にもフォローされていません。</p>";
+						echo "<p>".replaceProfileEmojiImages(htmlspecialchars($userData["username"], ENT_QUOTES, 'UTF-8', false))."さんは誰にもフォローされていません。</p>";
 					}
 					?>
 					<div class="btn_area">
@@ -905,22 +905,22 @@ $pdo = null;
 
 			<div id="FollowUserModal" class="modal">
 				<div class="modal-content">
-					<p><?php echo replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'));?>さんがフォローしているユーザー</p>
+					<p><?php echo replaceProfileEmojiImages(htmlspecialchars($userData["username"], ENT_QUOTES, 'UTF-8', false));?>さんがフォローしているユーザー</p>
 					<?php 
 					if(!empty($follow_userdata)){
 						foreach ($follow_userdata as $value) {
-							if (false === strpos($myblocklist, ',' . htmlentities($value['userid'], ENT_QUOTES, 'UTF-8'))) {
+							if (false === strpos($myblocklist, ',' . htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false))) {
 								echo "<div class='action_userlist'>";
-								echo "<a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'><img src=".htmlentities($value['iconname'], ENT_QUOTES, 'UTF-8')."></a>";
+								echo "<a href='/@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."'><img src=".htmlspecialchars($value['iconname'], ENT_QUOTES, 'UTF-8', false)."></a>";
 								echo "<div class='userabout'>";
-								echo "<div class='username'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>".replaceEmojisWithImages(htmlentities($value['username'], ENT_QUOTES, 'UTF-8'))."</a></div>";
-								echo "<div class='userid'><a href='/@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."'>@".htmlentities($value['userid'], ENT_QUOTES, 'UTF-8')."</a></div>";
+								echo "<div class='username'><a href='/@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."'>".replaceEmojisWithImages(htmlspecialchars($value['username'], ENT_QUOTES, 'UTF-8', false))."</a></div>";
+								echo "<div class='userid'><a href='/@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."'>@".htmlspecialchars($value['userid'], ENT_QUOTES, 'UTF-8', false)."</a></div>";
 								echo "</div>";
 								echo "</div>";
 							}
 						}
 					}else{
-						echo "<p>".replaceProfileEmojiImages(htmlentities($userData["username"], ENT_QUOTES, 'UTF-8'))."さんは誰もフォローしていません。</p>";
+						echo "<p>".replaceProfileEmojiImages(htmlspecialchars($userData["username"], ENT_QUOTES, 'UTF-8', false))."さんは誰もフォローしていません。</p>";
 					}
 					?>
 					<div class="btn_area">

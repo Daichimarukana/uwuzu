@@ -44,7 +44,56 @@ if (htmlentities(isset($_POST['uniqid'])) && htmlentities(isset($_POST['userid']
         $result2 = $query->fetch();
 
         if($result2["loginid"] === $loginid){
+            $photo_query = $dbh->prepare("SELECT * FROM ueuse WHERE account = :userid AND uniqid = :uniqid");
+            $photo_query->bindValue(':userid', $postUserid);
+            $photo_query->bindValue(':uniqid', $postUniqid);
+            $photo_query->execute();
+            $photo_and_video = $photo_query->fetch();
+			
+            if(!($photo_and_video["photo1"] == "none")){
+                $photoDelete1 = glob($photo_and_video["photo1"]); // 「-ユーザーID.拡張子」というパターンを検索
+                foreach ($photoDelete1 as $photo1) {
+                    if (is_file($photo1)) {
+                        unlink($photo1);
+                    }
+                }
+            }
+            if(!($photo_and_video["photo2"] == "none")){
+                $photoDelete2 = glob($photo_and_video["photo2"]); // 「-ユーザーID.拡張子」というパターンを検索
+                foreach ($photoDelete2 as $photo2) {
+                    if (is_file($photo2)) {
+                        unlink($photo2);
+                    }
+                }
+            }
+            if(!($photo_and_video["photo3"] == "none")){
+                $photoDelete3 = glob($photo_and_video["photo3"]); // 「-ユーザーID.拡張子」というパターンを検索
+                foreach ($photoDelete3 as $photo3) {
+                    if (is_file($photo3)) {
+                        unlink($photo3);
+                    }
+                }
+            }
+            if(!($photo_and_video["photo4"] == "none")){
+                $photoDelete4 = glob($photo_and_video["photo4"]); // 「-ユーザーID.拡張子」というパターンを検索
+                foreach ($photoDelete4 as $photo4) {
+                    if (is_file($photo4)) {
+                        unlink($photo4);
+                    }
+                }
+            }
+            if(!($photo_and_video["video1"] == "none")){
+                $videoDelete1 = glob($photo_and_video["video1"]); // 「-ユーザーID.拡張子」というパターンを検索
+                foreach ($videoDelete1 as $video1) {
+                    if (is_file($video1)) {
+                        unlink($video1);
+                    }
+                }
+            }
+			
+
             try {
+
                 $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
 
                 // 削除クエリを実行
