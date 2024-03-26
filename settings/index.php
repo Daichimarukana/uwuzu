@@ -430,8 +430,8 @@ if( !empty($_POST['pass_submit']) ) {
             
         }
         // 文字数を確認
-        if( 100 < mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは100文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
+        if( 256 < mb_strlen($password, 'UTF-8') ) {
+			$error_message[] = 'パスワードは256文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
 		}
 
 		if( 4 > mb_strlen($password, 'UTF-8') ) {
@@ -780,10 +780,10 @@ $pdo = null;
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>設定 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>設定 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -827,16 +827,16 @@ $pdo = null;
 				<!--ユーザーネーム関係-->
 				<div>
 					<p>ユーザーネーム</p>
-					<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userdata['username']) ){ echo htmlspecialchars( $userdata['username'], ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userdata['username']) ){ echo htmlentities( $userdata['username'], ENT_QUOTES, 'UTF-8'); } ?>">
 				</div>
 				<div>
 					<p>メールアドレス</p>
-					<input id="mailadds" type="text" placeholder="" class="inbox" name="mailadds" value="<?php if( !empty($userdata['mailadds']) ){ echo htmlspecialchars( $userdata['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="mailadds" type="text" placeholder="" class="inbox" name="mailadds" value="<?php if( !empty($userdata['mailadds']) ){ echo htmlentities( $userdata['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
 				</div>
 				<!--プロフィール関連-->
 				<div>
 					<p>プロフィール</p>
-					<textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlspecialchars( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+					<textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlentities( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 				</div>
 
 				<?php if(!empty($userData['token'])){?>
@@ -880,8 +880,14 @@ $pdo = null;
             </div>
 			<div>
                 <p>新しいパスワード</p>
-                <input id="password" type="text" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" style="-webkit-text-security:disc;" value="">
-            </div>
+                <input id="password" type="password" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="">
+				<p>パスワードを表示する</p>
+				<div class="switch_button">
+					<input id="passview" class="switch_input" type='checkbox' name="passview" value=""/>
+					<label for="passview" class="switch_label"></label>
+				</div>
+			</div>
+			
 
 			<input type="submit" class = "irobutton" name="pass_submit" value="パスワード更新">
 
@@ -901,5 +907,15 @@ $pdo = null;
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 </body>
 </html>
+<script>
+$("#passview").click(function () {
+    if ($("#passview").prop("checked") == true) {
+        $('#password').get(0).type = 'text';
+    } else {
+        $('#password').get(0).type = 'password';
+    }
+});
+</script>

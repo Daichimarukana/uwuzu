@@ -26,6 +26,8 @@ function random_code($length = 8){
 require('../db.php');
 //hCaptcha--------------------------------------------
 require('hCaptcha_settings/hCaptcha_settings.php');
+//Cloudflare_Turnstile--------------------------------------------
+require('CloudflareTurnstile_settings/CloudflareTurnstile_settings.php');
 //----------------------------------------------------
 
 // 変数の初期化
@@ -237,54 +239,82 @@ if (!empty($pdo)) {
 if( !empty($_POST['btn_submit']) ) {
 
     // 空白除去
-	$banuserid = $_POST['banuserid'];
+	$banuserid = htmlentities($_POST['banuserid'], ENT_QUOTES, 'UTF-8', false);
 
-	$banurldomain = $_POST['banurldomain'];
+	$banurldomain = htmlentities($_POST['banurldomain'], ENT_QUOTES, 'UTF-8', false);
 
-	$max_textsize = $_POST['max_textsize'];
+	$max_textsize = htmlentities($_POST['max_textsize'], ENT_QUOTES, 'UTF-8', false);
 
-	//banuserid
-	$file = fopen($banuseridfile, 'w');
-	$data = $banuserid;
-	fputs($file, $data);
-	fclose($file);
+	if((int)$max_textsize > 16777216){
+		$error_message[] = "投稿の最大文字数の限界値を超えています。";
+	}
 
-	//banurldomain
-	$file = fopen($banurldomainfile, 'w');
-	$data = $banurldomain;
-	fputs($file, $data);
-	fclose($file);
+	if(empty($error_message)){
+		//banuserid
+		$file = fopen($banuseridfile, 'w');
+		$data = $banuserid;
+		fputs($file, $data);
+		fclose($file);
 
-	//maxtextsize
-	$file = fopen($mojisizefile, 'w');
-	$data = $max_textsize;
-	fputs($file, $data);
-	fclose($file);
+		//banurldomain
+		$file = fopen($banurldomainfile, 'w');
+		$data = $banurldomain;
+		fputs($file, $data);
+		fclose($file);
+
+		//maxtextsize
+		$file = fopen($mojisizefile, 'w');
+		$data = $max_textsize;
+		fputs($file, $data);
+		fclose($file);
 
 
-	$Captcha_ONOFF = $_POST['hCaptcha_onoff'];
+		$hCaptcha_ONOFF = htmlentities($_POST['hCaptcha_onoff'], ENT_QUOTES, 'UTF-8', false);
 
-	$Captcha_sitekey = $_POST['hCaptcha_sitekey'];
-	$Captcha_seackey = $_POST['hCaptcha_seackey'];
+		$hCaptcha_sitekey = htmlentities($_POST['hCaptcha_sitekey'], ENT_QUOTES, 'UTF-8', false);
+		$hCaptcha_seackey = htmlentities($_POST['hCaptcha_seackey'], ENT_QUOTES, 'UTF-8', false);
 
-	$New_hCaptcha_Settings = "
-	<?php // Captchaの認証情報
-	define( 'CAPTCHA', '".htmlentities($Captcha_ONOFF)."');// trueならhCaptchaが有効
+		$New_hCaptcha_Settings = "
+		<?php // Captchaの認証情報
+		define( 'H_CAPTCHA_ONOFF', '".htmlentities($hCaptcha_ONOFF, ENT_QUOTES, 'UTF-8', false)."');// trueならhCaptchaが有効
 
-	define( 'SITE_KEY', '".htmlentities($Captcha_sitekey)."');
-	define( 'SEAC_KEY', '".htmlentities($Captcha_seackey)."');
-	?>
-	";
+		define( 'H_CAPTCHA_SITE_KEY', '".htmlentities($hCaptcha_sitekey, ENT_QUOTES, 'UTF-8', false)."');
+		define( 'H_CAPTCHA_SEAC_KEY', '".htmlentities($hCaptcha_seackey, ENT_QUOTES, 'UTF-8', false)."');
+		?>
+		";
 
-	//設定上書き
-	$file = fopen('hCaptcha_settings/hCaptcha_settings.php', 'w');
-	$data = $New_hCaptcha_Settings;
-	fputs($file, $data);
-	fclose($file);
+		//設定上書き
+		$file = fopen('hCaptcha_settings/hCaptcha_settings.php', 'w');
+		$data = $New_hCaptcha_Settings;
+		fputs($file, $data);
+		fclose($file);
 
-	$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-	header("Location:".$url."");
-	exit;  
+		//CF_Turnstile
+
+		$CF_Turnstile_ONOFF = htmlentities($_POST['CF_Turnstile_onoff'], ENT_QUOTES, 'UTF-8', false);
+
+		$CF_Turnstile_sitekey = htmlentities($_POST['CF_Turnstile_sitekey'], ENT_QUOTES, 'UTF-8', false);
+		$CF_Turnstile_seackey = htmlentities($_POST['CF_Turnstile_seackey'], ENT_QUOTES, 'UTF-8', false);
+
+		$New_CF_Turnstile_Settings = "
+		<?php // Captchaの認証情報
+		define( 'CF_TURNSTILE_ONOFF', '".htmlentities($CF_Turnstile_ONOFF, ENT_QUOTES, 'UTF-8', false)."');// trueならCloudflareTurnstileが有効
+
+		define( 'CF_TURNSTILE_SITE_KEY', '".htmlentities($CF_Turnstile_sitekey, ENT_QUOTES, 'UTF-8', false)."');
+		define( 'CF_TURNSTILE_SEAC_KEY', '".htmlentities($CF_Turnstile_seackey, ENT_QUOTES, 'UTF-8', false)."');
+		?>
+		";
+
+		//設定上書き
+		$file = fopen('CloudflareTurnstile_settings/CloudflareTurnstile_settings.php', 'w');
+		$data = $New_CF_Turnstile_Settings;
+		fputs($file, $data);
+		fclose($file);
+
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:".$url."");
+		exit; 
+	} 
 }
 require('../logout/logout.php');
 ?>
@@ -293,13 +323,15 @@ require('../logout/logout.php');
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
+<script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>モデレーション - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>モデレーション - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -326,25 +358,25 @@ require('../logout/logout.php');
 						<div class="p2">ここに入力してあるユーザーidは登録できません。<br>改行で禁止するユーザーidを指定できます。<br>すでにあるアカウントは影響を受けません。</div>
 						<textarea id="banuserid" placeholder="uwuzu" class="inbox" type="text" name="banuserid"><?php $sinfo = explode("\r", $banuserid_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
-
+					<hr>
 					<div>
 						<p>投稿禁止URLドメイン</p>
 						<div class="p2">ここに入力してあるドメインが含まれる投稿をしようとすると投稿が拒否されます。<br>なお、この機能はまだ確実な動作が保証されないためベータ版です。<br>位置情報特定サイトなどの対策等にご利用ください。</div>
 						<textarea id="banurldomain" placeholder="" class="inbox" type="text" name="banurldomain"><?php $sinfo = explode("\r", $banurldomain_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
-
+					<hr>
 					<div>
 						<p>投稿の最大文字数</p>
 						<div class="p2">ここで設定した文字数までの投稿が可能です。<br>なお、データベースより最大文字数を設定している場合そちらが優先されて使用されます。<br>1文字から16777216文字の間で設定が可能です。<br>※uwuzu version 1.3.0以前にuwuzuを導入された方はuwuzuのDB内のtext型を全てmediumtext型にしてください。</div>
-						<input id="max_textsize" placeholder="1024" class="inbox" type="number" min="1" max="16777216" name="max_textsize" value="<?php if( !empty(file_get_contents($mojisizefile)) ){ echo htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="max_textsize" placeholder="1024" class="inbox" type="number" min="1" max="16777216" name="max_textsize" value="<?php if( !empty(file_get_contents($mojisizefile)) ){ echo htmlentities(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
-
+					<hr>
 					<div>
 						<p>hCaptcha認証</p>
 						<div class="p2">hCaptchaを使用し、ログイン時とアカウント登録時に認証をすることができます。<br>もし人間でないと判断された場合はアカウント登録やログイン、パスワード変更を受け付けません。</div>
 						<p>hCaptchaのオンオフ</p>
 						<div class="switch_button">
-							<?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+							<?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
 								<input id="hCaptcha_onoff" class="switch_input" type='checkbox' name="hCaptcha_onoff" value="true" checked/>
 								<label for="hCaptcha_onoff" class="switch_label"></label>
 							<?php }else{?>
@@ -355,9 +387,35 @@ require('../logout/logout.php');
 						<div id="hcaptcha">
 							<p>hCaptcha - 認証情報設定</p>
 							<div class="p2">サイトキー</div>
-							<input id="hcaptcha" placeholder="" class="inbox" type="text" name="hCaptcha_sitekey" value="<?php if( !empty(SITE_KEY) ){ echo htmlspecialchars(SITE_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="hcaptcha" placeholder="" class="inbox" type="text" name="hCaptcha_sitekey" value="<?php if( !empty(H_CAPTCHA_SITE_KEY) ){ echo htmlentities(H_CAPTCHA_SITE_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
 							<div class="p2">シークレットキー</div>
-							<input id="hcaptcha" placeholder="" class="inbox" type="text" name="hCaptcha_seackey" value="<?php if( !empty(SEAC_KEY) ){ echo htmlspecialchars(SEAC_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="hcaptcha" placeholder="" class="inbox" type="text" name="hCaptcha_seackey" value="<?php if( !empty(H_CAPTCHA_SEAC_KEY) ){ echo htmlentities(H_CAPTCHA_SEAC_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+							<p>デモ</p>
+							<div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
+						</div>
+					</div>
+					<hr>
+					<div>
+						<p>CloudflareTurnstile認証</p>
+						<div class="p2">CloudflareTurnstileを使用し、ログイン時とアカウント登録時に認証をすることができます。<br>もし人間でないと判断された場合はアカウント登録やログイン、パスワード変更を受け付けません。<br>hCaptchaなどと二重に設定することが可能です。</div>
+						<p>CloudflareTurnstileのオンオフ</p>
+						<div class="switch_button">
+							<?php if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){?>
+								<input id="CF_Turnstile_onoff" class="switch_input" type='checkbox' name="CF_Turnstile_onoff" value="true" checked/>
+								<label for="CF_Turnstile_onoff" class="switch_label"></label>
+							<?php }else{?>
+								<input id="CF_Turnstile_onoff" class="switch_input" type='checkbox' name="CF_Turnstile_onoff" value="true" />
+								<label for="CF_Turnstile_onoff" class="switch_label"></label>
+							<?php }?>
+						</div>
+						<div id="CF_Turnstile">
+							<p>CloudflareTurnstile - 認証情報設定</p>
+							<div class="p2">サイトキー</div>
+							<input id="CF_Turnstile" placeholder="" class="inbox" type="text" name="CF_Turnstile_sitekey" value="<?php if( !empty(CF_TURNSTILE_SITE_KEY) ){ echo htmlentities(CF_TURNSTILE_SITE_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+							<div class="p2">シークレットキー</div>
+							<input id="CF_Turnstile" placeholder="" class="inbox" type="text" name="CF_Turnstile_seackey" value="<?php if( !empty(CF_TURNSTILE_SEAC_KEY) ){ echo htmlentities(CF_TURNSTILE_SEAC_KEY, ENT_QUOTES, 'UTF-8'); } ?>">
+							<p>デモ<p>
+							<div class="cf-turnstile" data-sitekey="1x00000000000000000000AA" data-callback="javascriptCallback" data-language="ja"></div>
 						</div>
 					</div>
 
@@ -369,6 +427,7 @@ require('../logout/logout.php');
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
 <script>
@@ -390,6 +449,15 @@ $(document).ready(function() {
 	}
 	$('#hCaptcha_onoff').change(function(){
 		$('#hcaptcha').toggle();
+	});
+
+	if ($("#CF_Turnstile_onoff").prop("checked")) {
+		$('#CF_Turnstile').show();
+	}else{
+		$('#CF_Turnstile').hide();
+	}
+	$('#CF_Turnstile_onoff').change(function(){
+		$('#CF_Turnstile').toggle();
 	});
 });
 </script>

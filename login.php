@@ -6,6 +6,8 @@ $serversettings = parse_ini_file($serversettings_file, true);
 require('db.php');
 //hCaptcha--------------------------------------------
 require('settings_admin/hCaptcha_settings/hCaptcha_settings.php');
+//Cloudflare_Turnstile--------------------------------------------
+require('settings_admin/CloudflareTurnstile_settings/CloudflareTurnstile_settings.php');
 //----------------------------------------------------
 
 
@@ -96,14 +98,14 @@ if( !empty($_POST['btn_submit']) ) {
     $userid = htmlentities($_POST['userid']);
     $password = htmlentities($_POST['password']);
 
-    if(!empty(CAPTCHA && CAPTCHA == "true")){
+    if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){
         if(isset($_POST['h-captcha-response'])){
             $hcaptcha_token = htmlentities($_POST['h-captcha-response']);
             if($hcaptcha_token){
                 $captcha_data = [
-                    'secret' => htmlentities(SEAC_KEY),
+                    'secret' => htmlentities(H_CAPTCHA_SEAC_KEY),
                     'response' => $hcaptcha_token,
-                    'sitekey' => htmlentities(SITE_KEY)
+                    'sitekey' => htmlentities(H_CAPTCHA_SITE_KEY)
                 ];
                 $options = [
                     'http' => [
@@ -114,13 +116,39 @@ if( !empty($_POST['btn_submit']) ) {
                 ];
                 $hCaptcha_result = json_decode(file_get_contents('https://hcaptcha.com/siteverify', false, stream_context_create($options)),true);
                 if(!($hCaptcha_result["success"] == true)){
-                    $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+                    $error_message[] = "hCaptchaであなたが人間である確認ができませんでした。(ERROR)";
                 }
             }else{
-                $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+                $error_message[] = "hCaptchaであなたが人間である確認ができませんでした。(ERROR)";
             }
         }else{
-            $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+            $error_message[] = "hCaptchaであなたが人間である確認ができませんでした。(ERROR)";
+        }
+    }
+    if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){
+        if(isset($_POST['cf-turnstile-response'])){
+            $CF_Turnstile_token = htmlentities($_POST['cf-turnstile-response']);
+            if($CF_Turnstile_token){
+                $CF_Turnstile_data = [
+                    'secret' => htmlentities(CF_TURNSTILE_SEAC_KEY),
+                    'response' => $CF_Turnstile_token
+                ];
+                $CF_Turnstile_options = [
+                    'http' => [
+                        'method'=> 'POST',
+                        'header'=> 'Content-Type: application/x-www-form-urlencoded',
+                        'content' => http_build_query($CF_Turnstile_data, '', '&')
+                    ]
+                ];
+                $CF_Turnstile_result = json_decode(file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, stream_context_create($CF_Turnstile_options)),true);
+                if(!($CF_Turnstile_result["success"] == true)){
+                    $error_message[] = "CloudflareTurnstileであなたが人間である確認ができませんでした。(ERROR)";
+                }
+            }else{
+                $error_message[] = "CloudflareTurnstileであなたが人間である確認ができませんでした。(ERROR)";
+            }
+        }else{
+            $error_message[] = "CloudflareTurnstileであなたが人間である確認ができませんでした。(ERROR)";
         }
     }
 
@@ -219,9 +247,13 @@ $pdo = null;
 <meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
 <link rel="stylesheet" href="css/style.css">
+<script src="js/jquery-min.js"></script>
 <script src="js/unsupported.js"></script>
-<?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+<?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<?php }?>
+<?php if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){?>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <?php }?>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
@@ -265,10 +297,24 @@ $pdo = null;
                     <label for="password">パスワード</label>
                     <input id="password" class="inbox" type="password" name="password" maxlength="32" value="<?php if( !empty($_SESSION['password']) ){ echo htmlentities( $_SESSION['password'], ENT_QUOTES, 'UTF-8'); } ?>">
                 </div>
-                <?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+                <div class="switch_flexbox">
+                    <div class="switch_button">
+                        <input id="passview" class="switch_input" type='checkbox' name="passview" value=""/>
+                        <label for="passview" class="switch_label"></label>
+                    </div>
+                    <p>パスワードを表示する</p>
+                </div>
+
+                <?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
                     <div class="captcha_zone">
                     <div class="p2">人間だと思いますが一応お伺いします...<br>人間ですか？<br>人間の場合はチェックボックスにチェックしてください！</div>
-                        <div class="h-captcha" data-sitekey="<?php echo htmlentities(SITE_KEY);?>"></div>
+                        <div class="h-captcha" data-sitekey="<?php echo htmlentities(H_CAPTCHA_SITE_KEY);?>"></div>
+                    </div>
+                <?php }?>
+
+                <?php if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){?>
+                    <div class="captcha_zone">
+                        <div class="cf-turnstile" data-sitekey="<?php echo htmlentities(CF_TURNSTILE_SITE_KEY);?>" data-callback="javascriptCallback" data-language="ja"></div>
                     </div>
                 <?php }?>
                 
@@ -292,13 +338,13 @@ function checkForm(inputElement) {
     }
     inputElement.value = str;
 }
-
-
-window.onload = function(){
-var ele = document.getElementsByTagName("body")[0];
-var n = Math.floor(Math.random() * 3); // 3枚の画像がある場合
-ele.style.backgroundImage = "url(img/titleimg/"+n+".png)";
-}
+$("#passview").click(function () {
+    if ($("#passview").prop("checked") == true) {
+        $('#password').get(0).type = 'text';
+    } else {
+        $('#password').get(0).type = 'password';
+    }
+});
 
 </script>
 

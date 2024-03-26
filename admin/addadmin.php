@@ -122,7 +122,7 @@ if( !empty($_POST['btn_submit']) ) {
 		// アップロードされたファイル情報
 		$uploadedFile = $_FILES['image'];
         
-        if(check_mime_video($uploadedFile['tmp_name'])){
+        if(check_mime($uploadedFile['tmp_name'])){
             // アップロードされたファイルの拡張子を取得
             $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
             
@@ -136,7 +136,7 @@ if( !empty($_POST['btn_submit']) ) {
             delete_exif($extension, $uploadedFile['tmp_name']);
 
             // ファイルを移動
-            $result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
+            $result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
 
             if ($result) {
                 $iconName = $uploadedPath; // 保存されたファイルのパスを使用
@@ -231,7 +231,7 @@ if( !empty($_POST['btn_submit']) ) {
 		$error_message[] = '表示名を入力してください。(USERNAME_INPUT_PLEASE)';
 	} else {
         // 文字数を確認
-        if( 25 < mb_strlen($username, 'UTF-8') ) {
+        if( 50 < mb_strlen($username, 'UTF-8') ) {
 			$error_message[] = 'ユーザーネームは50文字以内で入力してください。(USERNAME_OVER_MAX_COUNT)';
 		}
     }
@@ -248,6 +248,9 @@ if( !empty($_POST['btn_submit']) ) {
 
         if($result > 0){
             $error_message[] = 'このID('.$userid.')は既に使用されています。他のIDを作成してください。(USERID_SHIYOUZUMI)';
+        }
+        if(!(preg_match("/^[a-zA-Z0-9_]+$/", $userid))){
+            $error_message[] = "IDは半角英数字で入力してください。(「_」は使用可能です。)(USERID_DONT_USE_WORD)";
         }
 
     }
@@ -337,8 +340,8 @@ if( !empty($_POST['btn_submit']) ) {
 		}
 
         // 文字数を確認
-        if( 100 < mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは100文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
+        if( 256 < mb_strlen($password, 'UTF-8') ) {
+			$error_message[] = 'パスワードは256文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
 		}
     }
 
@@ -431,6 +434,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/style.css">
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="../image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">

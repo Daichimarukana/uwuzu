@@ -19,41 +19,19 @@
     for( $i=0;$i<$cnt;$i++ ){
         $uwuzuinfo[$i] = ($softwaredata[$i]);
     }
-    function replaceURLsWithLinks_forRightbox($postText) {
-        $postText = str_replace('&#039;', '\'', $postText);
+    function replaceURLsWithLinks_forRightbox($postText, $maxLength = 48) {
+        $pattern = '/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一-龠々\w\-\/?=&%.]+)/';
+        $convertedText = preg_replace_callback($pattern, function($matches) use ($maxLength) {
+            $link = $matches[0];
+            if (mb_strlen($link) > $maxLength) {
+                $truncatedLink = mb_substr($link, 0, $maxLength).'…';
+                return '<a href="'.$link.'">'.$truncatedLink.'</a>';
+            } else {
+                return '<a href="'.$link.'">'.$link.'</a>';
+            }
+        }, $postText);
 
-		// URLを正規表現を使って検出
-		$pattern = '/(https:\/\/[^\s<>\[\]\'"]+)/';  // 改良された正規表現
-		preg_match_all($pattern, $postText, $matches);
-
-		// 検出したURLごとに処理を行う
-		foreach ($matches[0] as $url) {
-			// ドメイン部分を抽出
-			$parsedUrl = parse_url($url);
-			if (!isset($parsedUrl['path'])) {
-				$parsedUrl['path'] = '';
-			}
-			if (!isset($parsedUrl['query'])) {
-				$parsedUrl['query'] = '';
-			}
-
-			$nochk_domain = $parsedUrl['host'].$parsedUrl['path'].$parsedUrl['query'];
-
-			if(strlen($nochk_domain) > 47){
-				$domain = mb_substr($nochk_domain, 0, 48, "UTF-8")."...";
-			}else{
-				$domain = $nochk_domain;
-			}
-
-			// 不要な文字を削除してaタグを生成
-			$urlWithoutSpaces = preg_replace('/\s+/', '', $url);
-			$link = "<a href='$urlWithoutSpaces' target='_blank' title='$urlWithoutSpaces'>$domain</a>";
-
-			// URLをドメインのみを表示するaタグで置き換え
-			$postText = preg_replace('/' . preg_quote($url, '/') . '/', $link, $postText);
-		}
-
-		return $postText;
+        return $convertedText;
     }
     ?>
     <div class="noticearea">

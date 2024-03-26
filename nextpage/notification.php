@@ -55,8 +55,10 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                     PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
                 ));
 
-                $messageQuery = $dbh->prepare("SELECT fromuserid,title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT $offset, $itemsPerPage");
-                $messageQuery->bindValue(':userid', $userid);
+                $messageQuery = $dbh->prepare("SELECT fromuserid,title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
+                $messageQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                 $messageQuery->execute();
                 $message_array = $messageQuery->fetchAll();
 
@@ -73,7 +75,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
                 if (!empty($message_array)) {
                     foreach ($message_array as $value) {
-                        $value["servericon"] = htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8', false);
+                        $value["servericon"] = htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8', false);
                         if(!(empty($value['fromuserid']))){
                             if(!($value['fromuserid'] == "uwuzu-fromsys")){
                                 $userQuery = $dbh->prepare("SELECT username,iconname FROM account WHERE userid = :userid");
@@ -94,6 +96,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 
                 $pdo = null;
 
+            }else{
+                echo '<div class="tokonone" id="noueuse"><p>取得に失敗しました。</p></div>';
             }
         }else{
             echo '<div class="tokonone" id="noueuse"><p>取得に失敗しました。</p></div>';

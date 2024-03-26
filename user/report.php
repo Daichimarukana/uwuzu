@@ -424,7 +424,7 @@ $pdo = null;
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -432,7 +432,7 @@ $pdo = null;
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんを通報 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title><?php echo htmlentities($userData['username'], ENT_QUOTES, 'UTF-8'); ?> さんを通報 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -487,6 +487,7 @@ $pdo = null;
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
 

@@ -402,7 +402,7 @@ if( !empty($_POST['session_submit']) ) {
 			// すべての出力を終了
 			exit;
 		} else {
-			$error_message[] = 'セッションの終了に失敗しました。(END_OF_SESSION_DAME)';
+			$error_message[] = 'セッショントークンの再生成に失敗しました。(END_OF_SESSION_DAME)';
 		}
 
 }
@@ -439,7 +439,7 @@ if( !empty($_POST['token_submit']) ) {
 			header('Location: ' . $url, true, 303);
 			exit; 
 		} else {
-			$error_message[] = 'トークンの発行に失敗しました。(CREATE_TOKEN_DAME)';
+			$error_message[] = 'アクセストークンの発行に失敗しました。(CREATE_TOKEN_DAME)';
 		}
 
 }
@@ -473,7 +473,7 @@ if( !empty($_POST['token_off_submit']) ) {
 			header("Location:".$url."");
 			exit; 
 		} else {
-			$error_message[] = 'トークンの削除に失敗しました。(TOKEN_DELETE_DAME)';
+			$error_message[] = 'アクセストークンの削除に失敗しました。(TOKEN_DELETE_DAME)';
 		}
 
 }
@@ -491,10 +491,10 @@ require('../logout/logout.php');
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>その他の項目 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>その他の項目 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -511,9 +511,9 @@ require('../logout/logout.php');
 	<?php endif; ?>
         <form class="formarea" method="post">
 
-		<h1>セッション終了</h1>
-		<p>下のセッションを終了ボタンを押すと全てのログイン中のデバイスからログアウトされます。<br>再度uwuzu使用するにはログインが必須になります。</p>
-		<input type="submit" class = "irobutton" name="session_submit" value="セッションを終了">
+		<h1>セッショントークンの再生成</h1>
+		<p>下のセッショントークン再生成ボタンを押すと全てのログイン中のデバイスからログアウトされます。<br>再度uwuzu使用するにはログインが必須になります。</p>
+		<input type="submit" class = "irobutton" name="session_submit" value="セッショントークン再生成">
 
 		<hr>
 		<h1>アカウント削除</h1>
@@ -532,29 +532,29 @@ require('../logout/logout.php');
 		<p>APIの簡単な使用法です。</p>
 		<hr>
 		<li>サーバー情報取得API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/serverinfo-api</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/serverinfo-api</div>
 		<p>これによりサーバーの各種情報を取得できます。</p>
 		<hr>
 		<li>ユーザー情報取得API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/userdata-api?userid=[ユーザーID]</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getuser_from_userid&userid=[ユーザーID]</div>
 		<p>これによりユーザーのユーザーネーム(user_name)、プロフィール(profile)、登録日時(registered_date)、フォローしている人一覧(follow)、フォロワー一覧(follower)、フォロー・フォロワー数(follow_cnt,follower_cnt)が取得できます。</p>
 		<hr>
 		<li>単独投稿取得API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/ueuse-api?ueuseid=[投稿の詳細ページのリンクより投稿のID(!より後、~より手前の文字列)]</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getueuse&ueuseid=[投稿の詳細ページのリンクより投稿のID(!より後、~より手前の文字列)]</div>
 		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。</p>
 		<hr>
 		<li>ローカルタイムライン投稿取得API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/ltl-api?limit=[取得件数]&page=[ページ切り替え]</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getltl&limit=[取得件数]&page=[ページ切り替え]</div>
 		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。<br>page=は指定しなくても動作します。(https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数])</p>
 		<hr>
 		<li>投稿API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=post&ueuse=[投稿の内容]</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=post&ueuse=[投稿の内容]</div>
 		<hr>
 		<li>アクセストークンからユーザー情報取得API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getuser</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getuser</div>
 		<hr>
 		<li>返信API</li>
-		<p>https://<?php echo htmlspecialchars($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]</p>
+		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]</div>
 		<hr>
 		<?php 
 			if(empty($userData['token'])){
@@ -591,6 +591,7 @@ require('../logout/logout.php');
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 </body>
 </html>
 

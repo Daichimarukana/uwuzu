@@ -9,7 +9,7 @@ function decode_yajirushi($postText){
     return $postText;
 }
 if(htmlspecialchars($serversettings["serverinfo"]["server_activitypub"], ENT_QUOTES, 'UTF-8') === "true"){
-    header("Content-Type: application/json");
+    header("Content-Type: application/activity+json");
     header("charset=utf-8");
     header("Access-Control-Allow-Origin: *");
 

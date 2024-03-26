@@ -5,7 +5,7 @@ $serversettings = parse_ini_file($serversettings_file, true);
 $domain = $_SERVER['HTTP_HOST'];
 
 $mojisizefile = "../server/textsize.txt";
-$mojisize = (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8');
+$mojisize = (int)htmlentities(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8');
 //投稿及び返信レート制限↓(分):デフォで60件/分まで
 $max_ueuse_rate_limit = 60;
 
@@ -185,22 +185,51 @@ if(empty($username)){
 	header("Location: ../login.php");
 	exit;
 }
-$notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
-$notiQuery->bindValue(':userid', $userid);
-$notiQuery->execute();
-$notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
-$notificationcount = $notiData['notification_count'];
+if (!(empty($pdo))) {
+	$notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
+	$notiQuery->bindValue(':userid', $userid);
+	$notiQuery->execute();
+	$notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
-if(isset($_GET['ueuseid']) && isset($_GET['touser'])) {
-	$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
-	$touserid = htmlentities(str_replace('~', '', $_GET['touser']));
-}elseif(isset($_GET['ueuseid'])){
-	$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
-	$touserid = null;
+	$notificationcount = $notiData['notification_count'];
+
+	if(isset($_GET['ueuseid'])) {
+		$ueuseid = htmlentities(str_replace('!', '', $_GET['ueuseid']));
+	}
 }
 
+//返信先id取得
+if (!(empty($pdo))) {
+	$toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
+	$toUserIdQuery->bindValue(':ueuseid', $ueuseid, PDO::PARAM_STR);
+	$toUserIdQuery->execute();
+	$toUserId_res = $toUserIdQuery->fetch();    
 
+	if(!(empty($toUserId_res))){
+		$touserid = $toUserId_res["account"];
+	}else{
+		$touserid = null;
+	}
+}
+
+//-----------------URLから取得----------------
+if(isset($_GET['text'])) { 
+    $ueuse = htmlentities($_GET['text'], ENT_QUOTES, 'UTF-8', false);
+}elseif(isset($_COOKIE['ueuse'])) { 
+    $ueuse = htmlentities($_COOKIE['ueuse'], ENT_QUOTES, 'UTF-8', false);
+}
+//-----------------絵文字の取得----------------
+if (!empty($pdo)) {
+    $custom_emoji_Query = "SELECT emojifile,emojiname,emojiinfo,emojidate FROM emoji ORDER BY emojidate DESC";
+    $custom_emoji_array = $pdo->query($custom_emoji_Query);
+
+    while ($row = $custom_emoji_array->fetch(PDO::FETCH_ASSOC)) {
+        $custom_emoji[] = $row;
+    }
+}
+
+//-------------------------------------------
 function get_mentions_userid($postText) {
     // @useridを検出する
     $usernamePattern = '/@(\w+)/';
@@ -251,8 +280,8 @@ if( !empty($_POST['btn_submit']) ) {
 		$error_message[] = '内容を入力してください。(INPUT_PLEASE)';
 	} else {
         // 文字数を確認
-        if( (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8') < mb_strlen($ueuse, 'UTF-8') ) {
-			$error_message[] = '内容は'.htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8').'文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
+        if( (int)htmlentities(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8') < mb_strlen($ueuse, 'UTF-8') ) {
+			$error_message[] = '内容は'.htmlentities(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8').'文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
 		}
 
 		// 禁止url確認
@@ -486,6 +515,8 @@ if( !empty($_POST['btn_submit']) ) {
 		}
 
 		if( empty($error_message) ) {
+			//一時保存していたユーズ内容の削除
+			setcookie("ueuse", "", time() - 30);
 			
 			// 書き込み日時を取得
 			$datetime = date("Y-m-d H:i:s");
@@ -500,22 +531,22 @@ if( !empty($_POST['btn_submit']) ) {
 				// SQL作成
 				$stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
 
-				$stmt->bindParam(':username', htmlspecialchars($username, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':account', htmlspecialchars($userid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':uniqid', htmlspecialchars($uniqid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':rpuniqid', htmlspecialchars($ueuseid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':ueuse', htmlspecialchars($ueuse, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':username', htmlentities($username, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':account', htmlentities($userid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':uniqid', htmlentities($uniqid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':rpuniqid', htmlentities($ueuseid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':ueuse', htmlentities($ueuse, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':photo1', htmlspecialchars($photo1, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':photo2', htmlspecialchars($photo2, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':photo3', htmlspecialchars($photo3, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':photo4', htmlspecialchars($photo4, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':video1', htmlspecialchars($video1, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo1', htmlentities($photo1, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo2', htmlentities($photo2, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo3', htmlentities($photo3, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':photo4', htmlentities($photo4, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':video1', htmlentities($video1, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', htmlentities($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':nsfw', htmlspecialchars($save_nsfw, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':nsfw', htmlentities($save_nsfw, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':abi', htmlspecialchars($abi, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':abi', htmlentities($abi, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 				// SQLクエリの実行
 				$res = $stmt->execute();
@@ -533,14 +564,14 @@ if( !empty($_POST['btn_submit']) ) {
 				// 通知用SQL作成
 				$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 		
-				$stmt->bindParam(':fromuserid', htmlspecialchars($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':touserid', htmlspecialchars($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':msg', htmlspecialchars($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':url', htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':userchk', htmlspecialchars($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-				$stmt->bindParam(':title', htmlspecialchars($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':fromuserid', htmlentities($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':touserid', htmlentities($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':msg', htmlentities($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':url', htmlentities($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':userchk', htmlentities($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':title', htmlentities($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-				$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+				$stmt->bindParam(':datetime', htmlentities($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 				// SQLクエリの実行
 				$res = $stmt->execute();
@@ -562,20 +593,20 @@ if( !empty($_POST['btn_submit']) ) {
 							$datetime = date("Y-m-d H:i:s");
 							$msg = "" . $ueuse . "";
 							$title = "" . $userid . "さんにメンションされました！";
-							$url = "/!" . $uniqid . "~" . $userid . "";
+							$url = "/!" . $uniqid . "";
 							$userchk = 'none';
 
 							// 通知用SQL作成
 							$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
 
-							$stmt->bindParam(':fromuserid', htmlspecialchars($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-							$stmt->bindParam(':touserid', htmlspecialchars($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-							$stmt->bindParam(':msg', htmlspecialchars($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-							$stmt->bindParam(':url', htmlspecialchars($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-							$stmt->bindParam(':userchk', htmlspecialchars($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-							$stmt->bindParam(':title', htmlspecialchars($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':fromuserid', htmlentities($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':touserid', htmlentities($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':msg', htmlentities($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':url', htmlentities($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':userchk', htmlentities($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':title', htmlentities($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
-							$stmt->bindParam(':datetime', htmlspecialchars($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+							$stmt->bindParam(':datetime', htmlentities($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
 
 							// SQLクエリの実行
 							$res = $stmt->execute();
@@ -643,7 +674,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
@@ -651,7 +682,7 @@ $pdo = null;
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ID <?php echo htmlentities($ueuseid, ENT_QUOTES, 'UTF-8'); ?> のユーズ - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>ID <?php echo htmlentities($ueuseid, ENT_QUOTES, 'UTF-8'); ?> のユーズ - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -676,10 +707,11 @@ $pdo = null;
 			<h1>@<?php echo htmlentities($touserid, ENT_QUOTES, 'UTF-8'); ?>さんに返信</h1>
 			</div>
 				<?php if(!($role ==="ice")){?>
-					<form method="post" enctype="multipart/form-data">
-						<div class="sendbox">
-							<textarea id="ueuse" placeholder="へんし～ん！！！" name="ueuse"><?php if( !empty($_SESSION['ueuse']) ){ echo htmlentities( $_SESSION['ueuse'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
-							<div class="fxbox">
+				<form method="post" enctype="multipart/form-data">
+					<div class="sendbox">
+						<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo htmlentities($ueuse, ENT_QUOTES, 'UTF-8', false); } ?></textarea>
+
+						<div class="fxbox">
 							<label for="upload_images" id="images" title="画像1">
 							<svg><use xlink:href="../img/sysimage/image_1.svg#image"></use></svg>
 							<input type="file" name="upload_images" id ="upload_images" accept="image/*">
@@ -706,13 +738,36 @@ $pdo = null;
 								<label for="nsfw_chk" class="nsfw_label" title="投稿をNSFW指定にする"><svg><use xlink:href="../img/sysimage/eye_1.svg#eye"></use></svg></label>
 							</div>
 
-							<div class="moji_cnt" id="moji_cnt"><?php echo $mojisize; ?></div>
+							
+							<label for="emoji_picker_btn" title="絵文字">
+							<svg><use xlink:href="../img/sysimage/menuicon/emoji.svg#emoji"></use></svg>
+							<input id="emoji_picker_btn" type='checkbox' value="false" style="display:none;"/>
+							</label>
 
-							<input type="submit" class="ueusebtn" id='ueusebtn' name="btn_submit" value="返信する">
+							<div class="moji_cnt" id="moji_cnt"><?php echo htmlentities($mojisize, ENT_QUOTES, 'UTF-8', false); ?></div>
+
+							<input type="submit" class="ueusebtn" id='ueusebtn' name="btn_submit" value="ユーズする">
+						</div>
+
+						<div class="emoji_picker" id="emoji_picker" style="display:none;">
+							<p>カスタム絵文字</p>
+							<div class="emoji_picker_flex">
+								<?php 
+								if(!empty($custom_emoji)){
+									foreach ($custom_emoji as $value) {
+									echo '<div class="one_emoji">';
+									echo '<img src="../' . htmlentities($value["emojifile"], ENT_QUOTES, 'UTF-8', false) . '" alt=":'.htmlentities($value["emojiname"], ENT_QUOTES, 'UTF-8', false).':" title=":'.htmlentities($value["emojiname"], ENT_QUOTES, 'UTF-8', false).':">';
+									echo '</div>';
+									}
+								}else{
+									echo '<div class="tokonone" id="noueuse"><p>カスタム絵文字がありません</p></div>';
+								}
+								?>
 							</div>
 						</div>
-					</form>
-				<?php }?>
+					</div>
+				</form>
+			<?php }?>
 			<script>
 				document.getElementById("upload_videos1").addEventListener('change', function(e){
 					var file_reader = new FileReader();
@@ -759,6 +814,7 @@ $pdo = null;
 				});
 				file_reader.readAsText(e.target.files[0]);
 				});
+
 				$('#ueuse').on('input', function () {
 					var mojisize = '<?php echo $mojisize; ?>';
 					var mojicount = Number(mojisize) - $(this).val().length;
@@ -771,7 +827,21 @@ $pdo = null;
 						$('#moji_cnt').html(mojicount);
 						$('#ueusebtn').prop('disabled', true);
 					}
+					document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/!<?php echo $ueuseid; ?>;";
 				})
+				$("#emoji_picker_btn").click(function () {
+					if ($("#emoji_picker_btn").prop("checked") == true) {
+						$("#emoji_picker").show();
+					} else {
+						$("#emoji_picker").hide();
+					}
+				});
+				$(".one_emoji").click(function (event) {
+					event.preventDefault();
+					var children = $(this).children("img");
+					var custom_emojiname = children.attr("title");
+					$("#ueuse").val($("#ueuse").val() + custom_emojiname);
+				});
 			</script>
 		<?php }else{?>
 			<h1>ユーズ</h1>
@@ -798,8 +868,8 @@ $pdo = null;
 		<div class="modal-content">
 			<p>ユーズを削除しますか？</p>
 			<form class="btn_area" method="post" id="deleteForm">
-				<input type="button" id="deleteButton" class="fbtn_no" name="delete" value="削除">
-				<input type="button" id="cancelButton" class="fbtn" value="キャンセル">
+				<input type="button" id="deleteButton" class="fbtn" name="delete" value="削除">
+				<input type="button" id="cancelButton" class="fbtn_no" value="キャンセル">
 			</form>
 		</div>
 	</div>
@@ -811,10 +881,16 @@ $pdo = null;
 			<form method="post" id="AbiForm">
 			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 			<div class="btn_area">
-				<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
-				<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">
+				<input type="submit" id="AbiAddButton" class="fbtn" name="abi" value="追記">
+				<input type="button" id="AbiCancelButton" class="fbtn_no" value="キャンセル">
 			</div>
 			</form>
+		</div>
+	</div>
+
+	<div id="Big_ImageModal" class="Image_modal">
+		<div class="modal-content">
+			<img id="Big_ImageMain" href="">
 		</div>
 	</div>
 	
@@ -822,6 +898,7 @@ $pdo = null;
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 </body>
 <script>
 $(document).ready(function() {

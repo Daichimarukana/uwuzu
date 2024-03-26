@@ -78,7 +78,7 @@ try {
 	$roleDataArray = array();
 	
 	foreach ($roles as $roleId) {
-		$rerole = $dbh->prepare("SELECT rolename, roleauth, rolecolor FROM role WHERE roleidname = :role");
+		$rerole = $dbh->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
 		$rerole->bindValue(':role', $roleId);
 		$rerole->execute();
 		$roleDataArray[$roleId] = $rerole->fetch();
@@ -277,6 +277,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="css/style.css">
+<script src="js/jquery-min.js"></script>
 <script src="js/unsupported.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
@@ -318,9 +319,20 @@ $pdo = null;
                 <div class="roleboxes">
                     <?php foreach ($roles as $roleId): ?>
                         <?php $roleData = $roleDataArray[$roleId]; ?>
-                        <div class="rolebox" style="border: 1px solid <?php echo '#' . $roleData["rolecolor"]; ?>;">
+                        <?php 
+                            if(htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == '' || htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'none'){
+                                $role_view_effect = "";
+                            }elseif(htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'shine'){
+                                $role_view_effect = "shine";
+                            }elseif(htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'rainbow'){
+                                $role_view_effect = "rainbow";
+                            }else{
+                                $role_view_effect = "";
+                            }
+                        ?>
+                        <div class="rolebox <?php echo htmlentities($role_view_effect, ENT_QUOTES, 'UTF-8', false); ?>" style="border: 1px solid <?php echo '#' . htmlentities($roleData["rolecolor"], ENT_QUOTES, 'UTF-8', false); ?>;">
                             <p style="color: <?php echo '#' . $roleData["rolecolor"]; ?>;">
-                                <?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
+                                <?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8', false); }else{ echo("ロールが正常に設定されていません。");} ?>
                             </p>
                         </div>
                     <?php endforeach; ?>

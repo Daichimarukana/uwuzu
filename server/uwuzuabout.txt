@@ -55,13 +55,23 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - datetime(datetime) アカウント作成日時保存用
 - follow(mediumtext) アカウントがフォローしている人保存用
 - follower(mediumtext) アカウントがフォローされている人保存用
-- blocklist(mediumtext) ブロックしている人保存用
 - bookmark(mediumtext) ブックマーク保存用
+- blocklist(mediumtext) ブロックしている人保存用
 - admin(varchar(25)) 管理者アカウントなら「yes」、それ以外なら「none」と入力。
 - authcode(varchar(256)) 二段階認証用キー保存用
 - backupcode(varchar(256)) 二段階認証のバックアップコード保存用
 - sacinfo(varchar(256)) 特殊アカウント識別用
 - mail_settings(mediumtext) メールの送信設定保存用
+
+### ads
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- uniqid(varchar(512)) 広告ID保存用
+- url(varchar(512)) 広告のクリック先URL保存用
+- image_url(varchar(512)) 広告に表示する画像URL保存用
+- memo(mediumtext) 広告にマウスオーバーしたときに表示されるメッセージ保存用
+- start_date(datetime) 広告配信開始日時保存用
+- limit_date(datetime) 広告配信終了日時保存用
+- datetime(datetime) 広告追加日時保存用
 
 ### emoji
 - sysid(INT)(AUTO_INCREMENT) アカウントが追加されるとカウントされるシステム用ID
@@ -70,12 +80,38 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - emojiinfo(mediumtext) 絵文字についての説明保存用
 - emojidate(datetime) 絵文字登録日時保存用
 
+### invitation
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- code(varchar(512)) 招待コード
+- used(varchar(25)) 使用済みかそうでないか
+- datetime(datetime) 招待コード仕様日時更新用
+
 ### notice
 - sysid(INT)(AUTO_INCREMENT) うんえいからのおしらせが追加されるとカウントされるシステム用ID
+- uniqid(varchar(256)) ID保存用
 - title(varchar(1024)) お知らせのタイトル保存用
 - note(mediumtext) お知らせの内容保存用
 - account(varchar(500)) 編集者ID保存用
 - emojidate(datetime) お知らせ登録日時保存用
+
+### notification
+- sysid(INT)(AUTO_INCREMENT) 通知されるとカウントされるシステム用ID
+- fromuserid(varchar(512)) 通知元ID保存用
+- touserid(varchar(512)) 通知先ID保存用
+- title(varchar(1024)) 通知のタイトル
+- url(通知のクリック先URL保存用)
+- msg(mediumtext) 通知の内容
+- datetime(datetime) 通知日時
+- userchk(varchar(25)) 通知の既読確認
+
+### report
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- uniqid(varchar(256)) 通報ID保存用
+- userid(varchar(500)) 通報先ユーザーID保存用
+- report_userid(varchar(500)) 通報元ユーザーID保存用
+- msg(mediumtext) サービス管理者宛メッセージ保存用
+- datetime(datetime) 通報日時保存用
+- admin_chk(varchar(25)) 解決済みかどうか確認用
 
 ### role
 - sysid(INT)(AUTO_INCREMENT) ロールが追加されるとカウントされるシステム用ID
@@ -83,10 +119,12 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - roleauth(varchar(256)) ロールの権限保存用
 - rolecolor(varchar(25)) ロールの色保存用
 - roleidname(varchar(512)) 「user」のようなロール指定用
+- roleeffect(varchar(256)) アニメーションロール機能のエフェクト指定用
 
 ### ueuse
 - sysid(INT)(AUTO_INCREMENT) 投稿されるとカウントされるシステム用ID
-- account(varchar(256)) 投稿者ID保存用
+- username(varchar(512)) 投稿時点での投稿者名保存用
+- account(varchar(512)) 投稿者ID保存用
 - uniqid(varchar(256)) 投稿ID保存用
 - rpuniqid(varchar(256)) リプライ先ID保存用
 - ueuse(mediumtext) 投稿内容保存用
@@ -100,39 +138,6 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - abi(mediumtext) 投稿者の追記保存用
 - abidate(datetime) 追記日時保存用
 - nsfw(varchar(25)) NSFW指定有無保存用
-
-### notification
-- sysid(INT)(AUTO_INCREMENT) 通知されるとカウントされるシステム用ID
-- touserid(varchar(512)) 通知先ID保存用
-- title(varchar(1024)) 通知のタイトル
-- msg(mediumtext) 通知の内容
-- datetime(datetime) 通知日時
-- userchk(varchar(25)) 通知の既読確認
-
-### invitation
-- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
-- code(varchar(512)) 招待コード
-- used(varchar(25)) 使用済みかそうでないか
-- datetime(datetime) 招待コード仕様日時更新用
-
-### report
-- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
-- uniqid(varchar(256)) 通報ID保存用
-- userid(varchar(500)) 通報先ユーザーID保存用
-- report_userid(varchar(500)) 通報元ユーザーID保存用
-- msg(mediumtext) サービス管理者宛メッセージ保存用
-- datetime(datetime) 通報日時保存用
-- admin_chk(varchar(25)) 解決済みかどうか確認用
-
-### ads
-- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
-- uniqid(varchar(512)) 広告ID保存用
-- url(varchar(512)) 広告のクリック先URL保存用
-- image_url(varchar(512)) 広告に表示する画像URL保存用
-- memo(mediumtext) 広告にマウスオーバーしたときに表示されるメッセージ保存用
-- start_date(datetime) 広告配信開始日時保存用
-- limit_date(datetime) 広告配信終了日時保存用
-- datetime(datetime) 広告追加日時保存用
 
 すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、動作ディレクトリ内のdb.phpにDBのログイン情報を書き込んであとはApacheとphpとMy SQLを起動するだけ！
 起動したらまずDBのroleにphpmyadminから「user」ロールと「official」ロールと「ice」ロールを追加、権限は「user」と「official」と「ice」でOK。ロール名はとりあえず「一般ユーザー」とか適当でOK、ロールの色はHEXコード(#を除く)で000000のように指定。(この3つのロールがないとエラーが発生します。)
@@ -185,5 +190,25 @@ daichimarukanaと一緒に開発したいよ～って人は私のHPからメー�
 UPULライセンスです！
 UPULライセンスに関しては同梱されているUPUL_License.txtを確認するか、uwuzu.comより詳細をご確認ください。
 
+## 10. 利用させていただいているライブラリなどのライセンス
+
+### Google Authenticator PHP class
+Copyright (c) 2012, Michael Kliewe All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1.Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2.Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+なお、使わせていただいているコードは改変させていただいでおります。
+
+### jQuery 3.7.1
+MITライセンスで提供されているようです。
+詳細は以下のリンク先をご覧ください。
+https://jquery.com/license/
+
+### QRcode image PHP scripts
+Y.Swetake様よりお借りしています。
+
+
+## 更新情報
 編集者 : daichimarukana
-最終更新日 : 2023/02/24 19:02
+最終更新日 : 2024/03/26 22:32

@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- ホスト: XXX.XXX.XXX.XXX
--- 生成日時: 2024-02-24 19:11:00
+-- ホスト: ひ.み.つ
+-- 生成日時: 2024-03-26 14:43:05
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- データベース: `uwuzu_db`
+-- データベース: `account`
 --
 
 -- --------------------------------------------------------
@@ -103,6 +103,7 @@ CREATE TABLE `invitation` (
 
 CREATE TABLE `notice` (
   `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
   `title` varchar(1024) NOT NULL,
   `note` mediumtext NOT NULL,
   `account` varchar(256) NOT NULL,
@@ -153,7 +154,8 @@ CREATE TABLE `role` (
   `rolename` varchar(512) NOT NULL,
   `roleauth` varchar(256) NOT NULL,
   `rolecolor` varchar(32) NOT NULL,
-  `roleidname` varchar(512) NOT NULL
+  `roleidname` varchar(512) NOT NULL,
+  `roleeffect` varchar(256) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

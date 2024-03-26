@@ -19,7 +19,7 @@ if(!empty(file_get_contents($serverstopfile))){
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="/css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="/js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">

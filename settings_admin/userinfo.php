@@ -201,7 +201,7 @@ if (!empty($pdo)) {
 	$roleDataArray = array();
 			
 	foreach ($roles as $roleId) {
-		$rerole = $dbh->prepare("SELECT rolename, roleauth, rolecolor FROM role WHERE roleidname = :role");
+		$rerole = $dbh->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
 		$rerole->bindValue(':role', $roleId);
 		$rerole->execute();
 		$roleDataArray[$roleId] = $rerole->fetch();
@@ -264,8 +264,8 @@ if( !empty($_POST['send_ice_submit']) ) {
 		if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){
 			if( !empty($userdata["mailadds"]) ){
 				if(filter_var($userdata["mailadds"], FILTER_VALIDATE_EMAIL)){
-					$mail_title = "お使いの".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは凍結されました";
-					$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."管理者により凍結されたためお知らせいたします。  サービス管理者からのメッセージは以下のものです。    ". $notice_msg ."    異議申し立てする場合は[".htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8')."]まで異議申し立てをする旨を記載し送信をしてください。";
+					$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは凍結されました";
+					$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."管理者により凍結されたためお知らせいたします。  サービス管理者からのメッセージは以下のものです。    ". $notice_msg ."    異議申し立てする場合は[".htmlentities($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8')."]まで異議申し立てをする旨を記載し送信をしてください。";
 
 					send_html_mail($userdata["mailadds"],$mail_title,$mail_text,"../");
 				}
@@ -352,7 +352,7 @@ if( !empty($_POST['send_water_submit']) ) {
 		if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){
 			if( !empty($userdata["mailadds"]) ){
 				if(filter_var($userdata["mailadds"], FILTER_VALIDATE_EMAIL)){
-					$mail_title = "お使いの".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは解凍されました！";
+					$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは解凍されました！";
 					$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が解凍されたためお知らせいたします。  今後、ご利用のuwuzuアカウントは今まで通りご利用いただけます。  また、APIを使用している方はAPIのトークンがリセットされているため再度トークンを発行してご利用ください。";
 
 					send_html_mail($userdata["mailadds"],$mail_title,$mail_text,"../");
@@ -535,8 +535,8 @@ if( !empty($_POST['send_ban_submit']) ) {
 			if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){
 				if( !empty($userdata["mailadds"]) ){
 					if(filter_var($userdata["mailadds"], FILTER_VALIDATE_EMAIL)){
-						$mail_title = "お使いの".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントはBANされました";
-						$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  この度、ご利用のアカウント(".$userdata["userid"].")が".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."管理者によりBAN(削除)されたためお知らせいたします。  今後は今までご利用いただいた".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは利用できません。  ".htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."サーバー上から今までご利用いただいていたアカウントの情報は削除されたためログインなどもできません。    ご理解とご協力のほどよろしくお願いします。";
+						$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントはBANされました";
+						$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  この度、ご利用のアカウント(".$userdata["userid"].")が".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."管理者によりBAN(削除)されたためお知らせいたします。  今後は今までご利用いただいた".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは利用できません。  ".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."サーバー上から今までご利用いただいていたアカウントの情報は削除されたためログインなどもできません。    ご理解とご協力のほどよろしくお願いします。";
 
 						send_html_mail($userdata["mailadds"],$mail_title,$mail_text,"../");
 					}
@@ -570,13 +570,13 @@ require('../logout/logout.php');
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ユーザー管理 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>ユーザー管理 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -607,9 +607,20 @@ require('../logout/logout.php');
 				<div class="roleboxes">
 					<?php foreach ($roles as $roleId): ?>
 						<?php $roleData = $roleDataArray[$roleId]; ?>
-						<div class="rolebox" style="border: 1px solid <?php echo '#' . $roleData["rolecolor"]; ?>;">
+						<?php 
+							if(htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == '' || htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'none'){
+								$role_view_effect = "";
+							}elseif(htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'shine'){
+								$role_view_effect = "shine";
+							}elseif(htmlentities($roleData["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'rainbow'){
+								$role_view_effect = "rainbow";
+							}else{
+								$role_view_effect = "";
+							}
+						?>
+						<div class="rolebox <?php echo htmlentities($role_view_effect, ENT_QUOTES, 'UTF-8', false); ?>" style="border: 1px solid <?php echo '#' . htmlentities($roleData["rolecolor"], ENT_QUOTES, 'UTF-8', false); ?>;">
 							<p style="color: <?php echo '#' . $roleData["rolecolor"]; ?>;">
-								<?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8'); } ?>
+								<?php if (!empty($roleData["rolename"])) { echo htmlentities($roleData["rolename"], ENT_QUOTES, 'UTF-8', false); }else{ echo("ロールが正常に設定されていません。");} ?>
 							</p>
 						</div>
 					<?php endforeach; ?>
@@ -618,12 +629,12 @@ require('../logout/logout.php');
 			
 				<div class="profile">
 					<div class="p2">プロフィール</div>
-					<p><?php echo nl2br(htmlspecialchars($userdata["profile"], ENT_QUOTES, 'UTF-8')); ?></p>
+					<p><?php echo nl2br(htmlentities($userdata["profile"], ENT_QUOTES, 'UTF-8')); ?></p>
 				</div>
 				<hr>
 				<div class="about">
 					<div class="p2">メールアドレス</div>
-					<p><?php if( !empty($userdata["mailadds"]) ){ echo htmlspecialchars($userdata["mailadds"], ENT_QUOTES, 'UTF-8'); }else{echo "未設定";} ?></p>   
+					<p><?php if( !empty($userdata["mailadds"]) ){ echo htmlentities($userdata["mailadds"], ENT_QUOTES, 'UTF-8'); }else{echo "未設定";} ?></p>   
 					<hr>
 					<div class="p2">二段階認証</div>
 					<p><?php if( !empty($userdata["authcode"]) ){ echo "設定済み";}else{echo "未設定";}  ?></p>
@@ -632,15 +643,15 @@ require('../logout/logout.php');
 					<p><?php if( !empty($userdata["admin"] === "yes") ){ echo "あり";}else{echo "なし";}  ?></p>
 					<hr>
 					<div class="p2">フォロー数</div>
-					<p><?php if( $followCount > 0 ){ echo htmlspecialchars($followCount, ENT_QUOTES, 'UTF-8');}else{echo "なし";}  ?></p>
+					<p><?php if( $followCount > 0 ){ echo htmlentities($followCount, ENT_QUOTES, 'UTF-8');}else{echo "なし";}  ?></p>
 					<div class="p2">フォロワー数</div>
-					<p><?php if( $followerCount > 0 ){ echo htmlspecialchars($followerCount, ENT_QUOTES, 'UTF-8');}else{echo "なし";}  ?></p>
+					<p><?php if( $followerCount > 0 ){ echo htmlentities($followerCount, ENT_QUOTES, 'UTF-8');}else{echo "なし";}  ?></p>
 					<hr>
 					<div class="p2">投稿数</div>
 					<p><?php if( $upload_cnt1 > 0 ){ echo $upload_cnt1;}else{echo "なし";}  ?></p>
 					<hr>
 					<div class="p2">アカウント登録日時</div>
-					<p><?php echo htmlspecialchars($userdata["datetime"], ENT_QUOTES, 'UTF-8'); ?></p>
+					<p><?php echo htmlentities($userdata["datetime"], ENT_QUOTES, 'UTF-8'); ?></p>
 					<hr>
 					<div class="p2">アカウント操作</div>
 					<div class="banzone">
@@ -698,6 +709,7 @@ require('../logout/logout.php');
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
 <script>

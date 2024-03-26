@@ -130,6 +130,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="css/style.css">
+<script src="js/jquery-min.js"></script>
 <script src="js/unsupported.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">

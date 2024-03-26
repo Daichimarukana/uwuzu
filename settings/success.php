@@ -183,7 +183,7 @@ require('../logout/logout.php');
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <title>設定 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
@@ -223,6 +223,7 @@ require('../logout/logout.php');
 
 <?php require('../require/rightbox.php');?>
 <?php require('../require/botbox.php');?>
+<?php require('../require/noscript_modal.php');?>
 </body>
 
 </html>

@@ -360,10 +360,10 @@ $pdo = null;
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>絵文字登録 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>絵文字登録 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -388,6 +388,10 @@ $pdo = null;
 			<h1>絵文字登録</h1>
 
 			<p>絵文字登録です。</p>
+			<div class="p2">
+			注意 : uwuzuで表示されるカスタム絵文字の最大の大きさは縦64pxです。<br>
+			縦64px以上のカスタム絵文字を登録しても縮小されて表示されます。<br>
+			また、縦64px以上の画像をアップロードすると、uwuzuの動作が遅くなる恐れがあるため、絵文字の画像サイズは縦64pxを推奨します。</div>
 
 			<div id="wrap">
 
@@ -399,12 +403,12 @@ $pdo = null;
 				<!--ユーザーネーム関係-->
 				<div>
 					<p>EmojiID</p>
-					<input id="username" onInput="checkForm(this)" placeholder="kusa" class="inbox" type="text" name="emojiname" value="<?php if( !empty($_SESSION['emojiname']) ){ echo htmlspecialchars( $_SESSION['emojiname'], ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="username" onInput="checkForm(this)" placeholder="kusa" class="inbox" type="text" name="emojiname" value="<?php if( !empty($_SESSION['emojiname']) ){ echo htmlentities( $_SESSION['emojiname'], ENT_QUOTES, 'UTF-8'); } ?>">
 				</div>
 
 				<div>
 					<p>この絵文字について</p>
-					<input id="username" placeholder="くさデス" class="inbox" type="text" name="emojiinfo" value="<?php if( !empty($_SESSION['emojiinfo']) ){ echo htmlspecialchars( $_SESSION['emojiinfo'], ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="username" placeholder="くさデス" class="inbox" type="text" name="emojiinfo" value="<?php if( !empty($_SESSION['emojiinfo']) ){ echo htmlentities( $_SESSION['emojiinfo'], ENT_QUOTES, 'UTF-8'); } ?>">
 				</div>
 
 				<div>
@@ -420,6 +424,7 @@ $pdo = null;
 
 	<?php require('../require/rightbox.php');?>
     <?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 </body>
 
 <script type="text/javascript">

@@ -8,7 +8,7 @@ $serverstopfile = "../server/serverstop.txt";
 $domain = $_SERVER['HTTP_HOST'];
 
 if(!empty(file_get_contents($serverstopfile))){
-    $serverstop = htmlspecialchars(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8'); 
+    $serverstop = htmlentities(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8'); 
 }else{
     $serverstop = "";
 }
@@ -246,13 +246,13 @@ require('../logout/logout.php');
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>プラグイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>プラグイン - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -291,15 +291,15 @@ require('../logout/logout.php');
 						<div id="mail_plugin">
 							<p>PHPMailer - メールサーバー設定</p>
 							<div class="p2">メールアドレス</div>
-							<input id="mail_plugin" placeholder="user@localhost" class="inbox" type="text" name="N_MAIL_ADDS" value="<?php if( !empty(MAIL_ADDS) ){ echo htmlspecialchars(MAIL_ADDS, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="user@localhost" class="inbox" type="text" name="N_MAIL_ADDS" value="<?php if( !empty(MAIL_ADDS) ){ echo htmlentities(MAIL_ADDS, ENT_QUOTES, 'UTF-8'); } ?>">
 							<div class="p2">ホスト名</div>
-							<input id="mail_plugin" placeholder="smtp.mailserver.com" class="inbox" type="text" name="N_MAIL_HOST" value="<?php if( !empty(MAIL_HOST) ){ echo htmlspecialchars(MAIL_HOST, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="smtp.mailserver.com" class="inbox" type="text" name="N_MAIL_HOST" value="<?php if( !empty(MAIL_HOST) ){ echo htmlentities(MAIL_HOST, ENT_QUOTES, 'UTF-8'); } ?>">
 							<div class="p2">ポート番号</div>
-							<input id="mail_plugin" placeholder="465" class="inbox" type="text" name="N_MAIL_PORT" value="<?php if( !empty(MAIL_PORT) ){ echo htmlspecialchars(MAIL_PORT, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="465" class="inbox" type="text" name="N_MAIL_PORT" value="<?php if( !empty(MAIL_PORT) ){ echo htmlentities(MAIL_PORT, ENT_QUOTES, 'UTF-8'); } ?>">
 							<div class="p2">ユーザー名</div>
-							<input id="mail_plugin" placeholder="from@localhost" class="inbox" type="text" name="N_MAIL_USER" value="<?php if( !empty(MAIL_USER) ){ echo htmlspecialchars(MAIL_USER, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="from@localhost" class="inbox" type="text" name="N_MAIL_USER" value="<?php if( !empty(MAIL_USER) ){ echo htmlentities(MAIL_USER, ENT_QUOTES, 'UTF-8'); } ?>">
 							<div class="p2">パスワード</div>
-							<input id="mail_plugin" placeholder="password" class="inbox" type="text" name="N_MAIL_PASS" style="-webkit-text-security:disc;" value="<?php if( !empty(MAIL_PASS) ){ echo htmlspecialchars(MAIL_PASS, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="password" class="inbox" type="text" name="N_MAIL_PASS" style="-webkit-text-security:disc;" value="<?php if( !empty(MAIL_PASS) ){ echo htmlentities(MAIL_PASS, ENT_QUOTES, 'UTF-8'); } ?>">
 							
 							<div class="p2">暗号化設定</div>
 							<div class="radio_btn_zone">
@@ -334,6 +334,7 @@ require('../logout/logout.php');
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
 

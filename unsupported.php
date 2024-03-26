@@ -67,7 +67,11 @@ if($errcode == "UNSUPPORTED_BROWSER"){
 
 <main>
     <div class="server_icon_zone">
-        <img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>>
+        <?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
+            <img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8');?>>
+        <?php }else{?>
+            <img src="/img/uwuzuicon.png">
+        <?php }?>
     </div>
     <h1>お使いの環境での利用はできません</h1>
     <div class="maintext">

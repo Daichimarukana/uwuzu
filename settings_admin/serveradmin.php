@@ -347,13 +347,13 @@ require('../logout/logout.php');
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>サーバー設定 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>サーバー設定 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 
 </head>
 
@@ -377,17 +377,17 @@ require('../logout/logout.php');
 					<!--(サーバーアイコン)-->
 					<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
 					<div class="serverhead_set">
-						<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
+						<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
 					</div>
 					<?php }?>
 					<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
 					<div class="servericon">
 						<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
 							<div class="up">
-								<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+								<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
 							</div>
 						<?php }else{?>
-							<img src="<?php echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+							<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
 						<?php }?>
 					</div>
 					<?php }?>
@@ -395,12 +395,12 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバーアイコン</p>
 						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。(設定しなくても大丈夫です。)</div>
-						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 					<div>
 						<p>サーバーヘッダー</p>
 						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。(設定しなくても大丈夫です。)</div>
-						<input id="serverhead" placeholder="https://~" class="inbox" type="text" name="serverhead" value="<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverhead" placeholder="https://~" class="inbox" type="text" name="serverhead" value="<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ echo htmlentities($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
@@ -419,9 +419,9 @@ require('../logout/logout.php');
 						<p>サーバーロゴ</p>
 						<div class="p2">サーバーの左上に表示されているuwuzuのロゴを独自のロゴに置き換えるときに使用します。<br>自動的に角が丸くなります。<br>URLより設定してください。<br>背景透過画像を推奨します。</div>
 						<div class="p2">ログイン後のロゴ</div>
-						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_home"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_logo_home"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_home"]) ){ echo htmlentities($serversettings["serverinfo"]["server_logo_home"], ENT_QUOTES, 'UTF-8'); } ?>">
 						<div class="p2">ログイン画面と利用規約などドキュメントページのロゴ</div>
-						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_login"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_login"]) ){ echo htmlentities($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 					<script>
 					if ($("#serverlogo_onoff").prop("checked")) {
@@ -437,7 +437,7 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバー名</p>
 						<div class="p2">サーバー名です。</div>
-						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty($serversettings["serverinfo"]["server_name"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty($serversettings["serverinfo"]["server_name"]) ){ echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
@@ -449,13 +449,13 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバー管理者の名前</p>
 						<div class="p2">サーバー管理者名です。</div>
-						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty($serversettings["serverinfo"]["server_admin"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty($serversettings["serverinfo"]["server_admin"]) ){ echo htmlentities($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
 						<p>サーバーへのお問い合わせ用メールアドレス</p>
 						<div class="p2">ユーザーからのお問い合わせメアドです。</div>
-						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty($serversettings["serverinfo"]["server_admin_mailadds"]) ){ echo htmlspecialchars($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty($serversettings["serverinfo"]["server_admin_mailadds"]) ){ echo htmlentities($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
 
 					<div>
@@ -515,6 +515,7 @@ require('../logout/logout.php');
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
 

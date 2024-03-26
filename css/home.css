@@ -46,14 +46,11 @@ body{
     cursor: pointer;
     border: none;
     display: block;
-    width:50%;
+    width: fit-content;
     margin: 32px;
-    padding: 8px 5%;
+    padding: 8px 20%;
     margin-left: auto;
     margin-right: auto;
-
-    padding-top: 8px;
-    padding-bottom: 8px;
 
     background-color: var(--main-color);
 
@@ -66,30 +63,26 @@ body{
     text-decoration:none;
     text-align: center;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
+    transition: all 250ms ease-in-out;
 }
 .irobutton:hover{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    width:55%;
+    padding: 8px 22%;
 }
 .irobutton:active{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:45%;
+    padding: 8px 18%;
 }
 
 .sirobutton{
     cursor: pointer;
     border: none;
     display: block;
-    width:40%;
+    width: fit-content;
     margin: 32px;
-    padding: 8px 10%;
+    padding: 8px 20%;
     margin-left: auto;
     margin-right: auto;
-
-    padding-top: 8px;
-    padding-bottom: 8px;
 
 
     text-align: center;
@@ -102,16 +95,15 @@ body{
     font-weight: normal;
     text-decoration:none;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
+    transition: all 250ms ease-in-out;
 }
 .sirobutton:hover{
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    width:45%;
+    padding: 8px 22%;
 }
 .sirobutton:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:45%;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    padding: 8px 18%;
 }
 
 .inbox {
@@ -242,41 +234,125 @@ textarea{
 }
 
 
-.rolebox{
-
-    margin-top: 12px;
-    margin-bottom: 12px;
-
-    margin-left: auto;
-    margin-right: auto;
-
-    width: 120px;
+.rolebox {
+    margin: 4px 6px 4px 6px;
+    width: auto;
     padding-left: auto;
     padding-right: auto;
-
-    background-color: var(--background-color);
-    border: 1px solid var(--main-color);
-
     border-radius: 25px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
-
 }
-
-.rolebox p{
-
-    color:var(--main-color);
-    margin-top: 2px;
-    margin-bottom: 2px;
-    margin-left: 10px;
-    margin-right: 10px;
-
-    text-align: center;
+  
+.rolebox p {
+    margin: 2px 10px 2px 10px;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: "Zen Maru Gothic", sans-serif;
     font-weight: normal;
-
 }
 
+.roleboxes {
+    margin-left: auto;
+    margin-right: auto;
+    display: table;
+    padding: auto;
+    flex-wrap: wrap;
+}
+  
+.shine {
+    position: relative;
+    overflow: hidden;
+}
+.shine:after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 10%;
+    height: 150%;
+    background: #fff;
+    transform: rotate(45deg);
+    animation: reflect 3s ease-in-out infinite;
+}
+@keyframes reflect {
+    0%,
+    75% {
+      transform: rotate(45deg) scale(0);
+      opacity: 1;
+    }
+  
+    100% {
+      transform: rotate(45deg) scale(100);
+      opacity: 0;
+    }
+}
+.cyclingmark {
+    display: flex;
+}
+.cyclingmark p::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 5px;
+    background: url("/img/uwuzuicon.png")
+      no-repeat;
+    background-size: contain;
+    animation: cycling 2s infinite;
+    margin: -6px 0px 0px -2px;
+}
+@keyframes cycling {
+    from {
+      animation-timing-function: ease-in-out;
+      transform: translate(0px, 0px) scale(1, 1) rotate(0deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+  
+    to {
+      animation-timing-function: ease-in-out;
+      transform: translate(0px, 0px) scale(1, 1) rotate(360deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+  
+    25% {
+      animation-timing-function: ease-in-out;
+      transform: translate(0px, 0px) scale(1, 1) rotate(400deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+  
+    40% {
+      animation-timing-function: ease-in-out;
+      transform: translate(0px, 0px) scale(1, 1) rotate(330deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+  
+    60% {
+      animation-timing-function: ease-in-out;
+      transform: translate(0px, 0px) scale(1, 1) rotate(360deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+}
+.rainbow {
+    animation: rain 5s infinite;
+}
+@keyframes rain {
+    0% {
+      border: 1px solid magenta;
+      color: magenta;
+    }
+    33% {
+      border: 1px solid yellow;
+      color: yellow;
+    }
+    66% {
+      border: 1px solid cyan;
+      color: cyan;
+    }
+    100% {
+      border: 1px solid magenta;
+      color: magenta;
+    }
+}
 
 .userleftbox{
     border-radius: 17px;
@@ -576,7 +652,7 @@ main h1{
     color:var(--text-color);
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
+    font-weight: normal;
 }
 .userheader .profile p img{
     vertical-align: middle;
@@ -606,23 +682,12 @@ main h1{
 
 
 .userheader .rolebox{
-
-    margin-top: 0px;
-    margin-bottom: 12px;
-
-    margin-left: 0px;
-    margin-right: 12px;
-
+    margin: 4px 6px 4px 6px;
     width: auto;
     padding-left: auto;
     padding-right: auto;
-
-    background-color: var(--background-color);
-    border: 1px solid var(--main-color);
-
     border-radius: 25px;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
-
 }
 
 
@@ -1132,6 +1197,7 @@ main h1{
     padding-right: 6px;
     padding-top: 3px;
     padding-bottom: 3px;
+    background-color: #F5F5F5;
     border: solid 1px #CCC;
     color: #323232;
     border-radius: 25px;
@@ -1319,6 +1385,7 @@ main h1{
     width: 100%;
     height: 350px;
     border: 1px solid var(--border-color);
+    cursor: pointer;
 }
 
 .ueuse .photo2{
@@ -1334,6 +1401,7 @@ main h1{
     width: 100%;
     height: 350px;
     border: 1px solid var(--border-color);
+    cursor: pointer;
 }
 
 .ueuse .photo3{
@@ -1353,6 +1421,7 @@ main h1{
     width: 100%;
     height: 200px;
     border: 1px solid var(--border-color);
+    cursor: pointer;
 }
 .ueuse .photo3_btm a img{
     object-fit: cover;
@@ -1363,6 +1432,7 @@ main h1{
     min-width: 100%;
     height: 200px;
     border: 1px solid var(--border-color);
+    cursor: pointer;
 }
 .ueuse .photo4{
     display: flex;
@@ -1377,6 +1447,7 @@ main h1{
     width: 100%;
     height: 200px;
     border: 1px solid var(--border-color);
+    cursor: pointer;
 }
 .ueuse .video1 video{
     object-fit: cover;
@@ -2079,6 +2150,16 @@ main h1{
     font-size: 12px;
     color:var(--main-color);
 }
+.ueuse .flebox .user .u_name a img{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 22px;
+    width: auto;
+    vertical-align: text-top;
+    border-radius: 0px;
+}
 
 
 .tokonone p{
@@ -2277,6 +2358,75 @@ main h1{
     color: #FF4848;
 }
 
+.sendbox .emoji_picker{
+    animation: Up_to_down_slideY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 24px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    background-color: var(--tl-color);
+    border: 1px solid var(--border-color);
+    width: auto;
+    max-height: 260px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+.sendbox .emoji_picker p{
+    margin: 0px;
+    word-wrap: break-word;
+    line-height: 20px;
+    color: var(--subtext-color);
+    font-size: 12px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: normal;
+}
+.sendbox .emoji_picker .emoji_picker_flex{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.sendbox .emoji_picker .emoji_picker_flex .one_emoji{
+    cursor: pointer;
+    margin: 6px;
+    width: 64px;
+    height: 64px;
+    background-color: var(--tl-color);
+    border-radius: 8px;
+    transition: all 250ms ease-out;
+}
+.sendbox .emoji_picker .emoji_picker_flex .one_emoji img{
+    margin: 8px;
+    width: 48px;
+    height: 48px;
+    object-fit:contain;
+}
+.sendbox .emoji_picker .emoji_picker_flex .one_emoji:hover{
+    background-color: color-mix(in srgb, var(--tl-color) 95%, #000);
+}
+.sendbox .emoji_picker .tokonone p{
+    font-size: 16px;
+    color:var(--text-color);
+    text-decoration: none;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-weight: bold;
+}
+@keyframes Up_to_down_slideY {
+    0% {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0px);
+    }
+    40%,100% {
+      opacity: 1;
+    }
+}
 
 .ueusebtn{
     cursor: pointer;
@@ -2880,6 +3030,48 @@ label>input {
     }
 }
 
+.Image_modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    transition: all 250ms ease-out;
+}
+.Image_modal .modal-content {
+    padding: 0px;
+    border-radius: 15px;
+    width: fit-content;
+    height: fit-content;
+    max-width: 90%;
+    max-height: 90dvh;
+    position: absolute;
+    top: 30dvh;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    overflow: hidden;
+    cursor: zoom-out;
+}
+.Image_modal .modal-content img{
+    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
+                linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    width: 100%;
+    height: 80dvh;
+    margin: 0px;
+    vertical-align:top;
+    object-fit: contain;
+}
+
 .topbox {
     position: fixed;
     
@@ -3378,8 +3570,8 @@ label>input {
 }
   
 .emojibox{
-    margin-left: 12px;
-    margin-right: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
     padding: 12px;
     width: auto;
 }
@@ -3429,54 +3621,85 @@ label>input {
     margin-bottom: 6px;
     fill: currentColor;
 }
-
-
-.emojizone{
-    margin-left: 0px;
-    margin-right: 0px;
-    margin-top: 12px;
+.emojibox h1{
+    margin-left: 12px;
 }
 
+.emojizone{
+    margin: 0px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 12px;
+    padding-top: 0px;
+}
+.emojizone .tokonone{
+    width: calc(50% - 32px);
+    height: fit-content;
+    margin-top: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 12px;
+    padding: 12px;
+}
+.emojizone .tokonone p{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
 .emjtex{
+    width: calc(50% - 32px);
     background-color: var(--background-color);
-    margin-top: 12px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-bottom: 12px;
     padding: 12px;
     border-radius: 10px;
     border: 1px solid var(--border-color);
+    transition: all 250ms ease-out;
+}
+.emjtex:hover{
+    background-color: color-mix(in srgb, var(--background-color) 95%, #000);
 }
 
 .emjtex .fx{
-    display: block;
+    display: flex;
     max-width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
 }
 
 .emjtex img{
-    margin-top: auto;
-    margin-bottom: auto;
+    margin-top: 6px;
+    margin-bottom: 6px;
     margin-left: 6px;
-    margin-right: 4px;
+    margin-right: 6px;
     max-height: 64px;
-    max-width: 98%;
+    max-width: calc(100% - 12px);
+    object-fit: initial;
+}
+
+.emjtex .btm_zone{
+    margin-top: auto;
+    margin-bottom:auto;
 }
 
 .emjtex h3{
-    overflow-wrap:  break-word;
-    margin-top: auto;
-    margin-bottom: auto;
+    overflow-wrap: break-word;
+    margin-top: 6px;
+    margin-bottom: 6px;
     margin-left: 6px;
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: 'BIZ UDGothic', sans-serif;
     font-weight: bold;
 }
 
 .emjtex p{
-    overflow-wrap:  break-word;
-    margin-top: 12px;
-    margin-bottom: auto;
+    overflow-wrap: break-word;
+    margin-top: 6px;
+    margin-bottom: 6px;
     margin-left: 6px;
     font-size: 16px;
     color:var(--text-color);
@@ -3498,7 +3721,7 @@ label>input {
 }
 
 .this{
-    background-color: var(--sub-color)!important;
+    background-color: color-mix(in srgb, var(--sub-color) 30%, var(--background-color))!important;
 }
 .notification{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
@@ -3561,6 +3784,12 @@ label>input {
     text-decoration: none;
     font-family: 'BIZ UDPGothic', sans-serif;
     font-weight: normal;
+}
+.notification .flebox .username img{
+    margin-left: 6px;
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
 }
 .notification .flebox .idbox{
     margin-top: auto;
@@ -4036,7 +4265,7 @@ hr{
     font-weight: bold;
 }
 .hny .textmain{
-    background-color: var(--border-color);
+    background-color: #F5F5F5;
     padding-top: 8px;
     padding-bottom: 8px;
     padding-left: 24px;
@@ -4055,7 +4284,7 @@ hr{
 }
 .hny .textmain p{
     text-align: left;
-    color:var(--text-color);
+    color:#252525;
     font-family: 'BIZ UDPGothic', sans-serif;
     word-wrap: break-word;
     font-size: 16px;
@@ -4064,7 +4293,7 @@ hr{
 }
 .hny .textmain .rp{
     text-align: right;
-    color:var(--text-color);
+    color:#252525;
     font-family: 'BIZ UDPGothic', sans-serif;
     word-wrap: break-word;
     font-size: 14px;
@@ -4279,16 +4508,12 @@ summary {
     font-weight: normal;
     text-decoration:none;
     text-align: center;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
 
 .delbox .delbtn:hover{
     background-color: #FF4848;
     color: var(--background-color);;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
 .mini_irobtn{
@@ -4311,15 +4536,11 @@ summary {
     font-weight: normal;
     text-decoration:none;
     text-align: center;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
 .mini_irobtn:hover{
     background-color: var(--main-color);
     color: var(--background-color);;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
     transition: all 250ms ease-out;
 }
 
@@ -4683,6 +4904,13 @@ summary {
 .serverhead{
     text-align: center;
 }
+.formarea .serverhead img {
+    object-fit: cover;
+    width: 100%;
+    height: 220px;
+    border-radius: 10px;
+    margin: 0px;
+}
 .serverhead img {
     object-fit: cover;
     width: 60%;
@@ -4833,6 +5061,116 @@ summary {
     text-align: center;
 }
 
+.graph{
+    margin-top: 12px;
+    margin-bottom: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: 100%;
+    height: 32px;
+    background-color: var(--background-color);
+    border-radius: 50px;
+    border: solid 1px var(--border-color);
+}
+.graph .per{
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    margin-left: 4px;
+    height: 24px;
+    background-color: var(--main-color);
+    border-radius: 50px;
+    border: none;
+}
+
+noscript{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    transition: all 250ms ease-out;
+    cursor: not-allowed;
+}
+noscript .noscript_modal{
+    padding: 0px;
+    border-radius: 15px;
+    width: fit-content;
+    height: fit-content;
+    background-color: var(--background-color);
+    max-width: 50%;
+    max-height: 75dvh;
+    position: absolute;
+    top: 45%;
+    right: 0;
+    bottom: 45%;
+    left: 0;
+    margin: auto;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    overflow: scroll;
+    cursor: auto;
+}
+noscript .noscript_modal .inner{
+    margin: 64px;
+}
+noscript .noscript_modal .inner .oops_icon{
+    margin-top: -32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-size: 74px;
+    text-align: center;
+}
+noscript .noscript_modal .inner h1{
+    line-height: 32px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-size: 32px;
+    color:var(--text-color);
+    text-align: center;
+    font-weight: bold;
+}
+noscript .noscript_modal .inner p{
+    line-height: 20px;
+    font-family: 'BIZ UDPGothic', sans-serif;
+    font-size: 16px;
+    color:var(--text-color);
+    text-align: center;
+}
+noscript .noscript_modal .inner .p2{
+    margin-top: 12px;
+    text-align: center;
+}
+noscript .noscript_modal .inner .infobtn{
+    display: block;
+    width: 128px;
+    padding: 6px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    background-color:#FFC832;
+    color:#ffffff;
+    border-radius: 32px;
+    font-size: 20px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: normal;
+    text-decoration: none;
+}
+noscript .noscript_modal .inner .center_text{
+    margin-top: 12px;
+    display: block;
+}
+noscript .noscript_modal .inner .center_text p{
+    line-height: 16px;
+    margin: 0px;
+    text-align: center;
+    color:#777;
+    font-size: 14px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: normal;
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -4874,8 +5212,8 @@ summary {
     }
 
     .userheader .roleboxes{
-        margin-left: 12px;
-        margin-right: 12px;
+        margin-left: 6px;
+        margin-right: 6px;
         display: flex;
         padding: 0px;
         flex-wrap : wrap;
@@ -5035,6 +5373,19 @@ summary {
         text-decoration: none;
         font-family: 'BIZ UDPGothic', sans-serif;
         font-weight: bold;
+    }
+    .sendbox .emoji_picker .emoji_picker_flex{
+        justify-content: flex-start;
+    }
+    .sendbox .emoji_picker .emoji_picker_flex .one_emoji{
+        margin: 6px;
+        width: 40px;
+        height: 40px;
+    }
+    .sendbox .emoji_picker .emoji_picker_flex .one_emoji img{
+        margin: 3px;
+        width: 34px;
+        height: 34px;
     }
 
     .ueusebtn{
@@ -5920,6 +6271,40 @@ summary {
         transform: translateY(-1%);
         }
     }
+    .Image_modal{
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    .Image_modal .modal-content {
+        padding: 0px;
+        border-radius: 15px;
+        width: fit-content;
+        height: fit-content;
+        max-width: 90%;
+        max-height: 90dvh;
+        position: absolute;
+        top: 45%;
+        right: 0;
+        bottom: 45%;
+        left: 0;
+        margin: auto;
+        margin-top: 0px;
+        margin-bottom: 0px;
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+        overflow: hidden;
+    }
+    .Image_modal .modal-content img{
+        background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
+                    linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+        background-color: #FFF;
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
+        width: 100%;
+        height: auto;
+        margin: 0px;
+        vertical-align:top;
+        object-fit: contain;
+    }
 
     .tlchange{
         border-radius: 10px;
@@ -6152,6 +6537,52 @@ summary {
         border-radius: 10px;
         margin: 0px;
     }
+
+    noscript .noscript_modal{
+        border-radius: 15px;
+        max-width: 90%;
+        max-height: 90dvh;
+        overflow: scroll;
+    }
+    noscript .noscript_modal .inner{
+        margin: 24px;
+    }
+    noscript .noscript_modal .inner .oops_icon{
+        margin-top: 12px;
+        font-size: 48px;
+    }
+    noscript .noscript_modal .inner h1{
+        line-height: 24px;
+        font-size: 24px;
+    }
+    noscript .noscript_modal .inner p{
+        line-height: 16px;
+        font-size: 14px;
+        text-align: left;
+    }
+    noscript .noscript_modal .inner .center_text{
+        margin-top: 12px;
+        display: block;
+    }
+    noscript .noscript_modal .inner .center_text p{
+        line-height: 14px;
+        font-size: 12px;
+    }
+
+
+    .emojizone{
+        display: block;
+    }
+    .emjtex{
+        width: auto;
+    }
+    .emjtex .fx{
+        display: block;
+    }
+    .emojizone .tokonone{
+        width: auto;
+        height: fit-content;
+    }
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -6160,6 +6591,11 @@ summary {
 /*------------------------------------------------------------------------------------------------------------*/
 
 @media (prefers-color-scheme: dark) {
+
+    ::selection {
+        color: var(--dark-background-color);
+        background: var(--main-color);
+    }
 
     body{
         background-color: var(--dark-background-color);
@@ -6244,6 +6680,11 @@ summary {
     .ueuse .blur:hover{
         background-color: var(--dark-ueuse-color);
         color: var(--dark-text-color);
+    }
+    .ueuse .unixtime{
+        background-color: #323232;
+        border: solid 1px #CCC;
+        color: #F5F5F5;
     }
     
     
@@ -6574,11 +7015,31 @@ summary {
     .sendbox .fxbox p{
         color:var(--sub-color);
     }
+
+    .sendbox .emoji_picker{
+        background-color: var(--dark-background-color);
+        border: none;
+    }
+    .sendbox .emoji_picker p{
+        color: var(--dark-subtext-color);
+    }
+    .sendbox .emoji_picker .emoji_picker_flex .one_emoji{
+        background-color: var(--dark-background-color);
+    }
+    .sendbox .emoji_picker .emoji_picker_flex .one_emoji:hover{
+        background-color: color-mix(in srgb, var(--dark-background-color) 95%, #FFF);
+    }
+    .sendbox .emoji_picker .tokonone p{
+        color:var(--dark-text-color);
+    }
     
 
     .emjtex{
         background-color: var(--dark-sub-color);
         border: none;
+    }
+    .emjtex:hover{
+        background-color: color-mix(in srgb, var(--dark-sub-color) 95%, #FFF);
     }
     
     .emjtex h3{
@@ -6760,7 +7221,7 @@ summary {
     }
 
     .this{
-        background-color: var(--link-color) !important;
+        background-color: color-mix(in srgb, var(--link-color) 30%, var(--dark-background-color))!important;
         border: none !important;
     }
 
@@ -7006,5 +7467,30 @@ summary {
     .emojibox_button:hover{
         background-color: #3a3333;
         color: #ff4848;
+    }
+    .graph{
+        background-color: var(--dark-background-color);
+        border: solid 1px var(--dark-background-color);
+    }
+    .graph .per{
+        background-color: var(--main-color);
+    }
+    noscript .noscript_modal{
+        background-color: var(--dark-background-color);
+    }
+    noscript .noscript_modal .inner h1{
+        color:var(--dark-text-color);
+    }
+    noscript .noscript_modal .inner p{
+        color:var(--dark-text-color);
+    }
+    noscript .noscript_modal .inner .center_text p{
+        line-height: 16px;
+        margin: 0px;
+        text-align: center;
+        color:#CCC;
+        font-size: 14px;
+        font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+        font-weight: normal;
     }
 }

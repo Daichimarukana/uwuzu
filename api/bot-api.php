@@ -299,7 +299,7 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
     }
 
     if($type === "reply"){
-        if(isset($_GET['ueuse'])) { 
+        if(isset($_GET['ueuse']) && isset($_GET['uniqid'])) { 
             $rpuniqid = htmlentities($_GET['uniqid']);
             $ueuse = nl2br(htmlentities($_GET['ueuse']));
 
@@ -676,6 +676,422 @@ if(isset($_GET['token'])&&isset($_GET['type'])) {
                 }
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);;
             }
+        }
+    }
+
+    if($type === "getuser_from_userid"){
+
+        if(isset($_GET['userid'])) { 
+            $userid = htmlentities($_GET['userid']);
+            
+            if($token === 'ice'){
+                $err = "this_account_has_been_frozen";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }elseif($token === ''){
+                $err = "token_input_error";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        
+            require('../db.php');
+        
+            $datetime = array();
+            $pdo = null;
+        
+            session_start();
+        
+            try {
+                $option = array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+                );
+                $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+            } catch(PDOException $e) {
+                // 接続エラーのときエラー内容を取得する
+                $error_message[] = $e->getMessage();
+            }
+
+            
+            if (!empty($pdo)) {
+
+                    // データベース接続の設定
+                $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                ));
+            
+                $userQuery = $dbh->prepare("SELECT username, userid,role FROM account WHERE token = :token");
+                $userQuery->bindValue(':token', $token);
+                $userQuery->execute();
+                $userData = $userQuery->fetch();
+
+                if(empty($userData["userid"])){
+                    $err = "token_invalid";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }elseif($userData["role"] === "ice"){
+                    $err = "this_account_has_been_frozen";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }else{
+                    $userQuery = $pdo->prepare("SELECT username,userid,profile,datetime,follow,follower,iconname,headname FROM account WHERE userid = :userid");
+                    $userQuery->bindValue(':userid', $userid);
+                    $userQuery->execute();
+                    $userdata = $userQuery->fetch();
+                
+                    if (empty($userdata)){
+                        $response = array(
+                            'error_code' => "userid_not_found",
+                        );
+                    }else{
+                        $followcnts = explode(',', $userdata["follow"]);
+                        $userdata["follow_cnt"] = count($followcnts)-1;
+
+                        $followercnts = explode(',', $userdata["follower"]);
+                        $userdata["follower_cnt"] = count($followercnts)-1;
+
+                        $response = array(
+                            'user_name' => decode_yajirushi(htmlspecialchars_decode($userdata["username"])),
+                            'user_id' => decode_yajirushi(htmlspecialchars_decode($userdata["userid"])),
+                            'profile' => decode_yajirushi(htmlspecialchars_decode($userdata["profile"])),
+                            'user_icon' => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userdata["iconname"])),
+                            'user_header' => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userdata["headname"])),
+                            'registered_date' => decode_yajirushi(htmlspecialchars_decode($userdata["datetime"])),
+                            'follow' => decode_yajirushi(htmlspecialchars_decode($userdata["follow"])),
+                            'follow_cnt' => decode_yajirushi(htmlspecialchars_decode($userdata["follow_cnt"])),
+                            'follower' => decode_yajirushi(htmlspecialchars_decode($userdata["follower"])),
+                            'follower_cnt' => decode_yajirushi(htmlspecialchars_decode($userdata["follower_cnt"])),
+                        );
+                    }
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                }
+            }
+
+        }else{
+            $err = "input_not_found";
+            $response = array(
+                'error_code' => $err,
+            ); 
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
+    if($type === "getltl"){
+
+        if(isset($_GET['limit'])) { 
+
+            $itemsPerPage = htmlentities((int)$_GET['limit']); // 1ページあたりの投稿数
+            if(isset($_GET['page'])) { 
+                $pageNumber = htmlentities((int)$_GET['page']);
+                if(!(is_int($pageNumber))){
+                    $pageNumber = 1;
+                }
+            }else{
+                $pageNumber = 1;
+            }
+            $offset = ($pageNumber - 1) * $itemsPerPage;
+        
+            $messages = array();
+            
+            if($token === 'ice'){
+                $err = "this_account_has_been_frozen";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }elseif($token === ''){
+                $err = "token_input_error";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        
+            require('../db.php');
+        
+            $datetime = array();
+            $pdo = null;
+        
+            session_start();
+        
+            try {
+                $option = array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+                );
+                $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+            } catch(PDOException $e) {
+                // 接続エラーのときエラー内容を取得する
+                $error_message[] = $e->getMessage();
+            }
+
+            
+            if (!empty($pdo)) {
+
+                // データベース接続の設定
+                $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                ));
+            
+                $userQuery = $dbh->prepare("SELECT username, userid,role FROM account WHERE token = :token");
+                $userQuery->bindValue(':token', $token);
+                $userQuery->execute();
+                $userData = $userQuery->fetch();
+
+                if(empty($userData["userid"])){
+                    $err = "token_invalid";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }elseif($userData["role"] === "ice"){
+                    $err = "this_account_has_been_frozen";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }else{
+                
+                    $sql = "SELECT ueuse.* 
+                            FROM ueuse 
+                            LEFT JOIN account ON ueuse.account = account.userid 
+                            WHERE ueuse.rpuniqid = '' AND account.role != 'ice'
+                            ORDER BY ueuse.datetime DESC 
+                            LIMIT :offset, :itemsPerPage";
+
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                    $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $message_array = $stmt;
+                
+                    while ($row = $message_array->fetch(PDO::FETCH_ASSOC)) {
+                
+                        $messages[] = $row;
+                    }
+                
+                    // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
+                    foreach ($messages as &$message) {
+                        $userQuery = $pdo->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
+                        $userQuery->bindValue(':userid', $message["account"]);
+                        $userQuery->execute();
+                        $userData = $userQuery->fetch();
+                
+                        if ($userData) {
+                            $message['username'] = $userData['username'];
+                            $message['role'] = $userData['role'];
+                        }
+                    }
+                
+                    if (!empty($messages)) {
+                        $response = array(); // ループ外で $response を初期化
+                    
+                        foreach ($messages as $ueusedata) {
+                            $favcnts = explode(',', $ueusedata["favorite"]);
+                            $ueusedata["favorite_cnt"] = count($favcnts) - 1;
+                    
+                            $item = [
+                                'account' => decode_yajirushi(htmlspecialchars_decode($ueusedata["account"])),
+                                'username' => decode_yajirushi(htmlspecialchars_decode($ueusedata["username"])),
+                                'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["uniqid"])),
+                                'ueuse' => decode_yajirushi(htmlspecialchars_decode($ueusedata["ueuse"])),
+                                'photo1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo1"]))),
+                                'photo2' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo2"]))),
+                                'photo3' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo3"]))),
+                                'photo4' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo4"]))),
+                                'video1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["video1"]))),
+                                'favorite' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite"])),
+                                'favorite_cnt' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite_cnt"])),
+                                'datetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["datetime"])),
+                                'abi' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abi"])),
+                                'abidatetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abidate"])),
+                                'nsfw' => decode_yajirushi(htmlspecialchars_decode($ueusedata["nsfw"])),
+                            ];
+                    
+                            $response[$ueusedata["uniqid"]] = $item; // ループ内で $response にデータを追加
+                        }
+                    
+                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    } else {
+                        $err = "ueuse_not_found";
+                        $response = array(
+                            'error_code' => $err,
+                        );
+                    
+                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    }
+                    
+                    
+                    $pdo = null;
+                }
+            }
+
+        }else{
+            $err = "input_not_found";
+            $response = array(
+                'error_code' => $err,
+            ); 
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
+
+    if($type === "getueuse"){
+
+        if(isset($_GET['ueuseid'])) { 
+
+            $ueuseid = htmlentities($_GET['ueuseid']);
+            
+            if($token === 'ice'){
+                $err = "this_account_has_been_frozen";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }elseif($token === ''){
+                $err = "token_input_error";
+                $response = array(
+                    'error_code' => $err,
+                );
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        
+            require('../db.php');
+        
+            $datetime = array();
+            $pdo = null;
+        
+            session_start();
+        
+            try {
+                $option = array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+                );
+                $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+            } catch(PDOException $e) {
+                // 接続エラーのときエラー内容を取得する
+                $error_message[] = $e->getMessage();
+            }
+
+            
+            if (!empty($pdo)) {
+
+                // データベース接続の設定
+                $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                ));
+            
+                $userQuery = $dbh->prepare("SELECT username, userid,role FROM account WHERE token = :token");
+                $userQuery->bindValue(':token', $token);
+                $userQuery->execute();
+                $userData = $userQuery->fetch();
+
+                if(empty($userData["userid"])){
+                    $err = "token_invalid";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }elseif($userData["role"] === "ice"){
+                    $err = "this_account_has_been_frozen";
+                    $response = array(
+                        'error_code' => $err,
+                    );
+                    
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }else{
+                
+                    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                    ));   
+            
+                    $ueuseQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid");
+                    $ueuseQuery->bindValue(':ueuseid', $ueuseid);
+                    $ueuseQuery->execute();
+                    $ueusedata = $ueuseQuery->fetch();
+                
+                    if (empty($ueusedata)){
+                        $response = array(
+                            'error_code' => "ueuseid_not_found",
+                        );
+                    }else{
+                        $userQuery = $pdo->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
+                        $userQuery->bindValue(':userid', $ueusedata["account"]);
+                        $userQuery->execute();
+                        $userData = $userQuery->fetch();
+                        if ($userData) {
+                            $ueusedata['username'] = $userData['username'];
+                            $ueusedata['role'] = $userData['role'];
+                        }
+                    
+                    
+                        $favcnts = explode(',', $ueusedata["favorite"]);
+                        $ueusedata["favorite_cnt"] = count($favcnts)-1;
+                    
+                        $response = array(
+                                'account' => decode_yajirushi(htmlspecialchars_decode($ueusedata["account"])),
+                                'username' => decode_yajirushi(htmlspecialchars_decode($ueusedata["username"])),
+                                'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["uniqid"])),
+                                'ueuse' => decode_yajirushi(htmlspecialchars_decode($ueusedata["ueuse"])),
+                                'photo1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo1"]))),
+                                'photo2' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo2"]))),
+                                'photo3' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo3"]))),
+                                'photo4' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo4"]))),
+                                'video1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["video1"]))),
+                                'favorite' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite"])),
+                                'favorite_cnt' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite_cnt"])),
+                                'datetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["datetime"])),
+                                'abi' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abi"])),
+                                'abidatetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abidate"])),
+                                'nsfw' => decode_yajirushi(htmlspecialchars_decode($ueusedata["nsfw"])),
+                        );
+                    }
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    
+                    
+                    $pdo = null;
+                }
+            }
+
+        }else{
+            $err = "input_not_found";
+            $response = array(
+                'error_code' => $err,
+            ); 
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            exit;
         }
     }
 

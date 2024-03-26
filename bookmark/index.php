@@ -200,7 +200,7 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <link rel="stylesheet" href="../css/home.css">
@@ -282,10 +282,17 @@ $pdo = null;
 			</div>
 		</div>
 
+        <div id="Big_ImageModal" class="Image_modal">
+            <div class="modal-content">
+                <img id="Big_ImageMain" href="">
+            </div>
+        </div>
+
 	</main>
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+    <?php require('../require/noscript_modal.php');?>
 
 
 </body>

@@ -20,6 +20,8 @@ require('db.php');
 require('function/function.php');
 //hCaptcha--------------------------------------------
 require('settings_admin/hCaptcha_settings/hCaptcha_settings.php');
+//Cloudflare_Turnstile--------------------------------------------
+require('settings_admin/CloudflareTurnstile_settings/CloudflareTurnstile_settings.php');
 //----------------------------------------------------
 
 $serversettings_file = "server/serversettings.ini";
@@ -117,14 +119,14 @@ if( !empty($_POST['btn_submit']) ) {
         $invitationcode = $_POST['invitationcode'];
     }
 
-    if(!empty(CAPTCHA && CAPTCHA == "true")){
+    if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){
         if(isset($_POST['h-captcha-response'])){
             $hcaptcha_token = htmlentities($_POST['h-captcha-response']);
             if($hcaptcha_token){
                 $captcha_data = [
-                    'secret' => htmlentities(SEAC_KEY),
+                    'secret' => htmlentities(H_CAPTCHA_SEAC_KEY),
                     'response' => $hcaptcha_token,
-                    'sitekey' => htmlentities(SITE_KEY)
+                    'sitekey' => htmlentities(H_CAPTCHA_SITE_KEY)
                 ];
                 $options = [
                     'http' => [
@@ -135,13 +137,39 @@ if( !empty($_POST['btn_submit']) ) {
                 ];
                 $hCaptcha_result = json_decode(file_get_contents('https://hcaptcha.com/siteverify', false, stream_context_create($options)),true);
                 if(!($hCaptcha_result["success"] == true)){
-                    $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+                    $error_message[] = "hCaptchaであなたが人間である確認ができませんでした。(ERROR)";
                 }
             }else{
-                $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+                $error_message[] = "hCaptchaであなたが人間である確認ができませんでした。(ERROR)";
             }
         }else{
-            $error_message[] = "あなたが人間である確認ができませんでした。(ERROR)";
+            $error_message[] = "hCaptchaであなたが人間である確認ができませんでした。(ERROR)";
+        }
+    }
+    if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){
+        if(isset($_POST['cf-turnstile-response'])){
+            $CF_Turnstile_token = htmlentities($_POST['cf-turnstile-response']);
+            if($CF_Turnstile_token){
+                $CF_Turnstile_data = [
+                    'secret' => htmlentities(CF_TURNSTILE_SEAC_KEY),
+                    'response' => $CF_Turnstile_token
+                ];
+                $CF_Turnstile_options = [
+                    'http' => [
+                        'method'=> 'POST',
+                        'header'=> 'Content-Type: application/x-www-form-urlencoded',
+                        'content' => http_build_query($CF_Turnstile_data, '', '&')
+                    ]
+                ];
+                $CF_Turnstile_result = json_decode(file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, stream_context_create($CF_Turnstile_options)),true);
+                if(!($CF_Turnstile_result["success"] == true)){
+                    $error_message[] = "CloudflareTurnstileであなたが人間である確認ができませんでした。(ERROR)";
+                }
+            }else{
+                $error_message[] = "CloudflareTurnstileであなたが人間である確認ができませんでした。(ERROR)";
+            }
+        }else{
+            $error_message[] = "CloudflareTurnstileであなたが人間である確認ができませんでした。(ERROR)";
         }
     }
 
@@ -400,8 +428,8 @@ if( !empty($_POST['btn_submit']) ) {
 		}
 
         // 文字数を確認
-        if( 100 < mb_strlen($password, 'UTF-8') ) {
-			$error_message[] = 'パスワードは100文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
+        if( 256 < mb_strlen($password, 'UTF-8') ) {
+			$error_message[] = 'パスワードは256文字以内で入力してください。(PASSWORD_OVER_MAX_COUNT)';
 		}
     }
 
@@ -506,9 +534,13 @@ $pdo = null;
 <meta name="twitter:description" content="<?php echo htmlentities($serverinfo);?>"/>
 <!--OGPここまで-->
 <link rel="stylesheet" href="css/style.css">
+<script src="js/jquery-min.js"></script>
 <script src="js/unsupported.js"></script>
-<?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+<?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+<?php }?>
+<?php if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){?>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <?php }?>
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
@@ -600,10 +632,15 @@ $pdo = null;
             </div>
 
             <p>登録を押すと利用規約とプライバシーポリシーに同意したこととなります。<br>未確認の場合は上のボタンよりお読みください。</p>
-            <?php if(!empty(CAPTCHA && CAPTCHA == "true")){?>
+            <?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
                 <div class="captcha_zone">
                     <div class="p2">あなたは人間ですか？<br>もし人間であれば下のチェックボックスにチェックしてください！</div>
-                    <div class="h-captcha" data-sitekey="<?php echo htmlentities(SITE_KEY);?>"></div>
+                    <div class="h-captcha" data-sitekey="<?php echo htmlentities(H_CAPTCHA_SITE_KEY);?>"></div>
+                </div>
+            <?php }?>
+            <?php if(!empty(CF_TURNSTILE_ONOFF && CF_TURNSTILE_ONOFF == "true")){?>
+                <div class="captcha_zone">
+                    <div class="cf-turnstile" data-sitekey="<?php echo htmlentities(CF_TURNSTILE_SITE_KEY);?>" data-callback="javascriptCallback" data-language="ja"></div>
                 </div>
             <?php }?>
             <?php if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){?>

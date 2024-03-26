@@ -181,41 +181,11 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-if( !empty($pdo) ) {
-	
-	// データベース接続の設定
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-	));
-
-	$userQuery = $dbh->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
-	$userQuery->bindValue(':userid', $userid);
-	$userQuery->execute();
-	$userData = $userQuery->fetch();
-
-	$role = $userData["role"];
-
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-
-	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
-
-    $rerole->bindValue(':userid', $userid);
-    // SQL実行
-    $rerole->execute();
-
-    $userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
-
-	
-}
-
-
 
 if( !empty($_POST['btn_submit']) ) {
 	//$level = $_POST['notice_level'];
-	$title = $_POST['title'];
-    $note = $_POST['note'];
+	$title = htmlentities($_POST['title'], ENT_QUOTES, 'UTF-8', false);
+    $note = htmlentities($_POST['note'], ENT_QUOTES, 'UTF-8', false);
 
     // IDの入力チェック
 	if( empty($title) ) {
@@ -244,6 +214,8 @@ if( !empty($_POST['btn_submit']) ) {
     }*/
 
 	if( empty($error_message) ) {
+
+		$uniqid = createUniqId();
 		
 		// 書き込み日時を取得
         $datetime = date("Y-m-d H:i:s");
@@ -254,11 +226,12 @@ if( !empty($_POST['btn_submit']) ) {
         try {
 
             // SQL作成
-            $stmt = $pdo->prepare("INSERT INTO notice (title,note,account,datetime) VALUES (:title,:note,:account,:datetime)");
+            $stmt = $pdo->prepare("INSERT INTO notice (uniqid,title,note,account,datetime) VALUES (:uniqid,:title,:note,:account,:datetime)");
 
 
             // 値をセット
 			//$stmt->bindParam( ':level', $notice_level, PDO::PARAM_STR);
+			$stmt->bindParam( ':uniqid', $uniqid, PDO::PARAM_STR);
             $stmt->bindParam( ':title', $title, PDO::PARAM_STR);
             $stmt->bindParam( ':note', $note, PDO::PARAM_STR);
 
@@ -294,9 +267,57 @@ if( !empty($_POST['btn_submit']) ) {
    
 }
 
+if( !empty($_POST['note_del']) ) {
+	$note_id = htmlentities($_POST['note_id']);
+
+	if (!empty($pdo)) {
+
+		$query = $pdo->prepare('SELECT * FROM notice WHERE uniqid = :uniqid limit 1');
+		$query->execute(array(':uniqid' => $note_id));
+		$result = $query->fetch();
+		if($result == 0){
+			$error_message[] = "削除できないお知らせです。";
+		}
+
+		if(empty($error_message)){
+
+			try{
+				// 通知削除クエリを実行
+				$deleteQuery = $pdo->prepare("DELETE FROM notice WHERE uniqid = :uniqid");
+				$deleteQuery->bindValue(':uniqid', $note_id, PDO::PARAM_STR);
+				$res = $deleteQuery->execute();
+
+			} catch (Exception $e) {
+					
+				// エラーが発生した時はロールバック
+				$pdo->rollBack();
+			}
+
+			if( $res ) {
+				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				header("Location:".$url."");
+				exit;  
+			} else {
+				$error_message[] = "お知らせの削除ができませんでした。(NOTICE_DELETE_DAME)";
+			}
+
+			$stmt = null;
+		}
+	}
+}
+
+if (!empty($pdo)) {
+    $sql = "SELECT * FROM notice ORDER BY datetime DESC";
+    $allnotice = $pdo->query($sql);    
+
+    while ($row = $allnotice->fetch(PDO::FETCH_ASSOC)) {
+
+        $Notices[] = $row;
+    }
+}
+
 
 require('../logout/logout.php');
-
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -310,7 +331,7 @@ $pdo = null;
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <title>お知らせ配信 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
@@ -321,19 +342,19 @@ $pdo = null;
 <?php require('../require/leftbox.php');?>
 	<main>
 
-            <?php if( !empty($error_message) ): ?>
-                <ul class="errmsg">
-                    <?php foreach( $error_message as $value ): ?>
-                        <p>・ <?php echo $value; ?></p>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+		<?php if( !empty($error_message) ): ?>
+			<ul class="errmsg">
+				<?php foreach( $error_message as $value ): ?>
+					<p>・ <?php echo $value; ?></p>
+				<?php endforeach; ?>
+			</ul>
+		<?php endif; ?>
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
 
-		<h1>お知らせ配信</h1>
+			<h1>お知らせ配信</h1>
 
-        <p>タイトルと内容を入力して配信してください。<br>削除と編集はここからは出来ません。<br>DB管理画面から行ってください。</p>
+			<p>タイトルと内容を入力して配信してください。<br>削除と編集はここからは出来ません。<br>DB管理画面から行ってください。</p>
 
 			<!--<div>
 				<p>緊急度レベル</p>
@@ -367,7 +388,47 @@ $pdo = null;
 
         </form>
 
-        </div>
+		<div class="formarea">
+			<?php if(!(empty($Notices))){?>
+				<?php foreach ($Notices as $value) {?>
+					<div class="server_code">
+						<details>
+							<summary><?php echo htmlentities($value["title"]);?></summary>
+							<hr>
+							<div class="p2">本文</div>
+							<p><?php echo htmlentities($value["note"]);?></p>
+							<hr>
+							<div class="p2">配信日時</div>
+							<p><?php echo date("Y年m月d日 H:i", strtotime(htmlentities($value["datetime"])));?></p>
+							<div class="p2">ID</div>
+							<?php if(!(empty($value["uniqid"]))){?>
+								<p><?php echo htmlentities($value["uniqid"]);?></p>
+							<?php }else{?>
+								<p>IDはありません。</p>
+							<?php }?>
+							<hr>
+
+							<form enctype="multipart/form-data" method="post">
+								<?php if(!(empty($value["uniqid"]))){?>
+									<div class="delbox">
+										<p>削除ボタンを押すとこのお知らせは削除されます。</p>
+										<input type="text" name="note_id" id="note_id" value="<?php echo htmlentities($value["uniqid"]);?>" style="display:none;" >
+										<input type="submit" name="note_del" class="delbtn" value="削除">
+									</div>
+								<?php }else{?>
+									<div class="delbox">
+										<p>このお知らせは削除できません。</p>
+									</div>
+								<?php }?>
+							</form>
+						</details>
+					</div>
+				<?php }?>
+			<?php }?>
+		
+		</div>
+
+        
 	</main>
 
 	<?php require('../require/rightbox.php');?>

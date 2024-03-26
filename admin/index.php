@@ -75,6 +75,26 @@ if($result2 > 0){
 	exit;
 }
 
+if (in_array("gd", get_loaded_extensions())) {
+    $check_gd = true;
+} else {
+    $check_gd = false;
+}
+if (in_array("fileinfo", get_loaded_extensions())) {
+    $check_fileinfo = true;
+} else {
+    $check_fileinfo = false;
+}
+if (in_array("mbstring", get_loaded_extensions())) {
+    $check_mbstring = true;
+} else {
+    $check_mbstring = false;
+}
+if (in_array("pdo_mysql", get_loaded_extensions())) {
+    $check_pdo_mysql = true;
+} else {
+    $check_pdo_mysql = false;
+}
 // データベースの接続を閉じる
 $pdo = null;
 
@@ -84,6 +104,7 @@ $pdo = null;
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/style.css">
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="../image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -115,7 +136,15 @@ $pdo = null;
 
         <p>おめでとうございます！！！</p>
         <p>uwuzuの導入が完了しました！</p>
-        <p>これより管理者アカウントの登録を行います。<br>userロールとofficialロールの設定はお済みですか？<br>userロールとofficialロールがないとuwuzuは正しく動作しないので設定をしていない方は一度このページを閉じて設定してください！<br>また、php.iniよりGDの有効化または導入はお済みですか？GDがないとuwuzuは二段階認証が正しく動作しないため絶対に設定してください！</p>
+        <p>これより管理者アカウントの登録を行います。<br>userロールとofficialロール、iceロールの設定はお済みですか？<br>userロールとofficialロール、iceロールがないとuwuzuは正しく動作しないので設定をしていない方は一度このページを閉じて設定してください！<br>また、php.iniよりGDの有効化または導入はお済みですか？GDがないとuwuzuは二段階認証が正しく動作しないため絶対に設定してください！</p>
+        
+        <div class="module_chk">
+            <p>GD : <?php if($check_gd == true){echo "OK";}else{echo "NG";}?></p>
+            <p>Fileinfo : <?php if($check_fileinfo == true){echo "OK";}else{echo "NG";}?></p>
+            <p>mbstring : <?php if($check_mbstring == true){echo "OK";}else{echo "NG";}?></p>
+            <p>pdo_mysql : <?php if($check_pdo_mysql == true){echo "OK";}else{echo "NG";}?></p>
+        </div>
+
 
         <p>uwuzu<br>Version : <?php echo $uwuzuinfo[1]?></p>
         <div class="btnbox">

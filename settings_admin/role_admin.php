@@ -188,6 +188,7 @@ if( !empty($_POST['role_btn_submit']) ) {
 	$rolename = htmlentities($_POST['rolename']);
 	$roleid = htmlentities($_POST['roleid']);
 	$rolecolor = htmlentities($_POST['rolecolor']);
+	$roleeffect = htmlentities($_POST['roleeffect']);
 
 	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 	$query = $dbh->prepare('SELECT * FROM role WHERE roleidname = :roleid limit 1');
@@ -207,6 +208,20 @@ if( !empty($_POST['role_btn_submit']) ) {
 		$error_message[] = "ロールの色が入力されていません。(INPUT_PLEASE)";
 	}
 
+	if(empty($roleeffect)){
+		$error_message[] = "ロールに適用するエフェクトが選択されていません。(INPUT_PLEASE)";
+	}else{
+		if($roleeffect == "0"){
+			$save_role_effect = "none";
+		}
+		if($roleeffect == "1"){
+			$save_role_effect = "shine";
+		}
+		if($roleeffect == "2"){
+			$save_role_effect = "rainbow";
+		}
+	}
+
 	if (!empty($pdo)) {
 		if (empty($error_message)) {
 			// 書き込み日時を取得
@@ -219,12 +234,13 @@ if( !empty($_POST['role_btn_submit']) ) {
 			try {
 
 				// SQL作成
-				$stmt = $pdo->prepare("INSERT INTO role (rolename, roleauth, rolecolor, roleidname) VALUES (:rolename, :roleauth, :rolecolor, :roleidname)");
+				$stmt = $pdo->prepare("INSERT INTO role (rolename, roleauth, rolecolor, roleidname, roleeffect) VALUES (:rolename, :roleauth, :rolecolor, :roleidname, :roleeffect)");
 		
 				$stmt->bindParam(':rolename', $rolename, PDO::PARAM_STR);
 				$stmt->bindParam(':roleauth', $roleauth, PDO::PARAM_STR);
 				$stmt->bindParam(':rolecolor', $rolecolor, PDO::PARAM_STR);
 				$stmt->bindParam(':roleidname', $roleid, PDO::PARAM_STR);
+				$stmt->bindParam(':roleeffect', $save_role_effect, PDO::PARAM_STR);
 
 				// SQLクエリの実行
 				$res = $stmt->execute();
@@ -420,13 +436,13 @@ if (!empty($pdo)) {
 <head>
 <meta charset="utf-8">
 <link rel="stylesheet" href="../css/home.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ロール - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>ロール - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -463,43 +479,87 @@ if (!empty($pdo)) {
 					<div class="p2">ロールの色です。<br>HEXコードで入力してください。(#はつけないでください。)</div>
 					<input id="rolecolor" onInput="checkForm(this)" placeholder="256238" class="inbox" type="text" name="rolecolor" maxlength="6" value="">
 				</div>
+				<div>
+				<div class="p2">ロールに付与するエフェクト</div>
+					<div class="radio_btn_zone">
+						<input type="radio" name="roleeffect" value="0" id="0" class="radiobtn_input" checked>
+						<label for="0" class="radiobtn_label">なし</label>
+
+						<input type="radio" name="roleeffect" value="1" id="1" class="radiobtn_input">
+						<label for="1" class="radiobtn_label">輝かせる</label>
+
+						<input type="radio" name="roleeffect" value="2" id="2" class="radiobtn_input">
+						<label for="2" class="radiobtn_label">枠を虹色にする</label>
+					</div>
+				</div>
 
 				<input type="submit" class = "irobutton" name="role_btn_submit" value="作成">
 			</form>
 			<div class="formarea">
-					<hr>
-					<h1>ロール付与</h1>
-					<p>特定のユーザーにロール付与するときに使用してください。</p>
-					<button id="addrole" class="irobutton">付与</button>
-					<hr>
-					<h1>ロール剥奪</h1>
-					<p>特定のユーザーからロールを剥奪する時に使用してください。</p>
-					<button id="delrole" class="irobutton">剥奪</button>
-					<hr>
-					<h1>ロール一覧</h1>
-					<?php if(!(empty($roles))){?>
-						<?php foreach ($roles as $value) {?>
-							<div class="server_code">
-								<details>
-									<summary><?php echo htmlentities($value["rolename"]);?></summary>
-									<hr>
-									<p>ロールのid:<?php echo htmlentities($value["roleidname"]);?></p>
-									<p>ロールの色:#<?php echo htmlentities($value["rolecolor"]);?></p>
-									<hr>
+				<hr>
+				<h1>ロール付与</h1>
+				<p>特定のユーザーにロール付与するときに使用してください。</p>
+				<button id="addrole" class="irobutton">付与</button>
+				<hr>
+				<h1>ロール剥奪</h1>
+				<p>特定のユーザーからロールを剥奪する時に使用してください。</p>
+				<button id="delrole" class="irobutton">剥奪</button>
+				<hr>
+				<h1>ロール一覧</h1>
+				<?php if(!(empty($roles))){?>
+					<?php foreach ($roles as $value) {?>
+						<div class="server_code">
+							<details>
+								<summary><?php echo htmlentities($value["rolename"]);?></summary>
+								<hr>
+								<p>ロールのid:<?php echo htmlentities($value["roleidname"]);?></p>
+								<p>ロールの色:#<?php echo htmlentities($value["rolecolor"]);?></p>
+								<p>ロールのエフェクト:<?php 
+								if(htmlentities($value["roleeffect"]) == '' || htmlentities($value["roleeffect"]) == 'none'){
+									$role_view_effect = "なし";
+								}elseif(htmlentities($value["roleeffect"]) == 'shine'){
+									$role_view_effect = "輝かせる";
+								}elseif(htmlentities($value["roleeffect"]) == 'rainbow'){
+									$role_view_effect = "枠を虹色にする";
+								}else{
+									$role_view_effect = "不明";
+								}
+								echo $role_view_effect;
+								?></p>
+								<hr>
+								<div class="roleboxes">
+									<?php 
+										if(htmlentities($value["roleeffect"], ENT_QUOTES, 'UTF-8', false) == '' || htmlentities($value["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'none'){
+											$role_view_effect = "";
+										}elseif(htmlentities($value["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'shine'){
+											$role_view_effect = "shine";
+										}elseif(htmlentities($value["roleeffect"], ENT_QUOTES, 'UTF-8', false) == 'rainbow'){
+											$role_view_effect = "rainbow";
+										}else{
+											$role_view_effect = "";
+										}
+									?>
+									<div class="rolebox <?php echo htmlentities($role_view_effect, ENT_QUOTES, 'UTF-8', false); ?>" style="border: 1px solid <?php echo '#' . htmlentities($value["rolecolor"], ENT_QUOTES, 'UTF-8', false); ?>;">
+										<p style="color: <?php echo '#' . $value["rolecolor"]; ?>;">
+											<?php if (!empty($value["rolename"])) { echo htmlentities($value["rolename"], ENT_QUOTES, 'UTF-8', false); }else{ echo("ロールが正常に設定されていません。");} ?>
+										</p>
+									</div>
+								</div>
+								<hr>
 
-									<form enctype="multipart/form-data" method="post">
-										<?php if(!($value["roleidname"] === "user" || $value["roleidname"] === "official" || $value["roleidname"] === "ice")){?>
-											<div class="delbox">
-												<p>削除ボタンを押すとこのロールは削除されます。<br>また、このロールをつけているユーザー全員からこのロールが剥奪されます。</p>
-												<input type="text" name="role_id" id="role_id" value="<?php echo htmlentities($value["roleidname"]);?>" style="display:none;" >
-												<input type="submit" name="role_del" class="delbtn" value="削除">
-											</div>
-										<?php }else{?>
-											<div class="delbox">
-												<p>このロールは削除できません。</p>
-											</div>
-										<?php }?>
-									</form>
+								<form enctype="multipart/form-data" method="post">
+									<?php if(!($value["roleidname"] === "user" || $value["roleidname"] === "official" || $value["roleidname"] === "ice")){?>
+										<div class="delbox">
+											<p>削除ボタンを押すとこのロールは削除されます。<br>また、このロールをつけているユーザー全員からこのロールが剥奪されます。</p>
+											<input type="text" name="role_id" id="role_id" value="<?php echo htmlentities($value["roleidname"]);?>" style="display:none;" >
+											<input type="submit" name="role_del" class="delbtn" value="削除">
+										</div>
+									<?php }else{?>
+										<div class="delbox">
+											<p>このロールは削除できません。</p>
+										</div>
+									<?php }?>
+								</form>
 							</details>
 						</div>
 					<?php }?>
@@ -546,6 +606,7 @@ if (!empty($pdo)) {
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
 <script type="text/javascript">

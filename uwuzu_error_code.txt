@@ -22,6 +22,7 @@ post_not_found - ユーズが存在しない時に表示されます。
 ueuseid_not_found - ユーズが存在しない時に表示されます。
 critical_error_userdata_not_found - ユーザーデータがない時に表示されます。
 userid_not_found - ユーザーデータがない時に表示されます。
+API_has_been_deleted - APIが削除または統合、変更された場合に表示されます。
 
 ----------(UWUZU ERR CODE)----------
 FILE_DEKASUGUI_PHP_INI_KAKUNIN - php.iniで設定されているファイルサイズ上限を上回っている時に表示されます。
@@ -112,6 +113,10 @@ NONE_SSL_SERVER - サーバー側でSSLの設定がされてない場合に表�
 OVER_RATE_LIMIT - 投稿回数のレート制限を超過している場合に表示されます。
 
 BOOKMARK_NOT_DELETED - ブックマークの削除に失敗した場合に表示されます。
+
+JS_BLOCKED_ERROR - JavaScriptがブラウザにより無効化されている場合に表示されます。
+
+NOTICE_DELETE_DAME - サーバーからのお知らせの削除に失敗した場合に表示されます。
 
 ERROR - 想定されていないエラーが発生した際に表示されます。
 

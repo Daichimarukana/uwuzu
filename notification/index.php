@@ -186,7 +186,7 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <link rel="stylesheet" href="../css/home.css">
@@ -233,6 +233,7 @@ $pdo = null;
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 
 </body>

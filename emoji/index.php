@@ -190,6 +190,11 @@ if (!empty($pdo)) {
 
 require('../logout/logout.php');
 
+if(isset($_GET['q'])){ 
+	$keyword = htmlentities($_GET['q']);
+}else{
+	$keyword = "";
+}
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -199,7 +204,7 @@ $pdo = null;
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+<script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -212,7 +217,7 @@ $pdo = null;
 
 <body>
 	<?php require('../require/leftbox.php');?>
-	<main>
+	<main class="outer">
 		<?php if( !empty($error_message) ): ?>
 			<ul class="errmsg">
 				<?php foreach( $error_message as $value ): ?>
@@ -220,35 +225,125 @@ $pdo = null;
 				<?php endforeach; ?>
 			</ul>
 		<?php endif; ?>
+		<div>
+			<div id="clipboard" class="online" style="display:none;">
+				<p>🗒️📎 コピーしました！</p>
+			</div>
+		</div>
 
-		<section>
-            <div class="emojibox">
-            <h1>絵文字一覧</h1>
-                <div class="emojizone">
-                    <?php 
-                    if(!empty($messages)){
-                        foreach ($messages as $value) {
-                        echo '<div class="emjtex">';
-                        echo '<div class="fx">';
-                        echo '<img src="../' . $value["emojifile"] . '">';
-                        echo '<h3>:'.$value["emojiname"].':</h3>';
-                        echo '</div>';
-                        echo '<p>'.$value["emojiinfo"].'</p>';
-                        echo '</div>';
-                        }
-                    }else{
-                        echo '<div class="tokonone" id="noueuse"><p>カスタム絵文字がありません</p></div>';
-                    }
-                    ?>
-                </div>
-            </div>
+		<section class="inner">
+			<div class="emojibox">
+            	<h1>絵文字一覧</h1>
+			</div>
+			<div class="sendbox">
+				<input class="inbox" placeholder="絵文字検索" id="emoji_searchword" type="text" value="<?php if( !empty($keyword) ){ echo htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); } ?>">
+				<button class="search_btn" id="search_btn">検索</button>
+			</div>
+			<div class="emojizone" id="emojizone">
+						
+			</div>
 		</section>
+
+		<div id="loading" class="loading" style="display: none;">
+			🤔
+		</div>
+		<div id="error" class="error" style="display: none;">
+			<h1>エラー</h1>
+			<p>サーバーの応答がなかったか不完全だったようです。<br>ネットワークの接続が正常かを確認の上再読み込みしてください。<br>(NETWORK_HUKANZEN_STOP)</p>
+		</div>
 
 	</main>
 
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
 
 </body>
+<script>
+$(document).ready(function() {
+
+	$(document).on('click', '.search_btn', function(event) {
+		if ($("#emoji_searchword").val() != ''){
+			$('#emojizone').empty();
+			loadEmojis();
+		} else {
+			return;
+		}
+	});
+
+    window.document.onkeydown = function(event){
+        if (event.key === 'Enter') {
+			if ($("#emoji_searchword").val() != ''){
+				$('#emojizone').empty();
+				loadEmojis();
+			} else {
+				return;
+			}
+        }
+    }
+
+	$(document).on('click','.emjtex',function(){
+		var children = $(this).children("div").children("div").children("h3");
+
+		navigator.clipboard.writeText(children.text());
+		$("#clipboard").show();
+		window.setTimeout(function(){
+			$("#clipboard").hide();
+		}, 5000);
+	});
+
+	loadEmojis();
+
+	var Emoji_pageNumber = 1;
+	var isLoading = false;
+
+	function loadEmojis() {
+		if (isLoading) return;
+		isLoading = true;
+		$("#loading").show();
+
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var search_query = $("#emoji_searchword").val();
+		var viewmode = 'page'
+		$.ajax({
+			url: '../nextpage/emojiview.php', // PHPファイルへのパス
+			method: 'GET',
+			data: { page: Emoji_pageNumber, userid: userid , account_id: account_id , search_query: search_query, view_mode: viewmode},
+			dataType: 'html',
+			timeout: 300000,
+			success: function(response) {
+				$('#emojizone').append(response);
+				Emoji_pageNumber++;
+				isLoading = false;
+				$("#loading").hide();
+			},
+			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+				isLoading = false;
+				$("#loading").hide();
+				$("#error").show();
+			},
+		});
+	}
+
+	$('.outer').on('scroll', function() {
+		var innerHeight = $('.inner').innerHeight(), //内側の要素の高さ
+			outerHeight = $('.outer').innerHeight(), //外側の要素の高さ
+			outerBottom = innerHeight - outerHeight; //内側の要素の高さ - 外側の要素の高さ
+		if (outerBottom <= $('.outer').scrollTop()) {
+			var elem = document.getElementById("noemoji");
+
+			if (elem === null){
+				// 存在しない場合の処理
+				loadEmojis();
+			} else {
+				// 存在する場合の処理
+				return;
+			}
+		}
+	});
+
+});
+</script>
 
 </html>
