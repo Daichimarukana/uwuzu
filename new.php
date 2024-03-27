@@ -599,7 +599,7 @@ $pdo = null;
             </div>
             <div>
                 <p>ユーザーID *</p>
-                <div class="p2">後から変更はできません。<br>プロフィールページに掲載され公開されます。<br>※サービス管理者が確認できます。</div>
+                <div class="p2">後から変更はできません。<br>プロフィールページに掲載され公開されます。<br>ユーザーIDはログインに必要になるためご自身で覚えておいてください。<br>※サービス管理者が確認できます。</div>
                 <input onInput="checkForm(this)" placeholder="" class="inbox" id="userid" type="text" name="userid" value="<?php if( !empty($_SESSION['userid']) ){ echo htmlspecialchars( $_SESSION['userid'], ENT_QUOTES, 'UTF-8'); } ?>">
             </div>
             <!--アカウント関連-->

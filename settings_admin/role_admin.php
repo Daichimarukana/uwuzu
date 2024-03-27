@@ -211,13 +211,13 @@ if( !empty($_POST['role_btn_submit']) ) {
 	if(empty($roleeffect)){
 		$error_message[] = "ロールに適用するエフェクトが選択されていません。(INPUT_PLEASE)";
 	}else{
-		if($roleeffect == "0"){
+		if($roleeffect == "1"){
 			$save_role_effect = "none";
 		}
-		if($roleeffect == "1"){
+		if($roleeffect == "2"){
 			$save_role_effect = "shine";
 		}
-		if($roleeffect == "2"){
+		if($roleeffect == "3"){
 			$save_role_effect = "rainbow";
 		}
 	}
@@ -482,14 +482,14 @@ if (!empty($pdo)) {
 				<div>
 				<div class="p2">ロールに付与するエフェクト</div>
 					<div class="radio_btn_zone">
-						<input type="radio" name="roleeffect" value="0" id="0" class="radiobtn_input" checked>
-						<label for="0" class="radiobtn_label">なし</label>
-
-						<input type="radio" name="roleeffect" value="1" id="1" class="radiobtn_input">
-						<label for="1" class="radiobtn_label">輝かせる</label>
+						<input type="radio" name="roleeffect" value="1" id="1" class="radiobtn_input" checked>
+						<label for="1" class="radiobtn_label">なし</label>
 
 						<input type="radio" name="roleeffect" value="2" id="2" class="radiobtn_input">
-						<label for="2" class="radiobtn_label">枠を虹色にする</label>
+						<label for="2" class="radiobtn_label">輝かせる</label>
+
+						<input type="radio" name="roleeffect" value="3" id="3" class="radiobtn_input">
+						<label for="3" class="radiobtn_label">枠を虹色にする</label>
 					</div>
 				</div>
 
@@ -571,7 +571,7 @@ if (!empty($pdo)) {
 	<div id="account_addrole_Modal" class="modal">
 		<div class="modal-content">
 			<h1>ロール付与</h1>
-			<p>ロール付与先のユーザーidと付与したいロールのidを入力してください。<br>なお、現時点ではここからロールの剥奪は出来ませんのでご注意ください。</p>
+			<p>ロール付与先のユーザーidと付与したいロールのidを入力してください。</p>
 			<form method="post" id="deleteForm">
 				<div class="p2">付与先ユーザーid</div>
 				<input type="text" id="add_userid" onInput="checkForm(this)" class="inbox" placeholder="admin" name="add_userid" value="">
@@ -587,8 +587,8 @@ if (!empty($pdo)) {
 
 	<div id="account_delrole_Modal" class="modal">
 		<div class="modal-content">
-			<h1>ロール付与</h1>
-			<p>ロール付与先のユーザーidと付与したいロールのidを入力してください。<br>なお、現時点ではここからロールの剥奪は出来ませんのでご注意ください。</p>
+			<h1>ロール剥奪</h1>
+			<p>ロール剥奪先のユーザーidと剥奪したいロールのidを入力してください。</p>
 			<form method="post" id="delrole_Form">
 				<div class="p2">剥奪先ユーザーid</div>
 				<input type="text" id="del_userid" onInput="checkForm(this)" class="inbox" placeholder="admin" name="del_userid" value="">

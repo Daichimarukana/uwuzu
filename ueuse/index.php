@@ -516,7 +516,7 @@ if( !empty($_POST['btn_submit']) ) {
 
 		if( empty($error_message) ) {
 			//一時保存していたユーズ内容の削除
-			setcookie("ueuse", "", time() - 30);
+			setcookie("ueuse", "", time() - 30, "/!".$ueuseid);
 			
 			// 書き込み日時を取得
 			$datetime = date("Y-m-d H:i:s");

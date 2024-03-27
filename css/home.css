@@ -240,6 +240,8 @@ textarea{
     padding-left: auto;
     padding-right: auto;
     border-radius: 25px;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
   
@@ -687,6 +689,8 @@ main h1{
     padding-left: auto;
     padding-right: auto;
     border-radius: 25px;
+    background-color: var(--background-color);
+    border: 1px solid var(--main-color);
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
 }
 
@@ -2876,7 +2880,7 @@ label>input {
     width:120px;
     padding: 8px auto;
 
-    margin-left: auto;
+    margin-left: 6px;
     margin-right: 6px;
     margin-bottom: 0px;
 
@@ -2915,8 +2919,8 @@ label>input {
     width:120px;
     padding: 8px auto;
 
-    margin-left: auto;
-    margin-right: 0px;
+    margin-left: 6px;
+    margin-right: 6px;
     margin-bottom: 0px;
 
     padding-top: 6px;
@@ -5312,6 +5316,13 @@ noscript .noscript_modal .inner .center_text p{
         margin-right: 6px;
     }
 
+    .sendbox{
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
     .sendbox .fx img{
         object-fit: cover;
         margin-left: -12px;
@@ -5375,7 +5386,7 @@ noscript .noscript_modal .inner .center_text p{
         font-weight: bold;
     }
     .sendbox .emoji_picker .emoji_picker_flex{
-        justify-content: flex-start;
+        justify-content: space-between;
     }
     .sendbox .emoji_picker .emoji_picker_flex .one_emoji{
         margin: 6px;
@@ -5471,6 +5482,25 @@ noscript .noscript_modal .inner .center_text p{
         margin-bottom: auto;
         fill: currentColor;
         transition: all 250ms ease-out;
+    }
+
+    .irobutton{
+        padding: 8px 5%;
+    }
+    .irobutton:hover{
+        padding: 8px 6%;
+    }
+    .irobutton:active{
+        padding: 8px 4%;
+    }
+    .sirobutton{
+        padding: 8px 5%;
+    }
+    .sirobutton:hover{
+        padding: 8px 6%;
+    }
+    .sirobutton:active{
+        padding: 8px 4%;
     }
 
     .ueuse .favbox img{
@@ -7325,6 +7355,13 @@ noscript .noscript_modal .inner .center_text p{
         background-color: var(--main-color);
         color:var(--dark-background-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    }
+
+    .ueuse .unixtime{
+        padding-left: 6px;
+        padding-right: 6px;
+        padding-top: 2px;
+        padding-bottom: 2px;
     }
         
     .tlchange{

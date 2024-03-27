@@ -110,20 +110,32 @@ function processMarkdownAndWrapEmptyLines($markdownText){
         return '<span class="unixtime" title="'.date("Y/m/d H:i.s", htmlentities($timestamp, ENT_QUOTES, 'UTF-8', false)).'">' . date("Y/m/d H:i", htmlentities($timestamp, ENT_QUOTES, 'UTF-8', false)) . '</span>';
     }, $markdownText);
 
-    $markdownText = preg_replace('/\*\*\*(.*?)\*\*\*/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
-    $markdownText = preg_replace('/\_\_\_(.*?)\_\_\_/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+    //太字&斜体------------------------------------------------------------------------
+    $markdownText = preg_replace('/\*\*\*(.+)\*\*\*(?=\s)/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+    $markdownText = preg_replace('/\b\*\*\*(.+)\*\*\*\b/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
 
-    $markdownText = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $markdownText);//太字
-    $markdownText = preg_replace('/\_\_(.*?)\_\_/', '<b>$1</b>', $markdownText);//太字
+    $markdownText = preg_replace('/\_\_\_(.+)\_\_\_(?=\s)/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+    $markdownText = preg_replace('/\b\_\_\_(.+)\_\_\_\b/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
 
-    $markdownText = preg_replace('/\*(.*?)\*/', '<i>$1</i>', $markdownText);//斜体
-    $markdownText = preg_replace('/\_(.*?)\_/', '<i>$1</i>', $markdownText);//斜体
+    //太字-----------------------------------------------------------------------------
+    $markdownText = preg_replace('/\*\*(.+)\*\*(?=\s)/', '<b>$1</b>', $markdownText);//太字
+    $markdownText = preg_replace('/\b\*\*(.+)\*\*\b/', '<b>$1</b>', $markdownText);//太字
 
-    $markdownText = preg_replace('/\~\~(.*?)\~\~/m', '<s>$1</s>', $markdownText);//打ち消し線
+    $markdownText = preg_replace('/\_\_(.+)\_\_(?=\s)/', '<b>$1</b>', $markdownText);//太字
+    $markdownText = preg_replace('/\b\_\_(.+)\_\_\b/', '<b>$1</b>', $markdownText);//太字
 
-    $markdownText = preg_replace('/&gt;&gt;&gt; (.*)/m', '<span class="quote">$1</span>', $markdownText);//>>> 引用
+    //斜体-----------------------------------------------------------------------------
+    $markdownText = preg_replace('/\*(.+)\*(?=\s)/', '<i>$1</i>', $markdownText);//斜体
+    $markdownText = preg_replace('/\b\*(.+)\*\b/', '<i>$1</i>', $markdownText);//斜体
 
-    $markdownText = preg_replace('/\|\|(.*)\|\|/m', '<span class="blur">$1</span>', $markdownText);//黒塗り
+    $markdownText = preg_replace('/\_(.+)\_(?=\s)/', '<i>$1</i>', $markdownText);//斜体
+    $markdownText = preg_replace('/\b\_(.+)\_\b/', '<i>$1</i>', $markdownText);//斜体
+
+    $markdownText = preg_replace('/\~\~(.+)\~\~/m', '<s>$1</s>', $markdownText);//打ち消し線
+
+    $markdownText = preg_replace('/&gt;&gt;&gt; (.+)/m', '<span class="quote">$1</span>', $markdownText);//>>> 引用
+
+    $markdownText = preg_replace('/\|\|(.+)\|\|/m', '<span class="blur">$1</span>', $markdownText);//黒塗り
 
     // タイトル（#、##、###）をHTMLのhタグに変換
     $markdownText = preg_replace('/^# (.+)/m', '<h1>$1</h1>', $markdownText);
@@ -183,10 +195,11 @@ function replaceEmojisWithImages($postText) {
         $emoji_row = $emoji_Query->fetch();
         if(empty($emoji_row["emojifile"])){
             $emoji_path = "img/sysimage/errorimage/emoji_404.png";
+            return ":".$emojiName.":";
         }else{
             $emoji_path = $emoji_row["emojifile"];
+            return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
         }
-        return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
     }, $postText);
     
     // @username を検出してリンクに置き換える
@@ -212,10 +225,10 @@ function replaceEmojisWithImages($postText) {
         }
     }, $postTextWithImages);
 
-    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_]+)/u';
+    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_!]+)/u';
     $postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
         $hashtags = $matches[1];
-        return "<a class='hashtags' href='/search?q=" . urlencode('#') . $hashtags . "'>" . '#' . $hashtags . "</a>";
+        return "<a class='hashtags' href='/search?q=" . urlencode('#' . $hashtags) . "'>" . '#' . $hashtags . "</a>";
     }, $postTextWithImagesAndUsernames);
 
     return $postTextWithHashtags;
@@ -225,12 +238,16 @@ function replaceURLsWithLinks($postText, $maxLength = 48) {
     $pattern = '/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一-龠々\w\-\/?=&%.]+)/';
     $convertedText = preg_replace_callback($pattern, function($matches) use ($maxLength) {
         $link = $matches[0];
-        $no_https_link = str_replace("https://", "", $link);
-        if (mb_strlen($link) > $maxLength) {
-            $truncatedLink = mb_substr($no_https_link, 0, $maxLength).'...';
-            return '<a href="'.$link.'" target="_blank">'.$truncatedLink.'</a>';
-        } else {
-            return '<a href="'.$link.'" target="_blank">'.$no_https_link.'</a>';
+        if(!(preg_match('/:(\w+):/',$link))){
+            $no_https_link = str_replace("https://", "", $link);
+            if (mb_strlen($link) > $maxLength) {
+                $truncatedLink = mb_substr($no_https_link, 0, $maxLength).'...';
+                return '<a href="'.$link.'" target="_blank">'.$truncatedLink.'</a>';
+            } else {
+                return '<a href="'.$link.'" target="_blank">'.$no_https_link.'</a>';
+            }   
+        }else{
+            return $link;
         }
     }, $postText);
 
@@ -249,51 +266,53 @@ function YouTube_and_nicovideo_Links($postText) {
     foreach ($matches[0] as $url) {
         // ドメイン部分を抽出
         $parsedUrl = parse_url($url);
-        if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com" || $parsedUrl['host'] == "m.youtube.com"){
+        if(!(empty($parsedUrl['host']))){
+            if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com" || $parsedUrl['host'] == "m.youtube.com"){
 
-            if (isset($parsedUrl['query'])) {
-                if(false !== strpos($parsedUrl['query'], 'v=')) {
-                    $video_id = str_replace('v=', '', htmlentities($parsedUrl['query'], ENT_QUOTES, 'UTF-8', false));
-                    $iframe = true;
-                }else{
+                if (isset($parsedUrl['query'])) {
+                    if(false !== strpos($parsedUrl['query'], 'v=')) {
+                        $video_id = str_replace('v=', '', htmlentities($parsedUrl['query'], ENT_QUOTES, 'UTF-8', false));
+                        $iframe = true;
+                    }else{
+                        $video_id = str_replace('/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
+                        $iframe = true;
+                    }
+                    $video_id = str_replace('&amp;', '?', $video_id);
+                }elseif(isset($parsedUrl['path'])){
                     $video_id = str_replace('/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
                     $iframe = true;
+                }else{
+                    $video_id = "";
+                    $iframe = false;
                 }
-                $video_id = str_replace('&amp;', '?', $video_id);
-            }elseif(isset($parsedUrl['path'])){
-                $video_id = str_replace('/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
-                $iframe = true;
-            }else{
-                $video_id = "";
-                $iframe = false;
-            }
-            // 不要な文字を削除してaタグを生成
-            if($iframe == true){
-                $link = '<iframe src="https://www.youtube-nocookie.com/embed/'.$video_id.'" rel="0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
-            }else{
-                $link = "";
-            }
-            // URLをドメインのみを表示するaタグで置き換え
-            $postText = $link;
-        }elseif($parsedUrl['host'] == "nicovideo.jp" || $parsedUrl['host'] == "www.nicovideo.jp"){
+                // 不要な文字を削除してaタグを生成
+                if($iframe == true){
+                    $link = '<iframe src="https://www.youtube-nocookie.com/embed/'.$video_id.'" rel="0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+                }else{
+                    $link = "";
+                }
+                // URLをドメインのみを表示するaタグで置き換え
+                $postText = $link;
+            }elseif($parsedUrl['host'] == "nicovideo.jp" || $parsedUrl['host'] == "www.nicovideo.jp"){
 
-            if(isset($parsedUrl['path'])){
-                $video_id = str_replace('/watch/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
-                $iframe = true;
+                if(isset($parsedUrl['path'])){
+                    $video_id = str_replace('/watch/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
+                    $iframe = true;
+                }else{
+                    $video_id = "";
+                    $iframe = false;
+                }
+                // 不要な文字を削除してaタグを生成
+                if($iframe == true){
+                    $link = '<iframe src="https://embed.nicovideo.jp/watch/'.$video_id.'"</iframe>';
+                }else{
+                    $link = "";
+                }
+                // URLをドメインのみを表示するaタグで置き換え
+                $postText = $link;
             }else{
-                $video_id = "";
-                $iframe = false;
+                $postText = "";
             }
-            // 不要な文字を削除してaタグを生成
-            if($iframe == true){
-                $link = '<iframe src="https://embed.nicovideo.jp/watch/'.$video_id.'"</iframe>';
-            }else{
-                $link = "";
-            }
-            // URLをドメインのみを表示するaタグで置き換え
-            $postText = $link;
-        }else{
-            $postText = "";
         }
     }
 
