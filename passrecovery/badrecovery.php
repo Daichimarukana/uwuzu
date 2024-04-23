@@ -18,10 +18,8 @@ $serversettings = parse_ini_file($serversettings_file, true);
 <title>残念なお知らせ - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="../back.js"></script>
+<script src="../js/back.js"></script>
 <body>
-
-
 
 <div class="leftbox2">
     <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>

@@ -21,10 +21,7 @@ console.log(
     "",
 );
 console.log(
-    "%cMessage by uwuzu%c\n%cこのメッセージはuwuzu開発者であるだいちまるによって書き込まれたものです。%c",
+    "%cMessage by uwuzu%c\nこのメッセージはuwuzu開発者であるだいちまるによって書き込まれたものです。\nuwuzuサーバー運営者及びuwuzu開発者がCookie情報等を要求することはありません。",
     "color:white; background-color:#FFC832; padding:4px; border-radius:4px; font-size: 12pt",
     "",
-    "color:#000;",
-    "",
-    "uwuzuサーバー運営者及びuwuzu開発者がCookie情報等を要求することはありません。",
 );

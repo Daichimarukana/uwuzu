@@ -730,8 +730,8 @@ $pdo = null;
 				<div class="modal-content">
 					<p>ユーズを削除しますか？</p>
 					<form class="btn_area" method="post" id="deleteForm">
-						<input type="button" id="deleteButton" class="fbtn" name="delete" value="削除">
-						<input type="button" id="cancelButton" class="fbtn_no" value="キャンセル">
+						<input type="button" id="deleteButton" class="fbtn_no" name="delete" value="削除">
+						<input type="button" id="cancelButton" class="fbtn" value="キャンセル">
 					</form>
 				</div>
 			</div>
@@ -743,8 +743,8 @@ $pdo = null;
 					<form method="post" id="AbiForm">
 					<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8', false); } ?></textarea>
 					<div class="btn_area">
-						<input type="submit" id="AbiAddButton" class="fbtn" name="abi" value="追記">
-						<input type="button" id="AbiCancelButton" class="fbtn_no" value="キャンセル">
+						<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
+						<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">
 					</div>
 					</form>
 				</div>
@@ -761,8 +761,8 @@ $pdo = null;
 					<h1><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんをブロックしますか？</h1>
 					<p><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんのアカウントをブロックしますか？<br>ブロックするとフォローが解除され、検索以外のLTL、FTL等で<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんの投稿が表示されなくなります。<br>また、相手からこのアカウントを閲覧することもできなくなります。<br>※ブロックしたことは相手には通知されません。<br><br>ブロックを解除するときはこのアカウントのユーザーページ(このページ)から解除を行ってください。</p>
 					<form class="btn_area" method="post">
-						<input type="submit" id="deleteButton2" class="fbtn" name="send_block_submit" value="ブロック">
-						<input type="button" id="cancelButton2" class="fbtn_no" value="キャンセル">
+						<input type="submit" id="deleteButton2" class="fbtn_no" name="send_block_submit" value="ブロック">
+						<input type="button" id="cancelButton2" class="fbtn" value="キャンセル">
 					</form>
 				</div>
 			</div>	
@@ -772,8 +772,8 @@ $pdo = null;
 					<h1><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんのブロックを解除しますか？</h1>
 					<p><?php echo replaceProfileEmojiImages(htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false)); ?>さんのアカウントをブロック解除しますか？<br>ブロック解除すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんの投稿の閲覧が可能になりフォローすることもできるようになります。</p>
 					<form class="btn_area" method="post">
-						<input type="submit" id="deleteButton3" class="fbtn" name="send_un_block_submit" value="ブロック解除">
-						<input type="button" id="cancelButton3" class="fbtn_no" value="キャンセル">
+						<input type="submit" id="deleteButton3" class="fbtn_no" name="send_un_block_submit" value="ブロック解除">
+						<input type="button" id="cancelButton3" class="fbtn" value="キャンセル">
 					</form>
 				</div>
 			</div>	

@@ -213,11 +213,11 @@ require('../logout/logout.php');
             <?php endif; ?>
 		<div class="formarea">
         <p>発行完了！以下のアクセストークンでこのアカウント(<?php echo $userid?>)に投稿を行えます！</p>
-		<p>アクセストークンは以下のものです！<br>
+		<p>アクセストークンは以下のものです！</p>
 		<ul class="errmsg">
 			<p>以下のアクセストークンは絶対に他人に知られないように大切に保管してください！</p>
 		</ul>
-		<p><?php echo $token;?>
+		<p><?php echo htmlentities($token, ENT_QUOTES, 'UTF-8',false);?></p>
 		</div>
         
         <a href="index" class="irobutton">戻る</a>

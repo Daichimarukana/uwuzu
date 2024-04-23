@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- ホスト: ひ.み.つ
--- 生成日時: 2024-03-26 14:43:05
+-- ホスト: ヒミツ
+-- 生成日時: 2024-04-23 17:09:16
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- データベース: `account`
+-- データベース: `uwuzu_db`
 --
 
 -- --------------------------------------------------------
@@ -92,6 +92,22 @@ CREATE TABLE `invitation` (
   `sysid` int(11) NOT NULL,
   `code` varchar(512) NOT NULL,
   `used` varchar(32) NOT NULL,
+  `datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `migration`
+--
+
+CREATE TABLE `migration` (
+  `sysid` int(11) NOT NULL,
+  `account` varchar(512) NOT NULL,
+  `domain` varchar(1024) NOT NULL,
+  `migration_code` varchar(256) NOT NULL,
+  `encryption_key` varchar(256) NOT NULL,
+  `encryption_ivkey` varchar(256) NOT NULL,
   `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -212,6 +228,12 @@ ALTER TABLE `invitation`
   ADD PRIMARY KEY (`sysid`);
 
 --
+-- テーブルのインデックス `migration`
+--
+ALTER TABLE `migration`
+  ADD PRIMARY KEY (`sysid`);
+
+--
 -- テーブルのインデックス `notice`
 --
 ALTER TABLE `notice`
@@ -267,6 +289,12 @@ ALTER TABLE `emoji`
 -- テーブルの AUTO_INCREMENT `invitation`
 --
 ALTER TABLE `invitation`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `migration`
+--
+ALTER TABLE `migration`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

@@ -195,15 +195,6 @@ if(isset($_GET['text'])) {
 }elseif(isset($_COOKIE['ueuse'])) { 
     $ueuse = htmlentities($_COOKIE['ueuse'], ENT_QUOTES, 'UTF-8', false);
 }
-//-----------------絵文字の取得----------------
-if (!empty($pdo)) {
-    $custom_emoji_Query = "SELECT emojifile,emojiname,emojiinfo,emojidate FROM emoji ORDER BY emojidate DESC";
-    $custom_emoji_array = $pdo->query($custom_emoji_Query);
-
-    while ($row = $custom_emoji_array->fetch(PDO::FETCH_ASSOC)) {
-        $custom_emoji[] = $row;
-    }
-}
 
 //-------------------------------------------
 function get_mentions_userid($postText) {
@@ -529,43 +520,7 @@ if( !empty($_POST['btn_submit']) ) {
 				$mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
 				foreach ($mentionedUsers as $mentionedUser) {
-				
-					$pdo->beginTransaction();
-
-					try {
-						$fromuserid = $userid;
-						$touserid = $mentionedUser;
-						$datetime = date("Y-m-d H:i:s");
-						$msg = "" . $ueuse . "";
-						$title = "" . $userid . "さんにメンションされました！";
-						$url = "/!" . $uniqid . "";
-						$userchk = 'none';
-
-						// 通知用SQL作成
-						$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-
-
-						$stmt->bindParam(':fromuserid', htmlentities($fromuserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-						$stmt->bindParam(':touserid', htmlentities($touserid, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-						$stmt->bindParam(':msg', htmlentities($msg, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-						$stmt->bindParam(':url', htmlentities($url, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-						$stmt->bindParam(':userchk', htmlentities($userchk, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-						$stmt->bindParam(':title', htmlentities($title, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-
-						$stmt->bindParam(':datetime', htmlentities($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
-
-						// SQLクエリの実行
-						$res = $stmt->execute();
-
-						// コミット
-						$res = $pdo->commit();
-
-					} catch(Exception $e) {
-
-						// エラーが発生した時はロールバック
-						$pdo->rollBack();
-					}
-			
+					send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."");
 				}
 
 			} catch(Exception $e) {
@@ -645,8 +600,8 @@ if ("serviceWorker" in navigator) {
 	<main class="outer">
 
 		<div class="tlchange">
-				<a href="index" class="off">LTL</a>
-				<a href="ftl" class="on">FTL</a>
+				<a href="index" class="off">ローカル</a>
+				<a href="ftl" class="on">フォロー</a>
 		</div>
 
 		<?php if( !empty($error_message) ): ?>
@@ -702,98 +657,12 @@ if ("serviceWorker" in navigator) {
 					<div class="emoji_picker" id="emoji_picker" style="display:none;">
 						<p>カスタム絵文字</p>
 						<div class="emoji_picker_flex">
-							<?php 
-							if(!empty($custom_emoji)){
-								foreach ($custom_emoji as $value) {
-								echo '<div class="one_emoji">';
-								echo '<img src="../' . htmlentities($value["emojifile"], ENT_QUOTES, 'UTF-8', false) . '" alt=":'.htmlentities($value["emojiname"], ENT_QUOTES, 'UTF-8', false).':" title=":'.htmlentities($value["emojiname"], ENT_QUOTES, 'UTF-8', false).':">';
-								echo '</div>';
-								}
-							}else{
-								echo '<div class="tokonone" id="noueuse"><p>カスタム絵文字がありません</p></div>';
-							}
-							?>
+							
 						</div>
 					</div>
 				</div>
 			</form>
 		<?php }?>
-		<script>
-			document.getElementById("upload_videos1").addEventListener('change', function(e){
-				var file_reader = new FileReader();
-				// ファイルの読み込みを行ったら実行
-				file_reader.addEventListener('load', function(e) {
-					$('#videos1').addClass('label_set');
-				});
-				file_reader.readAsText(e.target.files[0]);
-			});
-			document.getElementById("upload_images4").addEventListener('change', function(e){
-			var file_reader = new FileReader();
-			// ファイルの読み込みを行ったら実行
-			file_reader.addEventListener('load', function(e) {
-				$('#images4').addClass('label_set');
-			});
-			file_reader.readAsText(e.target.files[0]);
-			});
-
-			document.getElementById("upload_images3").addEventListener('change', function(e){
-			var file_reader = new FileReader();
-			// ファイルの読み込みを行ったら実行
-			file_reader.addEventListener('load', function(e) {
-				$('#images3').addClass('label_set');
-				$("#images4").show();
-			});
-			file_reader.readAsText(e.target.files[0]);
-			});
-
-			document.getElementById("upload_images2").addEventListener('change', function(e){
-			var file_reader = new FileReader();
-			// ファイルの読み込みを行ったら実行
-			file_reader.addEventListener('load', function(e) {
-				$('#images2').addClass('label_set');
-				$("#images3").show();
-			});
-			file_reader.readAsText(e.target.files[0]);
-			});
-			document.getElementById("upload_images").addEventListener('change', function(e){
-			var file_reader = new FileReader();
-			// ファイルの読み込みを行ったら実行
-			file_reader.addEventListener('load', function(e) {
-				$('#images').addClass('label_set');
-				$("#images2").show();
-			});
-			file_reader.readAsText(e.target.files[0]);
-			});
-
-			$('#ueuse').on('input', function () {
-				var mojisize = '<?php echo $mojisize; ?>';
-				var mojicount = Number(mojisize) - $(this).val().length;
-				if(mojicount >= 0){
-					$('#moji_cnt').removeClass('red');
-					$('#moji_cnt').html(mojicount);
-					$('#ueusebtn').prop('disabled', false);
-				}else{
-					$('#moji_cnt').addClass('red');
-					$('#moji_cnt').html(mojicount);
-					$('#ueusebtn').prop('disabled', true);
-				}
-				document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/home;";
-			})
-			$("#emoji_picker_btn").click(function () {
-				if ($("#emoji_picker_btn").prop("checked") == true) {
-					$("#emoji_picker").show();
-				} else {
-					$("#emoji_picker").hide();
-				}
-			});
-			$(".one_emoji").click(function (event) {
-				event.preventDefault();
-				var children = $(this).children("img");
-				var custom_emojiname = children.attr("title");
-        		$("#ueuse").val($("#ueuse").val() + custom_emojiname);
-			});
-		</script>
-
 
 		<section class="inner">
 			<div id="postContainer">
@@ -816,8 +685,8 @@ if ("serviceWorker" in navigator) {
 		<div class="modal-content">
 			<p>ユーズを削除しますか？</p>
 			<form class="btn_area" method="post" id="deleteForm">
-				<input type="button" id="deleteButton" class="fbtn" name="delete" value="削除">
-				<input type="button" id="cancelButton" class="fbtn_no" value="キャンセル">
+				<input type="button" id="deleteButton" class="fbtn_no" name="delete" value="削除">
+				<input type="button" id="cancelButton" class="fbtn" value="キャンセル">
 			</form>
 		</div>
 	</div>
@@ -830,8 +699,8 @@ if ("serviceWorker" in navigator) {
 			<form method="post" id="AbiForm">
 			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"><?php if( !empty($_SESSION['abi']) ){ echo htmlentities( $_SESSION['abi'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
 			<div class="btn_area">
-				<input type="submit" id="AbiAddButton" class="fbtn" name="abi" value="追記">
-				<input type="button" id="AbiCancelButton" class="fbtn_no" value="キャンセル">
+				<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
+				<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">
 			</div>
 			</form>
 		</div>
@@ -1149,6 +1018,125 @@ $(document).on('click', '.addabi', function (event) {
 		osho_gats.style.display = 'none';
 	});
 
+	//----------------------------------------------------------------------------------------------------------------------
+	//-------------------------------------------------------send_box-------------------------------------------------------
+	//----------------------------------------------------------------------------------------------------------------------
+	document.getElementById("upload_videos1").addEventListener('change', function(e){
+		var file_reader = new FileReader();
+		// ファイルの読み込みを行ったら実行
+		file_reader.addEventListener('load', function(e) {
+			$('#videos1').addClass('label_set');
+		});
+		file_reader.readAsText(e.target.files[0]);
+	});
+	document.getElementById("upload_images4").addEventListener('change', function(e){
+	var file_reader = new FileReader();
+	// ファイルの読み込みを行ったら実行
+	file_reader.addEventListener('load', function(e) {
+		$('#images4').addClass('label_set');
+	});
+	file_reader.readAsText(e.target.files[0]);
+	});
+
+	document.getElementById("upload_images3").addEventListener('change', function(e){
+	var file_reader = new FileReader();
+	// ファイルの読み込みを行ったら実行
+	file_reader.addEventListener('load', function(e) {
+		$('#images3').addClass('label_set');
+		$("#images4").show();
+	});
+	file_reader.readAsText(e.target.files[0]);
+	});
+
+	document.getElementById("upload_images2").addEventListener('change', function(e){
+	var file_reader = new FileReader();
+	// ファイルの読み込みを行ったら実行
+	file_reader.addEventListener('load', function(e) {
+		$('#images2').addClass('label_set');
+		$("#images3").show();
+	});
+	file_reader.readAsText(e.target.files[0]);
+	});
+	document.getElementById("upload_images").addEventListener('change', function(e){
+	var file_reader = new FileReader();
+	// ファイルの読み込みを行ったら実行
+	file_reader.addEventListener('load', function(e) {
+		$('#images').addClass('label_set');
+		$("#images2").show();
+	});
+	file_reader.readAsText(e.target.files[0]);
+	});
+
+	$('#ueuse').on('input', function () {
+		var mojisize = '<?php echo $mojisize; ?>';
+		var mojicount = Number(mojisize) - $(this).val().length;
+		if(mojicount >= 0){
+			$('#moji_cnt').removeClass('red');
+			$('#moji_cnt').html(mojicount);
+			$('#ueusebtn').prop('disabled', false);
+		}else{
+			$('#moji_cnt').addClass('red');
+			$('#moji_cnt').html(mojicount);
+			$('#ueusebtn').prop('disabled', true);
+		}
+		document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/home;";
+	});
+	loadEmojis();
+	$("#emoji_picker_btn").click(function () {
+		if ($("#emoji_picker_btn").prop("checked") == true) {
+			$("#emoji_picker").show();
+		} else {
+			$("#emoji_picker").hide();
+		}
+	});
+	$('.emoji_picker').on('scroll', function() {
+		var innerHeight = $('.emoji_picker_flex').innerHeight(),
+			outerHeight = $('.emoji_picker').innerHeight(),
+			outerBottom = innerHeight - outerHeight;
+		if (outerBottom <= $('.emoji_picker').scrollTop()) {
+			if ($('#noemoji').length){
+				return;
+			} else {
+				loadEmojis();
+			}
+		}
+	});
+	var Emoji_pageNumber = 1;
+	var isLoading = false;
+	function loadEmojis() {
+		if (isLoading) return;
+		isLoading = true;
+
+		var userid = '<?php echo $userid; ?>';
+		var account_id = '<?php echo $loginid; ?>';
+		var search_query = '';
+		var viewmode = 'picker'
+		$.ajax({
+			url: '../nextpage/emojiview.php', // PHPファイルへのパス
+			method: 'GET',
+			data: { page: Emoji_pageNumber, userid: userid , account_id: account_id , search_query: search_query, view_mode: viewmode},
+			dataType: 'html',
+			timeout: 300000,
+			success: function(response) {
+				$('.emoji_picker_flex').append(response);
+				Emoji_pageNumber++;
+				isLoading = false;
+				EmojiClickEvent();
+			},
+			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+				isLoading = false;
+				EmojiClickEvent();
+			},
+		});
+	}
+	function EmojiClickEvent() {
+		$(".one_emoji").click(function (event) {
+			event.preventDefault();
+			var children = $(this).children("img");
+			var custom_emojiname = children.attr("title");
+			$("#ueuse").val($("#ueuse").val() + custom_emojiname);
+		});
+	}
 });
 
 </script>

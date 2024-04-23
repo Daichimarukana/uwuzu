@@ -73,7 +73,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $followQuery->bindValue(':userid', $userid);
                 $followQuery->execute();
                 $followData = $followQuery->fetch();
-                $follow = $followData['follow'];
+                $follow = $followData['follow']/*.",".$userid*/;
                 $followList = explode(',', $follow);
 
                 // フォローしているユーザーの投稿を取得し、日時順に並び替える

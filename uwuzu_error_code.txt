@@ -23,6 +23,10 @@ ueuseid_not_found - ユーズが存在しない時に表示されます。
 critical_error_userdata_not_found - ユーザーデータがない時に表示されます。
 userid_not_found - ユーザーデータがない時に表示されます。
 API_has_been_deleted - APIが削除または統合、変更された場合に表示されます。
+no_reply_destination - リプライ先のユーズが存在しない際に表示されます。
+migration_bad_success - アカウントの移行後に移行の完了処理が正常に完了できなかった際に表示されます。
+already_been_completed - 処理が既に完了している場合に表示されます。
+you_cant_it_to_yourself - 自分に対して行えない処理を行おうとした際に表示されます。
 
 ----------(UWUZU ERR CODE)----------
 FILE_DEKASUGUI_PHP_INI_KAKUNIN - php.iniで設定されているファイルサイズ上限を上回っている時に表示されます。
@@ -62,6 +66,7 @@ REGISTERED_DAME - データの登録・更新に失敗した場合に表示さ�
 EMOJI_ID_INPUT_PLEASE - 絵文字IDが入力されていない時に表示されます。
 EMOJI_ID_OVER_MAX_COUNT - 絵文字IDの文字数が最大文字数を超過している時に表示されます。
 EMOJI_ID_SHIYOUZUMI - ユーザーIDがすでに使用されている時に表示されます。
+EMOJI_OVER_256KB - 絵文字のファイルサイズが256KBを超えている際に表示されます。
 
 INPUT_PLEASE - 入力すべき場所に内容が無い場合に表示されます。
 INPUT_OVER_MAX_COUNT - 入力すべき場所に入力された内容が設定されている最大文字数を超過している際に表示されます。
@@ -117,6 +122,17 @@ BOOKMARK_NOT_DELETED - ブックマークの削除に失敗した場合に表示
 JS_BLOCKED_ERROR - JavaScriptがブラウザにより無効化されている場合に表示されます。
 
 NOTICE_DELETE_DAME - サーバーからのお知らせの削除に失敗した場合に表示されます。
+
+MIGRATION_TO_SERVER_NOT_UWUZU - アカウントの移行操作時に移行先のサーバーがuwuzuを使用していないと表示されるエラーです。
+MIGRATION_TO_SERVER_BAD_UWUZU_VERSION - アカウントの移行操作時に移行先のサーバーがuwuzu v1.3.6未満の場合に表示されるエラーです。
+MIGRATION_TO_SERVER_IYADA - アカウントの移行操作時に移行先のサーバーがアカウントの移行登録を拒否しているために表示されるエラーです。
+MIGRATION_BAD_DOMAIN - 移行元or移行先サーバーのドメインにアクセスできなかった場合に表示されます。
+MIGRATION_BAD_CHECK_CODE - アカウントの移行登録時に識別コードが間違っていると表示されるエラーです。
+MIGRATION_BAD_AUTH_CODE - アカウントの移行登録時に認証コードもしくは確認コードが間違っていると表示されるエラーです。
+MIGRATION_FROM_SERVER_NOT_UWUZU - アカウントの移行操作時に移行元のサーバーがuwuzuを使用していないときに表示されるエラーです。
+MIGRATION_FROM_SERVER_BAD_UWUZU_VERSION - アカウントの移行操作時に移行元のサーバーがuwuzu v1.3.6未満の場合に表示されるエラーです。
+MIGRATION_SORRY - なんらかの原因により正常にアカウントの移行ができないと判断された場合に表示されます。
+MIGRATION_ONAJI_SERVER_DAME - 同じサーバーにアカウント移行しようとした際に表示されます。
 
 ERROR - 想定されていないエラーが発生した際に表示されます。
 

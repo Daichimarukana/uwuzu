@@ -63,6 +63,9 @@
         <h3><?php echo $uwuzuinfo[0]?></h3>
         <p>Version : <?php echo $uwuzuinfo[1]?></p>
         <p>Developer : <?php echo $uwuzuinfo[3]?></p>
+        <?php if (date("md") == "0816") {?>
+            <p class="special"><span class="clap_anim">🎉</span>今日はuwuzuの誕生日です！</p>
+        <?php }?>
         <a href="/rule/uwuzuabout">もっと詳しく！</a><a href="/rule/releasenotes">リリースノート</a>
     </div>
 </div>

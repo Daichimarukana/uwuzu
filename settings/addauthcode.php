@@ -277,14 +277,6 @@ $pdo = null;
 <?php require('../require/leftbox.php');?>
 	<main>
 
-	<?php if( !empty($error_message) ): ?>
-		<ul class="errmsg">
-			<?php foreach( $error_message as $value ): ?>
-				<p>・ <?php echo $value; ?></p>
-			<?php endforeach; ?>
-		</ul>
-	<?php endif; ?>
-
     <div class="emojibox">
     <h1>二段階認証の登録</h1>
             <?php if( !empty($error_message) ): ?>

@@ -62,7 +62,8 @@ function delete_exif($extension, $path){
 //----------Check_Extension------
 //ファイル形式チェック(画像かどうか)
 function check_mime($tmp_name){
-    $tmp_ext = mime_content_type($tmp_name);
+    $finfo = new finfo();
+    $tmp_ext = $finfo->file($tmp_name, FILEINFO_MIME_TYPE);
     $safe_img_mime = array(
 		"image/gif",
 		"image/jpeg",
@@ -81,7 +82,8 @@ function check_mime($tmp_name){
 }
 //ファイル形式チェック(画像かどうか)
 function check_mime_video($tmp_name){
-    $tmp_ext = mime_content_type($tmp_name);
+    $finfo = new finfo();
+    $tmp_ext = $finfo->file($tmp_name, FILEINFO_MIME_TYPE);
     $safe_vid_mime = array(
 		"video/mpeg",
 		"video/mp4",
@@ -91,6 +93,43 @@ function check_mime_video($tmp_name){
 	if(in_array($tmp_ext,$safe_vid_mime)){
         return $tmp_ext;
     }else{
+        return false;
+    }
+}
+//ファイル形式チェック(Base64の場合)
+function base64_mime($Base64,$userid){
+    $Base64 = base64_decode($Base64);
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_buffer($finfo, $Base64);
+
+    $safe_img_mime = [
+		"image/gif" => 'gif',
+		"image/jpeg" => 'jpg',
+		"image/png" => 'png',
+		"image/svg+xml" => 'svg',
+		"image/webp" => 'webp',
+        "image/bmp" => 'bmp',
+        "image/x-icon" => 'ico',
+        "image/tiff" => 'tiff'
+	];
+
+    if(isset($safe_img_mime[$mime_type])){
+        $extension = $safe_img_mime[$mime_type];
+        $temp_file = tempnam(sys_get_temp_dir(), 'img');
+        file_put_contents($temp_file, $Base64);
+
+        delete_exif($extension, $temp_file);
+
+        $newFilename = uniqid() . '-' . $userid . '.' . $extension;
+        $uploadedPath = '../ueuseimages/' . $newFilename;
+
+        $result = copy($temp_file, "../".$uploadedPath);
+        if($result){
+            return $uploadedPath;
+        } else {
+            return false;
+        }
+    } else {
         return false;
     }
 }
@@ -112,7 +151,7 @@ function processMarkdownAndWrapEmptyLines($markdownText){
 
     //太字&斜体------------------------------------------------------------------------
     $markdownText = preg_replace('/\*\*\*(.+)\*\*\*(?=\s)/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
-    $markdownText = preg_replace('/\b\*\*\*(.+)\*\*\*\b/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
+    $markdownText = preg_replace('/\*\*\*(.+)\*\*\*/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
 
     $markdownText = preg_replace('/\_\_\_(.+)\_\_\_(?=\s)/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
     $markdownText = preg_replace('/\b\_\_\_(.+)\_\_\_\b/', '<b><i>$1</i></b>', $markdownText);//太字&斜体の全部のせセット
@@ -318,4 +357,162 @@ function YouTube_and_nicovideo_Links($postText) {
 
     return $postText;
 }
+
+function UserAgent_to_Device($useragent) {
+    if(preg_match('/Windows\sNT\s10.0/', $useragent)) {
+        $device = "Windows 10/11";
+    }elseif(preg_match('/Windows\sNT\s6.3/', $useragent)) {
+        $device = "Windows 8.1";
+    }elseif(preg_match('/Windows\sNT\s6.2/', $useragent)) {
+        $device = "Windows 8";
+    }elseif(preg_match('/Windows\sNT\s6.1/', $useragent)) {
+        $device = "Windows 7";
+    }elseif(preg_match('/Windows\sNT\s6.0/', $useragent)) {
+        $device = "Windows Vista";
+    }elseif(preg_match('/Windows\sNT\s5.2/', $useragent)) {
+        $device = "Windows XP";
+    }elseif(preg_match('/Windows\sNT\s5.1/', $useragent)) {
+        $device = "Windows XP";
+    }elseif(preg_match('/Windows\sPhone/', $useragent)) {
+        $device = "Windows Phone";
+    }elseif(preg_match('/iPhone/', $useragent)) {
+        $device = "iPhone";
+    }elseif(preg_match('/iPad/', $useragent)) {
+        $device = "iPad";
+    }elseif(preg_match('/iPod\stouch/', $useragent)) {
+        $device = "iPod touch";
+    }elseif(preg_match('/Mac\sOS\sX/', $useragent)) {
+        $device = "macOS";
+    }elseif(preg_match('/Android/', $useragent)) {
+        $device = "Android";
+    }elseif(preg_match('/BlackBerry/', $useragent)) {
+        $device = "BlackBerry";
+    }elseif(preg_match('/Linux/', $useragent)) {
+        $device = "Linux";
+    }elseif(preg_match('/Nintendo\sWiiU/', $useragent)) {
+        $device = "Nintendo WiiU";
+    }elseif(preg_match('/PlayStation\s4/', $useragent)) {
+        $device = "PlayStation 4";
+    }elseif(preg_match('/PlayStation\s5/', $useragent)) {
+        $device = "PlayStation 5";
+    }elseif(preg_match('/Nintendo\sSwitch/', $useragent)) {
+        $device = "Nintendo Switch";
+    }elseif(preg_match('/Nintendo\s3DS/', $useragent)) {
+        $device = "Nintendo 3DS";
+    }else{
+        $device = "Others";
+    }
+    return $device;
+}
+function File_MaxUploadSize(){
+    $memory_max = ini_get('memory_limit');
+    $post_max = ini_get('post_max_size');
+    $upload_max = ini_get('upload_max_filesize');
+    if(!($memory_max == "-1")){
+        $memory_max_s = ini_parse_quantity($memory_max);
+    }else{
+        $memory_max_s = PHP_INT_MAX;
+    }
+    if(!($post_max == "-1")){
+        $post_max_s = ini_parse_quantity($post_max);
+    }else{
+        $post_max_s = PHP_INT_MAX;
+    }
+    if(!($upload_max == "-1")){
+        $upload_max_s = ini_parse_quantity($upload_max);
+    }else{
+        $upload_max_s = PHP_INT_MAX;
+    }
+
+    if($memory_max_s >= $post_max_s){
+        $maxsize = $post_max_s;
+    }else{
+        $maxsize = $memory_max_s;
+    }
+
+    if($maxsize >= $upload_max_s){
+        $file_maxsize = $upload_max_s;
+    }else{
+        $file_maxsize = $maxsize;
+    }
+    return $file_maxsize;
+}
+function x1024($byte){
+	$n_mb = $byte / 1024;
+    return round($n_mb, 1);
+}
+function uwuzu_ver($select,$path){
+    $softwaredata = file_get_contents($path);
+
+    $softwaredata = explode( "\n", $softwaredata );
+    $cnt = count( $softwaredata );
+    for( $i=0;$i<$cnt;$i++ ){
+        $software_info[$i] = ($softwaredata[$i]);
+    }
+    if($select == "name"){
+        $ret = $software_info[0];
+    }elseif($select == "ver_"){
+        $ret = $software_info[1];
+    }elseif($select == "date"){
+        $ret = $software_info[2];
+    }elseif($select == "dev_"){
+        $ret = $software_info[3];
+    }else{
+        $ret = "no_data";
+    }
+    return htmlentities($ret, ENT_QUOTES, 'UTF-8', false);
+}
+function send_notification($to,$from,$title,$message,$url){
+    // データベースに接続
+    try {
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    } catch(PDOException $e) {
+        return false;
+    }
+
+    if(!(empty($pdo))){
+        				
+        $pdo->beginTransaction();
+
+        try {
+            $fromuserid = htmlentities($from, ENT_QUOTES, 'UTF-8', false);
+            $touserid = htmlentities($to, ENT_QUOTES, 'UTF-8', false);
+            $datetime = date("Y-m-d H:i:s");
+            $msg = htmlentities($message, ENT_QUOTES, 'UTF-8', false);
+            $title = htmlentities($title, ENT_QUOTES, 'UTF-8', false);
+            $url = htmlentities($url, ENT_QUOTES, 'UTF-8', false);
+            $userchk = 'none';
+    
+            // 通知用SQL作成
+            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
+    
+            $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
+            $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+            $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+            $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+            $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+    
+            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+    
+            $res = $stmt->execute();
+    
+            $res = $pdo->commit();
+    
+            if($res){
+                return true;
+            }else{
+                return false;
+            }
+    
+        } catch(Exception $e) {
+            return false;
+        }
+    }
+}
+
 ?>

@@ -800,80 +800,84 @@ $pdo = null;
 	<?php endif; ?>
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
-			<div class="hed">
-				<img src="<?php echo htmlentities('../'.$userdata['headname']); ?>">
-			</div>
-
-			<div class="iconimg">
-				<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
-			</div>
-			<?php if($role === "ice"){?>
-				<p>お使いのアカウントは凍結されているため設定を変更できません</p>
-			<?php }else{?>
-
-				<label class="imgbtn" for="file_upload">アイコン選択
-				<input type="file" id="file_upload" name="image" accept="image/*">
-				</label>
-
-				<label class="imgbtn2" for="file_upload2">ヘッダー選択
-				<input type="file" id="file_upload2" name="image2s" accept="image/*">
-				</label>
-				
-				<div class="sub">
-					<input type="submit" class = "imgbtn" name="img1btn_submit" value="ヘッダー画像更新">
-					<input type="submit" class = "imgbtn" name="img2btn_submit" value="アイコン画像更新">
+			<div>
+			<h1>プロフィール</h1>
+				<div class="hed">
+					<img src="<?php echo htmlentities('../'.$userdata['headname']); ?>">
 				</div>
 
-				<!--ユーザーネーム関係-->
-				<div>
-					<p>ユーザーネーム</p>
-					<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userdata['username']) ){ echo htmlentities( $userdata['username'], ENT_QUOTES, 'UTF-8'); } ?>">
+				<div class="iconimg">
+					<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
 				</div>
-				<div>
-					<p>メールアドレス</p>
-					<input id="mailadds" type="text" placeholder="" class="inbox" name="mailadds" value="<?php if( !empty($userdata['mailadds']) ){ echo htmlentities( $userdata['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
-				</div>
-				<!--プロフィール関連-->
-				<div>
-					<p>プロフィール</p>
-					<textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlentities( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
-				</div>
+				<?php if($role === "ice"){?>
+					<p>お使いのアカウントは凍結されているため設定を変更できません</p>
+				<?php }else{?>
 
-				<?php if(!empty($userData['token'])){?>
+					<label class="imgbtn" for="file_upload">アイコン選択
+					<input type="file" id="file_upload" name="image" accept="image/*">
+					</label>
 
-					<p>このアカウントがBotであることを公開する</p>
-					<div class="switch_button">
-						<?php if($sacinfo === "bot"){?>
-							<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" checked/>
-							<label for="im_bot" class="switch_label"></label>
-						<?php }else{?>
-							<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" />
-							<label for="im_bot" class="switch_label"></label>
-						<?php }?>
+					<label class="imgbtn2" for="file_upload2">ヘッダー選択
+					<input type="file" id="file_upload2" name="image2s" accept="image/*">
+					</label>
+					
+					<div class="sub">
+						<input type="submit" class = "imgbtn" name="img1btn_submit" value="ヘッダー画像更新">
+						<input type="submit" class = "imgbtn" name="img2btn_submit" value="アイコン画像更新">
 					</div>
 
-				<?php }elseif($userData['token']==='ice'){ ?>
-					<p>アカウントが凍結されているためBotであることの設定変更はできません。</p>
-				<?php }?>
-				
-				<?php if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){?>
-					<p>重要なお知らせをメールで受信する</p>
-					<div class="p2">あなたのアカウントが凍結された際やBANされた際にメールにてお知らせする機能です。<br>利用可能なメールアドレスを事前に設定しておく必要があります。</div>
-					<div class="switch_button">
-						<?php if(false !== strpos($mail_settings, 'important')) {?>
-							<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" checked/>
-							<label for="mail_important" class="switch_label"></label>
-						<?php }else{?>
-							<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" />
-							<label for="mail_important" class="switch_label"></label>
-						<?php }?>
+					<!--ユーザーネーム関係-->
+					<div>
+						<p>ユーザーネーム</p>
+						<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userdata['username']) ){ echo htmlentities( $userdata['username'], ENT_QUOTES, 'UTF-8'); } ?>">
 					</div>
-				<?php }?>
-							
-				<input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
+					<div>
+						<p>メールアドレス</p>
+						<input id="mailadds" type="text" placeholder="" class="inbox" name="mailadds" value="<?php if( !empty($userdata['mailadds']) ){ echo htmlentities( $userdata['mailadds'], ENT_QUOTES, 'UTF-8'); } ?>">
+					</div>
+					<!--プロフィール関連-->
+					<div>
+						<p>プロフィール</p>
+						<textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userdata['profile']) ){ echo htmlentities( $userdata['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
+					</div>
 
-			<?php }?>
+					<?php if(!empty($userData['token'])){?>
+
+						<p>このアカウントがBotであることを公開する</p>
+						<div class="switch_button">
+							<?php if($sacinfo === "bot"){?>
+								<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" checked/>
+								<label for="im_bot" class="switch_label"></label>
+							<?php }else{?>
+								<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" />
+								<label for="im_bot" class="switch_label"></label>
+							<?php }?>
+						</div>
+
+					<?php }elseif($userData['token']==='ice'){ ?>
+						<p>アカウントが凍結されているためBotであることの設定変更はできません。</p>
+					<?php }?>
+					
+					<?php if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){?>
+						<p>重要なお知らせをメールで受信する</p>
+						<div class="p2">あなたのアカウントが凍結された際やBANされた際にメールにてお知らせする機能です。<br>利用可能なメールアドレスを事前に設定しておく必要があります。</div>
+						<div class="switch_button">
+							<?php if(false !== strpos($mail_settings, 'important')) {?>
+								<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" checked/>
+								<label for="mail_important" class="switch_label"></label>
+							<?php }else{?>
+								<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" />
+								<label for="mail_important" class="switch_label"></label>
+							<?php }?>
+						</div>
+					<?php }?>
+								
+					<input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
+
+				<?php }?>
+			</div>
 			<hr>
+			<h1>パスワード</h1>
 			<div>
                 <p>ユーザーid</p>
                 <input id="passchk_userid" type="text" class="inbox" name="passchk_userid" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="">
@@ -892,6 +896,7 @@ $pdo = null;
 			<input type="submit" class = "irobutton" name="pass_submit" value="パスワード更新">
 
 			<hr>
+			<h1>二段階認証</h1>
 			<?php 
 			if(empty($userdata['authcode'])){
 			?>
@@ -911,11 +916,29 @@ $pdo = null;
 </body>
 </html>
 <script>
-$("#passview").click(function () {
-    if ($("#passview").prop("checked") == true) {
-        $('#password').get(0).type = 'text';
-    } else {
-        $('#password').get(0).type = 'password';
-    }
+window.addEventListener('DOMContentLoaded', function(){
+	$("#passview").click(function () {
+		if ($("#passview").prop("checked") == true) {
+			$('#password').get(0).type = 'text';
+		} else {
+			$('#password').get(0).type = 'password';
+		}
+	});
+
+    $('#file_upload').change(function(e) {
+        var file_reader = new FileReader();
+        file_reader.addEventListener('load', function(e) {
+            $('.iconimg').children('img').attr('src', file_reader.result);
+        });
+        file_reader.readAsDataURL(e.target.files[0]);
+    });
+
+	$('#file_upload2').change(function(e) {
+        var file_reader = new FileReader();
+        file_reader.addEventListener('load', function(e) {
+            $('.hed').children('img').attr('src', file_reader.result);
+        });
+        file_reader.readAsDataURL(e.target.files[0]);
+    });
 });
 </script>

@@ -39,6 +39,13 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
     if(!(empty($result2["loginid"]))){
         if($result2["loginid"] === $loginid){
+            
+            $aduserinfoQuery = $pdo->prepare("SELECT username,userid,loginid,admin,role,sacinfo,blocklist,bookmark FROM account WHERE userid = :userid");
+            $aduserinfoQuery->bindValue(':userid', htmlentities($userid));
+            $aduserinfoQuery->execute();
+            $res = $aduserinfoQuery->fetch();
+            $myblocklist = htmlentities($res["blocklist"]);
+            
             $userid = htmlentities($_GET['userid']);
 
             $itemsPerPage = 15; // 1ページあたりの投稿数

@@ -8,7 +8,7 @@ $serverstopfile = "../server/serverstop.txt";
 $htaccessfile = "../.htaccess";
 
 if(!empty(file_get_contents($serverstopfile))){
-    $serverstop = htmlentities(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8'); 
+    $serverstop = htmlentities(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8', false); 
 }else{
     $serverstop = "";
 }
@@ -236,7 +236,7 @@ if (!empty($pdo)) {
 if( !empty($_POST['btn_submit']) ) {
 
     // 空白除去
-	$serverstop = $_POST['serverstop'];
+	$serverstop = htmlentities($_POST['serverstop'], ENT_QUOTES, 'UTF-8', false);
 
 	//鯖停止
 	$file = fopen($serverstopfile, 'w');
@@ -290,7 +290,7 @@ require('../logout/logout.php');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>メンテナンス - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>メンテナンス - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 

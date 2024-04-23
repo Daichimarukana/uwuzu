@@ -1,0 +1,415 @@
+<?php
+
+function random_token($length = 64)
+{
+    return substr(str_shuffle('1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, $length);
+}
+$domain = $_SERVER['HTTP_HOST'];
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
+function createUniqId(){
+    list($msec, $sec) = explode(" ", microtime());
+    $hashCreateTime = $sec.floor($msec*1000000);
+    
+    $hashCreateTime = strrev($hashCreateTime);
+
+    return base_convert($hashCreateTime,10,36);
+}
+function random($length){
+    return substr(str_shuffle('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'), 0, $length);
+}
+
+
+require('../db.php');
+
+// 変数の初期化
+$datetime = array();
+$user_name = null;
+$message = array();
+$message_data = null;
+$error_message = array();
+$pdo = null;
+$stmt = null;
+$res = null;
+$option = null;
+
+session_name('uwuzu_s_id');
+session_set_cookie_params(0, '', '', true, true);
+session_start();
+session_regenerate_id(true);
+
+// データベースに接続
+try {
+
+    $option = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+    );
+    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+
+} catch(PDOException $e) {
+
+    // 接続エラーのときエラー内容を取得する
+    $error_message[] = $e->getMessage();
+}
+
+if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_SESSION['userid']));
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: ../login.php");
+		exit;
+	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
+	// セッションに値をセット
+	$userid = htmlentities($res['userid']); // セッションに格納されている値をそのままセット
+	$username = htmlentities($res['username']); // セッションに格納されている値をそのままセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid, [
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	}else{
+		header("Location: ../login.php");
+		exit;
+	}
+
+		
+} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
+
+	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
+	$passQuery->bindValue(':userid', htmlentities($_COOKIE['userid']));
+	$passQuery->execute();
+	$res = $passQuery->fetch();
+	if(empty($res["userid"])){
+		header("Location: ../login.php");
+		exit;
+	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
+	// セッションに値をセット
+	$userid = htmlentities($res['userid']); // クッキーから取得した値をセット
+	$username = htmlentities($res['username']); // クッキーから取得した値をセット
+	$loginid = htmlentities($res["loginid"]);
+	$role = htmlentities($res["role"]);
+	$sacinfo = htmlentities($res["sacinfo"]);
+	$myblocklist = htmlentities($res["blocklist"]);
+	$myfollowlist = htmlentities($res["follow"]);
+	$_SESSION['admin_login'] = true;
+	$_SESSION['userid'] = $userid;
+	$_SESSION['username'] = $username;
+	$_SESSION['loginid'] = $res["loginid"];
+	setcookie('userid', $userid,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('username', $username,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('loginid', $res["loginid"],[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	setcookie('admin_login', true,[
+		'expires' => time() + 60 * 60 * 24 * 14,
+		'path' => '/',
+		'samesite' => 'lax',
+		'secure' => true,
+		'httponly' => true,
+	]);
+	}else{
+		header("Location: ../login.php");
+		exit;
+	}
+
+
+} else {
+	// ログインが許可されていない場合、ログインページにリダイレクト
+	header("Location: ../login.php");
+	exit;
+}
+if(empty($userid)){
+	header("Location: ../login.php");
+	exit;
+} 
+if(empty($username)){
+	header("Location: ../login.php");
+	exit;
+}
+$notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
+$notiQuery->bindValue(':userid', $userid);
+$notiQuery->execute();
+$notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
+
+$notificationcount = $notiData['notification_count'];
+
+if( !empty($pdo) ) {
+	
+	// データベース接続の設定
+	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+	));
+
+	$userQuery = $dbh->prepare("SELECT userid,role,datetime FROM account WHERE userid = :userid");
+	$userQuery->bindValue(':userid', $userid);
+	$userQuery->execute();
+	$userData = $userQuery->fetch();
+	
+}
+
+if( !empty($_POST['migration_submit']) ) {
+
+	$server_domain = htmlentities($_POST['server_domain']);
+
+	if( empty($server_domain) ) {
+		$error_message[] = '移行先のサーバードメインを入力してください。(INPUT_PLEASE)';
+	}else{
+		$domain_response = @file_get_contents("https://".$server_domain."/");
+		if (empty($domain_response)) {
+			$error_message[] = '入力されたドメインに接続できませんでした。(INPUT_PLEASE)';
+		}
+	}
+	if($server_domain == $domain){
+		$error_message[] = 'このサーバーに移行することはできません。(MIGRATION_ONAJI_SERVER_DAME)';
+	}
+
+    if(empty($error_message)){
+        $data = array();
+        $options = [
+            'http' => [
+                'method'=> 'POST',
+                'content' => http_build_query($data, '', '&')
+            ]
+        ];
+        $Check_result = json_decode(file_get_contents("http://".$server_domain."/api/serverinfo-api", false, stream_context_create($options)),true);
+        if($Check_result["software"]["name"] == "uwuzu"){
+            $version = str_pad(str_replace('.', '', $Check_result["software"]["version"]), 4, 0, STR_PAD_RIGHT);
+            
+            if($version >= 1360){
+                if($Check_result["server_info"]["account_migration"] == "true"){
+                    $pdo->beginTransaction();
+					try {
+						$account = $userid;
+						$migration_code = createUniqId();
+                        $encryption_key = random(32);
+                        $encryption_ivkey = random(16);
+						$datetime = date("Y-m-d H:i:s");
+                        $domain = $server_domain;
+
+						$stmt = $pdo->prepare("INSERT INTO migration (account, domain, migration_code, encryption_key, encryption_ivkey, datetime) VALUES (:account, :domain, :migration_code, :encryption_key, :encryption_ivkey, :datetime)");
+
+						$stmt->bindParam(':account', htmlentities($account, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                        $stmt->bindParam(':domain', htmlentities($domain, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+						$stmt->bindParam(':migration_code', htmlentities($migration_code, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+						$stmt->bindParam(':encryption_key', htmlentities($encryption_key, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+                        $stmt->bindParam(':encryption_ivkey', htmlentities($encryption_ivkey, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+						$stmt->bindParam(':datetime', htmlentities($datetime, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+
+						$res = $stmt->execute();
+
+						$res = $pdo->commit();
+
+					} catch(Exception $e) {
+						$pdo->rollBack();
+					}
+                    if($res) {
+						$_SESSION["migration_code"] = htmlentities($migration_code, ENT_QUOTES, 'UTF-8', false);
+						$_SESSION["encryption_key"] = htmlentities($encryption_key, ENT_QUOTES, 'UTF-8', false);
+						$_SESSION["encryption_ivkey"] = htmlentities($encryption_ivkey, ENT_QUOTES, 'UTF-8', false);
+                        header("Location: account_migration_done.php");
+                        exit;  
+                    }else{
+                        $error_message[] = $e->getMessage();
+                    }
+                }else{
+                    $error_message[] = "移行先のサーバーがアカウントの移行登録を拒否しているためアカウントの移行はできません。(MIGRATION_TO_SERVER_IYADA)";
+                }
+            }else{
+                $error_message[] = "移行先のサーバーのuwuzuバージョンが1.3.6未満のためアカウントの移行はできません。(MIGRATION_TO_SERVER_BAD_UWUZU_VERSION)";
+            }
+        }else{
+            $error_message[] = "移行先のサーバーのソフトウェアがuwuzuではありません。(MIGRATION_TO_SERVER_NOT_UWUZU)";
+        }
+    }
+   
+}
+
+if( !empty($_POST['migration_cancel_submit']) ) {
+	$account = $userid;
+	$pdo->beginTransaction();
+	try {
+		$deleteQuery = $pdo->prepare("DELETE FROM migration WHERE account = :account");
+		$deleteQuery->bindValue(':account', htmlentities($account, ENT_QUOTES, 'UTF-8', false), PDO::PARAM_STR);
+		$res = $deleteQuery->execute();
+		$res = $pdo->commit();
+	} catch(Exception $e) {
+		$pdo->rollBack();
+	}
+	if($res) {
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location: ".$url."");
+		exit;  
+	}else{
+		$error_message[] = $e->getMessage();
+	}
+}
+
+if(!(empty($pdo))){
+	$CheckQuery = $pdo->prepare("SELECT COUNT(*) as count FROM migration WHERE account = :account");
+	$CheckQuery->bindValue(':account', $userid);
+	$CheckQuery->execute();
+	$CheckData = $CheckQuery->fetch(PDO::FETCH_ASSOC);
+	$CheckCount = $CheckData['count'];
+	if(!(empty($CheckCount))){
+		if((int)$CheckCount > 0){
+			$migration_start = true;
+		}else{
+			$migration_start = false;
+		}
+	}else{
+		$migration_start = false;
+	}
+}
+
+$today = strtotime(date("Y-m-d"));
+$accountDate = new DateTime($userData["datetime"]);
+$day = strtotime($accountDate->format('Y-m-d'));
+$account_date = ($today - $day) / (60 * 60 * 24);
+if($account_date > 30){
+	$migration = true;
+}else{
+	$migration = false;
+}
+
+require('../logout/logout.php');
+
+
+?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../css/home.css">
+<script src="../js/unsupported.js"></script>
+<script src="../js/console_notice.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="../js/jquery-min.js"></script>
+<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
+<title>アカウントの移行 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+
+</head>
+
+<body>
+	<?php require('../require/leftbox.php');?>
+	<main>
+
+	<?php if( !empty($error_message) ): ?>
+		<ul class="errmsg">
+			<?php foreach( $error_message as $value ): ?>
+				<p>・ <?php echo $value; ?></p>
+			<?php endforeach; ?>
+		</ul>
+	<?php endif; ?>
+        <form class="formarea" enctype="multipart/form-data" method="post">
+            <h1>アカウントの移行</h1>
+            <p>アカウントの移行をすると以下のデータが引き継がれます。<br>フォロー・フォロワー、いいねなどの情報は引き継がれません。<br>ユーザーID、パスワードや二段階認証の設定は移行先サーバーで再度行う必要があります。<br>移行後30日は別のサーバーに移行することはできません。<p>
+            <p>- アカウント名<br>
+            - プロフィール<br>
+            - アイコン<br>
+            - ヘッダー<br>
+            - メールアドレス</p>
+			<?php
+			if($migration == true){?>
+				<?php if($userData['role']==='ice'){ ?>
+					<p>このアカウントは凍結されているため移行できません。</p>
+				<?php }else{ ?>
+					<?php if($migration_start == true){?>
+						<div class="errmsg">
+							<p>既に移行作業は開始されているようです。<br>もし以降に必要な情報をなくしてしまった場合はもう一度最初から作業をやり直す必要があります！</p>
+						</div>
+						<input type="submit" class = "irobutton" name="migration_cancel_submit" value="アカウントの移行を取り消す">
+					<?php }else{?>
+						<div>
+							<p>移行先サーバーのドメイン</p>
+							<div class="p2">uwuzu v1.3.6以上が使用されているサーバーに対応します。</div>
+							<input id="server_domain" type="text" placeholder="uwuzu.example.com" class="inbox" name="server_domain" value="">
+						</div>
+						<input type="submit" class = "irobutton" name="migration_submit" value="アカウントの移行を開始">
+					<?php }?>
+				<?php }?>
+			<?php }else{?>
+				<p>アカウントを作成してから30日以上経過していないとアカウントの移行はできません。</p>
+			<?php }?>
+        </form>
+
+        <div class="btnbox">
+                <a href="javascript:history.back();" class="sirobutton">戻る</a>
+            </div>
+        </div>
+	</main>
+
+	<?php require('../require/rightbox.php');?>
+	<?php require('../require/botbox.php');?>
+	<?php require('../require/noscript_modal.php');?>
+</body>
+</html>
+
+<script>
+$(document).ready(function() {
+    $(function(){
+        $("input"). keydown(function(e) {
+            if ((e.which && e.which === 13) || (e.keyCode && e.keyCode === 13)) {
+                return false;
+            } else {
+                return true;
+            }
+        });
+    });
+});
+</script>

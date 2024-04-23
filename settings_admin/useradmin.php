@@ -187,7 +187,7 @@ $notificationcount = $notiData['notification_count'];
 if( !empty($_POST['btn_submit']) ) {
 
     // 空白除去
-	$target_userid = htmlentities(str_replace('@', '', $_POST['target_userid']));
+	$target_userid = htmlentities(str_replace('@', '', $_POST['target_userid']), ENT_QUOTES, 'UTF-8', false);
 
 	if (!empty($pdo)) {
 		$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
@@ -222,7 +222,7 @@ if( !empty($_POST['btn_submit']) ) {
 
 if( !empty($_POST['report_done']) ) {
 
-	$report_id = $_POST['report_id'];
+	$report_id = htmlentities($_POST['report_id'], ENT_QUOTES, 'UTF-8', false);
 
 	if (!empty($pdo)) {
 		$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
@@ -268,7 +268,7 @@ if( !empty($_POST['report_done']) ) {
 require('../logout/logout.php');
 
 if(isset($_GET['q'])){ 
-	$keyword = htmlentities($_GET['q']);
+	$keyword = htmlentities($_GET['q'], ENT_QUOTES, 'UTF-8', false);
 }else{
 	$keyword = "";
 }
@@ -296,7 +296,7 @@ if (!empty($pdo)) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ユーザー管理 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>ユーザー管理 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -319,7 +319,7 @@ if (!empty($pdo)) {
 				<h1>ユーザー管理</h1>
 				<div>
 					<p>ユーザーID</p>
-					<input id="target_userid" placeholder="admin" class="inbox" type="text" name="target_userid" value="<?php if( !empty($keyword) ){ echo htmlentities($keyword, ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="target_userid" placeholder="admin" class="inbox" type="text" name="target_userid" value="<?php if( !empty($keyword) ){ echo htmlentities($keyword, ENT_QUOTES, 'UTF-8', false); } ?>">
 				</div>
 
 				<input type="submit" class = "irobutton" name="btn_submit" value="検索">

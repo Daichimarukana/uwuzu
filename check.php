@@ -4,7 +4,9 @@ $serversettings_file = "server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
 require('db.php');
-
+//関数呼び出し
+//- ユーザーエージェントからdevice名とるやつ
+require('function/function.php');
 
 // 変数の初期化
 $current_date = null;
@@ -137,12 +139,14 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
 }
 
 if( !empty($_POST['btn_submit']) ) {
+    $useragent = htmlentities($_SERVER['HTTP_USER_AGENT'], ENT_QUOTES, 'UTF-8', false);
+    $device = UserAgent_to_Device($useragent);
 
     $pdo->beginTransaction();
     try {
         $touserid = $userid;
         $datetime = date("Y-m-d H:i:s");
-        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッションを終了し、パスワードを変更してください。";
+        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更してください。\n\nログインした端末 : ".$device;
         $title = '🚪ログイン通知🚪';
         $url = '/settings';
         $userchk = 'none';
@@ -239,34 +243,6 @@ if( !empty($_POST['btn_submit2']) ) {
     // すべての出力を終了
     exit;
 }
-                    
-
-
-// プロフィールの絵文字対応
-function replaceProfileEmojiImages($postText) {
-    // プロフィール名で絵文字名（:emoji:）を検出して画像に置き換える
-    $emojiPattern = '/:(\w+):/';
-    $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
-        $emojiName = $matches[1];
-        //絵文字path取得
-        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-        ));
-        $emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
-        $emoji_Query->bindValue(':emojiname', $emojiName);
-        $emoji_Query->execute();
-        $emoji_row = $emoji_Query->fetch();
-        if(empty($emoji_row["emojifile"])){
-            $emoji_path = "img/sysimage/errorimage/emoji_404.png";
-        }else{
-            $emoji_path = $emoji_row["emojifile"];
-        }
-        return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
-    }, $postText);
-    return $postTextWithImages;
-}
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -291,11 +267,11 @@ $pdo = null;
 <div class="leftbox">
     <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
+            <a href="index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 

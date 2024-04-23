@@ -2,8 +2,11 @@
 
 $banuseridfile = "server/banuserid.txt";
 $banuserid_info = file_get_contents($banuseridfile);
-
 $banuserid = preg_split("/\r\n|\n|\r/", $banuserid_info);
+
+$badpassfile = "server/badpass.txt";
+$badpass_info = file_get_contents($badpassfile);
+$badpass = preg_split("/\r\n|\n|\r/", $badpass_info);
 
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());
@@ -102,9 +105,6 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
 
 if( !empty($_POST['btn_submit']) ) {
 
-
-    //$row['userid'] = "daichimarukn";
-
     // 空白除去
 	$username = htmlentities($_POST['username']);
     $userid = htmlentities($_POST['userid']);
@@ -116,7 +116,7 @@ if( !empty($_POST['btn_submit']) ) {
     $profile = htmlentities($_POST['profile']);
 
     if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){
-        $invitationcode = $_POST['invitationcode'];
+        $invitationcode = htmlentities($_POST['invitationcode'], ENT_QUOTES, 'UTF-8', false);
     }
 
     if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){
@@ -348,74 +348,7 @@ if( !empty($_POST['btn_submit']) ) {
 		$error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
 	} else {
 
-        $weakPasswords = array(
-            "password",
-            "123456",
-            "123456789",
-            "12345",
-            "12345678",
-            "123123",
-            "1234567890",
-            "1234567",
-            "1q2w3e",
-            "qwerty123",
-            "aa12345678",
-            "password1",
-            "1234",
-            "qwertyuiop",
-            "123321",
-            "12321",
-            "qwertyui",
-            "abcd1234",
-            "zaq12wsx",
-            "1q2w3e4r",
-            "qwer1234",
-            "sakura",
-            "asdf1234",
-            "asdfghjkl",
-            "asdfghjk",
-            "member",
-            "1qaz2wsx",
-            "doraemon",
-            "makoto",
-            "takeshi",
-            "machi1",
-            "machida",
-            "machida1",
-            "tokyo",
-            "arashi",
-            "dropbox",
-            "twitter",
-            "elonmusk",
-            "xcorp",
-            "1234qwer",
-            "japan",
-            "nippon",
-            "tukareta",
-            "tweet",
-            "discord",
-            "misskey",
-            "qwerty",
-            "123456789",
-            "abc123",
-            "password123",
-            "admin",
-            "letmein",
-            "iloveyou",
-            "111111",
-            "12345678910",
-            "user",
-            "root",
-            "system",
-            // 他にも弱いパスワードを追加できます
-        );
-        
-        function isWeakPassword($passwords) {
-            global $weakPasswords;
-            return in_array($passwords, $weakPasswords);
-        }
-
-        if (isWeakPassword($password)) {
+        if(in_array($password, $badpass) === true ){
             $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。(PASSWORD_ZEIJAKU)";
         }
 
@@ -556,11 +489,11 @@ $pdo = null;
 <div class="leftbox">
     <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
+            <a href="index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
@@ -582,11 +515,12 @@ $pdo = null;
 
         <div id="wrap">
             <div class="iconimg">
-                <img src="img/deficon/icon.png">
+                <img id="iconimg" src="img/deficon/icon.png">
             </div>
             <label class="irobutton" for="file_upload">ファイル選択
             <input type="file" id="file_upload" name="image" accept="image/*">
             </label>
+            <p id="img_select" style="display:none;">画像を選択しました</p>
         </div>
 
 
@@ -623,7 +557,7 @@ $pdo = null;
             <div>
                 <p>プロフィール</p>
                 <div class="p2">プロフィールページに掲載され公開されます。<br>※サービス管理者が確認できます。</div>
-                <input id="profile" type="text" placeholder="" class="inbox" name="profile" value="<?php if( !empty($_SESSION['profile']) ){ echo htmlspecialchars( $_SESSION['profile'], ENT_QUOTES, 'UTF-8'); } ?>">
+                <textarea id="profile" type="text" placeholder="" class="inbox" name="profile"><?php if( !empty($_SESSION['profile']) ){ echo htmlspecialchars( $_SESSION['profile'], ENT_QUOTES, 'UTF-8'); } ?></textarea>
             </div>
 
             <div class="btn_area">
@@ -676,22 +610,14 @@ function checkForm(inputElement) {
 
 
 window.addEventListener('DOMContentLoaded', function(){
-
-// ファイルが選択されたら実行
-document.getElementById("file_upload").addEventListener('change', function(e){
-
-  var file_reader = new FileReader();
-
-  // ファイルの読み込みを行ったら実行
-  file_reader.addEventListener('load', function(e) {
-    console.log(e.target.result);
-        const element = document.querySelector('#wrap');
-        const createElement = '<p>画像を選択しました。</p>';
-        element.insertAdjacentHTML('afterend', createElement);
-  });
-
-  file_reader.readAsText(e.target.files[0]);
-});
+    $('#file_upload').change(function(e) {
+        var file_reader = new FileReader();
+        file_reader.addEventListener('load', function(e) {
+            $('#img_select').show();
+            $('#iconimg').attr('src', file_reader.result);
+        });
+        file_reader.readAsDataURL(e.target.files[0]);
+    });
 });
 </script>
 

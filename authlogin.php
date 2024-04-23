@@ -4,7 +4,9 @@ $serversettings_file = "server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
 require('db.php');
-
+//関数呼び出し
+//- ユーザーエージェントからdevice名とるやつ
+require('function/function.php');
 
 // 変数の初期化
 $current_date = null;
@@ -88,6 +90,9 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
 }
 
 if( !empty($_POST['btn_submit']) ) {
+    $useragent = htmlentities($_SERVER['HTTP_USER_AGENT'], ENT_QUOTES, 'UTF-8', false);
+    $device = UserAgent_to_Device($useragent);
+
     $userbackupcode = $_POST['userbackupcode'];
 
     $options = array(
@@ -118,7 +123,7 @@ if( !empty($_POST['btn_submit']) ) {
             try {
                 $touserid = $userid;
                 $datetime = date("Y-m-d H:i:s");
-                $msg = "バックアップコードを使用しログインされました！\nバックアップコード変更のために二段階認証を再設定することを強くおすすめします。\nまた、もしバックアップコードを利用してログインした覚えがない場合は「その他」より全てのセッションを終了し、設定画面よりパスワードを変更し、二段階認証を再設定してください！";
+                $msg = "バックアップコードを使用しログインされました！\nバックアップコード変更のために二段階認証を再設定することを強くおすすめします。\nまた、もしバックアップコードを利用してログインした覚えがない場合は「その他」よりセッショントークンを再生成し、設定画面よりパスワードを変更し、二段階認証を再設定してください！\n\nログインした端末 : ".$device;
                 $title = '🔴バックアップコード使用のお知らせ🔴';
                 $url = '/settings';
                 $userchk = 'none';
@@ -145,6 +150,46 @@ if( !empty($_POST['btn_submit']) ) {
                 // エラーが発生した時はロールバック
                 $pdo->rollBack();
         	}
+
+            clearstatcache();
+                                        
+            if (isset($_SERVER['HTTP_COOKIE'])) {
+                $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+                foreach($cookies as $cookie) {
+                    $parts = explode('=', $cookie);
+                    $name = trim($parts[0]);
+                    setcookie($name, '', time()-1000);
+                }
+            }
+
+            setcookie('userid', $userid,[
+                'expires' => time() + 60 * 60 * 24 * 14,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
+            setcookie('loginid', $row["loginid"],[
+                'expires' => time() + 60 * 60 * 24 * 14,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
+            setcookie('username', $row["username"],[
+                'expires' => time() + 60 * 60 * 24 * 14,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
+            setcookie('admin_login', true,[
+                'expires' => time() + 60 * 60 * 24 * 14,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
 
             $_SESSION['admin_login'] = true;
             $_SESSION['userid'] = $userid;
@@ -186,7 +231,7 @@ if( !empty($_POST['btn_submit']) ) {
                     try {
                         $touserid = $userid;
                         $datetime = date("Y-m-d H:i:s");
-                        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッションを終了し、パスワードを変更し、二段階認証を再設定してください。";
+                        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更し、二段階認証を再設定してください。\n\nログインした端末 : ".$device;
                         $title = '🚪ログイン通知🚪';
                         $url = '/settings';
                         $userchk = 'none';
@@ -303,11 +348,11 @@ $pdo = null;
 <div class="leftbox">
     <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
+            <a href="index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
@@ -332,7 +377,7 @@ $pdo = null;
                 </div>
                 <div>
                     <p>バックアップコード</p>
-                    <div class="p2">もし二段階認証が出来ない場合は8桁英数字のバックアップコードを入力してください。</div>
+                    <div class="p2">もし二段階認証が出来ない場合は32桁英数字のバックアップコードを入力してください。</div>
                     <input id="profile" type="text" placeholder="通常は入力しなくて大丈夫です。" class="inbox" name="userbackupcode" value="">
                 </div>
                     <input type="submit" class = "irobutton" name="btn_submit" value="次へ">

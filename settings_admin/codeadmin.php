@@ -226,7 +226,7 @@ if (!empty($pdo)) {
 }
 
 if( !empty($_POST['code_btn_submit']) ) {
-	$make_code = $_POST['make_code'];
+	$make_code = htmlentities($_POST['make_code'], ENT_QUOTES, 'UTF-8', false);
 	$code_num = 0;
 	while ($code_num < (int)$make_code) {
 		$code_num++;
@@ -281,7 +281,7 @@ require('../logout/logout.php');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>招待コード発行所 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>招待コード発行所 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -302,14 +302,16 @@ require('../logout/logout.php');
 			<div class="admin_right">
 				<form class="formarea" enctype="multipart/form-data" method="post">
 					<h1>招待コード発行所</h1>
-					<?php if(htmlentities($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){?>
+					<?php if(htmlentities($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8', false) === "true"){?>
 						<p>下の発行ボタンで新しくコードを発行できます！<br>なお、コードは一回限り有効です。</p>
 						<div>
 							<p>発行数</p>
 							<input id="make_code" placeholder="1" class="inbox" type="number" name="make_code" value="1" min="1" max="10000">
 						</div>
 						<input type="submit" class = "irobutton" name="code_btn_submit" value="発行！">
-						<?php foreach ($codes as $value) {?>
+						<?php 
+						if(!(empty($codes))){
+							foreach ($codes as $value) {?>
 							<div class="server_code">
 								<details>
 									<summary>コード:<?php if( !empty($value["code"]) ){ echo htmlentities($value["code"]); }?><?php if( !empty($value["used"]) ){if($value["used"] === "true"){echo " ✅";}}?> </summary>
@@ -318,14 +320,16 @@ require('../logout/logout.php');
 											echo "未使用<br>発行日時:".$value["datetime"]."";
 										}elseif($value["used"] === "true"){
 											echo "使用済み<br>使用日時:".$value["datetime"]."";
-										}?></p>
+										}}?></p>
 									<div class="delbox">
 										<p>削除ボタンを押すとこのコードは使用できなくなります。</p>
 										<button type="button" id="code_delete" class="delbtn" del-code="<?php echo htmlentities($value["code"]);?>">削除</button>
 									</div>
 								</details>
-							</div>
-						<?php }?>	
+							</div>	
+							<?php }?>
+						<?php }else{?>
+							<p>招待コードは発行されていません。</p>
 						<?php }?>
 					<?php }else{?>
 						<p>サーバーは招待制にされていないため招待コードは利用できません。</p>

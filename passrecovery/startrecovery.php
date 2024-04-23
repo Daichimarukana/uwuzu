@@ -3,9 +3,12 @@
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
+$badpassfile = "../server/badpass.txt";
+$badpass_info = file_get_contents($badpassfile);
+$badpass = preg_split("/\r\n|\n|\r/", $badpass_info);
 
 require('../db.php');
-
+require('../function/function.php');
 
 // 変数の初期化
 $current_date = null;
@@ -89,80 +92,9 @@ if( !empty($_POST['btn_submit']) ) {
                 if( empty($password) ) {
                     $error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
                 } else {
-
-                    $weakPasswords = array(
-                        "password",
-                        "123456",
-                        "123456789",
-                        "12345",
-                        "12345678",
-                        "123123",
-                        "1234567890",
-                        "1234567",
-                        "1q2w3e",
-                        "qwerty123",
-                        "aa12345678",
-                        "password1",
-                        "1234",
-                        "qwertyuiop",
-                        "123321",
-                        "12321",
-                        "qwertyui",
-                        "abcd1234",
-                        "zaq12wsx",
-                        "1q2w3e4r",
-                        "qwer1234",
-                        "sakura",
-                        "asdf1234",
-                        "asdfghjkl",
-                        "asdfghjk",
-                        "member",
-                        "1qaz2wsx",
-                        "doraemon",
-                        "makoto",
-                        "takeshi",
-                        "machi1",
-                        "machida",
-                        "machida1",
-                        "tokyo",
-                        "arashi",
-                        "dropbox",
-                        "twitter",
-                        "elonmusk",
-                        "xcorp",
-                        "1234qwer",
-                        "japan",
-                        "nippon",
-                        "tukareta",
-                        "tweet",
-                        "discord",
-                        "misskey",
-                        "qwerty",
-                        "123456789",
-                        "abc123",
-                        "password123",
-                        "admin",
-                        "letmein",
-                        "iloveyou",
-                        "111111",
-                        "12345678910",
-                        "user",
-                        "root",
-                        "system",
-                        // 他にも弱いパスワードを追加できます
-                    );
                     
-                    function isWeakPassword($passwords) {
-                        global $weakPasswords;
-                        return in_array($passwords, $weakPasswords);
-                    }
-
-                    // テスト用のパスワード（実際にはユーザー入力などから取得することになります。
-
-                    if (isWeakPassword($password)) {
+                    if(in_array($password, $badpass) === true ){
                         $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。(PASSWORD_ZEIJAKU)";
-                    } else {
-                        
                     }
                     
                     if( 4 > mb_strlen($password, 'UTF-8') ) {
@@ -204,6 +136,9 @@ if( !empty($_POST['btn_submit']) ) {
                     }
                 
                     if ($res) {
+                        $msg = "お使いのアカウントのパスワードがパスワードの復元により変更されました。\n変更した覚えがない場合はパスワードを変更し、セッショントークンを再生成してください。";
+                        send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others");
+
                         $_SESSION['userid'] = "";
                         $url = 'donerecovery.php';
                         header('Location: ' . $url, true, 303);
@@ -239,10 +174,10 @@ $pdo = null;
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ログイン - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>パスワードの復元 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="../back.js"></script>
+<script src="../js/back.js"></script>
 <body>
 
 <div class="leftbox">

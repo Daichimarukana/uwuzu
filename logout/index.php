@@ -24,8 +24,11 @@ if (isset($_SERVER['HTTP_COOKIE'])) {
         setcookie('userid', '', time()-1000, '');
         setcookie('username', '', time()-1000, '');
     }
+    header("Location: " . $_SERVER['PHP_SELF']);
 }
-$_SESSION = null;
+session_start();
+$_SESSION = array();
+session_destroy();
 ?>
 
 <!DOCTYPE html>
@@ -72,3 +75,6 @@ $_SESSION = null;
 </body>
 
 </html>
+<script>
+document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
+</script>

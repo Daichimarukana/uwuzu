@@ -237,42 +237,49 @@ if (!empty($pdo)) {
 
 if( !empty($_POST['btn_submit']) ) {
 
-	$servericon = $_POST['servericon'];
+	$servericon = htmlentities($_POST['servericon'], ENT_QUOTES, 'UTF-8', false);
 
-	$serverhead = $_POST['serverhead'];
+	$serverhead = htmlentities($_POST['serverhead'], ENT_QUOTES, 'UTF-8', false);
 
-	$serverlogo_onoff = $_POST['serverlogo_onoff'];
+	$serverlogo_onoff = htmlentities($_POST['serverlogo_onoff'], ENT_QUOTES, 'UTF-8', false);
 
-	$serverlogo_light = $_POST['serverlogo_light'];
-	$serverlogo_dark = $_POST['serverlogo_dark'];
+	$serverlogo_light = htmlentities($_POST['serverlogo_light'], ENT_QUOTES, 'UTF-8', false);
+	$serverlogo_dark = htmlentities($_POST['serverlogo_dark'], ENT_QUOTES, 'UTF-8', false);
 
 	if(!($serverlogo_onoff === "true")){
 		$serverlogo_light = "";
 		$serverlogo_dark = "";
 	}
 
-	$servername = $_POST['servername'];
+	$servername = htmlentities($_POST['servername'], ENT_QUOTES, 'UTF-8', false);
 
-	$serverinfo = $_POST['serverinfo'];
+	$serverinfo = htmlentities($_POST['serverinfo'], ENT_QUOTES, 'UTF-8', false);
 
-	$serveradminname = $_POST['serveradminname'];
+	$serveradminname = htmlentities($_POST['serveradminname'], ENT_QUOTES, 'UTF-8', false);
 
-	$servermailadds = $_POST['servermailadds'];
+	$servermailadds = htmlentities($_POST['servermailadds'], ENT_QUOTES, 'UTF-8', false);
 
-	$onlyuser = $_POST['onlyuser'];
+	$onlyuser = htmlentities($_POST['onlyuser'], ENT_QUOTES, 'UTF-8', false);
 	if($onlyuser === "true"){
 		$saveonlyuser = "true";
 	}else{
 		$saveonlyuser = "false";
 	}
-	$activitypub = $_POST['activitypub'];
+	$activitypub = htmlentities($_POST['activitypub'], ENT_QUOTES, 'UTF-8', false);
 	if($activitypub === "true"){
 		$saveactivitypub = "true";
 	}else{
 		$saveactivitypub = "false";
 	}
 
-	$postrobots = $_POST['robots'];
+	$migration = htmlentities($_POST['migration'], ENT_QUOTES, 'UTF-8', false);
+	if($migration === "true"){
+		$savemigration = "true";
+	}else{
+		$savemigration = "false";
+	}
+
+	$postrobots = htmlentities($_POST['robots'], ENT_QUOTES, 'UTF-8', false);
 	if($postrobots === "true"){
 		//GPTBotによるクロールを拒否
 		$file = fopen($robots, 'w');
@@ -287,9 +294,9 @@ if( !empty($_POST['btn_submit']) ) {
 		fclose($file);
 	}
 
-	$serverterms = $_POST['serverterms'];
+	$serverterms = htmlentities($_POST['serverterms'], ENT_QUOTES, 'UTF-8', false);
 
-	$serverprv = $_POST['serverprv'];
+	$serverprv = htmlentities($_POST['serverprv'], ENT_QUOTES, 'UTF-8', false);
 
 	$server_new_settings = '
 	;サーバーの基本情報
@@ -309,6 +316,8 @@ if( !empty($_POST['btn_submit']) ) {
 	;招待のオンオフ
 	server_invitation = "'.$saveonlyuser.'"
 	server_activitypub = "'.$saveactivitypub.'"
+	;アカウントの移行登録を許可するか
+	server_account_migration = "'.$savemigration.'"
 	';
 
 	//サーバー設定上書き
@@ -353,7 +362,7 @@ require('../logout/logout.php');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>サーバー設定 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>サーバー設定 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -377,17 +386,17 @@ require('../logout/logout.php');
 					<!--(サーバーアイコン)-->
 					<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
 					<div class="serverhead_set">
-						<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); ?>">
+						<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8', false); ?>">
 					</div>
 					<?php }?>
 					<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ ?>
 					<div class="servericon">
 						<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ ?>
 							<div class="up">
-								<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+								<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8', false); ?>">
 							</div>
 						<?php }else{?>
-							<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); ?>">
+							<img src="<?php echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8', false); ?>">
 						<?php }?>
 					</div>
 					<?php }?>
@@ -395,12 +404,12 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバーアイコン</p>
 						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。(設定しなくても大丈夫です。)</div>
-						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servericon" placeholder="https://~" class="inbox" type="text" name="servericon" value="<?php if( !empty($serversettings["serverinfo"]["server_icon"]) ){ echo htmlentities($serversettings["serverinfo"]["server_icon"], ENT_QUOTES, 'UTF-8', false); } ?>">
 					</div>
 					<div>
 						<p>サーバーヘッダー</p>
 						<div class="p2">サーバー登録画面などに表示されます。<br>自動的に角が丸くなります。<br>URLより設定してください。(設定しなくても大丈夫です。)</div>
-						<input id="serverhead" placeholder="https://~" class="inbox" type="text" name="serverhead" value="<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ echo htmlentities($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverhead" placeholder="https://~" class="inbox" type="text" name="serverhead" value="<?php if( !empty($serversettings["serverinfo"]["server_head"]) ){ echo htmlentities($serversettings["serverinfo"]["server_head"], ENT_QUOTES, 'UTF-8', false); } ?>">
 					</div>
 
 					<div>
@@ -419,9 +428,9 @@ require('../logout/logout.php');
 						<p>サーバーロゴ</p>
 						<div class="p2">サーバーの左上に表示されているuwuzuのロゴを独自のロゴに置き換えるときに使用します。<br>自動的に角が丸くなります。<br>URLより設定してください。<br>背景透過画像を推奨します。</div>
 						<div class="p2">ログイン後のロゴ</div>
-						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_home"]) ){ echo htmlentities($serversettings["serverinfo"]["server_logo_home"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_light" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_home"]) ){ echo htmlentities($serversettings["serverinfo"]["server_logo_home"], ENT_QUOTES, 'UTF-8', false); } ?>">
 						<div class="p2">ログイン画面と利用規約などドキュメントページのロゴ</div>
-						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_login"]) ){ echo htmlentities($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serverlogo" placeholder="https://~" class="inbox" type="text" name="serverlogo_dark" value="<?php if( !empty($serversettings["serverinfo"]["server_logo_login"]) ){ echo htmlentities($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8', false); } ?>">
 					</div>
 					<script>
 					if ($("#serverlogo_onoff").prop("checked")) {
@@ -437,7 +446,7 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバー名</p>
 						<div class="p2">サーバー名です。</div>
-						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty($serversettings["serverinfo"]["server_name"]) ){ echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servername" placeholder="uwuzuさ～ば～" class="inbox" type="text" name="servername" value="<?php if( !empty($serversettings["serverinfo"]["server_name"]) ){ echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false); } ?>">
 					</div>
 
 					<div>
@@ -449,13 +458,13 @@ require('../logout/logout.php');
 					<div>
 						<p>サーバー管理者の名前</p>
 						<div class="p2">サーバー管理者名です。</div>
-						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty($serversettings["serverinfo"]["server_admin"]) ){ echo htmlentities($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="serveradminname" placeholder="わたし" class="inbox" type="text" name="serveradminname" value="<?php if( !empty($serversettings["serverinfo"]["server_admin"]) ){ echo htmlentities($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8', false); } ?>">
 					</div>
 
 					<div>
 						<p>サーバーへのお問い合わせ用メールアドレス</p>
 						<div class="p2">ユーザーからのお問い合わせメアドです。</div>
-						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty($serversettings["serverinfo"]["server_admin_mailadds"]) ){ echo htmlentities($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8'); } ?>">
+						<input id="servermailadds" placeholder="" class="inbox" type="text" name="servermailadds" value="<?php if( !empty($serversettings["serverinfo"]["server_admin_mailadds"]) ){ echo htmlentities($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8', false); } ?>">
 					</div>
 
 					<div>
@@ -467,6 +476,20 @@ require('../logout/logout.php');
 							<?php }else{?>
 								<input id="onlyuser" class="switch_input" type='checkbox' name="onlyuser" value="true" />
 								<label for="onlyuser" class="switch_label"></label>
+							<?php }?>
+						</div>
+					</div>
+
+					<div>
+						<p>アカウントの移行登録を許可するか</p>
+						<div class="p2">他のuwuzuサーバーからのアカウント移行を許可するかです。<br>このサーバーが招待制の場合移行登録にも招待コードが必要となります。</div>
+						<div class="switch_button">
+							<?php if($serversettings["serverinfo"]["server_account_migration"] === "true"){?>
+								<input id="migration" class="switch_input" type='checkbox' name="migration" value="true" checked/>
+								<label for="migration" class="switch_label"></label>
+							<?php }else{?>
+								<input id="migration" class="switch_input" type='checkbox' name="migration" value="true" />
+								<label for="migration" class="switch_label"></label>
 							<?php }?>
 						</div>
 					</div>

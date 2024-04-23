@@ -396,7 +396,7 @@ $pdo = null;
 							<summary><?php echo htmlentities($value["title"]);?></summary>
 							<hr>
 							<div class="p2">本文</div>
-							<p><?php echo htmlentities($value["note"]);?></p>
+							<p><?php echo nl2br(htmlentities($value["note"]));?></p>
 							<hr>
 							<div class="p2">配信日時</div>
 							<p><?php echo date("Y年m月d日 H:i", strtotime(htmlentities($value["datetime"])));?></p>

@@ -3,6 +3,12 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [L]
+RewriteRule ^\.htaccess$ - [F]
+RewriteRule ^db\.php$ - [F]
+RewriteRule ^settings_admin/CloudflareTurnstile_settings/ - [F]
+RewriteRule ^settings_admin/hCaptcha_settings/ - [F]
+RewriteRule ^settings_admin/plugin_settings/ - [F]
+
 RewriteBase /
 
 RewriteRule ^(@\w+)$ /user/index.php?uwuzuid=$1 [QSA,L]
@@ -18,4 +24,4 @@ ErrorDocument 404 /errorpage/404.php
 ErrorDocument 500 /errorpage/500.php
 ErrorDocument 503 /errorpage/503.php
 
-Header set X-FRAME-OPTIONS “DENY”
+Header set X-FRAME-OPTIONS "DENY"

@@ -185,11 +185,11 @@ $notificationcount = $notiData['notification_count'];
 
 if( !empty($_POST['ads_btn_submit']) ) {
 
-	$ads_url = htmlentities($_POST['ads_url']);
-	$ads_img_url = htmlentities($_POST['ads_img_url']);
-	$ads_start_date = htmlentities(date($_POST['ads_start_date']));
-	$ads_limit_date = htmlentities(date($_POST['ads_limit_date']));
-	$ads_memo = htmlentities($_POST['ads_memo']);
+	$ads_url = htmlentities($_POST['ads_url'], ENT_QUOTES, 'UTF-8', false);
+	$ads_img_url = htmlentities($_POST['ads_img_url'], ENT_QUOTES, 'UTF-8', false);
+	$ads_start_date = htmlentities(date($_POST['ads_start_date']), ENT_QUOTES, 'UTF-8', false);
+	$ads_limit_date = htmlentities(date($_POST['ads_limit_date']), ENT_QUOTES, 'UTF-8', false);
+	$ads_memo = htmlentities($_POST['ads_memo'], ENT_QUOTES, 'UTF-8', false);
 
 	if(empty($ads_url)){
 		$error_message[] = "URLが入力されていません。(INPUT_PLEASE)";
@@ -312,7 +312,7 @@ if (!empty($pdo)) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>広告 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>広告 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 

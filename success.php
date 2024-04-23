@@ -8,6 +8,11 @@ if(!(empty($_SESSION['backupcode']))){
 }else{
     $backupcode = null;
 }
+if(!(empty($_SESSION['done']))){
+    if($_SESSION['done'] == false){
+        $error_message[] = "アカウント移行の終了処理が完了できていません。\n前使用していたサーバーでアカウントの移行を取り消してください。";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -32,18 +37,24 @@ if(!(empty($_SESSION['backupcode']))){
 <div class="leftbox2">
     <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
+            <a href="index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
     <div class="textbox">
+        <?php if( !empty($error_message) ): ?>
+            <ul class="errmsg">
+                <?php foreach( $error_message as $value ): ?>
+                    <p>・ <?php echo $value; ?></p>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
         <h1>アカウント作成完了！</h1>
-        <p><br>いぇ～い！</p>
-        <p>88888888888</p>
+        <p>いぇ～い！</p>
         <p>アカウント登録が完了しました！</p>
         <?php 
         if(!(empty($backupcode))){?>

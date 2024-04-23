@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Josefin+Sans:ital,wght@1,700&family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@500&display=swap');
+@import url("font.css");
 @import url("color.css");
 
 ::-webkit-scrollbar{
@@ -58,7 +58,7 @@ body{
     border-radius: 50px;
     color:var(--background-color);
     font-size: 22px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -91,7 +91,7 @@ body{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 22px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
@@ -109,13 +109,13 @@ body{
 .inbox {
     margin-top: 4px;
     margin-bottom: 4px;
-    width: 96%;
+    width: calc(100% - 24px);
     padding: 8px 10px;
     border-radius: 10px;
     background: var(--background-color);
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     color: rgb(32,32,32);
-    font-size: 1em;
+    font-size: 16px;
     line-height: 1.5;
     white-space: nowrap;
     box-shadow:0px 0px 25px rgba(0,0,0,0.03);
@@ -156,7 +156,7 @@ textarea{
     margin: 12px;
     text-align: left;
     color:#ff4848;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     word-wrap: break-word;
     line-height: 20px;
     border: 1px solid #FF4848;
@@ -183,7 +183,7 @@ textarea{
     border-radius: 50px;
     color:var(--background-color);
     font-size: 26px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
@@ -217,7 +217,7 @@ textarea{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 26px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
@@ -248,7 +248,7 @@ textarea{
 .rolebox p {
     margin: 2px 10px 2px 10px;
     font-size: 16px;
-    font-family: "Zen Maru Gothic", sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -372,7 +372,7 @@ textarea{
 }
 
 .userleftbox h1{
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     margin-left: 20px;
     color:var(--background-color);
     font-size: 32px;
@@ -392,7 +392,7 @@ textarea{
 }
 .userleftbox .logo p{
     color:var(--main-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 32px;
     margin-left: 8px;
@@ -420,12 +420,11 @@ textarea{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 20px;
-    font-family: 'Zen Maru Gothic', sans-serif;
-    font-weight: normal;
+    font-family: var(--Head-fonts), sans-serif;
+    font-weight: bold;
     text-decoration:none;
     text-align: left;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
+    align-items: center;
     transition: all 250ms ease-out;
 }
 .leftbutton_on:hover{
@@ -460,12 +459,11 @@ textarea{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 20px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: left;
-    transition: box-shadow 250ms ease-in-out;
-    transition: width 250ms ease-out;
+    align-items: center;
     transition: all 250ms ease-out;
 }
 .leftbutton:hover{
@@ -499,7 +497,7 @@ textarea{
     margin-right: auto;
     color:#FFF;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -557,7 +555,7 @@ main{
 main h1{
     color:var(--text-color);
     font-size: 32px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
 }
 
 .userheader{
@@ -615,7 +613,7 @@ main h1{
     margin-bottom: 12px;
     color:var(--text-color);
     font-size: 32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 
@@ -627,7 +625,7 @@ main h1{
     margin-bottom: 14px;
     color: var(--subtext-color);
     font-size: 18px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 
@@ -639,7 +637,7 @@ main h1{
     margin-bottom: 14px;
     color: var(--dark-subtext-color);
     font-size: 18px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 
@@ -653,7 +651,7 @@ main h1{
     font-size: 18px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .userheader .profile p img{
@@ -671,7 +669,7 @@ main h1{
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -704,7 +702,7 @@ main h1{
     margin-right: 10px;
 
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
 
 }
@@ -717,7 +715,7 @@ main h1{
     font-size: 16px;
     color:var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -755,7 +753,7 @@ main h1{
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -797,7 +795,7 @@ main h1{
     color:var(--main-color);
     border: 1px solid var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -838,7 +836,7 @@ main h1{
     color:var(--main-color);
     border: 1px solid var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -878,7 +876,7 @@ main h1{
     color:var(--main-color);
     border: 1px solid var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -920,7 +918,7 @@ main h1{
     text-align: left;
     font-size: 12px;
     color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 .fzone .time a{
@@ -929,7 +927,7 @@ main h1{
     text-align: left;
     font-size: 12px;
     color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 .fzone .follow_yes{
@@ -983,7 +981,7 @@ main h1{
     background: var(--tl-color);
     color: var(--dark-subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 
     display: inline-block;
@@ -1076,7 +1074,7 @@ main h1{
     font-size: 18px;
     color: var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -1111,7 +1109,7 @@ main h1{
     font-size: 12px;
     color:var(--subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 .ueuse .flebox .bot{
@@ -1122,7 +1120,7 @@ main h1{
     border-radius: 10px;
     background-color: var(--sub-color);
     border: 1px solid var(--border-color);
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
     text-align: center;
     font-size: 12px;
@@ -1137,7 +1135,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .ueuse .inline{
@@ -1153,7 +1151,7 @@ main h1{
     border-radius: 5px;
     font-size: calc(100% - 2px);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
     vertical-align: top;
 }
@@ -1170,7 +1168,7 @@ main h1{
     padding-bottom: 4px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -1207,7 +1205,7 @@ main h1{
     border-radius: 25px;
     font-size: calc(100% - 2px);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
     vertical-align: top;
 }
@@ -1220,7 +1218,7 @@ main h1{
     font-size: 48px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -1232,7 +1230,7 @@ main h1{
     font-size: 32px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -1244,7 +1242,7 @@ main h1{
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -1255,7 +1253,7 @@ main h1{
     margin-left: auto;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -1271,7 +1269,7 @@ main h1{
     font-size: 14px;
     color:var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     transition: all 250ms ease-out;
 }
@@ -1296,7 +1294,7 @@ main h1{
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse p img{
@@ -1352,7 +1350,7 @@ main h1{
     text-align: right;
     font-size: 12px;
     color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 .ueuse .photo1 a{
     width: 48%;
@@ -1501,7 +1499,7 @@ main h1{
     font-size: 14px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -1521,7 +1519,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .abi .back h1 img{
@@ -1541,7 +1539,7 @@ main h1{
     font-size: 42px;
     color: var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .abi h2{
@@ -1552,7 +1550,7 @@ main h1{
     font-size: 32px;
     color: var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .abi h3{
@@ -1563,7 +1561,7 @@ main h1{
     font-size: 24px;
     color: var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .abi .h3s{
@@ -1574,7 +1572,7 @@ main h1{
     font-size: 12px;
     color:var(--subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .favbox{
@@ -1606,7 +1604,7 @@ main h1{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1637,7 +1635,7 @@ main h1{
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1684,7 +1682,7 @@ main h1{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1710,7 +1708,7 @@ main h1{
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1743,7 +1741,7 @@ main h1{
     border-radius: 50px;
     color:#FF4848;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1773,7 +1771,7 @@ main h1{
     border-radius: 50px;
     color: var(--background-color);;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1808,7 +1806,7 @@ main h1{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1839,7 +1837,7 @@ main h1{
     border-radius: 50px;
     color: var(--sub-color);;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1880,7 +1878,7 @@ main h1{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1910,7 +1908,7 @@ main h1{
     border-radius: 50px;
     color: var(--sub-color);;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1952,7 +1950,7 @@ main h1{
     border-radius: 50px;
     color:var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -1982,7 +1980,7 @@ main h1{
     border-radius: 50px;
     color: var(--sub-color);;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2026,7 +2024,7 @@ main h1{
     font-size: 16px;
     color:var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
 }
 .ueuse .nsfw{
@@ -2078,7 +2076,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .headbox a{
@@ -2118,7 +2116,7 @@ main h1{
     font-size: 22px;
     color: var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse .flebox .user .idbox{
@@ -2138,7 +2136,7 @@ main h1{
     font-size: 12px;
     color:var(--subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 .ueuse .flebox .user .bot{
     margin-top: auto;
@@ -2148,7 +2146,7 @@ main h1{
     border-radius: 10px;
     background-color: var(--sub-color);
     border: 1px solid var(--border-color);
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
     text-align: center;
     font-size: 12px;
@@ -2173,7 +2171,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -2211,7 +2209,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -2227,7 +2225,7 @@ main h1{
     border: none;
     resize: none;
     font-size: 18px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -2260,7 +2258,7 @@ main h1{
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2298,7 +2296,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -2355,7 +2353,7 @@ main h1{
     font-size: 16px;
     color: var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
 }
 .sendbox .fxbox .red{
@@ -2386,7 +2384,7 @@ main h1{
     line-height: 20px;
     color: var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .sendbox .emoji_picker .emoji_picker_flex{
@@ -2416,7 +2414,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 @keyframes Up_to_down_slideY {
@@ -2450,7 +2448,7 @@ main h1{
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2505,7 +2503,7 @@ main h1{
     font-size: 26px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -2526,7 +2524,7 @@ main h1{
     font-size: 16px;
     color:var(--subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 .ueuse2 p{
@@ -2537,7 +2535,7 @@ main h1{
     font-size: 22px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse2 a{
@@ -2547,7 +2545,7 @@ main h1{
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .ueuse2 p img{
@@ -2567,7 +2565,7 @@ main h1{
     text-align: right;
     font-size: 12px;
     color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 .ueuse2 .photo1 img{
@@ -2627,8 +2625,8 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
+    font-family: var(--Text-fonts), sans-serif;
+    font-weight: normal;
 }
 .formarea li{
     line-height: 20px;
@@ -2638,7 +2636,7 @@ main h1{
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -2692,7 +2690,7 @@ main h1{
     line-height: 20px;
     color: var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -2703,7 +2701,7 @@ main h1{
     line-height: 20px;
     color: var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -2728,7 +2726,7 @@ label>input {
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2766,7 +2764,7 @@ label>input {
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2834,8 +2832,8 @@ label>input {
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
+    font-family: var(--Text-fonts), sans-serif;
+    font-weight: normal;
 }
 .modal-content p img{
     margin-top: 0px;
@@ -2852,7 +2850,7 @@ label>input {
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .modal-content h1 img{
@@ -2880,7 +2878,7 @@ label>input {
     width:120px;
     padding: 8px auto;
 
-    margin-left: 6px;
+    margin-left: auto;
     margin-right: 6px;
     margin-bottom: 0px;
 
@@ -2893,7 +2891,7 @@ label>input {
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2919,7 +2917,7 @@ label>input {
     width:120px;
     padding: 8px auto;
 
-    margin-left: 6px;
+    margin-left: auto;
     margin-right: 6px;
     margin-bottom: 0px;
 
@@ -2933,7 +2931,7 @@ label>input {
     color:var(--main-color);
     border: 1px solid var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -2982,7 +2980,7 @@ label>input {
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .modal-content .action_userlist .userabout .username a img{
@@ -3001,7 +2999,7 @@ label>input {
     font-size: 14px;
     color:var(--subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3089,7 +3087,7 @@ label>input {
     
     background-color: var(--main-color);
     box-shadow: 0px 0px 30px rgba(0,0,0,0.1);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 2em;
     text-align: left;
@@ -3116,7 +3114,7 @@ label>input {
 
 .terms h1{
     line-height:32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 48px;
     text-align: left;
@@ -3125,7 +3123,7 @@ label>input {
 
 .terms h2{
     line-height:32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 48px;
     text-align: left;
@@ -3134,7 +3132,7 @@ label>input {
 
 .terms h3{
     line-height:28px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 32px;
     text-align: left;
@@ -3143,7 +3141,7 @@ label>input {
 
 .terms h4{
     line-height:24px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 24px;
     text-align: left;
@@ -3154,7 +3152,7 @@ label>input {
     margin-top: 2px;
     margin-bottom: 2px;
     line-height:24px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 16px;
     text-align: left;
@@ -3185,7 +3183,7 @@ label>input {
     line-height:24px;
     margin-right: 12px;
     margin-left: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 16px;
     text-align: left;
@@ -3214,7 +3212,7 @@ label>input {
     margin-right: auto;
     color: #00b96c;
     font-size: 14px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
     vertical-align:middle;
     align-items: center;
@@ -3238,7 +3236,7 @@ label>input {
     margin-right: auto;
     color: #e6890f;
     font-size: 14px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
     vertical-align:middle;
     align-items: center;
@@ -3262,7 +3260,7 @@ label>input {
     margin-right: auto;
     color: #1d9bf0;
     font-size: 14px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
     vertical-align:middle;
     align-items: center;
@@ -3286,7 +3284,7 @@ label>input {
     margin-right: auto;
     color: #FF4848;
     font-size: 14px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
     vertical-align:middle;
     align-items: center;
@@ -3304,7 +3302,7 @@ label>input {
     line-height: 20px;
     color: var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .terms .p3{
@@ -3314,7 +3312,7 @@ label>input {
     line-height: 24px;
     color: var(--text-color);
     font-size: 22px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3326,7 +3324,7 @@ label>input {
     line-height: 20px;
     color: var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .terms .sp3{
@@ -3336,14 +3334,14 @@ label>input {
     line-height: 24px;
     color: var(--text-color);
     font-size: 22px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
 .terms ul{
     margin-top: 6px;
     margin-bottom: 6px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     line-height: 20px;
 }
 
@@ -3361,7 +3359,7 @@ label>input {
 .terms .err404 h1{
     margin-top: 64px;
     line-height:64px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 64px;
     text-align: center;
@@ -3372,7 +3370,7 @@ label>input {
     margin-top: 2px;
     margin-bottom: 2px;
     line-height:32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 16px;
     text-align: center;
@@ -3398,7 +3396,7 @@ label>input {
 
     margin-top: 12px;
     margin-bottom: 0px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 28px;
     text-align: left;
@@ -3407,7 +3405,8 @@ label>input {
 
 .rightbox .noticearea{
     width: auto;
-    height: 50dvh;
+    height: fit-content;
+    max-height: 50dvh;
     overflow: scroll;
     border-radius: 10px;
 }
@@ -3429,7 +3428,7 @@ label>input {
 .rightbox .noticebox h4{
     margin-top: 2px;
     margin-bottom: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 20px;
     text-align: left;
@@ -3440,7 +3439,7 @@ label>input {
     line-height: 20px;
     margin-top: 2px;
     margin-bottom: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 16px;
     text-align: left;
@@ -3453,7 +3452,7 @@ label>input {
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3470,7 +3469,7 @@ label>input {
     line-height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 16px;
     text-align: left;
@@ -3484,7 +3483,7 @@ label>input {
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3500,22 +3499,24 @@ label>input {
     text-align: left;
     font-size: 12px;
     color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 
 
 .rightbox .btmbox{
     position: absolute;
-    bottom: 36px; /*下に固定*/
-    height: 320px;
+    bottom: 6px; /*下に固定*/
+    height: fit-content;
+    max-width: 45dvh;
     width: 90%;
+    overflow: scroll;
 }
 
 .rightbox .btmbox h2{
     margin-top: 12px;
     margin-bottom: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 20px;
     text-align: left;
@@ -3525,7 +3526,7 @@ label>input {
 .rightbox .btmbox h3{
     margin-top: 2px;
     margin-bottom: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 20px;
     text-align: left;
@@ -3537,7 +3538,7 @@ label>input {
     line-height: 20px;
     margin-top: 2px;
     margin-bottom: 2px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
     font-size: 14px;
     text-align: left;
@@ -3552,7 +3553,7 @@ label>input {
     font-size: 14px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3606,7 +3607,7 @@ label>input {
     border-radius: 50px;
     color:var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -3652,7 +3653,7 @@ label>input {
 }
 .emjtex{
     width: calc(50% - 32px);
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
     margin-top: 0px;
     margin-left: 0px;
     margin-right: 0px;
@@ -3696,7 +3697,7 @@ label>input {
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3708,7 +3709,7 @@ label>input {
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3720,7 +3721,7 @@ label>input {
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3762,7 +3763,7 @@ label>input {
     font-size: 18px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .notification .flebox .icon img{
@@ -3786,7 +3787,7 @@ label>input {
     color:var(--subtext-color);
     font-size: 14px;
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .notification .flebox .username img{
@@ -3812,21 +3813,9 @@ label>input {
     font-size: 12px;
     color:var(--subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
-.notification p{
-    line-height: 20px;
-    overflow-wrap:  break-word;
-    margin-top: auto;
-    margin-bottom: auto;
-    margin-left: 12px;
-    font-size: 16px;
-    color:var(--text-color);
-    text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
-    font-weight: bold;
-}
 .notification p{
     line-height:20px;
     overflow-wrap:  break-word;
@@ -3836,7 +3825,7 @@ label>input {
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .notification .inline{
@@ -3852,7 +3841,7 @@ label>input {
     border-radius: 5px;
     font-size: calc(100% - 2px);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
     vertical-align: top;
 }
@@ -3869,7 +3858,7 @@ label>input {
     padding-bottom: 4px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 
@@ -3900,7 +3889,7 @@ label>input {
     font-size: 48px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3912,7 +3901,7 @@ label>input {
     font-size: 32px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3924,7 +3913,7 @@ label>input {
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3935,7 +3924,7 @@ label>input {
     margin-left: auto;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 
@@ -3951,7 +3940,7 @@ label>input {
     font-size: 14px;
     color:var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     transition: all 250ms ease-out;
 }
@@ -3977,7 +3966,7 @@ label>input {
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .notification p img{
@@ -4026,7 +4015,7 @@ label>input {
     text-align: right;
     font-size: 12px;
     color:var(--subtext-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 
 .notification a{
@@ -4037,7 +4026,7 @@ label>input {
     font-size: 16px;
     color:var(--link-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 hr{
@@ -4069,7 +4058,7 @@ hr{
     border-radius: 50px;
     color:var(--sub-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -4145,7 +4134,7 @@ hr{
     padding-left: 0px;
     padding-right: 0px;
     color:var(--background-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
 }
 @keyframes slideDown {
     0%, 100% { transform: translateY(-64px); }
@@ -4232,7 +4221,7 @@ hr{
     font-size: 24px;
     color:var(--dark-subtext-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .tlchange .on{
@@ -4246,7 +4235,7 @@ hr{
     font-size: 24px;
     color:var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     border-bottom: 1px solid var(--main-color);
 }
@@ -4265,7 +4254,7 @@ hr{
     padding-top: 8px;
     padding-bottom: 8px;
     color:#F5F4F0;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .hny .textmain{
@@ -4279,7 +4268,7 @@ hr{
     background-color: #dcae64;
     text-align: left;
     color:#FCFAF2;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 32px;
     line-height: 32px;
@@ -4289,7 +4278,7 @@ hr{
 .hny .textmain p{
     text-align: left;
     color:#252525;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 16px;
     line-height: 22px;
@@ -4298,7 +4287,7 @@ hr{
 .hny .textmain .rp{
     text-align: right;
     color:#252525;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 14px;
     line-height: 22px;
@@ -4373,7 +4362,7 @@ input[type=radio] {
     box-sizing: border-box;
 
     color:var(--dark-text-color);
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 16px;
     line-height: 22px;
@@ -4437,7 +4426,7 @@ summary {
     margin-bottom: 0px;
     text-align: left;
     color:var(--text-color);
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 18px;
     line-height: 22px;
@@ -4470,7 +4459,7 @@ summary {
     margin-bottom: 4px;
     text-align: left;
     color:var(--text-color);
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 14px;
     line-height: 22px;
@@ -4486,7 +4475,7 @@ summary {
     margin-bottom: auto;
     text-align: left;
     color:var(--text-color);
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     word-wrap: break-word;
     font-size: 14px;
     line-height: 22px;
@@ -4508,7 +4497,7 @@ summary {
     border-radius: 50px;
     color:#FF4848;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -4536,7 +4525,7 @@ summary {
     border-radius: 50px;
     color: var(--main-color);
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -4584,7 +4573,7 @@ summary {
     border-radius: 50px;
     color:var(--main-color);
     font-size: 18px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: left;
@@ -4631,7 +4620,7 @@ summary {
     margin-bottom: auto;
     color:var(--text-color);
     font-size: 32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 .admin_userinfo .icon .tatext p{
@@ -4642,7 +4631,7 @@ summary {
     margin-bottom: 14px;
     color: var(--subtext-color);
     font-size: 18px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 
@@ -4656,7 +4645,7 @@ summary {
     font-size: 18px;
     color:var(--text-color);
     text-decoration: none;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
 }
 .admin_userinfo .roleboxes{
@@ -4686,7 +4675,7 @@ summary {
     margin-left: 10px;
     margin-right: 10px;
     font-size: 16px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
 }
 .admin_userinfo .about{
@@ -4699,7 +4688,7 @@ summary {
     line-height: 20px;
     color:var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
 .admin_userinfo .about p{
@@ -4710,7 +4699,7 @@ summary {
     margin-bottom: 14px;
     color: var(--text-color);
     font-size: 18px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 .admin_userinfo .banzone{
@@ -4735,7 +4724,7 @@ summary {
     border-radius: 50px;
     color:var(--background-color);
     font-size: 22px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -4770,7 +4759,7 @@ summary {
     border-radius: 50px;
     color:var(--main-color);
     font-size: 22px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -4805,7 +4794,7 @@ summary {
     border-radius: 50px;
     color:var(--background-color);
     font-size: 22px;
-    font-family: 'Zen Maru Gothic', sans-serif;
+    font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
@@ -4844,13 +4833,13 @@ summary {
     background-color: var(--main-color);
     color: var(--background-color);
     font-size: 22px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
 }
 .error p{
     color: var(--text-color);
     font-size: 18px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
 
@@ -4881,13 +4870,13 @@ summary {
 .overview p{
     color: var(--text-color);
     font-size: 32px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: bold;
 }
 .overview .p2{
     color: var(--subtext-color);
     font-size: 12px;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
 }
 .servericon{
@@ -4963,7 +4952,7 @@ summary {
     font-size: 20px;
     color: var(--main-color);
     text-decoration: none;
-    font-family: 'BIZ UDGothic', sans-serif;
+    font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
     text-align: center;
 }
@@ -4994,7 +4983,7 @@ summary {
     margin-left: 12px;
     margin-right: 12px;
     line-height: 24px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-size: 16px;
     color:var(--tl-color);
     color: transparent; 
@@ -5027,7 +5016,7 @@ summary {
     margin-left: 12px;
     margin-right: 12px;
     line-height: 24px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-size: 16px;
     color:var(--tl-color);
     color: transparent; 
@@ -5057,7 +5046,7 @@ summary {
     margin-left: 12px;
     margin-right: 12px;
     line-height: 24px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-size: 16px;
     color:var(--tl-color);
     color: transparent; 
@@ -5122,13 +5111,13 @@ noscript .noscript_modal .inner{
 }
 noscript .noscript_modal .inner .oops_icon{
     margin-top: -32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-size: 74px;
     text-align: center;
 }
 noscript .noscript_modal .inner h1{
     line-height: 32px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-size: 32px;
     color:var(--text-color);
     text-align: center;
@@ -5136,7 +5125,7 @@ noscript .noscript_modal .inner h1{
 }
 noscript .noscript_modal .inner p{
     line-height: 20px;
-    font-family: 'BIZ UDPGothic', sans-serif;
+    font-family: var(--Text-fonts), sans-serif;
     font-size: 16px;
     color:var(--text-color);
     text-align: center;
@@ -5157,7 +5146,7 @@ noscript .noscript_modal .inner .infobtn{
     color:#ffffff;
     border-radius: 32px;
     font-size: 20px;
-    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-family: var(--Mono-fonts), 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
     font-weight: normal;
     text-decoration: none;
 }
@@ -5171,10 +5160,165 @@ noscript .noscript_modal .inner .center_text p{
     text-align: center;
     color:#777;
     font-size: 14px;
-    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-family: var(--Mono-fonts), 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
     font-weight: normal;
 }
 
+.special:hover span{
+    display:inline-block;
+    vertical-align: top;
+    animation: cycling 500ms;
+}
+@keyframes cycling {
+    from {
+      animation-timing-function: ease-in-out;
+      transform: scale(1.0, 1.0) translate(0%, 0%) rotate(0deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+    50%{
+        animation-timing-function: ease-in-out;
+        transform: scale(1.5, 1.5) translate(0%, 0%) rotate(-15deg) skew(0deg, 0deg);
+        opacity: 1;
+    }
+    to {
+      animation-timing-function: ease-out;
+      transform: scale(1.0, 1.0) translate(0%, 0%) rotate(0deg) skew(0deg, 0deg);
+      opacity: 1;
+    }
+}
+
+.tutorial_background{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    transition: all 250ms ease-out;
+}
+.tutorial_background .tutorial_modal{
+    padding: 0px;
+    border-radius: 15px;
+    width: 720px;
+    height: 640px;
+    background-color: var(--background-color);
+    max-width: 50%;
+    max-height: 75dvh;
+    position: absolute;
+    top: 45%;
+    right: 0;
+    bottom: 45%;
+    left: 0;
+    margin: auto;
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
+    overflow: scroll;
+    cursor: auto;
+}
+.tutorial_background .tutorial_modal .tutorial{
+    margin: 64px;
+    height: calc(100% - 128px);
+    width: calc(100% - 128px);
+}
+.tutorial_background .tutorial_modal .tutorial .page{
+    position: relative;
+    transition: all 250ms ease-out;
+    animation: slideInX 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    height: 100%;
+    width: 100%;
+}
+.tutorial_background .tutorial_modal .tutorial .page h1{
+    line-height: 32px;
+    font-family: var(--Text-fonts), sans-serif;
+    font-size: 32px;
+    color:var(--text-color);
+    text-align: center;
+    font-weight: bold;
+}
+.tutorial_background .tutorial_modal .tutorial .page h2{
+    line-height: 28px;
+    font-family: var(--Text-fonts), sans-serif;
+    font-size: 24px;
+    color:var(--text-color);
+    text-align: left;
+    font-weight: bold;
+}
+.tutorial_background .tutorial_modal .tutorial .page p{
+    line-height: 20px;
+    font-family: var(--Text-fonts), sans-serif;
+    font-size: 16px;
+    color:var(--text-color);
+    text-align: left;
+}
+.tutorial_background .tutorial_modal .tutorial .page img{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+}
+.tutorial_background .tutorial_modal .tutorial .page .btm_area{
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+    display: flex;
+    justify-content:flex-end;
+    margin:auto 0px 0px 0px;
+}
+.tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:20%;
+    padding: 4px 4px;
+    margin-left: 12px;
+    margin-right: 0px;
+    background-color: var(--main-color);
+    border-radius: 50px;
+    color:var(--sub-color);
+    font-size: 18px;
+    font-family: var(--Head-fonts), sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: all 250ms ease-out;
+}
+.tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn:hover{
+    background-color: var(--main-color);
+    color: var(--sub-color);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
+    width:21%;
+}
+.tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn:active{
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .0);
+    width:19%;
+}
+.tutorial_background .tutorial_modal .tutorial .page .btm_area .backcolor{
+    background-color: #CCC;
+    color: #FFF;
+}
+.tutorial_background .tutorial_modal .tutorial .page .btm_area .backcolor:hover{
+    background-color: #CCC;
+    color: #FFF;
+}
+.clear{
+    opacity: 0;
+}
+
+@keyframes slideInX {
+    0% {
+      transform: translateX(24px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0px);
+    }
+    40%,100% {
+      opacity: 1;
+    }
+}
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -5277,7 +5421,7 @@ noscript .noscript_modal .inner .center_text p{
         text-align: left;
         font-size: 12px;
         color:var(--subtext-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
     .sp_time_area .time a{
         margin-top: 0px;
@@ -5285,7 +5429,7 @@ noscript .noscript_modal .inner .center_text p{
         text-align: left;
         font-size: 12px;
         color:var(--subtext-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
 
     main{
@@ -5306,7 +5450,7 @@ noscript .noscript_modal .inner .center_text p{
     main h1{
         color:var(--text-color);
         font-size: 32px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
     }
 
     .fzone .follow_yes p{
@@ -5340,7 +5484,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 14px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
 
@@ -5360,8 +5504,8 @@ noscript .noscript_modal .inner .center_text p{
         height: 24px;
         padding: 6px 6px;
         
-        margin-left: 6px;
-        margin-right: 6px;
+        margin-left: 0px;
+        margin-right: 12px;
 
         padding-top: 6px;
         padding-bottom: 6px;
@@ -5382,7 +5526,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 16px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     .sendbox .emoji_picker .emoji_picker_flex{
@@ -5448,7 +5592,7 @@ noscript .noscript_modal .inner .center_text p{
         border-radius: 0px;
         color:var(--main-color);
         font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         font-weight: normal;
         text-decoration:none;
         text-align: center;
@@ -5640,7 +5784,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 18px;
         color: var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
 
@@ -5652,7 +5796,7 @@ noscript .noscript_modal .inner .center_text p{
         text-align: right;
         font-size: 12px;
         color:var(--subtext-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
 
     .ueuse .headbox{
@@ -5689,7 +5833,7 @@ noscript .noscript_modal .inner .center_text p{
         padding: 3px 8px; 
         margin-left: 6px;
         border-radius: 10px;
-        font-family: 'BIZ UDGothic', sans-serif;
+        font-family: var(--Mono-fonts), sans-serif;
         font-weight: bold;
         text-align: center;
         font-size: 12px;
@@ -5712,7 +5856,7 @@ noscript .noscript_modal .inner .center_text p{
     }
 
     .leftbox h1{
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         margin-left: 20px;
         color:var(--background-color);
         font-size: 32px;
@@ -5732,7 +5876,7 @@ noscript .noscript_modal .inner .center_text p{
     }
     .leftbox .logo p{
         color:var(--main-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
         font-size: 32px;
         margin-left: 8px;
@@ -5773,7 +5917,7 @@ noscript .noscript_modal .inner .center_text p{
         border-radius: 50px;
         color:var(--sub-color);
         font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         font-weight: normal;
         text-decoration:none;
         text-align: center;
@@ -5827,7 +5971,7 @@ noscript .noscript_modal .inner .center_text p{
 
     .terms h1{
         line-height:52px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
         font-size: 48px;
         text-align: left;
@@ -5836,7 +5980,7 @@ noscript .noscript_modal .inner .center_text p{
 
     .terms h2{
         line-height:52px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
         font-size: 48px;
         text-align: left;
@@ -5845,7 +5989,7 @@ noscript .noscript_modal .inner .center_text p{
 
     .terms h3{
         line-height:36px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
         font-size: 32px;
         text-align: left;
@@ -5854,7 +5998,7 @@ noscript .noscript_modal .inner .center_text p{
 
     .terms h4{
         line-height:24px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
         font-size: 24px;
         text-align: left;
@@ -5865,7 +6009,7 @@ noscript .noscript_modal .inner .center_text p{
         margin-top: 2px;
         margin-bottom: 2px;
         line-height:24px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: normal;
         font-size: 16px;
         text-align: left;
@@ -5894,7 +6038,7 @@ noscript .noscript_modal .inner .center_text p{
         line-height:24px;
         margin-right: 12px;
         margin-left: 12px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: normal;
         font-size: 16px;
         text-align: left;
@@ -5910,7 +6054,7 @@ noscript .noscript_modal .inner .center_text p{
         line-height: 20px;
         color: var(--subtext-color);
         font-size: 12px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: normal;
     }
 
@@ -5921,14 +6065,14 @@ noscript .noscript_modal .inner .center_text p{
         line-height: 24px;
         color: var(--text-color);
         font-size: 22px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
 
     .terms .err404 h1{
         margin-top: 128px;
         line-height:64px;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
         font-size: 64px;
         text-align: center;
@@ -5941,7 +6085,7 @@ noscript .noscript_modal .inner .center_text p{
         padding: 3px 8px; 
         margin-left: 6px;
         border-radius: 10px;
-        font-family: 'BIZ UDGothic', sans-serif;
+        font-family: var(--Mono-fonts), sans-serif;
         font-weight: bold;
         text-align: center;
         font-size: 12px;
@@ -6023,7 +6167,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 18px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     
@@ -6044,7 +6188,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 12px;
         color:var(--subtext-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
     
     .notification p{
@@ -6056,7 +6200,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 16px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     
@@ -6068,7 +6212,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 18px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     
@@ -6081,7 +6225,7 @@ noscript .noscript_modal .inner .center_text p{
         text-align: right;
         font-size: 12px;
         color:var(--subtext-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
     
     .notification a{
@@ -6092,7 +6236,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 16px;
         color:var(--link-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
 
@@ -6103,7 +6247,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 18px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     
@@ -6124,7 +6268,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 12px;
         color:var(--subtext-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
     
     .notification2 p{
@@ -6136,7 +6280,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 16px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     
@@ -6148,7 +6292,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 18px;
         color:var(--text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     
@@ -6161,7 +6305,7 @@ noscript .noscript_modal .inner .center_text p{
         text-align: right;
         font-size: 12px;
         color:var(--subtext-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
     }
     
     .notification2 a{
@@ -6172,7 +6316,7 @@ noscript .noscript_modal .inner .center_text p{
         font-size: 16px;
         color:var(--link-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
    
@@ -6230,7 +6374,7 @@ noscript .noscript_modal .inner .center_text p{
         padding-bottom: 6px;
         border-radius: 50px;
         font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         font-weight: normal;
         text-decoration:none;
         text-align: center;
@@ -6258,7 +6402,7 @@ noscript .noscript_modal .inner .center_text p{
         padding-bottom: 6px;
         border-radius: 50px;
         font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         font-weight: normal;
         text-decoration:none;
         text-align: center;
@@ -6308,7 +6452,7 @@ noscript .noscript_modal .inner .center_text p{
     .Image_modal .modal-content {
         padding: 0px;
         border-radius: 15px;
-        width: fit-content;
+        width: 100%;
         height: fit-content;
         max-width: 90%;
         max-height: 90dvh;
@@ -6378,7 +6522,7 @@ noscript .noscript_modal .inner .center_text p{
         padding-top: 8px;
         padding-bottom: 8px;
         color:#FCFAF2;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: bold;
     }
     .hny .textmain{
@@ -6392,7 +6536,7 @@ noscript .noscript_modal .inner .center_text p{
         background-color: transparent;
         text-align: left;
         color:var(--text-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         overflow-wrap:break-word;
         font-size: 22px;
         line-height: 32px;
@@ -6403,7 +6547,7 @@ noscript .noscript_modal .inner .center_text p{
         margin: 0px;
         text-align: left;
         color:var(--text-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         overflow-wrap:break-word;
         font-size: 16px;
         line-height: 22px;
@@ -6413,7 +6557,7 @@ noscript .noscript_modal .inner .center_text p{
         margin-top: 6px;
         text-align: right;
         color:var(--text-color);
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         overflow-wrap:break-word;
         font-size: 14px;
         line-height: 22px;
@@ -6465,7 +6609,7 @@ noscript .noscript_modal .inner .center_text p{
         border-radius: 50px;
         color:var(--main-color);
         font-size: 18px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         font-weight: normal;
         text-decoration:none;
         text-align: left;
@@ -6517,7 +6661,7 @@ noscript .noscript_modal .inner .center_text p{
         fill: currentColor;
     }
     .menubutton div{
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         word-wrap: break-word;
         font-size: 12px;
         line-height: 22px;
@@ -6613,6 +6757,49 @@ noscript .noscript_modal .inner .center_text p{
         width: auto;
         height: fit-content;
     }
+
+    .tutorial_background .tutorial_modal{
+        padding: 0px;
+        border-radius: 0px;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+    .tutorial_background .tutorial_modal .tutorial{
+        margin: 64px 32px;
+        height: calc(100% - 128px);
+        width: calc(100% - 64px);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page h1{
+        line-height: 32px;
+        font-size: 28px;
+    }
+    .tutorial_background .tutorial_modal .tutorial .page h2{
+        line-height: 28px;
+        font-size: 22px;
+    }
+    .tutorial_background .tutorial_modal .tutorial .page p{
+        line-height: 20px;
+        font-size: 18px;
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn{
+        width:30%;
+        padding: 4px 8px;
+        margin-left: 12px;
+        margin-right: 0px;
+        font-size: 22px;
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn:hover{
+        width:31%;
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn:active{
+        width:29%;
+    }
 }
 
 /*------------------------------------------------------------------------------------------------------------*/
@@ -6666,7 +6853,7 @@ noscript .noscript_modal .inner .center_text p{
     main h1{
         color:var(--sub-color);
         font-size: 32px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
     }
 
 
@@ -6933,7 +7120,7 @@ noscript .noscript_modal .inner .center_text p{
         color:var(--main-color);
         border: 1px solid var(--main-color);
         font-size: 16px;
-        font-family: 'Zen Maru Gothic', sans-serif;
+        font-family: var(--Head-fonts), sans-serif;
         font-weight: normal;
         text-decoration:none;
         text-align: center;
@@ -7285,7 +7472,7 @@ noscript .noscript_modal .inner .center_text p{
         border-radius: 5px;
         font-size: calc(100% - 2px);
         text-decoration: none;
-        font-family: 'BIZ UDGothic', sans-serif;
+        font-family: var(--Mono-fonts), sans-serif;
         font-weight: bold;
         vertical-align: top;
     }
@@ -7312,7 +7499,7 @@ noscript .noscript_modal .inner .center_text p{
         padding-bottom: 4px;
         color:var(--dark-text-color);
         text-decoration: none;
-        font-family: 'BIZ UDPGothic', sans-serif;
+        font-family: var(--Text-fonts), sans-serif;
         font-weight: normal;
     }
     
@@ -7474,13 +7661,13 @@ noscript .noscript_modal .inner .center_text p{
     .overview p{
         color: var(--dark-text-color);
         font-size: 32px;
-        font-family: 'BIZ UDGothic', sans-serif;
+        font-family: var(--Mono-fonts), sans-serif;
         font-weight: bold;
     }
     .overview .p2{
         color: var(--dark-subtext-color);
         font-size: 12px;
-        font-family: 'BIZ UDGothic', sans-serif;
+        font-family: var(--Mono-fonts), sans-serif;
         font-weight: normal;
     }
     .servericon img{
@@ -7527,7 +7714,36 @@ noscript .noscript_modal .inner .center_text p{
         text-align: center;
         color:#CCC;
         font-size: 14px;
-        font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+        font-family: var(--Mono-fonts), 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
         font-weight: normal;
+    }
+
+    .tutorial_background .tutorial_modal{
+        background-color: var(--dark-background-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page h1{
+        color:var(--dark-text-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page h2{
+        color:var(--dark-text-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page p{
+        color:var(--dark-text-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn{
+        background-color: var(--main-color);
+        color:var(--dark-sub-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .iro_btn:hover{
+        background-color: var(--main-color);
+        color:var(--dark-sub-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .backcolor{
+        background-color: var(--dark-background-color);
+        color: var(--dark-text-color);
+    }
+    .tutorial_background .tutorial_modal .tutorial .page .btm_area .backcolor:hover{
+        background-color: var(--dark-background-color);
+        color: var(--dark-text-color);
     }
 }

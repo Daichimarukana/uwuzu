@@ -3,10 +3,15 @@
 <?php
 
 require('../db.php');
+//関数呼び出し
+//- php.iniのファイル最大サイズ
+require('../function/function.php');
 
 session_name('uwuzu_s_id');
 session_start();
 
+$mojisizefile = "../server/textsize.txt";
+$mojisize = htmlentities(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8');
 
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
@@ -124,6 +129,10 @@ $count4 = $result4->num_rows;
             echo $info.'<br>';
         }?></p>
     <hr>
+    <h4>制限</h4>
+    <p>ファイルサイズの上限 : <?php echo x1024(x1024(File_MaxUploadSize()));?>MB</p>
+    <p>ユーズの文字数の上限 : <?php echo $mojisize;?>文字</p>
+    <hr>
 
     <h4>管理者情報</h4>
     <p>管理者名 : <?php echo htmlspecialchars($serversettings["serverinfo"]["server_admin"], ENT_QUOTES, 'UTF-8');?></p>
@@ -160,7 +169,7 @@ $count4 = $result4->num_rows;
     <?php }?>
     <hr>
     <h4>サーバーソフトウェア</h4>
-    <div class="p3"><?php echo $uwuzuinfo[0];?></div>
+    <div class="p3" translate="no"><?php echo $uwuzuinfo[0];?></div>
     <div class="p2c">Version : <?php echo $uwuzuinfo[1];?><br>Developer : <?php echo $uwuzuinfo[3];?><br>Last Update : <?php echo $uwuzuinfo[2];?></div>
 
     <a href = "javascript:history.back();" class="irobutton">戻る</a>

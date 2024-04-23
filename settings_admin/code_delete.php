@@ -2,9 +2,9 @@
 require('../db.php');
 
 if (htmlentities(isset($_POST['code'])) && htmlentities(isset($_POST['userid'])) && htmlentities(isset($_POST['account_id']))){
-    $postUserid = htmlentities($_POST['userid']);
-    $postCode= htmlentities($_POST['code']);
-    $loginid = htmlentities($_POST['account_id']);
+    $postUserid = htmlentities($_POST['userid'], ENT_QUOTES, 'UTF-8', false);
+    $postCode= htmlentities($_POST['code'], ENT_QUOTES, 'UTF-8', false);
+    $loginid = htmlentities($_POST['account_id'], ENT_QUOTES, 'UTF-8', false);
 
     try {
         $option = array(

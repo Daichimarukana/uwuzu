@@ -1,4 +1,5 @@
 :root {
+    /*Maincolor*/
     --main-color: #FFC832;
     --sub-color: #FFFAE6;
     --background-color: #F5F5F5;
@@ -13,4 +14,10 @@
     --dark-background-color: #0c0c0c;
     --dark-subtext-color: #CCC;
     --dark-text-color: #FFF;
+    /*HeadingFonts*/
+    --Head-fonts: "Zen Maru Gothic";
+    /*TextFonts*/
+    --Text-fonts: "BIZ UDPGothic";
+    /*MonospacedFonts*/
+    --Mono-fonts: "BIZ UDGothic";
 }

@@ -185,10 +185,10 @@ $notificationcount = $notiData['notification_count'];
 
 if( !empty($_POST['role_btn_submit']) ) {
 
-	$rolename = htmlentities($_POST['rolename']);
-	$roleid = htmlentities($_POST['roleid']);
-	$rolecolor = htmlentities($_POST['rolecolor']);
-	$roleeffect = htmlentities($_POST['roleeffect']);
+	$rolename = htmlentities($_POST['rolename'], ENT_QUOTES, 'UTF-8', false);
+	$roleid = htmlentities($_POST['roleid'], ENT_QUOTES, 'UTF-8', false);
+	$rolecolor = htmlentities($_POST['rolecolor'], ENT_QUOTES, 'UTF-8', false);
+	$roleeffect = htmlentities($_POST['roleeffect'], ENT_QUOTES, 'UTF-8', false);
 
 	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 	$query = $dbh->prepare('SELECT * FROM role WHERE roleidname = :roleid limit 1');
@@ -269,7 +269,7 @@ if( !empty($_POST['role_btn_submit']) ) {
 	}
 }
 if( !empty($_POST['role_del']) ) {
-	$role_id = htmlentities($_POST['role_id']);
+	$role_id = htmlentities($_POST['role_id'], ENT_QUOTES, 'UTF-8', false);
 	try{
 		// 通知削除クエリを実行
 		$deleteQuery = $pdo->prepare("DELETE FROM role WHERE roleidname = :roleid");
@@ -319,8 +319,8 @@ if( !empty($_POST['role_del']) ) {
 
 
 if( !empty($_POST['send_add_role_submit']) ) {
-	$add_userid = htmlentities($_POST['add_userid']);
-	$add_roleid = htmlentities($_POST['add_roleid']);
+	$add_userid = htmlentities($_POST['add_userid'], ENT_QUOTES, 'UTF-8', false);
+	$add_roleid = htmlentities($_POST['add_roleid'], ENT_QUOTES, 'UTF-8', false);
 
 	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 	$query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
@@ -371,8 +371,8 @@ if( !empty($_POST['send_add_role_submit']) ) {
 	}
 }
 if( !empty($_POST['send_del_role_submit']) ) {
-	$del_userid = htmlentities($_POST['del_userid']);
-	$del_roleid = htmlentities($_POST['del_roleid']);
+	$del_userid = htmlentities($_POST['del_userid'], ENT_QUOTES, 'UTF-8', false);
+	$del_roleid = htmlentities($_POST['del_roleid'], ENT_QUOTES, 'UTF-8', false);
 
 	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 	$query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');

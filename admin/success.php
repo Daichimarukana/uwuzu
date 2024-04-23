@@ -65,12 +65,12 @@ if($result2 > 0){
 	exit;
 }
 
-$servernamefile = "../server/servername.txt";
-if(!(empty($_SESSION['backupcode']))){
-    $backupcode = $_SESSION['backupcode'];
-}else{
-    $backupcode = null;
+$_SESSION = array();
+if (isset($_COOKIE[session_name()])) {
+    setcookie(session_name(), '', time()-1000, '/');
 }
+session_destroy();
+
 ?>
 
 <!DOCTYPE html>
@@ -85,7 +85,7 @@ if(!(empty($_SESSION['backupcode']))){
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>アカウント登録完了!!! - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>管理者アカウント登録完了!!! - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
 <script src="back.js"></script>
@@ -99,9 +99,9 @@ if(!(empty($_SESSION['backupcode']))){
     </div>
 
     <div class="textbox">
-        <h1>アカウント作成完了！</h1>
+        <h1>管理者アカウント登録完了！</h1>
         <p><br>いぇ～い！</p>
-        <p>88888888888</p>
+        <p>🎉🎉🎉🎊🎊🎊✨✨✨</p>
         <p>管理者アカウントの登録が完了しました！</p>
         <p>以下のログインボタンよりログインしてください！<br>ログイン後は画面左側メニューの「サーバー設定」よりサーバーの情報を設定することをおすすめします！<br>また、左側メニューの「設定」から二段階認証の設定をすることもおすすめします。</p>
 

@@ -190,7 +190,7 @@ if( !empty($pdo) ) {
 		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
 	));
 
-	$userQuery = $dbh->prepare("SELECT userid,token FROM account WHERE userid = :userid");
+	$userQuery = $dbh->prepare("SELECT userid,token,role FROM account WHERE userid = :userid");
 	$userQuery->bindValue(':userid', $userid);
 	$userQuery->execute();
 	$userData = $userQuery->fetch();
@@ -478,6 +478,10 @@ if( !empty($_POST['token_off_submit']) ) {
 
 }
 
+if( !empty($_POST['cache_submit']) ) {
+	header("Location: cache_clear.php");
+	exit; 
+}
 
 require('../logout/logout.php');
 
@@ -516,6 +520,28 @@ require('../logout/logout.php');
 		<input type="submit" class = "irobutton" name="session_submit" value="セッショントークン再生成">
 
 		<hr>
+
+		<h1>キャッシュクリア</h1>
+		<p>下のボタンを押すことでキャッシュクリアが可能です。</p>
+		<div class="p2">この機能は試験的なものであり、正常に動作しない可能性があります。</div>
+		<input type="submit" class = "irobutton" name="cache_submit" value="キャッシュクリア">
+
+		<hr>
+
+		<h1>チュートリアル</h1>
+		<p>uwuzuの基礎的なチュートリアルを行うことができます！</p>
+		<input type="button" class = "irobutton" id="tutorial" value="チュートリアル">
+
+		<hr>
+		<h1>他のサーバーへアカウント移行</h1>
+		<p>uwuzuサーバー同士でのアカウント移行が可能になりました！</p>
+		<?php if($userData['token']==='ice'){ ?>
+			<p>このアカウントは凍結されているため移行できません。</p>
+		<?php }else{ ?>
+			<a href="account_migration" class="irobutton">アカウント移行</a>
+		<?php }?>
+
+		<hr>
 		<h1>アカウント削除</h1>
 		<p>アカウント誤削除を防ぐため下の入力ボックスにご自身のユーザーIDを入力する必要があります。</p>
 		<?php if($res["admin"] === "yes"){?>
@@ -529,39 +555,14 @@ require('../logout/logout.php');
 		
 		<hr>
 		<h1>API</h1>
-		<p>APIの簡単な使用法です。</p>
-		<hr>
-		<li>サーバー情報取得API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/serverinfo-api</div>
-		<p>これによりサーバーの各種情報を取得できます。</p>
-		<hr>
-		<li>ユーザー情報取得API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getuser_from_userid&userid=[ユーザーID]</div>
-		<p>これによりユーザーのユーザーネーム(user_name)、プロフィール(profile)、登録日時(registered_date)、フォローしている人一覧(follow)、フォロワー一覧(follower)、フォロー・フォロワー数(follow_cnt,follower_cnt)が取得できます。</p>
-		<hr>
-		<li>単独投稿取得API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getueuse&ueuseid=[投稿の詳細ページのリンクより投稿のID(!より後、~より手前の文字列)]</div>
-		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。</p>
-		<hr>
-		<li>ローカルタイムライン投稿取得API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getltl&limit=[取得件数]&page=[ページ切り替え]</div>
-		<p>これにより投稿内容(ueuse)と、ユーザーネーム(user_name)、ユーザーID(userid)、投稿ID(uniqid)、写真・動画URL(photo1,photo2,video1)、いいねした人一覧(favorite)、いいね数(favorite_cnt)、投稿日時(datetime)、追記内容(abi)、追記日時(abidatetime)が取得できます。<br>page=は指定しなくても動作します。(https://[ドメイン名(uwuzu.netなど)]/api/ltl-api?limit=[取得件数])</p>
-		<hr>
-		<li>投稿API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=post&ueuse=[投稿の内容]</div>
-		<hr>
-		<li>アクセストークンからユーザー情報取得API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=getuser</div>
-		<hr>
-		<li>返信API</li>
-		<div class="p2">https://<?php echo htmlentities($domain, ENT_QUOTES, 'UTF-8');?>/api/bot-api?token=[アクセストークン]&type=reply&uniqid=[返信先のuniqid]&ueuse=[返信の内容]</div>
-		<hr>
+		<p>APIの使用方法はuwuzu.comよりAPIドキュメントをご確認ください。</p>
+
 		<?php 
 			if(empty($userData['token'])){
 		?>
 		<p>以下のボタンよりアクセストークンを取得すると使用できます。<br>アクセストークンは一度発行すると作り直すまで再度確認はできません。また、絶対に他人に知られないように保護してください。<p>
 		<input type="submit" class = "irobutton" name="token_submit" value="アクセストークン発行">
-		<?php }elseif($userData['token']==='ice'){ ?>
+		<?php }elseif($userData['role']==='ice'){ ?>
 			<p>アクセストークンはアカウントが凍結されているため発行できません。</p>
 		<?php }else{ ?>
 			<p>以下のボタンよりアクセストークンを削除できます。ボタンを押すとすぐに削除されますのでご注意ください。</p>
@@ -592,11 +593,15 @@ require('../logout/logout.php');
 	<?php require('../require/rightbox.php');?>
 	<?php require('../require/botbox.php');?>
 	<?php require('../require/noscript_modal.php');?>
+	<?php require('../require/tutorial.php');?>
 </body>
 </html>
 
 <script>
 $(document).ready(function() {
+	$('#tutorial').on('click', function() {
+		$(".tutorial_background").show();
+	});
 
 	var modal = document.getElementById('help_me_Modal');
     var cancelButton = document.getElementById('cancelButton');

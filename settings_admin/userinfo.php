@@ -231,12 +231,12 @@ if( !empty($_POST['send_ice_submit']) ) {
 
 	$newrole = "ice";
 	$newtoken = "ice";
-	$newadmin = "user";
+	$newadmin = "none";
 	// トランザクション開始
 	$pdo->beginTransaction();
 
 	try {
-		$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8');
+		$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8', false);
 		// SQL作成
 		$stmt = $pdo->prepare("UPDATE account SET role = :role,token = :newtoken,admin = :newadmin WHERE userid = :userid");
 
@@ -264,8 +264,8 @@ if( !empty($_POST['send_ice_submit']) ) {
 		if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){
 			if( !empty($userdata["mailadds"]) ){
 				if(filter_var($userdata["mailadds"], FILTER_VALIDATE_EMAIL)){
-					$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは凍結されました";
-					$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."管理者により凍結されたためお知らせいたします。  サービス管理者からのメッセージは以下のものです。    ". $notice_msg ."    異議申し立てする場合は[".htmlentities($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8')."]まで異議申し立てをする旨を記載し送信をしてください。";
+					$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."アカウントは凍結されました";
+					$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."管理者により凍結されたためお知らせいたします。  サービス管理者からのメッセージは以下のものです。    ". $notice_msg ."    異議申し立てする場合は[".htmlentities($serversettings["serverinfo"]["server_admin_mailadds"], ENT_QUOTES, 'UTF-8', false)."]まで異議申し立てをする旨を記載し送信をしてください。";
 
 					send_html_mail($userdata["mailadds"],$mail_title,$mail_text,"../");
 				}
@@ -277,7 +277,7 @@ if( !empty($_POST['send_ice_submit']) ) {
 	$pdo->beginTransaction();
 
 		try {
-			$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8');
+			$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8', false);
 			$datetime = date("Y-m-d H:i:s");
 			$msg = "サービス管理者からのメッセージは以下のものです。\n" . $notice_msg . "\n異議申し立てする場合は連絡用メールに異議申し立てをする旨を記載し送信をしてください。";
 			$title = "🧊お使いのアカウントは凍結されました。🧊";
@@ -324,7 +324,7 @@ if( !empty($_POST['send_water_submit']) ) {
 	$pdo->beginTransaction();
 
 	try {
-		$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8');
+		$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8', false);
 		// SQL作成
 		$stmt = $pdo->prepare("UPDATE account SET role = :role,token = :newtoken,admin = :newadmin WHERE userid = :userid");
 
@@ -352,7 +352,7 @@ if( !empty($_POST['send_water_submit']) ) {
 		if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){
 			if( !empty($userdata["mailadds"]) ){
 				if(filter_var($userdata["mailadds"], FILTER_VALIDATE_EMAIL)){
-					$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは解凍されました！";
+					$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."アカウントは解凍されました！";
 					$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が解凍されたためお知らせいたします。  今後、ご利用のuwuzuアカウントは今まで通りご利用いただけます。  また、APIを使用している方はAPIのトークンがリセットされているため再度トークンを発行してご利用ください。";
 
 					send_html_mail($userdata["mailadds"],$mail_title,$mail_text,"../");
@@ -365,7 +365,7 @@ if( !empty($_POST['send_water_submit']) ) {
 	$pdo->beginTransaction();
 
 		try {
-			$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8');
+			$touserid = htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8', false);
 			$datetime = date("Y-m-d H:i:s");
 			$msg = "サービス管理者によりお使いのアカウントは解凍されました！\n今まで通りご利用いただけます。\nまた、APIを使用している方はAPIのトークンがリセットされているため再度トークンを発行してご利用ください。";
 			$title = "🫗お使いのアカウントが解凍されました！🫗";
@@ -535,8 +535,8 @@ if( !empty($_POST['send_ban_submit']) ) {
 			if(!empty(MAIL_CHKS && MAIL_CHKS == "true")){
 				if( !empty($userdata["mailadds"]) ){
 					if(filter_var($userdata["mailadds"], FILTER_VALIDATE_EMAIL)){
-						$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントはBANされました";
-						$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  この度、ご利用のアカウント(".$userdata["userid"].")が".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."管理者によりBAN(削除)されたためお知らせいたします。  今後は今までご利用いただいた".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."アカウントは利用できません。  ".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8')."サーバー上から今までご利用いただいていたアカウントの情報は削除されたためログインなどもできません。    ご理解とご協力のほどよろしくお願いします。";
+						$mail_title = "お使いの".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."アカウントはBANされました";
+						$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  この度、ご利用のアカウント(".$userdata["userid"].")が".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."管理者によりBAN(削除)されたためお知らせいたします。  今後は今までご利用いただいた".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."アカウントは利用できません。  ".htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false)."サーバー上から今までご利用いただいていたアカウントの情報は削除されたためログインなどもできません。    ご理解とご協力のほどよろしくお願いします。";
 
 						send_html_mail($userdata["mailadds"],$mail_title,$mail_text,"../");
 					}
@@ -576,7 +576,7 @@ require('../logout/logout.php');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ユーザー管理 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>ユーザー管理 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -599,8 +599,8 @@ require('../logout/logout.php');
 				<div class="icon">
 					<img src="<?php echo htmlentities('../'.$userdata['iconname']); ?>">
 					<div class="tatext">
-						<h2><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?></h2>
-						<p>@<?php echo htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8'); ?></p>
+						<h2><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?></h2>
+						<p>@<?php echo htmlentities($userdata['userid'], ENT_QUOTES, 'UTF-8', false); ?></p>
 					</div>
 				</div>
 
@@ -629,12 +629,12 @@ require('../logout/logout.php');
 			
 				<div class="profile">
 					<div class="p2">プロフィール</div>
-					<p><?php echo nl2br(htmlentities($userdata["profile"], ENT_QUOTES, 'UTF-8')); ?></p>
+					<p><?php echo nl2br(htmlentities($userdata["profile"], ENT_QUOTES, 'UTF-8', false)); ?></p>
 				</div>
 				<hr>
 				<div class="about">
 					<div class="p2">メールアドレス</div>
-					<p><?php if( !empty($userdata["mailadds"]) ){ echo htmlentities($userdata["mailadds"], ENT_QUOTES, 'UTF-8'); }else{echo "未設定";} ?></p>   
+					<p><?php if( !empty($userdata["mailadds"]) ){ echo htmlentities($userdata["mailadds"], ENT_QUOTES, 'UTF-8', false); }else{echo "未設定";} ?></p>   
 					<hr>
 					<div class="p2">二段階認証</div>
 					<p><?php if( !empty($userdata["authcode"]) ){ echo "設定済み";}else{echo "未設定";}  ?></p>
@@ -643,15 +643,15 @@ require('../logout/logout.php');
 					<p><?php if( !empty($userdata["admin"] === "yes") ){ echo "あり";}else{echo "なし";}  ?></p>
 					<hr>
 					<div class="p2">フォロー数</div>
-					<p><?php if( $followCount > 0 ){ echo htmlentities($followCount, ENT_QUOTES, 'UTF-8');}else{echo "なし";}  ?></p>
+					<p><?php if( $followCount > 0 ){ echo htmlentities($followCount, ENT_QUOTES, 'UTF-8', false);}else{echo "なし";}  ?></p>
 					<div class="p2">フォロワー数</div>
-					<p><?php if( $followerCount > 0 ){ echo htmlentities($followerCount, ENT_QUOTES, 'UTF-8');}else{echo "なし";}  ?></p>
+					<p><?php if( $followerCount > 0 ){ echo htmlentities($followerCount, ENT_QUOTES, 'UTF-8', false);}else{echo "なし";}  ?></p>
 					<hr>
 					<div class="p2">投稿数</div>
 					<p><?php if( $upload_cnt1 > 0 ){ echo $upload_cnt1;}else{echo "なし";}  ?></p>
 					<hr>
 					<div class="p2">アカウント登録日時</div>
-					<p><?php echo htmlentities($userdata["datetime"], ENT_QUOTES, 'UTF-8'); ?></p>
+					<p><?php echo htmlentities($userdata["datetime"], ENT_QUOTES, 'UTF-8', false); ?></p>
 					<hr>
 					<div class="p2">アカウント操作</div>
 					<div class="banzone">
@@ -670,9 +670,9 @@ require('../logout/logout.php');
 	<div id="account_IceModal" class="modal">
 		<div class="modal-content">
 			<h1>このアカウントを凍結しますか？</h1>
-			<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントを凍結しますか？<br>凍結すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんは以下のことができなくなります。<br>・投稿<br>・追記<br>・フォロー<br>・返信<br>・管理者権限の利用(管理者権限を持っていた場合)<br>・APIの使用(トークンがリセットされます)<br>また、以下の欄に入力した内容が個別メッセージとして通知欄に表示されます。<br><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんは異議申し立てが可能です。</p>
+			<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんのアカウントを凍結しますか？<br>凍結すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんは以下のことができなくなります。<br>・投稿<br>・追記<br>・フォロー<br>・返信<br>・管理者権限の利用(管理者権限を持っていた場合)<br>・APIの使用(トークンがリセットされます)<br>また、以下の欄に入力した内容が個別メッセージとして通知欄に表示されます。<br><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんは異議申し立てが可能です。</p>
 			<form method="post" id="deleteForm">
-			<textarea id="notice_msg" placeholder="<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんへのメッセージ" name="notice_msg"></textarea>
+			<textarea id="notice_msg" placeholder="<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんへのメッセージ" name="notice_msg"></textarea>
 				<div class="btn_area">
 					<input type="submit" id="deleteButton" class="fbtn_no" name="send_ice_submit" value="凍結">
 					<input type="button" id="cancelButton" class="fbtn" value="キャンセル">
@@ -684,7 +684,7 @@ require('../logout/logout.php');
 	<div id="account_BanModal" class="modal">
 		<div class="modal-content">
 			<h1>このアカウントをBANしますか？</h1>
-			<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントをBANしますか？<br>BANすると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントとは削除されます。<br>また、以下のデータも削除されます。<br>・アカウントに紐づいている画像や写真データ<br>・投稿<br>・フォロー情報やいいね情報<br>・APIトークン<br>・アカウントのメールアドレス<br>・その他アカウントに関連している情報<br>また、すぐに削除されるため本人に削除通知を送ることは出来ません。<br><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントを削除する場合は「BAN」を押してください。<br>アカウントの復旧は出来ません。</p>
+			<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんのアカウントをBANしますか？<br>BANすると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんのアカウントとは削除されます。<br>また、以下のデータも削除されます。<br>・アカウントに紐づいている画像や写真データ<br>・投稿<br>・フォロー情報やいいね情報<br>・APIトークン<br>・アカウントのメールアドレス<br>・その他アカウントに関連している情報<br>また、すぐに削除されるため本人に削除通知を送ることは出来ません。<br><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんのアカウントを削除する場合は「BAN」を押してください。<br>アカウントの復旧は出来ません。</p>
 			<form class="btn_area" method="post" id="deleteForm">
 				<input type="submit" id="deleteButton2" class="fbtn_no" name="send_ban_submit" value="BAN">
 				<input type="button" id="cancelButton2" class="fbtn" value="キャンセル">
@@ -695,7 +695,7 @@ require('../logout/logout.php');
 	<div id="account_WaterModal" class="modal">
 		<div class="modal-content">
 			<h1>このアカウントを解凍しますか？</h1>
-			<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんのアカウントを解凍しますか？<br>凍結すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8'); ?>さんは今まで通りアカウントを使用できます。</p>
+			<p><?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんのアカウントを解凍しますか？<br>凍結すると<?php echo htmlentities($userdata['username'], ENT_QUOTES, 'UTF-8', false); ?>さんは今まで通りアカウントを使用できます。</p>
 			<form method="post" id="deleteForm">
 				<div class="btn_area">
 					<input type="submit" id="deleteButton3" class="fbtn_no" name="send_water_submit" value="解凍">

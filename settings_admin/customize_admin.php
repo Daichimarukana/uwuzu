@@ -6,6 +6,9 @@ $serversettings = parse_ini_file($serversettings_file, true);
 $colorfile = "../css/color.css";
 $color_info = file_get_contents($colorfile);
 
+$fontfile = "../css/font.css";
+$font_info = file_get_contents($fontfile);
+
 $manifestfile = "../manifest/manifest.json";
 $manifest_info = file_get_contents($manifestfile);
 
@@ -235,13 +238,20 @@ if (!empty($pdo)) {
 
 if( !empty($_POST['btn_submit']) ) {
 
-    // 空白除去
+	//htmlentitiesで変換すると死ぬので注意
 	$colordata = $_POST['colordata'];
+	$fontdata = $_POST['fontdata'];
 	$manifestdata = $_POST['manifestdata'];
 
-	//鯖名
+	//色等変数
 	$file = fopen($colorfile, 'w');
 	$data = $colordata;
+	fputs($file, $data);
+	fclose($file);
+
+	//フォント呼び出し
+	$file = fopen($fontfile, 'w');
+	$data = $fontdata;
 	fputs($file, $data);
 	fclose($file);
 
@@ -268,7 +278,7 @@ require('../logout/logout.php');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>サーバーカスタマイズ - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>サーバーカスタマイズ - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -291,9 +301,15 @@ require('../logout/logout.php');
 					<h1>サーバーカスタマイズ</h1>
 					
 					<div>
-						<p>CSS</p>
+						<p>Color & Fontname CSS</p>
 						<div class="p2">ここで指定されている色が適用されます。<br>もし適用されなかった場合はキャッシュを削除し再読み込みしてください。<br>表示がおかしくなってしまった場合はカラーコードを再度確認してください。</div>
 						<textarea id="colordata" placeholder="CSS" class="inbox" type="text" name="colordata"><?php $sinfo = explode("\r", $color_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
+					</div>
+
+					<div>
+						<p>FontRequire CSS</p>
+						<div class="p2">ここで指定されている色が適用されます。<br>もし適用されなかった場合はキャッシュを削除し再読み込みしてください。<br>表示がおかしくなってしまった場合はカラーコードを再度確認してください。</div>
+						<textarea id="fontdata" placeholder="FontRequireCSS" class="inbox" type="text" name="fontdata"><?php $sinfo = explode("\r", $font_info); foreach ($sinfo as $info) { echo $info; }?></textarea>
 					</div>
 
 					<div>

@@ -75,16 +75,25 @@ function decode_yajirushi($postText){
     }else{
         $invitation_code = false;
     }
+    if(htmlspecialchars($serversettings["serverinfo"]["server_account_migration"], ENT_QUOTES, 'UTF-8') === "true"){
+        $account_migration = true;
+    }else{
+        $account_migration = false;
+    }
 
-        foreach ($notices as $value) {
-            $notices = array(
-                "title" => decode_yajirushi(htmlspecialchars_decode($value['title'])),
-                "note" => decode_yajirushi(htmlspecialchars_decode($value['note'])),
-                "editor" => decode_yajirushi(htmlspecialchars_decode($value['account'])),
-                "datetime" => decode_yajirushi(htmlspecialchars_decode($value['datetime'])),
-            );
+        if(!(empty($notices))){
+            foreach ($notices as $value) {
+                $notices = array(
+                    "title" => decode_yajirushi(htmlspecialchars_decode($value['title'])),
+                    "note" => decode_yajirushi(htmlspecialchars_decode($value['note'])),
+                    "editor" => decode_yajirushi(htmlspecialchars_decode($value['account'])),
+                    "datetime" => decode_yajirushi(htmlspecialchars_decode($value['datetime'])),
+                );
 
-            $notice[] = $notices;
+                $notice[] = $notices;
+            }
+        }else{
+            $notice[] = "";
         }
 
         $item = [
@@ -103,6 +112,7 @@ function decode_yajirushi($postText){
                 "max_ueuse_length" => (int)htmlspecialchars(file_get_contents($mojisizefile), ENT_QUOTES, 'UTF-8'),
 
                 "invitation_code" => $invitation_code,
+                "account_migration" => $account_migration,
 
                 "usage" => [
                     "users" => $count1,

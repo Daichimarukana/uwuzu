@@ -8,7 +8,7 @@ $serverstopfile = "../server/serverstop.txt";
 $domain = $_SERVER['HTTP_HOST'];
 
 if(!empty(file_get_contents($serverstopfile))){
-    $serverstop = htmlentities(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8'); 
+    $serverstop = htmlentities(file_get_contents($serverstopfile), ENT_QUOTES, 'UTF-8', false); 
 }else{
     $serverstop = "";
 }
@@ -197,26 +197,26 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 $notificationcount = $notiData['notification_count'];
 
 if( !empty($_POST['btn_submit']) ) {
-	$N_MAIL_ONOFF = $_POST['mailchks_onoff'];
+	$N_MAIL_ONOFF = htmlentities($_POST['mailchks_onoff'], ENT_QUOTES, 'UTF-8', false);
 
-	$N_MAIL_ADDS = $_POST['N_MAIL_ADDS'];
-	$N_MAIL_HOST = $_POST['N_MAIL_HOST'];
-	$N_MAIL_PORT = $_POST['N_MAIL_PORT'];
-	$N_MAIL_USER = $_POST['N_MAIL_USER'];
-	$N_MAIL_PASS = $_POST['N_MAIL_PASS'];
+	$N_MAIL_ADDS = htmlentities($_POST['N_MAIL_ADDS'], ENT_QUOTES, 'UTF-8', false);
+	$N_MAIL_HOST = htmlentities($_POST['N_MAIL_HOST'], ENT_QUOTES, 'UTF-8', false);
+	$N_MAIL_PORT = htmlentities($_POST['N_MAIL_PORT'], ENT_QUOTES, 'UTF-8', false);
+	$N_MAIL_USER = htmlentities($_POST['N_MAIL_USER'], ENT_QUOTES, 'UTF-8', false);
+	$N_MAIL_PASS = htmlentities($_POST['N_MAIL_PASS'], ENT_QUOTES, 'UTF-8', false);
 
-	$N_MAIL_SSL_ = $_POST['ssl_tls_none'];
+	$N_MAIL_SSL_ = htmlentities($_POST['ssl_tls_none'], ENT_QUOTES, 'UTF-8', false);
 
 	$New_Mail_Settings = "
 	<?php // メールサーバーの情報
-	define( 'MAIL_CHKS', '".htmlentities($N_MAIL_ONOFF)."');// trueならPHPMailerが有効
+	define( 'MAIL_CHKS', '".$N_MAIL_ONOFF."');// trueならPHPMailerが有効
 
-	define( 'MAIL_ADDS', '".htmlentities($N_MAIL_ADDS)."');
-	define( 'MAIL_HOST', '".htmlentities($N_MAIL_HOST)."');
-	define( 'MAIL_PORT', '".htmlentities($N_MAIL_PORT)."');
-	define( 'MAIL_USER', '".htmlentities($N_MAIL_USER)."');
-	define( 'MAIL_PASS', '".htmlentities($N_MAIL_PASS)."');
-	define( 'MAIL_SSL_', '".htmlentities($N_MAIL_SSL_)."');
+	define( 'MAIL_ADDS', '".$N_MAIL_ADDS."');
+	define( 'MAIL_HOST', '".$N_MAIL_HOST."');
+	define( 'MAIL_PORT', '".$N_MAIL_PORT."');
+	define( 'MAIL_USER', '".$N_MAIL_USER."');
+	define( 'MAIL_PASS', '".$N_MAIL_PASS."');
+	define( 'MAIL_SSL_', '".$N_MAIL_SSL_."');
 	?>
 	";
 
@@ -232,7 +232,7 @@ if( !empty($_POST['btn_submit']) ) {
 }
 
 if( !empty($_POST['testmail_send_btn_submit']) ) {
-	$test_mail_adds = $_POST['test_sender_adds'];
+	$test_mail_adds = htmlentities($_POST['test_sender_adds'], ENT_QUOTES, 'UTF-8', false);
 	
 	$mail_title = "Test email";
 	$mail_text = "これはuwuzuのテストメールです。  問題なく受信できていますか？";
@@ -252,7 +252,7 @@ require('../logout/logout.php');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>プラグイン - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>プラグイン - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -291,15 +291,15 @@ require('../logout/logout.php');
 						<div id="mail_plugin">
 							<p>PHPMailer - メールサーバー設定</p>
 							<div class="p2">メールアドレス</div>
-							<input id="mail_plugin" placeholder="user@localhost" class="inbox" type="text" name="N_MAIL_ADDS" value="<?php if( !empty(MAIL_ADDS) ){ echo htmlentities(MAIL_ADDS, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="user@localhost" class="inbox" type="text" name="N_MAIL_ADDS" value="<?php if( !empty(MAIL_ADDS) ){ echo htmlentities(MAIL_ADDS, ENT_QUOTES, 'UTF-8', false); } ?>">
 							<div class="p2">ホスト名</div>
-							<input id="mail_plugin" placeholder="smtp.mailserver.com" class="inbox" type="text" name="N_MAIL_HOST" value="<?php if( !empty(MAIL_HOST) ){ echo htmlentities(MAIL_HOST, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="smtp.mailserver.com" class="inbox" type="text" name="N_MAIL_HOST" value="<?php if( !empty(MAIL_HOST) ){ echo htmlentities(MAIL_HOST, ENT_QUOTES, 'UTF-8', false); } ?>">
 							<div class="p2">ポート番号</div>
-							<input id="mail_plugin" placeholder="465" class="inbox" type="text" name="N_MAIL_PORT" value="<?php if( !empty(MAIL_PORT) ){ echo htmlentities(MAIL_PORT, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="465" class="inbox" type="text" name="N_MAIL_PORT" value="<?php if( !empty(MAIL_PORT) ){ echo htmlentities(MAIL_PORT, ENT_QUOTES, 'UTF-8', false); } ?>">
 							<div class="p2">ユーザー名</div>
-							<input id="mail_plugin" placeholder="from@localhost" class="inbox" type="text" name="N_MAIL_USER" value="<?php if( !empty(MAIL_USER) ){ echo htmlentities(MAIL_USER, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="from@localhost" class="inbox" type="text" name="N_MAIL_USER" value="<?php if( !empty(MAIL_USER) ){ echo htmlentities(MAIL_USER, ENT_QUOTES, 'UTF-8', false); } ?>">
 							<div class="p2">パスワード</div>
-							<input id="mail_plugin" placeholder="password" class="inbox" type="text" name="N_MAIL_PASS" style="-webkit-text-security:disc;" value="<?php if( !empty(MAIL_PASS) ){ echo htmlentities(MAIL_PASS, ENT_QUOTES, 'UTF-8'); } ?>">
+							<input id="mail_plugin" placeholder="password" class="inbox" type="text" name="N_MAIL_PASS" style="-webkit-text-security:disc;" value="<?php if( !empty(MAIL_PASS) ){ echo htmlentities(MAIL_PASS, ENT_QUOTES, 'UTF-8', false); } ?>">
 							
 							<div class="p2">暗号化設定</div>
 							<div class="radio_btn_zone">

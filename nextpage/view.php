@@ -74,7 +74,7 @@ class MessageDisplay {
                 echo '    <div class="nsfw_main" data-uniqid="' . htmlentities($this->value['uniqid'], ENT_QUOTES, 'UTF-8', false) . '">';
                 echo '    <div class="block">';
             }
-            echo '    <p>' . processMarkdownAndWrapEmptyLines(replaceEmojisWithImages(replaceURLsWithLinks(nl2br(htmlentities($this->value['ueuse'], ENT_QUOTES, 'UTF-8', false))))) . '</h1></h2></h3></font></center></p>';
+            echo '    <p>' . replaceEmojisWithImages(processMarkdownAndWrapEmptyLines(replaceURLsWithLinks(nl2br(htmlentities($this->value['ueuse'], ENT_QUOTES, 'UTF-8', false))))) . '</h1></h2></h3></font></center></p>';
             
             if (!empty($this->value['photo4']) && $this->value['photo4'] !== 'none') {
                 echo '    <div class="photo4">';

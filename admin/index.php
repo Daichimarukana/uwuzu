@@ -36,43 +36,49 @@ $stmt = null;
 $res = null;
 $option = null;
 
-try {
+if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
+    try {
 
-    $option = array(
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    
+    } catch(PDOException $e) {
+    
+        // 接続エラーのときエラー内容を取得する
+        $error_message[] = $e->getMessage();
+    }
+    
+    $aduser = "yes";
+    
+    $options = array(
+        // SQL実行失敗時に例外をスルー
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        // デフォルトフェッチモードを連想配列形式に設定
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
+        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
     );
-    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-
-} catch(PDOException $e) {
-
-    // 接続エラーのときエラー内容を取得する
-    $error_message[] = $e->getMessage();
-}
-
-$aduser = "yes";
-
-$options = array(
-    // SQL実行失敗時に例外をスルー
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    // デフォルトフェッチモードを連想配列形式に設定
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-    // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-);
-
-$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-
-$query = $dbh->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
-
-$query->execute(array(':adminuser' => $aduser));
-
-$result2 = $query->fetch();
-
-if($result2 > 0){
-    header("Location: ../login.php");
-	exit;
+    
+    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    
+    $query = $dbh->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
+    
+    $query->execute(array(':adminuser' => $aduser));
+    
+    $result2 = $query->fetch();
+    
+    if($result2 > 0){
+        header("Location: ../login.php");
+        exit;
+    }
+    
+    $db_php = true;
+}else{
+    $db_php = false;
 }
 
 if (in_array("gd", get_loaded_extensions())) {
@@ -118,7 +124,7 @@ $pdo = null;
 <body>
 
 
-<div class="leftbox2">
+<div class="leftbox">
     <div class="logo">
         <img src="../img/uwuzulogo.svg">
     </div>
@@ -136,19 +142,37 @@ $pdo = null;
 
         <p>おめでとうございます！！！</p>
         <p>uwuzuの導入が完了しました！</p>
-        <p>これより管理者アカウントの登録を行います。<br>userロールとofficialロール、iceロールの設定はお済みですか？<br>userロールとofficialロール、iceロールがないとuwuzuは正しく動作しないので設定をしていない方は一度このページを閉じて設定してください！<br>また、php.iniよりGDの有効化または導入はお済みですか？GDがないとuwuzuは二段階認証が正しく動作しないため絶対に設定してください！</p>
+        <p>これよりuwuzuのセットアップを開始します！<br>
+            セットアップを始める前に、PHPの必須モジュールがインストールされているか、以下の欄をみてご確認ください。<br>
+            Not setが一つでもある場合は再度モジュールの設定を行ってください！<br>
+            <br>
+            <?php if($db_php == true){?>
+                db.phpの設定は済んでいるようですね、それでは早速セットアップを開始しましょう！
+            <?php }else{?>
+                また、uwuzuのセットアップを始める前に、以下の情報をあなたが知っている必要があります！<br>
+                - データベース名(空のデータベースを用意してください。)<br>
+                - データベースを管理できるユーザー名<br>
+                - データベースへアクセスできるユーザーのパスワード<br>
+                - データベースのホストアドレス<br>
+                これらの情報はuwuzuがデータベースを使用するために必要で、uwuzu導入フォルダ内のdb.phpに保存されます。<br>
+                もしこのあとうまくセットアップが継続できなければ手動でdb.phpに上の情報を保存してください！<br>
+                これらのデータをあなたが知っているのであれば早速セットアップを開始しましょう！<br>
+            <?php }?>
+            <br>
+            セットアップ中にエラーに遭遇した場合はuwuzu.comを確認し、解消に向けて取り組みましょう！</p>
         
         <div class="module_chk">
-            <p>GD : <?php if($check_gd == true){echo "OK";}else{echo "NG";}?></p>
-            <p>Fileinfo : <?php if($check_fileinfo == true){echo "OK";}else{echo "NG";}?></p>
-            <p>mbstring : <?php if($check_mbstring == true){echo "OK";}else{echo "NG";}?></p>
-            <p>pdo_mysql : <?php if($check_pdo_mysql == true){echo "OK";}else{echo "NG";}?></p>
+            <div class="p2">Already setが設定済みでNot setが未設定です。</div>
+            <p>GD : <?php if($check_gd == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
+            <p>Fileinfo : <?php if($check_fileinfo == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
+            <p>mbstring : <?php if($check_mbstring == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
+            <p>pdo_mysql : <?php if($check_pdo_mysql == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
         </div>
 
 
         <p>uwuzu<br>Version : <?php echo $uwuzuinfo[1]?></p>
-        <div class="btnbox">
-                <a href="addadmin.php" class="irobutton">次へ</a>
+            <div class="btnbox">
+                <a href="setup_db_php.php" class="irobutton">セットアップ開始！</a>
             </div>
         </div>
         
@@ -165,26 +189,6 @@ function checkForm(inputElement) {
     }
     inputElement.value = str;
 }
-
-
-window.addEventListener('DOMContentLoaded', function(){
-
-// ファイルが選択されたら実行
-document.getElementById("file_upload").addEventListener('change', function(e){
-
-  var file_reader = new FileReader();
-
-  // ファイルの読み込みを行ったら実行
-  file_reader.addEventListener('load', function(e) {
-    console.log(e.target.result);
-        const element = document.querySelector('#wrap');
-        const createElement = '<p>画像を選択しました。</p>';
-        element.insertAdjacentHTML('afterend', createElement);
-  });
-
-  file_reader.readAsText(e.target.files[0]);
-});
-});
 </script>
 
 

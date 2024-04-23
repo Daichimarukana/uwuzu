@@ -149,11 +149,11 @@ if ("serviceWorker" in navigator) {
 <div class="leftbox">
     <?php if(!empty(htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8'))){ ?>
         <div class="logo">
-            <a href="../index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
+            <a href="index.php"><img src=<?php echo htmlspecialchars($serversettings["serverinfo"]["server_logo_login"], ENT_QUOTES, 'UTF-8');?>></a>
         </div>
     <?php }else{?>
         <div class="logo">
-            <a href="../index.php"><img src="img/uwuzulogo.svg"></a>
+            <a href="index.php"><img src="img/uwuzulogo.svg"></a>
         </div>
     <?php }?>
 
@@ -206,11 +206,6 @@ if ("serviceWorker" in navigator) {
 
         <?php if(htmlspecialchars($serversettings["serverinfo"]["server_invitation"], ENT_QUOTES, 'UTF-8') === "true"){?>
             <p>このサーバーには招待コードがないと登録できません。<br>招待コードはお手元にありますか？</p>
-
-            <div class="btnbox">
-                <a href="new.php" class="irobutton">アカウント登録</a>
-                <a href="login.php" class="sirobutton">ログイン</a>
-            </div>
         <?php }else{?>
     
         <div class="cntzone">
@@ -223,11 +218,13 @@ if ("serviceWorker" in navigator) {
                 <p><?php echo $count2."<br>"?></p>
             </div>
         </div>
+        
+        <?php }?>
         <div class="btnbox">
-            <a href="new.php" class="irobutton">アカウント登録</a>
+            <a href="new_select.php" class="irobutton">アカウント登録</a>
             <a href="login.php" class="sirobutton">ログイン</a>
         </div>
-        <?php }?>
+        
         <div class="p2" style="margin-top:8px;margin-bottom:0px;"><?php echo $uwuzuinfo[0];?> Version <?php echo $uwuzuinfo[1];?></div>
     </div>
 </div>

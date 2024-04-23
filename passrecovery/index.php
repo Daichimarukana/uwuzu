@@ -213,7 +213,7 @@ $pdo = null;
 <title>パスワードの復元 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="../back.js"></script>
+<script src="../js/back.js"></script>
 <body>
 
 <div class="leftbox">

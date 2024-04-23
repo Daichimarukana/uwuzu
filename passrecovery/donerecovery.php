@@ -18,7 +18,7 @@ $serversettings = parse_ini_file($serversettings_file, true);
 <title>パスワード変更完了 - <?php echo htmlspecialchars($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
 </head>
 
-<script src="../back.js"></script>
+<script src="../js/back.js"></script>
 <body>
 
 

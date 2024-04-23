@@ -86,6 +86,15 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - used(varchar(25)) 使用済みかそうでないか
 - datetime(datetime) 招待コード仕様日時更新用
 
+### migration
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- account(varchar(512)) ユーザーID保存用
+- domain(varchar(1024)) 移行先サーバーのドメイン保存用
+- migration_code(varchar(256)) 識別コード
+- encryption_ivkey(varchar(256)) 暗号化用
+- encryption_key(varchar(256)) 暗号化用
+- datetime(datetime) 招待コード仕様日時更新用
+
 ### notice
 - sysid(INT)(AUTO_INCREMENT) うんえいからのおしらせが追加されるとカウントされるシステム用ID
 - uniqid(varchar(256)) ID保存用
@@ -154,16 +163,16 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - 503imagepath.txt : 503ページに表示する画像パス保存用
 - banurldomain.txt : 投稿禁止URLドメイン
 - banuserid.txt : 登録禁止ユーザーid
+- badpass.txt : 登録禁止パスワードリスト
 - info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
 - privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
 - serverstop.txt : サーバー停止ページで表示するメッセージ
 - terms.txt : 利用規約(サーバーの利用規約を記載)
 - textsize.txt : 最大文字数
 - serversettings.ini : サーバー情報保存ファイル
-- uwuzuabout.txt : このファイル(uwuzuを改造した場合は書き換え)
-- uwuzuinfo.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
-- uwuzurelease.txt : uwuzuのバージョン等記載(uwuzuを改造した場合は書き換え)
-- onlyuser.txt : 招待コード機能をオンにするかどうか、「true」でオン、「false」でオフ。招待コードはDBに直接追加。
+- uwuzuabout.txt : このファイル
+- uwuzuinfo.txt : uwuzuのバージョン等記載
+- uwuzurelease.txt : uwuzuのバージョン等記載
 
 ### これでサーバーは完成！！！
 もう一度サーバーを起動してみんなに公開しよう！！！(まだ脆弱性は残っていると思われます。公開する際は気をつけてください。私だいちまる及びPutonfpsは一切責任を負いません。)
@@ -173,9 +182,10 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 誰かが作ってくれたらありがたいな～()
 
 ## 7. 開発したいです！！！
-uwuzuを自分の思うように改造して使いたい場合はAGPLライセンスのもと改造後ソースコードを公開するということで改造してください！
+uwuzuを自分の思うように改造して使いたい場合はUPULライセンスのもと改造後ソースコードを公開するということで改造してください！
 場合によってはdaichimarukanaの作る本家(?)uwuzuにも改造で追加された機能が実装されるかも...()
 daichimarukanaと一緒に開発したいよ～って人は私のHPからメールとか某Xとかから連絡してくださいな～
+(uwuzuはv1.3.0よりAGPLからUPULに変更されました。)
 
 ## 8. ロゴは誰が作ったのですか？
 ロゴはまだない。

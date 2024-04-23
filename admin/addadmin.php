@@ -17,6 +17,10 @@ require('../function/function.php');
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
+$badpassfile = "../server/badpass.txt";
+$badpass_info = file_get_contents($badpassfile);
+$badpass = preg_split("/\r\n|\n|\r/", $badpass_info);
+
 session_name('uwuzu_s_id');
 session_set_cookie_params(0, '', '', true, true);
 session_start();
@@ -73,9 +77,6 @@ if($result2 > 0){
 
 
 if( !empty($_POST['btn_submit']) ) {
-
-
-    //$row['userid'] = "daichimarukn";
 
     // 空白除去
 	$username = $_POST['username'];
@@ -260,74 +261,7 @@ if( !empty($_POST['btn_submit']) ) {
 		$error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
 	} else {
 
-        $weakPasswords = array(
-            "password",
-            "123456",
-            "123456789",
-            "12345",
-            "12345678",
-            "123123",
-            "1234567890",
-            "1234567",
-            "1q2w3e",
-            "qwerty123",
-            "aa12345678",
-            "password1",
-            "1234",
-            "qwertyuiop",
-            "123321",
-            "12321",
-            "qwertyui",
-            "abcd1234",
-            "zaq12wsx",
-            "1q2w3e4r",
-            "qwer1234",
-            "sakura",
-            "asdf1234",
-            "asdfghjkl",
-            "asdfghjk",
-            "member",
-            "1qaz2wsx",
-            "doraemon",
-            "makoto",
-            "takeshi",
-            "machi1",
-            "machida",
-            "machida1",
-            "tokyo",
-            "arashi",
-            "dropbox",
-            "twitter",
-            "elonmusk",
-            "xcorp",
-            "1234qwer",
-            "japan",
-            "nippon",
-            "tukareta",
-            "tweet",
-            "discord",
-            "misskey",
-            "qwerty",
-            "123456789",
-            "abc123",
-            "password123",
-            "admin",
-            "letmein",
-            "iloveyou",
-            "111111",
-            "12345678910",
-            "user",
-            "root",
-            "system",
-            // 他にも弱いパスワードを追加できます
-        );
-        
-        function isWeakPassword($passwords) {
-            global $weakPasswords;
-            return in_array($passwords, $weakPasswords);
-        }
-
-        if (isWeakPassword($password)) {
+        if(in_array($password, $badpass) === true ){
             $error_message[] = "パスワードが弱いです。セキュリティ上変更してください。(PASSWORD_ZEIJAKU)";
         }
 
@@ -455,7 +389,7 @@ $pdo = null;
     <div class="textbox">
         <h1>アカウント登録</h1>
 
-        <p>アカウント登録です。</p>
+        <p>管理者アカウント登録です。</p>
         <p>必須項目には「*」があります。
 
             <?php if( !empty($error_message) ): ?>
@@ -470,11 +404,12 @@ $pdo = null;
 
         <div id="wrap">
             <div class="iconimg">
-                <img src="../img/deficon/icon.png">
+                <img id="iconimg" src="../img/deficon/icon.png">
             </div>
             <label class="irobutton" for="file_upload">ファイル選択
             <input type="file" id="file_upload" name="image" accept="image/*">
             </label>
+            <p id="img_select" style="display:none;">画像を選択しました</p>
         </div>
 
 
@@ -545,22 +480,14 @@ function checkForm(inputElement) {
 
 
 window.addEventListener('DOMContentLoaded', function(){
-
-// ファイルが選択されたら実行
-document.getElementById("file_upload").addEventListener('change', function(e){
-
-  var file_reader = new FileReader();
-
-  // ファイルの読み込みを行ったら実行
-  file_reader.addEventListener('load', function(e) {
-    console.log(e.target.result);
-        const element = document.querySelector('#wrap');
-        const createElement = '<p>画像を選択しました。</p>';
-        element.insertAdjacentHTML('afterend', createElement);
-  });
-
-  file_reader.readAsText(e.target.files[0]);
-});
+    $('#file_upload').change(function(e) {
+        var file_reader = new FileReader();
+        file_reader.addEventListener('load', function(e) {
+            $('#img_select').show();
+            $('#iconimg').attr('src', file_reader.result);
+        });
+        file_reader.readAsDataURL(e.target.files[0]);
+    });
 });
 </script>
 

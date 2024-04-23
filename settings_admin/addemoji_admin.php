@@ -214,41 +214,47 @@ if( !empty($pdo) ) {
 }
 
 if( !empty($_POST['btn_submit']) ) {
-	$emojiname = $_POST['emojiname'];
-    $emojiinfo = $_POST['emojiinfo'];
+	$emojiname = htmlentities($_POST['emojiname'], ENT_QUOTES, 'UTF-8', false);
+    $emojiinfo = htmlentities($_POST['emojiinfo'], ENT_QUOTES, 'UTF-8', false);
 
     if (!empty($_FILES['image']['name'])) {
         // アップロードされたファイル情報
 		$uploadedFile = $_FILES['image'];
 
+		if(filesize($uploadedFile['tmp_name']) > 256000){
+			$error_message[] = "絵文字のファイルサイズは256KB以下に押さえてください。(EMOJI_OVER_256KB)";
+		}
+
 		if(check_mime($uploadedFile['tmp_name'])){
-			// アップロードされたファイルの拡張子を取得
-			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-			
-			// 新しいファイル名を生成（uniqid + 拡張子）
-			$newFilename = uniqid() . '.' . $extension;
-			
-			// 保存先のパスを生成
-			$uploadedPath = 'emojiimage/' . $newFilename;
+			if(empty($error_message)){
+				// アップロードされたファイルの拡張子を取得
+				$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+				
+				// 新しいファイル名を生成（uniqid + 拡張子）
+				$newFilename = uniqid() . '.' . $extension;
+				
+				// 保存先のパスを生成
+				$uploadedPath = 'emojiimage/' . $newFilename;
 
-			// EXIF削除
-			delete_exif($extension2, $uploadedFile['tmp_name']);
+				// EXIF削除
+				delete_exif($extension, $uploadedFile['tmp_name']);
 
-			// ファイルを移動
-			$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
-			
-			if ($result) {
-				$emoji_path = $uploadedPath; // 保存されたファイルのパスを使用
-			} else {
-				$errnum = $uploadedFile['error'];
-				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+				// ファイルを移動
+				$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
+				
+				if ($result) {
+					$emoji_path = $uploadedPath; // 保存されたファイルのパスを使用
+				} else {
+					$errnum = $uploadedFile['error'];
+					if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+					if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+					if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+					if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+					if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+					if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+					if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+					$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+				}
 			}
 		}else{
 			$error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
@@ -363,7 +369,7 @@ $pdo = null;
 <script src="../js/jquery-min.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>絵文字登録 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8');?></title>
+<title>絵文字登録 - <?php echo htmlentities($serversettings["serverinfo"]["server_name"], ENT_QUOTES, 'UTF-8', false);?></title>
 
 </head>
 
@@ -375,13 +381,13 @@ $pdo = null;
 
 		<div class="admin_right">
 
-				<?php if( !empty($error_message) ): ?>
-					<ul class="errmsg">
-						<?php foreach( $error_message as $value ): ?>
-							<p>・ <?php echo $value; ?></p>
-						<?php endforeach; ?>
-					</ul>
-				<?php endif; ?>
+			<?php if( !empty($error_message) ): ?>
+				<ul class="errmsg">
+					<?php foreach( $error_message as $value ): ?>
+						<p>・ <?php echo $value; ?></p>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
 					
 			<form class="formarea" enctype="multipart/form-data" method="post">
 
@@ -391,7 +397,8 @@ $pdo = null;
 			<div class="p2">
 			注意 : uwuzuで表示されるカスタム絵文字の最大の大きさは縦64pxです。<br>
 			縦64px以上のカスタム絵文字を登録しても縮小されて表示されます。<br>
-			また、縦64px以上の画像をアップロードすると、uwuzuの動作が遅くなる恐れがあるため、絵文字の画像サイズは縦64pxを推奨します。</div>
+			最大ファイルサイズは256KBです。<br>
+			これはカスタム絵文字によってuwuzuが重たくならないようにするための仕様です。</div>
 
 			<div id="wrap">
 
@@ -403,12 +410,12 @@ $pdo = null;
 				<!--ユーザーネーム関係-->
 				<div>
 					<p>EmojiID</p>
-					<input id="username" onInput="checkForm(this)" placeholder="kusa" class="inbox" type="text" name="emojiname" value="<?php if( !empty($_SESSION['emojiname']) ){ echo htmlentities( $_SESSION['emojiname'], ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="username" onInput="checkForm(this)" placeholder="kusa" class="inbox" type="text" name="emojiname" value="<?php if( !empty($_SESSION['emojiname']) ){ echo htmlentities( $_SESSION['emojiname'], ENT_QUOTES, 'UTF-8', false); } ?>">
 				</div>
 
 				<div>
 					<p>この絵文字について</p>
-					<input id="username" placeholder="くさデス" class="inbox" type="text" name="emojiinfo" value="<?php if( !empty($_SESSION['emojiinfo']) ){ echo htmlentities( $_SESSION['emojiinfo'], ENT_QUOTES, 'UTF-8'); } ?>">
+					<input id="username" placeholder="くさデス" class="inbox" type="text" name="emojiinfo" value="<?php if( !empty($_SESSION['emojiinfo']) ){ echo htmlentities( $_SESSION['emojiinfo'], ENT_QUOTES, 'UTF-8', false); } ?>">
 				</div>
 
 				<div>
@@ -438,21 +445,21 @@ function checkForm(inputElement) {
 
 window.addEventListener('DOMContentLoaded', function(){
 
-// ファイルが選択されたら実行
-document.getElementById("file_upload").addEventListener('change', function(e){
+	// ファイルが選択されたら実行
+	document.getElementById("file_upload").addEventListener('change', function(e){
 
-  var file_reader = new FileReader();
+	var file_reader = new FileReader();
 
-  // ファイルの読み込みを行ったら実行
-  file_reader.addEventListener('load', function(e) {
-    console.log(e.target.result);
-        const element = document.querySelector('#wrap');
-        const createElement = '<p>画像を選択しました。</p>';
-        element.insertAdjacentHTML('afterend', createElement);
-  });
+	// ファイルの読み込みを行ったら実行
+		file_reader.addEventListener('load', function(e) {
+		
+			const element = document.querySelector('#wrap');
+			const createElement = '<p>画像を選択しました。</p>';
+			element.insertAdjacentHTML('afterend', createElement);
+		});
 
-  file_reader.readAsText(e.target.files[0]);
-});
+	file_reader.readAsText(e.target.files[0]);
+	});
 });
 </script>
 </html>

@@ -91,7 +91,9 @@ foreach ($sterms as $terms) {
     <div class="p2c"><?php echo $domain;?></div>
     <div class="p3"><?php echo $uwuzuinfo[0];?></div>
     <div class="p2c">Version : <?php echo $uwuzuinfo[1];?><br>Developer : <?php echo $uwuzuinfo[3];?><br>Last Update : <?php echo $uwuzuinfo[2];?></div>
-    
+    <?php if (date("md") == "0816") {?>
+        <div class="p2c">🎉今日はuwuzuの誕生日です！</div>
+    <?php }?>
 
     <p><?php echo $htmltext;?></p>
 

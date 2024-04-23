@@ -122,7 +122,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
                 if(!empty($messages)){
                     foreach ($messages as $value) {
-                        if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8'))) {
+                        if (false === strpos($myblocklist, ','.htmlentities($value['account'], ENT_QUOTES, 'UTF-8', false))) {
                             if(!($value["role"] === "ice")){
                                 $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数
                         
