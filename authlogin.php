@@ -230,7 +230,7 @@ if( !empty($_POST['btn_submit']) ) {
         if($result->rowCount() > 0) {
             $row = $result->fetch();
 
-            if(!(empty($row["encryption_ivkey"])) && (!($row["authcode"] === 16))){
+            if(!(empty($row["encryption_ivkey"])) && (!(mb_strlen($row["authcode"]) === 16))){
                 $tousercode = DecryptionUseEncrKey($row["authcode"], GenUserEnckey($row["datetime"]), $row["encryption_ivkey"]);
             }else{
                 $tousercode = $row["authcode"];

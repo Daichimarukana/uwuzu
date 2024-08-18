@@ -1,0 +1,17 @@
+{
+    "software": "uwuzu",
+    "version": "1.4.1",
+    "release_date": "2024-08-18",
+    "release_notes": "このアップデートでは二段階認証を設定しているユーザーがログインできない問題を修正しました。\n他の変更点はありません。",
+    "notices": "アップデートの前に、データのバックアップを行うことをおすすめします！",
+    "files": {
+        "overwrite": [
+            "/authlogin.php",
+            "/passrecovery/startrecovery.php",
+            "/server/uwuzuabout.txt",
+            "/server/uwuzuinfo.txt",
+            "/server/uwuzurelease.txt"
+        ],
+        "delete": []
+    }
+}
