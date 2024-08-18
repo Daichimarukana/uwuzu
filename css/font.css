@@ -1,0 +1,17 @@
+/*GoogleFontsから使用*/
+@import url('https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=BIZ+UDPGothic:wght@400;700&family=Zen+Maru+Gothic:wght@500&display=swap')
+
+/*
+ローカルから独自フォントを読み込む際はこれを使用
+color.cssの方のフォント変数にも同じ名前を書いて～
+@font-face {
+    font-family: 'HeadingFont';
+	src: url(/Fonts/HeadingFont.woff);
+
+    font-family: 'TextFont';
+	src: url(/Fonts/TextFont.woff);
+
+    font-family: 'MonospacedFont';
+	src: url(/Fonts/MOnospacedtFont.woff);
+}
+*/

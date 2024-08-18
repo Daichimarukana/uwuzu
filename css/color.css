@@ -1,0 +1,29 @@
+:root {
+    /*Maincolor*/
+    --main-color: #FFC832;
+    --sub-color: #FFFAE6;
+    --background-color: #F5F5F5;
+    --tl-color: #F7F7F7;
+    --ueuse-color:#f5f5f5;
+    --text-color: #252525;
+    --subtext-color: #999;
+    --link-color: #4e4428;
+    --border-color: #EEE;
+    /*Infocolor*/
+    --error: #FF4848;
+    --danger: #ff6a00;
+    --warn: #ffc400;
+    --good: #99cc00;
+    --success: #00cc4e;
+    /*Darkmode*/
+    --dark-sub-color: #181616;
+    --dark-background-color: #0c0c0c;
+    --dark-subtext-color: #CCC;
+    --dark-text-color: #FFF;
+    /*HeadingFonts*/
+    --Head-fonts: "Zen Maru Gothic";
+    /*TextFonts*/
+    --Text-fonts: "BIZ UDPGothic";
+    /*MonospacedFonts*/
+    --Mono-fonts: "BIZ UDGothic";
+}

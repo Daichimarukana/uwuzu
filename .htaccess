@@ -1,0 +1,27 @@
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+RewriteRule ^\.htaccess$ - [F]
+RewriteRule ^db\.php$ - [F]
+RewriteRule ^settings_admin/CloudflareTurnstile_settings/ - [F]
+RewriteRule ^settings_admin/hCaptcha_settings/ - [F]
+RewriteRule ^settings_admin/plugin_settings/ - [F]
+
+RewriteBase /
+
+RewriteRule ^(@\w+)$ /user/index.php?uwuzuid=$1 [QSA,L]
+
+RewriteRule ^!(\w+)~(\w+)$ /ueuse/index.php?ueuseid=$1&touser=$2 [QSA,L]
+
+RewriteRule ^!(\w+)$ /ueuse/index.php?ueuseid=$1 [QSA,L]
+
+ErrorDocument 400 /errorpage/400.php
+ErrorDocument 401 /errorpage/401.php
+ErrorDocument 403 /errorpage/403.php
+ErrorDocument 404 /errorpage/404.php
+ErrorDocument 500 /errorpage/500.php
+ErrorDocument 503 /errorpage/503.php
+
+Header set X-FRAME-OPTIONS "DENY"

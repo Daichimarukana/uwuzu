@@ -1,0 +1,248 @@
+## 1. まずそもそもuwuzuとは何か
+使っている方ならわかると思いますが普通のSNSです！
+これと言った大きな特徴もなく、平凡で、なんとも言えないSNSです…
+あっ！特徴かもしれないのが誰でもサーバーを建てられることです！！！
+詳細は5. サーバーの立て方をご覧ください！
+### 1.1 作られた理由は？
+uwuzuは某X社のSNSを再構築しようと考えたdaichimarukanaにより作成されたSNSです()
+uwuzuの読みはゆずです。
+
+## 2. 誰でもサーバーを建てれるってことは、分散型？
+残念っ！
+uwuzuにはActivityPubやその他の連合用機能がないため基本的に導入されたサーバー中心の中央集権型SNSです！
+いやでも中央集権型でも誰でもサーバーを立てれるから分散型...？
+分散中央型SNSな気がしてきました！（？）
+今後いつかはActivityPubも導入しようかと思っています...
+
+## 3. 名前の由来って何？
+おっ！いい着眼点ですねぇ～～～
+uwuzu(ゆず)の名前の由来は、開発者のdaichimarukanaがサービス名を考えていたときに某X社のSNSに「TwitterみたいなSNS作ってるけどサービス名が全く思いつかねぇ()」と投稿したところ思ったより多くの名前の案が集まり、
+その中に「With you」という名前の案があったところから来ています。
+daichimarukana < 「うぃずゆー(With you)」「うぃじゅー(witzou)」「うずー(wuzu)」「ゆず(yuzu)」あれっ？なんか普通すぎ？そうだ！！！！これでいいやん！！！！
+### 「ゆず(uwuzu)」
+
+ちなみに、この案が来るまでは「Twilus」という名前にする予定だったんですよっ！
+
+## 4. 開発言語は？
+uwuzuはPHPとJS、HTML(プログラミング言語じゃないか)、CSSで作られています！
+ライブラリはjQueryを導入しています！
+使用している画像は友人またはGoogle Icons様より使わせて頂いております！
+
+## 5. サーバーの建て方
+まず、Apache2とPHP 8とmysql Ver 15が導入されているサーバーを準備します！
+PHP 8では事前にGDを有効化しておいてください！(QRコードの生成に必要です。)
+次にSQLを設定します。(InnoDB)
+まず、お好きな名前でDBを作成し、その中に、account,emoji,notice,role,ueuse,notification,ads,reportとテーブルを作成します。
+テーブルの中身は以下のとおりです。
+照合順序は全て標準でutf8mb4_general_ciです。
+
+【追記】v1.2.28からSSLが必須項目になりました。localhostでアクセスする分には大丈夫ですが、他の端末からのアクセス時にはSSLの設定をしてください。
+
+## 簡単に構築できるようSQLの構造ファイルがリリースに添付されています！そちらをインポートしていただけますと大幅に簡単に導入できます！
+(userロールとofficialロールとiceロールの設定は別途必要です。お手数ですがそこの設定だけよろしくお願いいたします。)
+
+### account
+- sysid(INT)(AUTO_INCREMENT	) アカウントが追加されるとカウントされるシステム用ID
+- username(varchar(500)) ユーザーネーム保存用
+- userid(varchar(500)) ユーザーID保存用
+- password(varchar(1024)) パスワード保存用(ハッシュ化されます)
+- loginid(varchar(256)) 自動ログイン時に本人アカウントか確認
+- mailadds(varchar(500)) メールアドレス保存用
+- profile(mediumtext) プロフィールテキスト保存用
+- iconname(varchar(256)) アイコン画像リンク保存用
+- headname(varchar(256)) ヘッダー画像リンク保存用
+- role(varchar(1024)) 「user」のようなロール保存用
+- datetime(datetime) アカウント作成日時保存用
+- follow(mediumtext) アカウントがフォローしている人保存用
+- follower(mediumtext) アカウントがフォローされている人保存用
+- bookmark(mediumtext) ブックマーク保存用
+- blocklist(mediumtext) ブロックしている人保存用
+- admin(varchar(25)) 管理者アカウントなら「yes」、それ以外なら「none」と入力。
+- authcode(varchar(256)) 二段階認証用キー保存用
+- backupcode(varchar(256)) 二段階認証のバックアップコード保存用
+- sacinfo(varchar(256)) 特殊アカウント識別用
+- mail_settings(mediumtext) メールの送信設定保存用
+- encryption_ivkey(varchar(256)) ユーザーデータ暗号化時の暗号化ベクトル保存用
+
+### ads
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- uniqid(varchar(512)) 広告ID保存用
+- url(varchar(512)) 広告のクリック先URL保存用
+- image_url(varchar(512)) 広告に表示する画像URL保存用
+- memo(mediumtext) 広告にマウスオーバーしたときに表示されるメッセージ保存用
+- start_date(datetime) 広告配信開始日時保存用
+- limit_date(datetime) 広告配信終了日時保存用
+- datetime(datetime) 広告追加日時保存用
+
+### emoji
+- sysid(INT)(AUTO_INCREMENT) アカウントが追加されるとカウントされるシステム用ID
+- emojifile(varchar(512)) 絵文字ファイルパス保存用
+- emojiname(varchar(512)) 「:emoji:」のような絵文字名保存用
+- emojiinfo(mediumtext) 絵文字についての説明保存用
+- emojidate(datetime) 絵文字登録日時保存用
+
+### invitation
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- code(varchar(512)) 招待コード
+- used(varchar(25)) 使用済みかそうでないか
+- datetime(datetime) 招待コード仕様日時更新用
+
+### migration
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- account(varchar(512)) ユーザーID保存用
+- domain(varchar(1024)) 移行先サーバーのドメイン保存用
+- migration_code(varchar(256)) 識別コード
+- encryption_ivkey(varchar(256)) 暗号化用
+- encryption_key(varchar(256)) 暗号化用
+- datetime(datetime) 招待コード仕様日時更新用
+
+### notice
+- sysid(INT)(AUTO_INCREMENT) うんえいからのおしらせが追加されるとカウントされるシステム用ID
+- uniqid(varchar(256)) ID保存用
+- title(varchar(1024)) お知らせのタイトル保存用
+- note(mediumtext) お知らせの内容保存用
+- account(varchar(500)) 編集者ID保存用
+- emojidate(datetime) お知らせ登録日時保存用
+
+### notification
+- sysid(INT)(AUTO_INCREMENT) 通知されるとカウントされるシステム用ID
+- fromuserid(varchar(512)) 通知元ID保存用
+- touserid(varchar(512)) 通知先ID保存用
+- title(varchar(1024)) 通知のタイトル
+- url(通知のクリック先URL保存用)
+- msg(mediumtext) 通知の内容
+- datetime(datetime) 通知日時
+- userchk(varchar(25)) 通知の既読確認
+
+### report
+- sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
+- uniqid(varchar(256)) 通報ID保存用
+- userid(varchar(500)) 通報先ユーザーID保存用
+- report_userid(varchar(500)) 通報元ユーザーID保存用
+- msg(mediumtext) サービス管理者宛メッセージ保存用
+- datetime(datetime) 通報日時保存用
+- admin_chk(varchar(25)) 解決済みかどうか確認用
+
+### role
+- sysid(INT)(AUTO_INCREMENT) ロールが追加されるとカウントされるシステム用ID
+- rolename(varchar(512)) ロール表示名保存用
+- roleauth(varchar(256)) ロールの権限保存用
+- rolecolor(varchar(25)) ロールの色保存用
+- roleidname(varchar(512)) 「user」のようなロール指定用
+- roleeffect(varchar(256)) アニメーションロール機能のエフェクト指定用
+
+### ueuse
+- sysid(INT)(AUTO_INCREMENT) 投稿されるとカウントされるシステム用ID
+- username(varchar(512)) 投稿時点での投稿者名保存用
+- account(varchar(512)) 投稿者ID保存用
+- uniqid(varchar(256)) 投稿ID保存用
+- rpuniqid(varchar(256)) リプライ先ID保存用
+- ruuniqid(varchar(256)) リユーズ先ID保存用
+- ueuse(mediumtext) 投稿内容保存用
+- photo1(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- photo2(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- photo3(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- photo4(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- video1(varchar(512)) 投稿に添付されたファイルの保存ディレクトリ保存用
+- datetime(datetime) 投稿日時保存用
+- favorite(mediumtext) いいね保存用
+- abi(mediumtext) 投稿者の追記保存用
+- abidate(datetime) 追記日時保存用
+- nsfw(varchar(25)) NSFW指定有無保存用
+
+すべて作成完了したらGithubよりuwuzuのファイルをDLし、解凍し、それをサーバーの動作ディレクトリに置き、Apacheのhttpd.confからその動作ディレクトリを指定し、動作ディレクトリ内のdb.phpにDBのログイン情報を書き込んであとはApacheとphpとMy SQLを起動するだけ！
+起動したらまずDBのroleにphpmyadminから「user」ロールと「official」ロールと「ice」ロールを追加、権限は「user」と「official」と「ice」でOK。ロール名はとりあえず「一般ユーザー」とか適当でOK、ロールの色はHEXコード(#を除く)で000000のように指定。(この3つのロールがないとエラーが発生します。)
+そしたら普通にuwuzuにアクセスして自分のアカウントを登録。
+## 管理者アカウント登録機能が追加されました。【[domain]/admin/】より設定できるのでそちらをご利用ください。
+なお、管理者アカウントを導入後に登録した場合サーバーを止めてuwuzu動作ディレクトリ内のserverフォルダ内のファイルを設定する必要はございません。
+
+それが終わったら一度サーバーを止め、uwuzuの動作ディレクトリ内のserverフォルダ内のファイルを各自設定
+ファイルの機能は以下の通り！
+
+## 管理者アカウント作成後にログインし、サーバー設定より以下の項目が簡単に設定できます。
+
+- 404imagepath.txt : 404ページに表示する画像パス保存用
+- 503imagepath.txt : 503ページに表示する画像パス保存用
+- banurldomain.txt : 投稿禁止URLドメイン
+- banuserid.txt : 登録禁止ユーザーid
+- badpass.txt : 登録禁止パスワードリスト
+- info.txt : サーバー登録時に表示されるメッセージ(好きな内容)
+- privacypolicy.txt : プライバシーポリシー(サーバーのプライバシーポリシーを記載)
+- serverstop.txt : サーバー停止ページで表示するメッセージ
+- terms.txt : 利用規約(サーバーの利用規約を記載)
+- textsize.txt : 最大文字数
+- serversettings.ini : サーバー情報保存ファイル
+- uwuzuabout.txt : このファイル
+- uwuzuinfo.txt : uwuzuのバージョン等記載
+- uwuzurelease.txt : uwuzuのバージョン等記載
+
+### これでサーバーは完成！！！
+もう一度サーバーを起動してみんなに公開しよう！！！(まだ脆弱性は残っていると思われます。公開する際は気をつけてください。私だいちまる及びPutonfpsは一切責任を負いません。)
+
+## 6. Android、iOS、その他OS向けのアプリについて
+残念ですが今現在は公式アプリ等はなく、Webブラウザからお楽しみいただけます。
+誰かが作ってくれたらありがたいな～()
+
+## 7. 開発したいです！！！
+uwuzuを自分の思うように改造して使いたい場合はUPULライセンスのもと改造後ソースコードを公開するということで改造してください！
+場合によってはdaichimarukanaの作る本家(?)uwuzuにも改造で追加された機能が実装されるかも...()
+daichimarukanaと一緒に開発したいよ～って人は私のHPからメールとか某Xとかから連絡してくださいな～
+(uwuzuはv1.3.0よりAGPLからUPULに変更されました。)
+
+## 8. ロゴは誰が作ったのですか？
+ロゴはまだない。
+ロゴは下記のリンクよりuwuzuに関連しているコンテンツのみDLしてご利用いただけます。(uwuzuへ飛ぶリンクボタンなどはOK)
+
+### 色付き
+#img ../img/uwuzucolorlogo.svg
+### まっしろ
+#img ../img/uwuzulogo.svg
+
+## 9. ライセンス
+UPULライセンスです！
+UPULライセンスに関しては同梱されているUPUL_License.txtを確認するか、uwuzu.comより詳細をご確認ください。
+
+## 10. 利用させていただいているライブラリなどのライセンス
+
+### Google Authenticator PHP class
+Copyright (c) 2012, Michael Kliewe All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1.Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2.Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+なお、使わせていただいているコードは改変させていただいでおります。
+
+### jQuery 3.7.1
+MITライセンスで提供されているようです。
+詳細は以下のリンク先をご覧ください。
+https://jquery.com/license/
+
+### QRcode image PHP scripts
+Y.Swetake様よりお借りしています。
+
+### zxcvbn
+Copyright (c) 2012-2016 Dan Wheeler and Dropbox, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+## 更新情報
+編集者 : daichimarukana
+最終更新日 : 2024/08/18 19:43
