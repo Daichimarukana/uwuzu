@@ -227,55 +227,61 @@ if( !empty($_POST['migration_submit']) ) {
                 'content' => http_build_query($data, '', '&')
             ]
         ];
-        $Check_result = json_decode(file_get_contents("http://".$server_domain."/api/serverinfo-api", false, stream_context_create($options)),true);
-        if($Check_result["software"]["name"] == "uwuzu"){
-            $version = str_pad(str_replace('.', '', $Check_result["software"]["version"]), 4, 0, STR_PAD_RIGHT);
-            
-            if($version >= 1360){
-                if($Check_result["server_info"]["account_migration"] == "true"){
-                    $pdo->beginTransaction();
-					try {
-						$account = $userid;
-						$migration_code = createUniqId();
-                        $encryption_key = random(32);
-                        $encryption_ivkey = random(16);
-						$datetime = date("Y-m-d H:i:s");
-                        $domain = $server_domain;
+        $Get_Info = @file_get_contents("http://".$server_domain."/api/serverinfo-api", false, stream_context_create($options));
+		if($Get_Info === false){
+			$error_message[] = '入力されたサーバーがuwuzu以外のサーバーソフトウェア(MisskeyさんやMastodonさんなど)を使用しているかuwuzu v1.2.26未満のバージョンを使用している可能性があります。(MIGRATION_TO_SERVER_NOT_UWUZU)';
+		}else{
+			$Check_result = json_decode($Get_Info, true);
+			
+			if($Check_result["software"]["name"] == "uwuzu"){
+				$version = str_pad(str_replace('.', '', $Check_result["software"]["version"]), 4, 0, STR_PAD_RIGHT);
+				
+				if($version >= 1360){
+					if($Check_result["server_info"]["account_migration"] == "true"){
+						$pdo->beginTransaction();
+						try {
+							$account = $userid;
+							$migration_code = createUniqId();
+							$encryption_key = random(32);
+							$encryption_ivkey = random(16);
+							$datetime = date("Y-m-d H:i:s");
+							$domain = $server_domain;
 
-						$stmt = $pdo->prepare("INSERT INTO migration (account, domain, migration_code, encryption_key, encryption_ivkey, datetime) VALUES (:account, :domain, :migration_code, :encryption_key, :encryption_ivkey, :datetime)");
+							$stmt = $pdo->prepare("INSERT INTO migration (account, domain, migration_code, encryption_key, encryption_ivkey, datetime) VALUES (:account, :domain, :migration_code, :encryption_key, :encryption_ivkey, :datetime)");
 
-						$stmt->bindParam(':account', safetext($account), PDO::PARAM_STR);
-                        $stmt->bindParam(':domain', safetext($domain), PDO::PARAM_STR);
-						$stmt->bindParam(':migration_code', safetext($migration_code), PDO::PARAM_STR);
-						$stmt->bindParam(':encryption_key', safetext($encryption_key), PDO::PARAM_STR);
-                        $stmt->bindParam(':encryption_ivkey', safetext($encryption_ivkey), PDO::PARAM_STR);
-						$stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
+							$stmt->bindParam(':account', safetext($account), PDO::PARAM_STR);
+							$stmt->bindParam(':domain', safetext($domain), PDO::PARAM_STR);
+							$stmt->bindParam(':migration_code', safetext($migration_code), PDO::PARAM_STR);
+							$stmt->bindParam(':encryption_key', safetext($encryption_key), PDO::PARAM_STR);
+							$stmt->bindParam(':encryption_ivkey', safetext($encryption_ivkey), PDO::PARAM_STR);
+							$stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
 
-						$res = $stmt->execute();
+							$res = $stmt->execute();
 
-						$res = $pdo->commit();
+							$res = $pdo->commit();
 
-					} catch(Exception $e) {
-						$pdo->rollBack();
+						} catch(Exception $e) {
+							$pdo->rollBack();
+						}
+						if($res) {
+							$_SESSION["migration_code"] = safetext($migration_code);
+							$_SESSION["encryption_key"] = safetext($encryption_key);
+							$_SESSION["encryption_ivkey"] = safetext($encryption_ivkey);
+							header("Location: account_migration_done.php");
+							exit;  
+						}else{
+							$error_message[] = $e->getMessage();
+						}
+					}else{
+						$error_message[] = "移行先のサーバーがアカウントの移行登録を拒否しているためアカウントの移行はできません。(MIGRATION_TO_SERVER_IYADA)";
 					}
-                    if($res) {
-						$_SESSION["migration_code"] = safetext($migration_code);
-						$_SESSION["encryption_key"] = safetext($encryption_key);
-						$_SESSION["encryption_ivkey"] = safetext($encryption_ivkey);
-                        header("Location: account_migration_done.php");
-                        exit;  
-                    }else{
-                        $error_message[] = $e->getMessage();
-                    }
-                }else{
-                    $error_message[] = "移行先のサーバーがアカウントの移行登録を拒否しているためアカウントの移行はできません。(MIGRATION_TO_SERVER_IYADA)";
-                }
-            }else{
-                $error_message[] = "移行先のサーバーのuwuzuバージョンが1.3.6未満のためアカウントの移行はできません。(MIGRATION_TO_SERVER_BAD_UWUZU_VERSION)";
-            }
-        }else{
-            $error_message[] = "移行先のサーバーのソフトウェアがuwuzuではありません。(MIGRATION_TO_SERVER_NOT_UWUZU)";
-        }
+				}else{
+					$error_message[] = "移行先のサーバーのuwuzuバージョンが1.3.6未満のためアカウントの移行はできません。(MIGRATION_TO_SERVER_BAD_UWUZU_VERSION)";
+				}
+			}else{
+				$error_message[] = "移行先のサーバーのソフトウェアがuwuzuではありません。(MIGRATION_TO_SERVER_NOT_UWUZU)";
+			}
+		}
     }
    
 }

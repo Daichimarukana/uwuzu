@@ -205,24 +205,28 @@ if( !empty($pdo) ) {
 	}else{
 		$view_mailadds = $userData["mailadds"];
 	}
+
+	if(empty($userData["notification_settings"])){
+		$notification_settings_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other"];
+	}else{
+		$notification_settings_list = explode(',', $userData["notification_settings"]);
+	}
 }
 
 
 
 if( !empty($_POST['btn_submit']) ) {
 
-	if( !empty($_POST['im_bot']) ) {
-		$im_bot = safetext($_POST['im_bot']);
-	}else{
-		$im_bot = "false";
-	}
-	if($im_bot === "true"){
-		$saveim_bot = "bot";
+	if(!(empty($_POST['im_bot']))){
+		if($_POST['im_bot'] == "on"){
+			$saveim_bot = "bot";
+		}else{
+			$saveim_bot = "none";
+		}
 	}else{
 		$saveim_bot = "none";
 	}
 
-    // 空白除去
 	$username = safetext($_POST['username']);
 
     $mailadds = safetext($_POST['mailadds']);
@@ -675,6 +679,72 @@ if( !empty($_POST['auth_off_submit']) ) {
 	}
 }
 
+
+if( !empty($_POST['notification_submit']) ) {
+	$New_notification_list = ["system", "other"];
+
+	if(!(empty($_POST['notification_favorite']))){
+		if($_POST['notification_favorite'] == "on"){
+			$New_notification_list[] = "favorite";
+		}
+	}
+
+	if(!(empty($_POST['notification_reuse']))){
+		if($_POST['notification_reuse'] == "on"){
+			$New_notification_list[] = "reuse";
+		}
+	}
+
+	if(!(empty($_POST['notification_reply']))){
+		if($_POST['notification_reply'] == "on"){
+			$New_notification_list[] = "reply";
+		}
+	}
+
+	if(!(empty($_POST['notification_mention']))){
+		if($_POST['notification_mention'] == "on"){
+			$New_notification_list[] = "mention";
+		}
+	}
+
+	if(!(empty($_POST['notification_follow']))){
+		if($_POST['notification_follow'] == "on"){
+			$New_notification_list[] = "follow";
+		}
+	}
+
+	if( empty($error_message) ) {
+		$Save_notification_list = implode(',', array_unique($New_notification_list));
+
+		// トランザクション開始
+		$pdo->beginTransaction();
+	
+		try {
+			$stmt = $pdo->prepare("UPDATE account SET notification_settings = :notification_settings WHERE userid = :userid");
+			$stmt->bindValue(':notification_settings', $Save_notification_list, PDO::PARAM_STR);
+			$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+	
+			$res = $stmt->execute();
+	
+			// コミット
+			$res = $pdo->commit();
+		} catch (Exception $e) {
+			$pdo->rollBack();
+		}
+	
+		if ($res) {
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:".$url."");
+			exit; 
+		} else {
+			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+		}
+	
+		// プリペアドステートメントを削除
+		$stmt = null;
+	}
+}
+
 // データベースの接続を閉じる
 $pdo = null;
 
@@ -753,13 +823,8 @@ $pdo = null;
 
 						<p>このアカウントがBotであることを公開する</p>
 						<div class="switch_button">
-							<?php if($sacinfo === "bot"){?>
-								<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" checked/>
-								<label for="im_bot" class="switch_label"></label>
-							<?php }else{?>
-								<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" value="true" />
-								<label for="im_bot" class="switch_label"></label>
-							<?php }?>
+							<input id="im_bot" class="switch_input" type='checkbox' name="im_bot" <?php if($sacinfo === "bot"){?>checked<?php }?>/>
+							<label for="im_bot" class="switch_label"></label>
 						</div>
 
 					<?php }elseif($userData['token']==='ice'){ ?>
@@ -815,6 +880,46 @@ $pdo = null;
 				<p>下のボタンを押すとすぐに解除されます。確認などはありません。気をつけてください。</p>
 				<input type="submit" class = "irobutton" name="auth_off_submit" value="二段階認証の解除">
 			<?php } ?>
+
+			<hr>
+			<h1>通知</h1>
+
+			<p>いいね</p>
+			<div class="p2">ユーズがいいねされた時に通知されます。</div>
+			<div class="switch_button">
+				<input id="notification_favorite" class="switch_input" type='checkbox' name="notification_favorite" <?php if(in_array("favorite",$notification_settings_list)){?>checked<?php }?>/>
+				<label for="notification_favorite" class="switch_label"></label>
+			</div>
+
+			<p>リユーズ</p>
+			<div class="p2">ユーズがリユーズまたは引用リユーズされた時に通知されます。</div>
+			<div class="switch_button">
+				<input id="notification_reuse" class="switch_input" type='checkbox' name="notification_reuse" <?php if(in_array("reuse",$notification_settings_list)){?>checked<?php }?>/>
+				<label for="notification_reuse" class="switch_label"></label>
+			</div>
+
+			<p>返信</p>
+			<div class="p2">ユーズに返信が来た時に通知されます。</div>
+			<div class="switch_button">
+				<input id="notification_reply" class="switch_input" type='checkbox' name="notification_reply" <?php if(in_array("reply",$notification_settings_list)){?>checked<?php }?>/>
+				<label for="notification_reply" class="switch_label"></label>
+			</div>
+
+			<p>メンション</p>
+			<div class="p2">メンションされた時に通知されます。</div>
+			<div class="switch_button">
+				<input id="notification_mention" class="switch_input" type='checkbox' name="notification_mention" <?php if(in_array("mention",$notification_settings_list)){?>checked<?php }?>/>
+				<label for="notification_mention" class="switch_label"></label>
+			</div>
+
+			<p>フォロー</p>
+			<div class="p2">フォローされた時に通知されます。</div>
+			<div class="switch_button">
+				<input id="notification_follow" class="switch_input" type='checkbox' name="notification_follow" <?php if(in_array("follow",$notification_settings_list)){?>checked<?php }?>/>
+				<label for="notification_follow" class="switch_label"></label>
+			</div>
+
+			<input type="submit" class = "irobutton" name="notification_submit" value="通知の設定&更新">
 
         </form>
 	</main>

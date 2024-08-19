@@ -1061,6 +1061,7 @@ $(document).ready(function() {
 		document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/home;";
 	});
 	loadEmojis();
+
 	$("#emoji_picker_btn").click(function () {
 		if ($("#emoji_picker_btn").prop("checked") == true) {
 			$("#emoji_picker").show();
@@ -1081,10 +1082,11 @@ $(document).ready(function() {
 		}
 	});
 	var Emoji_pageNumber = 1;
-	var isLoading = false;
+	var isEmojiLoading = false;
 	function loadEmojis() {
-		if (isLoading) return;
-		isLoading = true;
+
+		if (isEmojiLoading) return;
+		isEmojiLoading = true;
 
 		var search_query = '';
 		var viewmode = 'picker'
@@ -1097,7 +1099,7 @@ $(document).ready(function() {
 			success: function(response) {
 				$('.emoji_picker_flex').append(response);
 				Emoji_pageNumber++;
-				isLoading = false;
+				isEmojiLoading = false;
 				if($("#error").length){
 					$("#error").hide();
 				}
@@ -1105,7 +1107,7 @@ $(document).ready(function() {
 				EmojiClickEvent();
 			},
 			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
-				isLoading = false;
+				isEmojiLoading = false;
 				$("#error").show();
 				EmojiClickEvent();
 			},

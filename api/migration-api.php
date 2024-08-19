@@ -96,38 +96,14 @@ if(isset($_GET['migration_code'])) {
                 }
                 //メール送信はナシ
                 //------------
-                $pdo->beginTransaction();
-
-                try {
-                    $datetime = date("Y-m-d H:i:s");
-                    $msg = "アカウントの移行が完了したためこのアカウントの不正コピーを防ぐためアカウントを凍結しました！\n引き続きこのアカウントを利用するには管理者に凍結を解除してもらってください！";
-                    $title = "✨アカウントの移行が完了しました！🔄️";
-                    $url = "/rule/serverabout";
-                    $userchk = 'none';
-                    $from_userid = "uwuzu-fromsys";
-
-                    $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-
-                    $stmt->bindParam(':fromuserid', $from_userid, PDO::PARAM_STR);
-                    $stmt->bindParam(':touserid', $account, PDO::PARAM_STR);
-                    $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                    $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-
-                    $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                    // SQLクエリの実行
-                    $res2 = $stmt->execute();
-
-                    // コミット
-                    $res2 = $pdo->commit();
-
-                } catch(Exception $e) {
-
-                    // エラーが発生した時はロールバック
-                    $pdo->rollBack();
-                }
+                
+                $msg = "アカウントの移行が完了したためこのアカウントの不正コピーを防ぐためアカウントを凍結しました！\n引き続きこのアカウントを利用するには管理者に凍結を解除してもらってください！";
+                $title = "✨アカウントの移行が完了しました！🔄️";
+                $url = "/rule/serverabout";
+                $from_userid = "uwuzu-fromsys";
+                $category = "system";
+                
+                send_notification($from_userid,$account,$title,$msg,$url,$category);
 
                 if ($res) {
                     $item = array(

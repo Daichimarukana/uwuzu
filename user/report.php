@@ -178,13 +178,6 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-function customStripTags($html, $allowedTags) {
-    $allowedTagsString = '<' . implode('><', $allowedTags) . '>';
-    return strip_tags($html, $allowedTagsString);
-}
-
-$allowedTags = array('h1', 'h2', 'h3', 'center', 'font');
-
 if( !empty($pdo) ) {
 	
 	// データベース接続の設定
@@ -198,68 +191,6 @@ if( !empty($pdo) ) {
 		$uwuzuid = safetext($_GET['q']);
 	}else{
 		$uwuzuid = "";
-	}
-	
-	// ユーズ内の絵文字を画像に置き換える
-	function replaceEmojisWithImages($postText) {
-		// ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
-		$emojiPattern = '/:(\w+):/';
-		$postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
-			$emojiName = $matches[1];
-			return "<img src='../emoji/emojiimage.php?emoji=" . urlencode($emojiName) . "' alt=':$emojiName:' title=':$emojiName:'>";
-		}, $postText);
-		
-		// @username を検出してリンクに置き換える
-		$usernamePattern = '/@(\w+)/';
-		$postTextWithImagesAndUsernames = preg_replace_callback($usernamePattern, function($matches) {
-			$username = $matches[1];
-
-			$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-			));
-		
-			$mentionsuserQuery = $dbh->prepare("SELECT username, userid FROM account WHERE userid = :userid");
-			$mentionsuserQuery->bindValue(':userid', $username);
-			$mentionsuserQuery->execute();
-			$mentionsuserData = $mentionsuserQuery->fetch();   
-			
-			if(empty($mentionsuserData)){
-				return "@$username";
-			}else{
-				return "<a class = 'mta' href='/@".$mentionsuserData["userid"]."'>@".$mentionsuserData["username"]."</a>";
-			}
-		}, $postTextWithImages);
-
-		$hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9_]+)/u';
-		$postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
-			$hashtags = $matches[1];
-				return "<a class = 'hashtags' href='/search?q=".urlencode('#').$hashtags."'>".'#'.$hashtags."</a>";
-		}, $postTextWithImagesAndUsernames);
-
-		return $postTextWithHashtags;
-	}
-
-	function replaceURLsWithLinks($postText) {
-		// URLを正規表現を使って検出
-		$pattern = '/(https?:\/\/[^\s]+)/';
-		preg_match_all($pattern, $postText, $matches);
-	
-		// 検出したURLごとに処理を行う
-		foreach ($matches[0] as $url) {
-			// ドメイン部分を抽出
-			$parsedUrl = parse_url($url);
-			$domain = isset($parsedUrl['host']) ? $parsedUrl['host'] : '';
-	
-			// ドメインのみを表示するaタグを生成
-			$link = "<a href='$url'>$domain</a>";
-	
-			// URLをドメインのみを表示するaタグで置き換え
-			$postText = str_replace($url, $link, $postText);
-		}
-	
-		return $postText;
 	}
 
 	$userQuery = $dbh->prepare("SELECT username, userid, profile, role, follower FROM account WHERE userid = :userid");
@@ -319,38 +250,14 @@ if (!empty($_POST['report'])) {
 		
 			$pdo->beginTransaction();
 
-			try {
-				$fromuserid = $userid;
-				$touserid2 = $to_admin["userid"];//管理者宛通知
-				$datetime = date("Y-m-d H:i:s");
-				$msg = "通報情報をご確認ください！";
-				$title = "🚨" . $touserid . "さんが通報されました！🚨";
-				$url = "/settings_admin/useradmin";
-				$userchk = 'none';
+			$fromuserid = $userid;
+			$touserid2 = $to_admin["userid"];//管理者宛通知
+			$msg = "通報情報をご確認ください！";
+			$title = "🚨" . $touserid . "さんが通報されました！🚨";
+			$url = "/settings_admin/useradmin";
+			$category = "system";
 
-				// 通知用SQL作成
-				$stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-
-				$stmt->bindParam(':fromuserid', safetext('uwuzu-fromsys'), PDO::PARAM_STR);
-				$stmt->bindParam(':touserid', safetext($touserid2), PDO::PARAM_STR);
-				$stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-				$stmt->bindParam(':url', safetext($url), PDO::PARAM_STR);
-				$stmt->bindParam(':userchk', safetext($userchk), PDO::PARAM_STR);
-				$stmt->bindParam(':title', safetext($title), PDO::PARAM_STR);
-
-				$stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
-
-				// SQLクエリの実行
-				$res = $stmt->execute();
-
-				// コミット
-				$res = $pdo->commit();
-
-			} catch(Exception $e) {
-
-				// エラーが発生した時はロールバック
-				$pdo->rollBack();
-			}
+			send_notification($fromuserid, $touserid2, $title, $msg, $url, $category);
 	
 		}
 

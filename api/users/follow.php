@@ -118,53 +118,27 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                             $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
                             $updateQuery->bindValue(':userid', $Follow_userdata['userid'], PDO::PARAM_STR);
                             $res = $updateQuery->execute();
-        
+                            
                             // 自分のfollowカラムを更新
-                            $updateQuery = $pdo->prepare("UPDATE account SET follow = CONCAT_WS(',', follow, :follow) WHERE userid = :userid");
-                            $updateQuery->bindValue(':follow', $Follow_userdata["userid"], PDO::PARAM_STR);
+                            $myflwlist = explode(',', $userData['follow']);
+                            $myflwlist[] = $userData['userid'];
+                            $newFollowList = implode(',', array_unique($myflwlist));
+
+                            $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
+                            $updateQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
                             $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
                             $res_follow = $updateQuery->execute();
                             
                             $datetime = date("Y-m-d H:i:s");
                             $pdo->beginTransaction();
         
-                            try {
-                                $fromuserid = safetext($userid);
-                                $touserid = safetext($Follow_userdata["userid"]);
-                                $datetime = safetext(date("Y-m-d H:i:s"));
-                                $msg = safetext("".$userid."さんにフォローされました。");
-                                $title = safetext("🎉".$userid."さんにフォローされました！🎉");
-                                $url = safetext("/@" . $userid . "");
-                                $userchk = safetext('none');
-        
-                                // 通知用SQL作成
-                                $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-        
-                                $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
-                                $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                                $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                                $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                                $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                                $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-        
-                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-        
-                                // SQLクエリの実行
-                                $res = $stmt->execute();
-        
-                                // コミット
-                                $res = $pdo->commit();
-        
-                            } catch(Exception $e) {
-        
-                                // エラーが発生した時はロールバック
-                                $pdo->rollBack();
-                            }
+                            send_notification($follow_userid, $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow");
         
                             if ($res && $res_follow) {
                                 //フォロー完了
                                 $response = array(
                                     'userid' => decode_yajirushi(htmlspecialchars_decode($Follow_userdata["userid"])),
+                                    'success' => true
                                 );
                                 echo json_encode($response, JSON_UNESCAPED_UNICODE);
                             } else {

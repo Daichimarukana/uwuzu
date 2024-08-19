@@ -72,7 +72,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
     session_start();
 
     if( !empty($pdo) ) {
-        $userQuery = $pdo->prepare("SELECT username, userid, role FROM account WHERE token = :token");
+        $userQuery = $pdo->prepare("SELECT username, userid, role, loginid FROM account WHERE token = :token");
         $userQuery->bindValue(':token', $token);
         $userQuery->execute();
         $userData = $userQuery->fetch();
@@ -93,111 +93,37 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             echo json_encode($response, JSON_UNESCAPED_UNICODE);
             exit;
         }else{
-            $query = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :uniqid limit 1');
-        
-            $query->execute(array(':uniqid' => $ueuseid));
-        
-            $result = $query->fetch();
-        
-            if(!(empty($result))){
-                if($result["account"] === $userData["userid"]){
-        
-                    $Userid = $userData["userid"];
-                    $photo_query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND uniqid = :uniqid");
-                    $photo_query->bindValue(':userid', $Userid);
-                    $photo_query->bindValue(':uniqid', $ueuseid);
-                    $photo_query->execute();
-                    $photo_and_video = $photo_query->fetch();
-                    
-                    if(!($photo_and_video["photo1"] == "none")){
-                        $photoDelete1 = glob("../".$photo_and_video["photo1"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete1 as $photo1) {
-                            if (is_file($photo1)) {
-                                unlink($photo1);
-                            }
-                        }
-                    }
-                    if(!($photo_and_video["photo2"] == "none")){
-                        $photoDelete2 = glob("../".$photo_and_video["photo2"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete2 as $photo2) {
-                            if (is_file($photo2)) {
-                                unlink($photo2);
-                            }
-                        }
-                    }
-                    if(!($photo_and_video["photo3"] == "none")){
-                        $photoDelete3 = glob("../".$photo_and_video["photo3"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete3 as $photo3) {
-                            if (is_file($photo3)) {
-                                unlink($photo3);
-                            }
-                        }
-                    }
-                    if(!($photo_and_video["photo4"] == "none")){
-                        $photoDelete4 = glob("../".$photo_and_video["photo4"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete4 as $photo4) {
-                            if (is_file($photo4)) {
-                                unlink($photo4);
-                            }
-                        }
-                    }
-                    if(!($photo_and_video["video1"] == "none")){
-                        $videoDelete1 = glob("../".$photo_and_video["video1"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($videoDelete1 as $video1) {
-                            if (is_file($video1)) {
-                                unlink($video1);
-                            }
-                        }
-                    }
-                    
-        
-                    try {
-                        $deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE uniqid = :uniqid AND account = :userid");
-                        $deleteQuery->bindValue(':uniqid', $ueuseid, PDO::PARAM_STR);
-                        $deleteQuery->bindValue(':userid', $Userid, PDO::PARAM_STR);
-                        $res = $deleteQuery->execute();
-        
-                        if ($res) {
-                            $response = array(
-                                'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueuseid)),
-                                'userid' => decode_yajirushi(htmlspecialchars_decode($userData["userid"])),
-                                'success' => true
-                            );
-                            
-                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                            exit;
-                        } else {
-                            $response = array(
-                                'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueuseid)),
-                                'userid' => decode_yajirushi(htmlspecialchars_decode($Userid)),
-                                'success' => false
-                            );
-                            
-                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                            exit;
-                        }
-                    } catch(PDOException $e) {
-                        $response = array(
-                            'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueuseid)),
-                            'userid' => decode_yajirushi(htmlspecialchars_decode($userData["userid"])),
-                            'success' => false
-                        );
-                        
-                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        exit;
-                    }
+            if (safetext(isset($ueuseid)) && safetext(isset($userData["userid"])) && safetext(isset($userData["loginid"]))){
+                $postUserid = safetext($userData["userid"]);
+                $postUniqid = safetext($ueuseid);
+                $loginid = safetext($userData["loginid"]);
+            
+                $result = delete_ueuse($postUniqid, $postUserid, $loginid);
+                if($result[0] === true){
+                    $response = array(
+                        'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueuseid)),
+                        'userid' => decode_yajirushi(htmlspecialchars_decode($userData["userid"])),
+                        'success' => true
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
+                }else{
+                    $response = array(
+                        'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueuseid)),
+                        'userid' => decode_yajirushi(htmlspecialchars_decode($userData["userid"])),
+                        'success' => false
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    exit;
                 }
-
-            } else {
-                $err = "ueuse_not_found";
+            }else{
+                $err = "input_not_found";
                 $response = array(
                     'error_code' => $err,
                 );
-            
+                
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                exit;
             }
-            
         }
     }
 }else{

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2024-08-18 13:04:27
+-- 生成日時: 2024-08-19 10:03:35
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -48,6 +48,7 @@ CREATE TABLE `account` (
   `authcode` varchar(256) NOT NULL,
   `backupcode` varchar(256) NOT NULL,
   `sacinfo` varchar(256) NOT NULL,
+  `notification_settings` varchar(256) NOT NULL,
   `mail_settings` mediumtext NOT NULL,
   `encryption_ivkey` varchar(256) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -141,7 +142,8 @@ CREATE TABLE `notification` (
   `url` varchar(512) NOT NULL,
   `datetime` datetime NOT NULL,
   `userchk` varchar(32) NOT NULL,
-  `title` varchar(1024) NOT NULL
+  `title` varchar(1024) NOT NULL,
+  `category` varchar(256) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

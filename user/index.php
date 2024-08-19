@@ -333,7 +333,7 @@ if (!empty($_POST['follow'])) {
 			$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
 			$res_follow = $updateQuery->execute();
 
-			send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "");
+			send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow");
 
 			if ($res && $res_follow) {
 				$pdo->commit();

@@ -266,7 +266,10 @@ require('../logout/logout.php');
 					<p>ここからuwuzuのアップデートが行えます。<br>
 						データベースの構造に変更を加える必要のあるアップデートの場合、データベースの構造の変更を手動で行っていただいた後にここからuwuzu自体のアップデートが行えます。<br>
 						uwuzuは一度アップデートするともとの状態に戻すことはできません。<br>
-						また、アップデート中に発生したエラーや不具合に関してuwuzu開発者が責任を取ることはできません。</p>
+						また、アップデート中に発生したエラーや不具合に関してuwuzu開発者が責任を取ることはできません。<br>
+						<br>
+						飛び級アップデートはuwuzuが破損するため絶対にしないでください。
+					</p>
 					
 					
 					<label class="irobutton" for="file_upload">ファイル選択
@@ -336,8 +339,8 @@ $(document).ready(function(){
 						$("#software").text(response["software_name"]);
 						$("#version").text(response["version"]);
 
-                        $("#release_notes").html(response["release_notes"].replace("\n", "<br>"));
-						$("#notices").html(response["notices"].replace("\n", "<br>"));
+                        $("#release_notes").html(response["release_notes"].replace(/\n/g, '<br>'));
+						$("#notices").html(response["notices"].replace(/\n/g, '<br>'));
 
 						$("#confirm_update").show();
                     } else {

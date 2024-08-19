@@ -141,7 +141,7 @@ if(!($userid == null)){
                                 
                                     if ($res) {
                                         $msg = "お使いのアカウントのパスワードがパスワードの復元により変更されました。\n変更した覚えがない場合はパスワードを変更し、セッショントークンを再生成してください。";
-                                        send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others");
+                                        send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others", "system");
                 
                                         $_SESSION['userid'] = "";
                                         $url = 'donerecovery.php';
@@ -237,7 +237,7 @@ if(!($userid == null)){
                                 
                                     if ($res) {
                                         $msg = "お使いのアカウントのパスワードがパスワードの復元により変更されました。\n変更した覚えがない場合はパスワードを変更し、セッショントークンを再生成してください。";
-                                        send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others");
+                                        send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others", "system");
                 
                                         $_SESSION['userid'] = "";
                                         $url = 'donerecovery.php';

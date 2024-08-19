@@ -37,18 +37,21 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
                 $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
 
                 // 投稿のいいね情報を取得
-                $stmt = $pdo->prepare("SELECT favorite FROM ueuse WHERE uniqid = :uniqid");
+                $stmt = $pdo->prepare("SELECT account,ueuse,favorite FROM ueuse WHERE uniqid = :uniqid");
                 $stmt->bindValue(':uniqid', $postUniqid, PDO::PARAM_STR);
                 $stmt->execute();
                 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($post) {
+                if (!(empty($post))) {
                     $favoriteList = explode(',', $post['favorite']);
                     $index = array_search($userId, $favoriteList);
 
                     if ($index === false) {
                         // ユーザーIDを追加
                         $favoriteList[] = $userId;
+
+                        send_notification(safetext($post['account']),$userId,"".$userId."さんがいいねしました！",safetext($post['ueuse']),"/!".$postUniqid."","favorite");
+
                     } else {
                         // ユーザーIDを削除
                         array_splice($favoriteList, $index, 1);

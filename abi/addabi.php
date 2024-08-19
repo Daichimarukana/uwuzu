@@ -95,8 +95,9 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && s
                         $title = safetext("" . $result2["username"] . "さんにメンションされました！");
                         $url = safetext("/!" . $postUniqid . "~" . $userid . "");
                         $userchk = 'none';
+                        $category = 'mention';
                 
-                        send_notification($touserid,$userid,$title,$msg,$url);
+                        send_notification($touserid,$userid,$title,$msg,$url,$category);
                     }
 
                     if ($res) {

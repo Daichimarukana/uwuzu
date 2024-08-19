@@ -189,15 +189,19 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
 }
 
 //文字装飾・URL変換など
-function processMarkdownAndWrapEmptyLines($markdownText){
+function processMarkdownAndWrapEmptyLines($markdownText) {
+    $placeholders = [];
 
-    //\___________________[注意]__________________\
-    // \____ここの順番を変えるとうまく動かなくなります___\
-    //  \______Markdownうまく動くところを探すべし______\
+    // インラインコードをプレースホルダーに置き換える
+    $markdownText = preg_replace_callback('/`([^`\n]+)`/', function($matches) use (&$placeholders) {
+        $placeholder = 'PLACEHOLDER_' . count($placeholders);
+        $placeholders[$placeholder] = '<span class="inline">' . $matches[1] . '</span>';
+        return $placeholder;
+    }, $markdownText);
+
+    // ここから先の処理はインラインコードとコードブロックに影響しない
 
     $markdownText = preg_replace('/\[\[buruburu (.+)\]\]/m', '<span class="buruburu">$1</span>', $markdownText);//ぶるぶる
-
-    $markdownText = preg_replace('/(^|[^`])`([^`\n]+)`($|[^`])/m', '$1<span class="inline">$2</span>$3', $markdownText);//Inline Code
 
     $markdownText = preg_replace_callback('/\[\[time (\d+)\]\]/m', function($matches) {
         $timestamp = $matches[1];
@@ -238,12 +242,18 @@ function processMarkdownAndWrapEmptyLines($markdownText){
 
     // 箇条書き（-）をHTMLのul/liタグに変換
     $markdownText = preg_replace('/^- (.+)/m', '<p>・ $1</p>', $markdownText);
-    
+
     // 空行の前に何もない行をHTMLのpタグに変換
     $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
 
+    // プレースホルダーを元のコードに戻す
+    foreach ($placeholders as $placeholder => $original) {
+        $markdownText = str_replace($placeholder, $original, $markdownText);
+    }
+
     return $markdownText;
 }
+
 //Profile
 function replaceProfileEmojiImages($postText) {
     $postText = str_replace('&#039;', '\'', $postText);
@@ -361,44 +371,76 @@ function YouTube_and_nicovideo_Links($postText) {
         // ドメイン部分を抽出
         $parsedUrl = parse_url($url);
         if(!(empty($parsedUrl['host']))){
-            if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com" || $parsedUrl['host'] == "m.youtube.com"){
+            $video_time = "0";
+            $video_id = "";
 
+            if($parsedUrl['host'] == "youtube.com" || $parsedUrl['host'] == "youtu.be" || $parsedUrl['host'] == "www.youtube.com" || $parsedUrl['host'] == "m.youtube.com"){
                 if (isset($parsedUrl['query'])) {
-                    if(false !== strpos($parsedUrl['query'], 'v=')) {
-                        $video_id = str_replace('v=', '', htmlentities($parsedUrl['query'], ENT_QUOTES, 'UTF-8', false));
+                    // クエリ部分を連想配列に変換する
+                    parse_str($parsedUrl['query'], $queryParams);
+
+                    // video_idの取得
+                    if (isset($queryParams['v'])) {
+                        $video_id = safetext($queryParams['v']);
                         $iframe = true;
-                    }else{
-                        $video_id = str_replace('/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
+                    } else {
+                        $video_id = str_replace('/', '', safetext($parsedUrl['path']));
                         $iframe = true;
                     }
+                    // video_timeの取得
+                    if (isset($queryParams['amp;t'])) {
+                        $video_time = safetext($queryParams['amp;t']);
+                        if(!(is_numeric($video_time))){
+                            $video_time = "0";
+                        }
+                    } else {
+                        $video_time = "0";
+                    }
                     $video_id = str_replace('&amp;', '?', $video_id);
-                }elseif(isset($parsedUrl['path'])){
-                    $video_id = str_replace('/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
+                } elseif (isset($parsedUrl['path'])) {
+                    $video_id = str_replace('/', '', safetext($parsedUrl['path']));
+                    $video_time = "0";
                     $iframe = true;
-                }else{
+                } else {
                     $video_id = "";
+                    $video_time = "0";
                     $iframe = false;
                 }
+
                 // 不要な文字を削除してaタグを生成
-                if($iframe == true){
-                    $link = '<iframe src="https://www.youtube-nocookie.com/embed/'.$video_id.'" rel="0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
-                }else{
+                if ($iframe) {
+                    $link = '<iframe src="https://www.youtube-nocookie.com/embed/'.$video_id.'?start='.$video_time.'" rel="0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+                } else {
                     $link = "";
                 }
+
                 // URLをドメインのみを表示するaタグで置き換え
                 $postText = $link;
             }elseif($parsedUrl['host'] == "nicovideo.jp" || $parsedUrl['host'] == "www.nicovideo.jp"){
-
                 if(isset($parsedUrl['path'])){
-                    $video_id = str_replace('/watch/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
+                    $video_id = str_replace('/watch/', '', safetext($parsedUrl['path']));
                     $iframe = true;
                 }else{
                     $video_id = "";
                     $iframe = false;
                 }
+                if (isset($parsedUrl['query'])) {
+                    // クエリ部分を連想配列に変換する
+                    parse_str($parsedUrl['query'], $queryParams);
+
+                    // video_timeの取得
+                    if (isset($queryParams['from'])) {
+                        $video_time = safetext($queryParams['from']);
+                        if(!(is_numeric($video_time))){
+                            $video_time = "0";
+                        }
+                    } else {
+                        $video_time = "0";
+                    }
+                }
                 // 不要な文字を削除してaタグを生成
                 if($iframe == true){
-                    $link = '<iframe src="https://embed.nicovideo.jp/watch/'.$video_id.'"</iframe>';
+                    $link = '<iframe src="https://embed.nicovideo.jp/watch/'.$video_id.'?from='.$video_time.'"</iframe>';
                 }else{
                     $link = "";
                 }
@@ -559,7 +601,7 @@ function get_mentions_userid($postText) {
     return $mentionedUsers;
 }
 
-function send_notification($to,$from,$title,$message,$url){
+function send_notification($to,$from,$title,$message,$url,$category){
     // データベースに接続
     try {
         $option = array(
@@ -571,46 +613,63 @@ function send_notification($to,$from,$title,$message,$url){
         return false;
     }
 
-    if(!(empty($pdo))){
-        				
-        $pdo->beginTransaction();
+    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+    $query->execute(array(':userid' => $from));
+    $result = $query->fetch();
 
-        try {
-            $fromuserid = htmlentities($from, ENT_QUOTES, 'UTF-8', false);
-            $touserid = htmlentities($to, ENT_QUOTES, 'UTF-8', false);
-            $datetime = date("Y-m-d H:i:s");
-            $msg = htmlentities($message, ENT_QUOTES, 'UTF-8', false);
-            $title = htmlentities($title, ENT_QUOTES, 'UTF-8', false);
-            $url = htmlentities($url, ENT_QUOTES, 'UTF-8', false);
-            $userchk = 'none';
-    
-            // 通知用SQL作成
-            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-    
-            $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
-            $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-            $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-            $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-            $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-    
-            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-    
-            $res = $stmt->execute();
-    
-            $res = $pdo->commit();
-    
-            if($res){
-                return true;
+    $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other"];
+    if(in_array($category, $category_list)){
+        if(in_array($category, explode(',', $result["notification_settings"])) || empty($result["notification_settings"]) || $category === "system" || $category === "other"){
+            if(!(empty($pdo))){		
+                $pdo->beginTransaction();
+
+                try {
+                    $fromuserid = safetext($from);
+                    $touserid = safetext($to);
+                    $datetime = date("Y-m-d H:i:s");
+                    $msg = safetext($message);
+                    $title = safetext($title);
+                    $url = safetext($url);
+                    $userchk = 'none';
+                    $notification_category = safetext($category);
+            
+                    // 通知用SQL作成
+                    $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category)");
+            
+                    $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
+                    $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                    $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                    $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                    $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
+            
+                    $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+            
+                    $res = $stmt->execute();
+            
+                    $res = $pdo->commit();
+            
+                    if($res){
+                        return true;
+                    }else{
+                        $pdo->rollBack();
+                        return false;
+                    }
+            
+                } catch(Exception $e) {
+                    $pdo->rollBack();
+                    return false;
+                }
             }else{
-                $pdo->rollBack();
                 return false;
             }
-    
-        } catch(Exception $e) {
-            $pdo->rollBack();
-            return false;
+        }else{
+            // 受信しない設定なのでtrue
+            return true;
         }
+    }else{
+        return false;
     }
 }
 // ユーズするとき全部この関数
@@ -904,7 +963,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         $mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
                         foreach ($mentionedUsers as $mentionedUser) {
-                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."");
+                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
                         }
 
                     } catch(Exception $e) {
@@ -956,10 +1015,10 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         $mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
                         foreach ($mentionedUsers as $mentionedUser) {
-                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."");
+                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
                         }
 
-                        send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."");
+                        send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply");
                     } catch(Exception $e) {
                         // エラーが発生した時はロールバック
                         $pdo->rollBack();
@@ -1009,10 +1068,10 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         $mentionedUsers = array_unique(get_mentions_userid($ueuse));
 
                         foreach ($mentionedUsers as $mentionedUser) {
-                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."");
+                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
                         }
 
-                        send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."");
+                        send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse");
 
                     } catch(Exception $e) {
                         // エラーが発生した時はロールバック
@@ -1037,6 +1096,132 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
         }
     }
 }
+
+function delete_ueuse($uniqid, $userid, $account_id){
+    if (safetext(isset($uniqid)) && safetext(isset($userid)) && safetext(isset($account_id))){
+        $postUserid = safetext($userid);
+        $postUniqid = safetext($uniqid);
+        $loginid = safetext($account_id);
+    
+        try {
+            $option = array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+            );
+            $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
+        } catch (PDOException $e) {
+            // 接続エラーのときエラー内容を取得する
+            $error_message[] = $e->getMessage();
+        }
+    
+        $query = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :uniqid limit 1');
+        $query->execute(array(':uniqid' => $postUniqid));
+        $result = $query->fetch();
+    
+        if($result > 0){
+            if($result["account"] === $postUserid){
+                $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+                $query->execute(array(':userid' => $postUserid));
+                $result2 = $query->fetch();
+    
+                if($result2["loginid"] === $loginid){
+                    $photo_query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND uniqid = :uniqid");
+                    $photo_query->bindValue(':userid', $postUserid);
+                    $photo_query->bindValue(':uniqid', $postUniqid);
+                    $photo_query->execute();
+                    $photo_and_video = $photo_query->fetch();
+                    
+                    if(!($photo_and_video["photo1"] == "none")){
+                        $photoDelete1 = glob($photo_and_video["photo1"]); // 「-ユーザーID.拡張子」というパターンを検索
+                        foreach ($photoDelete1 as $photo1) {
+                            if (is_file($photo1)) {
+                                unlink($photo1);
+                            }
+                        }
+                    }
+                    if(!($photo_and_video["photo2"] == "none")){
+                        $photoDelete2 = glob($photo_and_video["photo2"]); // 「-ユーザーID.拡張子」というパターンを検索
+                        foreach ($photoDelete2 as $photo2) {
+                            if (is_file($photo2)) {
+                                unlink($photo2);
+                            }
+                        }
+                    }
+                    if(!($photo_and_video["photo3"] == "none")){
+                        $photoDelete3 = glob($photo_and_video["photo3"]); // 「-ユーザーID.拡張子」というパターンを検索
+                        foreach ($photoDelete3 as $photo3) {
+                            if (is_file($photo3)) {
+                                unlink($photo3);
+                            }
+                        }
+                    }
+                    if(!($photo_and_video["photo4"] == "none")){
+                        $photoDelete4 = glob($photo_and_video["photo4"]); // 「-ユーザーID.拡張子」というパターンを検索
+                        foreach ($photoDelete4 as $photo4) {
+                            if (is_file($photo4)) {
+                                unlink($photo4);
+                            }
+                        }
+                    }
+                    if(!($photo_and_video["video1"] == "none")){
+                        $videoDelete1 = glob($photo_and_video["video1"]); // 「-ユーザーID.拡張子」というパターンを検索
+                        foreach ($videoDelete1 as $video1) {
+                            if (is_file($video1)) {
+                                unlink($video1);
+                            }
+                        }
+                    }
+    
+                    $ruChkquery = $pdo->prepare('SELECT * FROM ueuse WHERE ruuniqid = :uniqid AND ueuse = "" limit 1');
+                    $ruChkquery->execute(array(':uniqid' => $postUniqid));
+                    $result3 = $ruChkquery->fetch();
+                    
+                    if($result3 > 0){
+                        try {
+                            // 削除クエリを実行
+                            $rudeleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE ruuniqid = :uniqid AND ueuse = ''");
+                            $rudeleteQuery->bindValue(':uniqid', $postUniqid, PDO::PARAM_STR);
+                            $res = $rudeleteQuery->execute();
+            
+                            if (!($res)){
+                                $pdo->rollBack();
+                                $error_message[] = "リユーズの削除ができませんでした。";
+                            }
+                        } catch(PDOException $e) {
+                            $pdo->rollBack();
+                            $error_message[] = 'データベースエラー：' . $e->getMessage();
+                        }
+                    }
+    
+                    try {
+                        // 削除クエリを実行
+                        $deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE uniqid = :uniqid AND account = :userid");
+                        $deleteQuery->bindValue(':uniqid', $postUniqid, PDO::PARAM_STR);
+                        $deleteQuery->bindValue(':userid', $postUserid, PDO::PARAM_STR);
+                        $res = $deleteQuery->execute();
+    
+                        if ($res) {
+                            return [true, "削除に成功しました！"];
+                        } else {
+                            $pdo->rollBack();
+                            return [false, "削除に失敗しました"];
+                        }
+                    } catch(PDOException $e) {
+                        $pdo->rollBack();
+                        return [false, "削除に失敗しました！"];
+                    }
+                }
+            }else{
+                return [false, "削除に失敗しました！"];
+            }
+        }else{
+            return [true, "すでに削除しています"];
+        }
+    }else{
+        return [true, "削除に成功しました！"];
+    }
+}
+
 function safetext($text){
     // テキストの安全化
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8', false);

@@ -61,6 +61,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - authcode(varchar(256)) 二段階認証用キー保存用
 - backupcode(varchar(256)) 二段階認証のバックアップコード保存用
 - sacinfo(varchar(256)) 特殊アカウント識別用
+- notification_settings(varchar(256)) 受け取る通知設定用
 - mail_settings(mediumtext) メールの送信設定保存用
 - encryption_ivkey(varchar(256)) ユーザーデータ暗号化時の暗号化ベクトル保存用
 
@@ -113,6 +114,7 @@ PHP 8では事前にGDを有効化しておいてください！(QRコードの�
 - msg(mediumtext) 通知の内容
 - datetime(datetime) 通知日時
 - userchk(varchar(25)) 通知の既読確認
+- category(varchar(256)) 通知のカテゴリ識別用
 
 ### report
 - sysid(INT)(AUTO_INCREMENT) 追加されるとカウントされるシステム用ID
@@ -245,4 +247,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## 更新情報
 編集者 : daichimarukana
-最終更新日 : 2024/03/26 22:32
+最終更新日 : 2024/08/19 16:58
