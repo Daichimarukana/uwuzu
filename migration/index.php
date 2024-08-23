@@ -257,8 +257,16 @@ if( !empty($_POST['btn_submit']) ) {
 
                                     delete_exif($extension, $temp_file);
 
-                                    // 新しいファイル名を生成（uniqid + 拡張子）
-                                    $newFilename = uniqid() . '-'.$new_userid.'.png';
+                                    // リサイズ
+                                    resizeImage($temp_file, 512, 512);
+
+                                    if(check_mime($temp_file) == "image/webp"){
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename = uniqid() . '-'.$new_userid.'.webp';
+                                    }else{
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename = uniqid() . '-'.$new_userid.'.' . $extension;
+                                    }
                                     
                                     // 保存先のパスを生成
                                     $uploadedPath = 'usericons/' . $newFilename;
@@ -301,8 +309,16 @@ if( !empty($_POST['btn_submit']) ) {
 
                                     delete_exif($extension, $temp_file);
 
-                                    // 新しいファイル名を生成（uniqid + 拡張子）
-                                    $newFilename = uniqid() . '-'.$new_userid.'.png';
+                                    // リサイズ
+                                    resizeImage($temp_file, 2048, 1024);
+
+                                    if(check_mime($temp_file) == "image/webp"){
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename = uniqid() . '-'.$new_userid.'.webp';
+                                    }else{
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename = uniqid() . '-'.$new_userid.'.' . $extension;
+                                    }
                                     
                                     // 保存先のパスを生成
                                     $uploadedPath = 'userheads/' . $newFilename;

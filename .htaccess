@@ -17,11 +17,12 @@ RewriteRule ^!(\w+)~(\w+)$ /ueuse/index.php?ueuseid=$1&touser=$2 [QSA,L]
 
 RewriteRule ^!(\w+)$ /ueuse/index.php?ueuseid=$1 [QSA,L]
 
-ErrorDocument 400 /errorpage/400.php
-ErrorDocument 401 /errorpage/401.php
-ErrorDocument 403 /errorpage/403.php
-ErrorDocument 404 /errorpage/404.php
-ErrorDocument 500 /errorpage/500.php
-ErrorDocument 503 /errorpage/503.php
+ErrorDocument 400 /errorpage/httperror.php
+ErrorDocument 401 /errorpage/httperror.php
+ErrorDocument 403 /errorpage/httperror.php
+ErrorDocument 404 /errorpage/httperror.php
+ErrorDocument 413 /errorpage/httperror.php
+ErrorDocument 500 /errorpage/httperror.php
+ErrorDocument 503 /errorpage/httperror.php
 
 Header set X-FRAME-OPTIONS "DENY"

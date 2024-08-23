@@ -4442,7 +4442,7 @@ hr{
     margin-top: 12px;
     margin-bottom: 12px;
     font-size: 24px;
-    background: var(--tl-color);
+    background: var(--ueuse-color);
     color: var(--dark-subtext-color);
     text-decoration: none;
     font-family: var(--Text-fonts), sans-serif;

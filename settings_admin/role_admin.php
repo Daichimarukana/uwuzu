@@ -223,7 +223,7 @@ if( !empty($_POST['role_btn_submit']) ) {
 		}
 	}
 
-	if(!($roleid == "ice" || $roleid == "official" || $roleid == "user")){
+	if($roleid == "ice" || $roleid == "official" || $roleid == "user"){
 		$error_message[] = "システムロールは作成できません。(DON'T_TOUCH_SYSTEM_ROLE)";
 	}
 
@@ -275,7 +275,7 @@ if( !empty($_POST['role_btn_submit']) ) {
 }
 if( !empty($_POST['role_del']) ) {
 	$role_id = safetext($_POST['role_id']);
-	if(!($role_id == "ice" || $role_id == "official" || $role_id == "user")){
+	if($role_id == "ice" || $role_id == "official" || $role_id == "user"){
 		$error_message[] = "システムロールは削除できません。(DON'T_TOUCH_SYSTEM_ROLE)";
 	}
 
@@ -340,7 +340,7 @@ if( !empty($_POST['send_add_role_submit']) ) {
     $result5 = $query->fetch();
 
 	if($result4 > 0 && $result5 > 0){
-		if(!($add_roleid == "ice")){
+		if($add_roleid == "ice"){
 			$error_message[] = "凍結ロールは付与できません。ユーザー管理画面より凍結してください。(BAD_REQUEST)";
 		}
 
@@ -399,7 +399,7 @@ if( !empty($_POST['send_del_role_submit']) ) {
     $result5 = $query->fetch();
 
 	if($result4 > 0 && $result5 > 0){
-		if(!($del_roleid == "ice")){
+		if($del_roleid == "ice"){
 			$error_message[] = "凍結ロールは削除できません。ユーザー管理画面より凍結解除してください。(BAD_REQUEST)";
 		}
 

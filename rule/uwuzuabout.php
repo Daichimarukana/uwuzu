@@ -27,9 +27,31 @@ for( $i=0;$i<$cnt;$i++ ){
 $sterms = explode("\n", $termsdata);
 $htmltext = '';  // 初期化
 
+function processMarkdownRules($markdownText) {
+
+    // コード（#code）をHTMLのdiv class="code"タグに変換
+    $markdownText = preg_replace('/^#code (.+)/m', '<div class="code"><p>$1</p></div>', $markdownText);
+
+    // 画像（#img）をHTMLのimgタグに変換
+    $markdownText = preg_replace('/^#img (.+)/m', '<img src="$1">', $markdownText);
+    
+    // タイトル（#、##、###）をHTMLのhタグに変換
+    $markdownText = preg_replace('/^# (.+)/m', '<h2>$1</h2>', $markdownText);
+    $markdownText = preg_replace('/^## (.+)/m', '<h3>$1</h3>', $markdownText);
+    $markdownText = preg_replace('/^### (.+)/m', '<h4>$1</h4>', $markdownText);
+
+    // 箇条書き（-）をHTMLのul/liタグに変換
+    $markdownText = preg_replace('/^- (.+)/m', '<ul><li>$1</li></ul>', $markdownText);
+
+    // 空行の前に何もない行をHTMLのpタグに変換
+    $markdownText = preg_replace('/(^\s*)(?!\s)(.*)/m', '$1<p>$2</p>', $markdownText);
+
+    return $markdownText;
+}
+
 foreach ($sterms as $terms) {
     $markdowntext = $terms;
-    $convertedText = processMarkdownAndWrapEmptyLines($markdowntext);
+    $convertedText = processMarkdownRules($markdowntext);
     $htmltext .= $convertedText . "\n";  // 変換されたテキストを追加
 }
 

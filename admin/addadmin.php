@@ -312,7 +312,7 @@ if( !empty($_POST['btn_submit']) ) {
         $loginid = sha1(uniqid(mt_rand(), true));
 
         // SQL作成
-        $stmt = $pdo->prepare("INSERT INTO account (username, userid, password, loginid, mailadds, profile, iconname, headname, role, datetime, admin) VALUES (:username, :userid, :password, :loginid, :mailadds, :profile, :iconname, :headname, :role, :datetime, :admin )");
+        $stmt = $pdo->prepare("INSERT INTO account (username, userid, password, loginid, mailadds, profile, iconname, headname, role, datetime, admin, encryption_ivkey) VALUES (:username, :userid, :password, :loginid, :mailadds, :profile, :iconname, :headname, :role, :datetime, :admin ,:encryption_ivkey)");
 
         // アイコン画像
         $stmt->bindValue(':iconname', $iconName, PDO::PARAM_STR);
@@ -330,6 +330,8 @@ if( !empty($_POST['btn_submit']) ) {
         $stmt->bindParam(':role', $role, PDO::PARAM_STR);
         $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
         
+        $stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
+
         $stmt->bindParam(':admin', $admin, PDO::PARAM_STR);
 
         // SQLクエリの実行

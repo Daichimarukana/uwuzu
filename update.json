@@ -1,30 +1,34 @@
 {
     "software": "uwuzu",
-    "version": "1.4.2",
-    "release_date": "2024-08-19",
-    "release_notes": "このアップデートでは、絵文字ピッカーが使用できない問題やAPIの問題、通報ができない問題などを修正しました！\n\nまた、次の変更と新機能が追加されています。\nYouTubeとニコニコ動画の動画埋め込みの時間指定に対応\n受け取る通知を選べる機能を追加\nいいねの通知を追加\n\n新しいバージョンのuwuzuをお楽しみください！",
-    "notices": "事前にデータベースの構造の追加が必要です。\nリリースノートに従ってデータベースの構造を追加したうえでアップデートをしてください。\nアップデートの前に、データのバックアップを行うことをおすすめします！",
+    "version": "1.4.3",
+    "release_date": "2024-08-23",
+    "release_notes": "致命的なバグを修正しました！\nまた、エラーページを一つにまとめました！\n新しいバージョンのuwuzuをお楽しみください！",
+    "notices": "アップデートの前に、データのバックアップを行うことをおすすめします！",
     "files": {
         "overwrite": [
-            "/abi/addabi.php",
-            "/api/migration-api.php",
-            "/api/users/follow.php",
-            "/api/ueuse/delete.php",
-            "/delete/delete.php",
-            "/favorite/favorite.php",
+            "/admin/addadmin.php",
+            "/css/home.css",
+            "/errorpage/httperror.php",
             "/function/function.php",
-            "/home/index.php",
-            "/others/account_migration.php",
-            "/passrecovery/startrecovery.php",
-            "/settings/index.php",
-            "/settings_admin/update_admin.php",
+            "/migration/index.php",
+            "/rule/privacypolicy.php",
+            "/rule/releasenotes.php",
+            "/rule/terms.php",
+            "/rule/uwuzuabout.php",
+            "/settings_admin/role_admin.php",
             "/ueuse/index.php",
-            "/user/index.php",
-            "/user/report.php",
+            "/.htaccess",
             "/server/uwuzuabout.txt",
             "/server/uwuzuinfo.txt",
             "/server/uwuzurelease.txt"
         ],
-        "delete": []
+        "delete": [
+            "/errorpage/400.php",
+            "/errorpage/401.php",
+            "/errorpage/403.php",
+            "/errorpage/404.php",
+            "/errorpage/500.php",
+            "/errorpage/503.php"
+        ]
     }
 }

@@ -407,6 +407,20 @@ $pdo = null;
 		</div>
 	</div>
 
+	<div id="myAbiModal" class="modal">
+		<div class="modal-content">
+			<h1>ユーズに追記しますか？</h1>
+			<p>※追記は削除出来ません。</p>
+			<form method="post" id="AbiForm">
+			<textarea id="abitexts" placeholder="なに追記する～？" name="abi"></textarea>
+			<div class="btn_area">
+				<input type="submit" id="AbiAddButton" class="fbtn_no" name="abi" value="追記">
+				<input type="button" id="AbiCancelButton" class="fbtn" value="キャンセル">
+			</div>
+			</form>
+		</div>
+	</div>
+
 	<div id="myQuoteReuseModal" class="modal">
 		<div class="modal-content">
 			<h1>引用リユーズ</h1>
