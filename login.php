@@ -102,6 +102,7 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset
 }
 
 if( !empty($_POST['btn_submit']) ) {
+    $_SESSION['form_data'] = $_POST;
 
     $userid = safetext($_POST['userid']);
     $password = safetext($_POST['password']);
@@ -204,6 +205,8 @@ if( !empty($_POST['btn_submit']) ) {
 
                             $_SESSION['userid'] = $userid;
                             $_SESSION['loginid'] = $row["loginid"];
+
+                            $_SESSION['form_data'] = array();//フォーム初期化
                             // リダイレクト先のURLへ転送する
                             $url = 'check.php';
                             header('Location: ' . $url, true, 303);
@@ -212,6 +215,8 @@ if( !empty($_POST['btn_submit']) ) {
                             exit;
                         }else{
                             $_SESSION['userid'] = $userid;
+                            
+                            $_SESSION['form_data'] = array();//フォーム初期化
                             $url = 'authlogin.php';
                             header('Location: ' . $url, true, 303);
 
@@ -299,11 +304,11 @@ $pdo = null;
             <form class="formarea" method="post">
                 <div>
                     <p>ユーザーID</p>
-                    <input onInput="checkForm(this)" id="userid" class="inbox" type="text" name="userid" value="<?php if( !empty($_SESSION['userid']) ){ echo safetext( $_SESSION['userid']); } ?>">
+                    <input onInput="checkForm(this)" id="userid" class="inbox" type="text" name="userid" value="<?php if( !empty($_SESSION['form_data']['userid']) ){ echo safetext($_SESSION['form_data']['userid']); } ?>">
                 </div>
                 <div>
                     <p>パスワード</p>
-                    <input id="password" class="inbox" type="password" name="password" maxlength="32" value="<?php if( !empty($_SESSION['password']) ){ echo safetext( $_SESSION['password']); } ?>">
+                    <input id="password" class="inbox" type="password" name="password" maxlength="32" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
                 </div>
                 <div class="switch_flexbox">
                     <div class="switch_button">

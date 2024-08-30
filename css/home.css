@@ -641,6 +641,11 @@ main h1{
     font-weight: 900;
 }
 
+.userheader .profile{
+    max-height: 25dvh;
+    overflow: scroll;
+}
+
 .userheader .profile p{
     text-align: left;
     margin-top: 12px;
@@ -2894,6 +2899,47 @@ main h1{
     color:var(--text-color);
     font-family: var(--Text-fonts), sans-serif;
 }
+.formarea table{
+    width: 100%;
+    text-align: left;
+    font-size: 16px;
+    color:var(--text-color);
+    font-family: var(--Mono-fonts), sans-serif;
+}
+.formarea .emojipreview{
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    height: fit-content;
+    display: flex;
+    justify-content: space-between;
+}
+.formarea .emojiimg{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    width: fit-content;
+    height: fit-content;
+    padding: 8px;
+    border-radius: 6px;
+    box-shadow:0 0px 24px 0 rgba(0, 0, 0, .1)
+}
+.formarea .light{
+    background-color: var(--ueuse-color);
+}
+.formarea .dark{
+    background-color: var(--dark-sub-color);
+}
+.formarea .emojiimg img{
+    vertical-align:top;
+    object-fit: cover;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    max-height: 64px;
+    width: auto;
+    border-radius: 0px;
+}
 
 .p2{
     margin-top: 0px;
@@ -3946,6 +3992,16 @@ label>input {
     text-decoration: none;
     font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
+}
+.ru a p img{
+    vertical-align: text-top;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 4px;
+    margin-right: 4px;
+    max-height: 16px;
+    width: auto;
+    border-radius: 0px;
 }
 
 .this{
@@ -5607,6 +5663,67 @@ noscript .noscript_modal .inner .center_text p{
         opacity: 0;
     }
 }
+
+
+.emoji_admin{
+    margin-top: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 8px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    width: auto;
+}
+.emoji_admin details {
+    padding: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    color:var(--text-color);
+    font-family: var(--Mono-fonts), sans-serif;
+    word-wrap: break-word;
+    font-size: 18px;
+    line-height: 32px;
+    font-weight: bold;
+}
+.emoji_admin details img{
+    padding: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-right: 12px;
+    max-height: 32px;
+    max-width: 100%;
+    object-fit: initial;
+    vertical-align: middle;
+}
+.emoji_admin summary {
+    display: block;
+    list-style: none;
+
+    color:var(--text-color);
+    font-family: var(--Mono-fonts), sans-serif;
+    word-wrap: break-word;
+    font-size: 20px;
+    line-height: 32px;
+    font-weight: bold;
+}
+.emoji_admin summary::-webkit-details-marker {
+    display: none;
+}
+.emoji_admin p{
+    margin-top: 4px;
+    margin-bottom: 4px;
+    text-align: left;
+    color:var(--text-color);
+    font-family: var(--Mono-fonts), sans-serif;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: bold;
+}
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -7182,7 +7299,7 @@ noscript .noscript_modal .inner .center_text p{
         color: #DDDDDD;
     }
     .ueuse .blur:hover{
-        background-color: var(--dark-ueuse-color);
+        background-color: var(--dark-sub-color);
         color: var(--dark-text-color);
     }
     .ueuse .unixtime{
@@ -7592,10 +7709,10 @@ noscript .noscript_modal .inner .center_text p{
     }
     
     .formarea p{
-        color:var(--dark-subtext-color);
+        color:var(--dark-text-color);
     }
     .formarea li{
-        color:var(--dark-subtext-color);
+        color:var(--dark-text-color);
     }
 
     .formarea .update_box{
@@ -7613,6 +7730,10 @@ noscript .noscript_modal .inner .center_text p{
         border: none;
     }
     .formarea .update_box .update_text p{
+        color:var(--dark-text-color);
+    }
+
+    .formarea table{
         color:var(--dark-text-color);
     }
     
@@ -8088,5 +8209,19 @@ noscript .noscript_modal .inner .center_text p{
     .ueuse_popup_back .ueuse_popup_menu button:hover {
         background-color: var(--dark-sub-color);
         color: var(--main-color);
+    }
+        
+    .emoji_admin{
+        background-color: var(--dark-background-color);
+        border: none;
+    }
+    .emoji_admin details {
+        color:var(--dark-text-color);
+    }
+    .emoji_admin summary {
+        color:var(--dark-text-color);
+    }
+    .emoji_admin p{
+        color:var(--dark-text-color);
     }
 }

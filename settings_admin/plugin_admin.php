@@ -240,7 +240,7 @@ if( !empty($_POST['testmail_send_btn_submit']) ) {
 	$mail_title = "Test email";
 	$mail_text = "これはuwuzuのテストメールです。  問題なく受信できていますか？";
 
-	$error_message[] = send_html_mail($test_mail_adds,$mail_title,$mail_text,"../");
+	$error_message = send_html_mail($test_mail_adds,$mail_title,$mail_text,"../");
 }
 
 /*

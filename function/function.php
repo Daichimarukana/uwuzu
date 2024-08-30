@@ -798,7 +798,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 // アップロードされたファイル情報
                 $uploadedFile2 = $photo2;
 
-                if(!(empty($uploadedFile['tmp_name']))){
+                if(!(empty($uploadedFile2['tmp_name']))){
                     if(check_mime($uploadedFile2['tmp_name'])){
                         // アップロードされたファイルの拡張子を取得
                         $extension2 = pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION);
@@ -840,7 +840,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 // アップロードされたファイル情報
                 $uploadedFile3 = $photo3;
 
-                if(!(empty($uploadedFile['tmp_name']))){
+                if(!(empty($uploadedFile3['tmp_name']))){
                     if(check_mime($uploadedFile3['tmp_name'])){
                         // アップロードされたファイルの拡張子を取得
                         $extension3 = pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION);
@@ -881,7 +881,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 }
                 // アップロードされたファイル情報
                 $uploadedFile4 = $photo4;
-                if(!(empty($uploadedFile['tmp_name']))){
+                if(!(empty($uploadedFile4['tmp_name']))){
                     if(check_mime($uploadedFile4['tmp_name'])){
                         // アップロードされたファイルの拡張子を取得
                         $extension4 = pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION);
@@ -920,7 +920,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 // アップロードされたファイル情報
                 $uploadedVideo = $video1;
 
-                if(!(empty($uploadedFile['tmp_name']))){
+                if(!(empty($uploadedVideo['tmp_name']))){
                     if(check_mime_video($uploadedVideo['tmp_name'])){
                         // アップロードされたファイルの拡張子を取得
                         $extensionVideo = strtolower(pathinfo($uploadedVideo['name'], PATHINFO_EXTENSION)); // 小文字に変換

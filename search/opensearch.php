@@ -11,7 +11,7 @@ header("Access-Control-Allow-Origin: *");
 $domain = $_SERVER['HTTP_HOST'];
 
 if(!(empty($serversettings["serverinfo"]["server_icon"]))){
-    $servericon = safetext($this->value["servericon"]);
+    $servericon = safetext($serversettings["serverinfo"]["server_icon"]);
 }else{
     $servericon = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$domain."/img/uwuzuicon.png";
 }

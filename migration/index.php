@@ -95,6 +95,8 @@ try {
     $error_message[] = $e->getMessage();
 }
 if( !empty($_POST['btn_submit']) ) {
+    $_SESSION['form_data'] = $_POST;
+    
     if(safetext($serversettings["serverinfo"]["server_account_migration"]) === "true"){
         $new_userid = safetext($_POST['new_userid']);
         $password = safetext($_POST['password']);
@@ -403,17 +405,31 @@ if( !empty($_POST['btn_submit']) ) {
                                     $datetime = date("Y-m-d H:i:s");
                                     $username = safetext($json_account_data["userdata"]["user_name"]);
                                     $mailadds = safetext($json_account_data["userdata"]["mail_adds"]);
-                                    $profile = safetext($json_account_data["userdata"]["user_profile"]);
+                                    $profile = mb_substr(safetext($json_account_data["userdata"]["user_profile"]),0,1024);// 一応文字数制限
+
+                                    $userEnckey = GenUserEnckey($datetime);
+                                    $ivLength = openssl_cipher_iv_length('aes-256-cbc');
+                                    $randomBytes = random_bytes($ivLength);
+                                    $randomhash = hash('sha3-512', $randomBytes);
+                                    $iv = substr($randomhash, 0, $ivLength);
+                            
+                                    // メアドを暗号化する
+                                    if(!(empty($mailadds))){
+                                        $enc_mailadds = EncryptionUseEncrKey($mailadds, $userEnckey, $iv);
+                                    }else{
+                                        $enc_mailadds = "";
+                                    }
                                 
                                     try {
                                 
                                         $role = "user";
                                         $admin = "none";
                                         $hashpassword = password_hash($password, PASSWORD_DEFAULT);
-                                        $loginid = sha1(uniqid(mt_rand(), true));
+                                        $LoginIdBytes = random_bytes(64);
+	                                    $loginid = hash('sha3-512', $LoginIdBytes);
                                 
                                         // SQL作成
-                                        $stmt = $pdo->prepare("INSERT INTO account (username, userid, password, loginid, mailadds, profile, iconname, headname, role, datetime, admin) VALUES (:username, :userid, :password, :loginid, :mailadds, :profile, :iconname, :headname, :role, :datetime, :admin )");
+                                        $stmt = $pdo->prepare("INSERT INTO account (username, userid, password, loginid, mailadds, profile, iconname, headname, role, datetime, admin, encryption_ivkey) VALUES (:username, :userid, :password, :loginid, :mailadds, :profile, :iconname, :headname, :role, :datetime, :admin ,:encryption_ivkey)");
                                 
                                         // アイコン画像
                                         $stmt->bindValue(':iconname', $iconName, PDO::PARAM_STR);
@@ -426,10 +442,12 @@ if( !empty($_POST['btn_submit']) ) {
                                         $stmt->bindParam(':userid', $new_userid, PDO::PARAM_STR);
                                         $stmt->bindParam(':password', $hashpassword, PDO::PARAM_STR);
                                         $stmt->bindParam(':loginid', $loginid, PDO::PARAM_STR);
-                                        $stmt->bindParam(':mailadds', $mailadds, PDO::PARAM_STR);
+                                        $stmt->bindParam(':mailadds', $enc_mailadds, PDO::PARAM_STR);
                                         $stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
                                         $stmt->bindParam(':role', $role, PDO::PARAM_STR);
                                         $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                                        $stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
                                         
                                         $stmt->bindParam(':admin', $admin, PDO::PARAM_STR);
                                 
@@ -486,12 +504,14 @@ if( !empty($_POST['btn_submit']) ) {
                                                 $_SESSION['userid'] = $new_userid;
                                                 $_SESSION['done'] = false;
                                             }
+                                            $_SESSION['form_data'] = array();
                                             $url = '../success';
                                             header('Location: ' . $url, true, 303);
                                             exit;
                                         }else{
                                             $_SESSION['userid'] = $new_userid;
                                             $_SESSION['done'] = false;
+                                            $_SESSION['form_data'] = array();
                                             $url = '../success';
                                             header('Location: ' . $url, true, 303);
                                             exit;
@@ -574,28 +594,28 @@ $pdo = null;
                 <div>
                     <p>新しいユーザーID</p>
                     <div class="p2">このサーバーで使用するユーザーIDを入力してください。</div>
-                    <input id="new_userid" type="text" placeholder="" class="inbox" name="new_userid" value="">
+                    <input id="new_userid" type="text" placeholder="" class="inbox" name="new_userid" value="<?php if( !empty($_SESSION['form_data']['new_userid']) ){ echo safetext($_SESSION['form_data']['new_userid']); } ?>">
                 </div>
                 <div>
                     <p>新しいパスワード</p>
                     <div class="p2">このサーバーで使用するパスワードを入力してください。</div>
-                    <input id="password" type="text" placeholder="" class="inbox" name="password" value="">
+                    <input id="password" type="text" placeholder="" class="inbox" name="password" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
                 </div>
                 <div>
                     <p>アカウント移行元のuwuzuサーバーのドメイン</p>
                     <div class="p2">アカウント移行元のサーバードメインを入力してください。</div>
-                    <input id="moto_server_domain" type="text" placeholder="uwuzu.example.com" class="inbox" name="moto_server_domain" value="">
+                    <input id="moto_server_domain" type="text" placeholder="uwuzu.example.com" class="inbox" name="moto_server_domain" value="<?php if( !empty($_SESSION['form_data']['moto_server_domain']) ){ echo safetext($_SESSION['form_data']['moto_server_domain']); } ?>">
                 </div>
                 <div>
                     <p>識別コード</p>
                     <div class="p2">アカウント移行元のサーバーで発行された識別コードを入力してください。</div>
-                    <input id="moto_server_account_check" type="text" placeholder="" class="inbox" name="moto_server_account_check" value="">
+                    <input id="moto_server_account_check" type="text" placeholder="" class="inbox" name="moto_server_account_check" value="<?php if( !empty($_SESSION['form_data']['moto_server_account_check']) ){ echo safetext($_SESSION['form_data']['moto_server_account_check']); } ?>">
                 </div>
 
                 <div>
                     <p>認証コード</p>
                     <div class="p2">アカウント移行元のサーバーで発行された認証コードを入力してください。</div>
-                    <input id="moto_server_account_auth" type="text" placeholder="" class="inbox" name="moto_server_account_auth" value="">
+                    <input id="moto_server_account_auth" type="text" placeholder="" class="inbox" name="moto_server_account_auth" value="<?php if( !empty($_SESSION['form_data']['moto_server_account_auth']) ){ echo safetext($_SESSION['form_data']['moto_server_account_auth']); } ?>">
                 </div>
                 <?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
                     <div class="captcha_zone">
@@ -612,7 +632,7 @@ $pdo = null;
                     <div>
                         <p>招待コード</p>
                         <div class="p2">招待コードがないとこのサーバーには登録できません。</div>
-                        <input id="invitationcode" type="text" placeholder="" class="inbox" name="invitationcode" value="<?php if( !empty($_SESSION['invitationcode']) ){ echo safetext( $_SESSION['invitationcode']); } ?>">
+                        <input id="invitationcode" type="text" placeholder="" class="inbox" name="invitationcode" value="<?php if( !empty($_SESSION['form_data']['invitationcode']) ){ echo safetext($_SESSION['form_data']['invitationcode']); } ?>">
                     </div>
                 <?php }?>
 

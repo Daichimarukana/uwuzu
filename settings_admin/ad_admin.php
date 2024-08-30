@@ -285,12 +285,6 @@ if( !empty($_POST['ads_del']) ) {
 
 require('../logout/logout.php');
 
-if(isset($_GET['q'])){ 
-	$keyword = safetext($_GET['q']);
-}else{
-	$keyword = "";
-}
-
 if (!empty($pdo)) {
     $sql = "SELECT * FROM ads ORDER BY datetime DESC";
     $allads = $pdo->query($sql);    

@@ -1315,4 +1315,9 @@ p img{
     .errmsg p{
         color:#ff4848;
     }
+    .module_chk{
+        background-color: var(--dark-background-color);
+        border: none;
+        padding: 0px;
+    }
 }

@@ -263,7 +263,7 @@ class MessageDisplay {
                         //普通のリユーズ----------------------------------------------------------------------------------------------------
                         //----------------------------------------------------------------------------------------------------------------
                         //----------------------------------------------------------------------------------------------------------------
-                        echo '<div class="ru"><a href="/@' . safetext($this->value['account']) . '"><img src="../'.$this->value['iconname'] . '"><p>' . safetext($this->value['username']) . 'さんがリユーズ</p></a></div>';
+                        echo '<div class="ru"><a href="/@' . safetext($this->value['account']) . '"><img src="../'.$this->value['iconname'] . '"><p>' . replaceProfileEmojiImages(safetext($this->value['username'])) . 'さんがリユーズ</p></a></div>';
                         echo '    <div class="flebox">';
                         echo '        <a href="/@' . safetext($org_ueuse['account']) . '"><img src="../'.$org_ueuse['iconname'] . '"></a>';
                         echo '        <a href="/@' . safetext($org_ueuse['account']) . '"><div class="u_name">' . replaceProfileEmojiImages(safetext($org_ueuse['username'])) . '</div></a>';
@@ -541,7 +541,7 @@ class MessageDisplay {
                         //普通のリユーズのリユーズ元が消えた場合--------------------------------------------------------------------------------
                         //----------------------------------------------------------------------------------------------------------------
                         //----------------------------------------------------------------------------------------------------------------
-                        echo '<div class="ru"><a href="/@' . safetext($this->value['account']) . '"><img src="../'.$this->value['iconname'] . '"><p>' . safetext($this->value['username']) . 'さんがリユーズ</p></a></div>';
+                        echo '<div class="ru"><a href="/@' . safetext($this->value['account']) . '"><img src="../'.$this->value['iconname'] . '"><p>' . replaceProfileEmojiImages(safetext($this->value['username'])) . 'さんがリユーズ</p></a></div>';
                         
                         echo '<p>リユーズ元のユーズは削除されました。</p>'; 
                         

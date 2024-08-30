@@ -197,22 +197,47 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
+if(!empty($pdo)){
+	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+	$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+	//User
+	$result = $mysqli->query("SELECT userid FROM account");
+	$count1 = $result->num_rows;
+	//ueuse
+	$result2 = $mysqli->query("SELECT uniqid FROM ueuse");
+	$count2 = $result2->num_rows;
+	//emoji
+	$result3 = $mysqli->query("SELECT sysid FROM emoji");
+	$count3 = $result3->num_rows;
+	//bot
+	$result4 = $mysqli->query("SELECT userid FROM account WHERE sacinfo = 'bot'");
+	$count4 = $result4->num_rows;
 
-//User
-$result = $mysqli->query("SELECT userid FROM account");
-$count1 = $result->num_rows;
-//ueuse
-$result2 = $mysqli->query("SELECT uniqid FROM ueuse");
-$count2 = $result2->num_rows;
-//emoji
-$result3 = $mysqli->query("SELECT sysid FROM emoji");
-$count3 = $result3->num_rows;
-//bot
-$result4 = $mysqli->query("SELECT userid FROM account WHERE sacinfo = 'bot'");
-$count4 = $result4->num_rows;
+	//DB_Data
+	try {
+		$dbname = DB_NAME;
+
+		$query = "
+			SELECT
+				table_name AS `Table`,
+				ROUND(((data_length + index_length) / 1024 / 1024), 2) AS `Size`
+			FROM
+				information_schema.TABLES
+			WHERE
+				table_schema = :database
+			ORDER BY
+				`Size` DESC;
+		";
+		$stmt = $pdo->prepare($query);
+		$stmt->bindParam(':database', $dbname);
+		$stmt->execute();
+		$db_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+	} catch (PDOException $e) {
+		$db_results = null;
+	}
+}
+
 
 if(function_exists("disk_free_space")){
 	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
@@ -255,6 +280,7 @@ if(function_exists("disk_free_space")){
 		$loadAve = null;
 	}
 }
+
 
 require('../logout/logout.php');
 ?>
@@ -369,6 +395,21 @@ require('../logout/logout.php');
 					<?php }else{?>
 						<p>過去1分間のロードアベレージ : <?php echo $loadAve?></p>
 					<?php };?>
+					<hr>
+					<p>データベース</p>
+					<div class="p2">データベースの容量情報です。</div>
+					<table>
+						<?php 
+							if(!empty($db_results)){
+								foreach ($db_results as $value) {
+									echo "<tr>";
+									echo "<td>".$value['Table']."</td>";
+									echo "<td>".$value['Size']." MB</td>";
+									echo "</tr>";
+								}
+							}
+						?>
+					</table>
 				</div>
 			</div>
 		</div>

@@ -286,6 +286,9 @@ if( !empty($_POST['btn_submit']) ) {
 	
 
     $profile = safetext($_POST['profile']);
+	if( 1024 < mb_strlen($profile, 'UTF-8') ) {
+        $error_message[] = 'プロフィールは1024文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
+    }
 
 	// ユーザーネームの入力チェック
 	if( empty($username) ) {

@@ -67,6 +67,7 @@ EMOJI_ID_INPUT_PLEASE - 絵文字IDが入力されていない時に表示され
 EMOJI_ID_OVER_MAX_COUNT - 絵文字IDの文字数が最大文字数を超過している時に表示されます。
 EMOJI_ID_SHIYOUZUMI - ユーザーIDがすでに使用されている時に表示されます。
 EMOJI_OVER_256KB - 絵文字のファイルサイズが256KBを超えている際に表示されます。
+EMOJI_NOT_FOUND - 絵文字が見つからない時に表示されます。
 
 INPUT_PLEASE - 入力すべき場所に内容が無い場合に表示されます。
 INPUT_OVER_MAX_COUNT - 入力すべき場所に入力された内容が設定されている最大文字数を超過している際に表示されます。

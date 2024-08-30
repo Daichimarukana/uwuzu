@@ -183,32 +183,15 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 $notificationcount = $notiData['notification_count'];
 
 if( !empty($pdo) ) {
-	
-	// データベース接続の設定
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-	));
 
-	$userQuery = $dbh->prepare("SELECT username, userid, profile, role FROM account WHERE userid = :userid");
-	$userQuery->bindValue(':userid', $userid);
-	$userQuery->execute();
-	$userData = $userQuery->fetch();
+	$sql = "SELECT * FROM emoji ORDER BY emojidate DESC";
+	$allemoji = $pdo->query($sql);    
 
-	$role = $userData["role"];
+	while ($row = $allemoji->fetch(PDO::FETCH_ASSOC)) {
 
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+		$Emojis[] = $row;
+	}
 
-	$rerole = $dbh->prepare("SELECT username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
-
-    $rerole->bindValue(':userid', $userid);
-    // SQL実行
-    $rerole->execute();
-
-    $userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
-
-	
 }
 
 if( !empty($_POST['btn_submit']) ) {
@@ -344,7 +327,48 @@ if( !empty($_POST['btn_submit']) ) {
 
 
 	}
-   
+}
+
+if( !empty($_POST['emoji_del']) ) {
+	$emoji_name = safetext($_POST['emoji_id']);
+
+	$query = $pdo->prepare('SELECT * FROM emoji WHERE emojiname = :emojiname limit 1');
+	$query->bindValue(':emojiname', $emoji_name);
+	$query->execute();
+	$emoji_img = $query->fetch();
+
+	if(!(empty($emoji_img))){
+		if (is_file("../".$emoji_img["emojifile"])) {
+			unlink("../".$emoji_img["emojifile"]);
+		}else{
+			$error_message[] = "絵文字の画像が見つかりませんでした。(EMOJI_NOT_FOUND)";
+		}
+
+		if(empty($error_message)){
+			try{
+				// 通知削除クエリを実行
+				$deleteQuery = $pdo->prepare("DELETE FROM emoji WHERE emojiname = :emojiname");
+				$deleteQuery->bindValue(':emojiname', $emoji_name, PDO::PARAM_STR);
+				$res = $deleteQuery->execute();
+		
+			} catch (Exception $e) {
+				$pdo->rollBack();
+			}
+		
+			if( $res ) {
+				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				header("Location:".$url."");
+				exit;  
+			} else {
+				$error_message[] = $e->getMessage();
+			}
+		}
+	}else{
+		$error_message[] = "絵文字が見つかりませんでした。(EMOJI_NOT_FOUND)";
+	}
+
+	// プリペアドステートメントを削除
+	$stmt = null;
 }
 
 
@@ -389,22 +413,30 @@ $pdo = null;
 					
 			<form class="formarea" enctype="multipart/form-data" method="post">
 
-			<h1>絵文字登録</h1>
+				<h1>絵文字登録</h1>
 
-			<p>絵文字登録です。</p>
-			<div class="p2">
-			注意 : uwuzuで表示されるカスタム絵文字の最大の大きさは縦64pxです。<br>
-			縦64px以上のカスタム絵文字を登録しても縮小されて表示されます。<br>
-			最大ファイルサイズは256KBです。<br>
-			これはカスタム絵文字によってuwuzuが重たくならないようにするための仕様です。</div>
+				<p>絵文字登録です。</p>
+				<div class="p2">
+				注意 : uwuzuで表示されるカスタム絵文字の最大の大きさは縦64pxです。<br>
+				縦64px以上のカスタム絵文字を登録しても縮小されて表示されます。<br>
+				最大ファイルサイズは256KBです。<br>
+				これはカスタム絵文字によってuwuzuが重たくならないようにするための仕様です。</div>
 
-			<div id="wrap">
-
-				<label class="irobutton" for="file_upload">ファイル選択
-				<input type="file" id="file_upload" name="image" >
-				</label>
-			</div>
-
+				<div id="wrap">
+					<div class="emojipreview">
+						<div class="emojiimg light">
+							<img id="emojiimg_light" src="../img/sysimage/errorimage/emoji_404.png">
+						</div>
+						<div class="emojiimg dark">
+							<img id="emojiimg_dark" src="../img/sysimage/errorimage/emoji_404.png">
+						</div>
+					</div>
+					
+					<label class="irobutton" for="file_upload">ファイル選択
+					<input type="file" id="file_upload" name="image" >
+					</label>
+					<p id="img_select" style="display:none;">画像を選択しました</p>
+				</div>
 				<!--ユーザーネーム関係-->
 				<div>
 					<p>EmojiID</p>
@@ -417,11 +449,40 @@ $pdo = null;
 				</div>
 
 				<div>
-					
-				<input type="submit" class = "irobutton" name="btn_submit" value="登録">
+					<input type="submit" class = "irobutton" name="btn_submit" value="登録">
 				</div>
-
 			</form>
+
+			<div class="formarea">
+				<?php if(!(empty($Emojis))){?>
+					<?php foreach ($Emojis as $value) {?>
+						<div class="emoji_admin">
+							<details>
+								<summary><img src="../<?php echo safetext($value["emojifile"]);?>"><?php echo safetext($value["emojiname"]);?></summary>
+								<hr>
+								<div class="p2">説明</div>
+								<p><?php echo nl2br(safetext($value["emojiinfo"]));?></p>
+								<hr>
+								<div class="p2">登録日時</div>
+								<p><?php echo date("Y年m月d日 H:i", strtotime(safetext($value["emojidate"])));?></p>
+
+								<hr>
+
+								<form enctype="multipart/form-data" method="post">
+									<div class="delbox">
+										<p>削除ボタンを押すとこの絵文字は削除されます。<br>
+											この絵文字を使用した投稿からは絵文字が表示されなくなります。</p>
+										<input type="text" name="emoji_id" id="emoji_id" value="<?php echo safetext($value["emojiname"]);?>" style="display:none;" >
+										<input type="submit" name="emoji_del" class="delbtn" value="削除">
+									</div>
+								</form>
+							</details>
+						</div>
+					<?php }?>
+				<?php }?>
+			
+			</div>
+
 
 			</div>
 	</div>
@@ -440,23 +501,15 @@ function checkForm(inputElement) {
     }
     inputElement.value = str;
 }
-
-window.addEventListener('DOMContentLoaded', function(){
-
-	// ファイルが選択されたら実行
-	document.getElementById("file_upload").addEventListener('change', function(e){
-
-	var file_reader = new FileReader();
-
-	// ファイルの読み込みを行ったら実行
+$(document).ready(function(){
+	$('#file_upload').change(function(e) {
+		var file_reader = new FileReader();
 		file_reader.addEventListener('load', function(e) {
-		
-			const element = document.querySelector('#wrap');
-			const createElement = '<p>画像を選択しました。</p>';
-			element.insertAdjacentHTML('afterend', createElement);
+			$('#img_select').show();
+			$('#emojiimg_light').attr('src', file_reader.result);
+			$('#emojiimg_dark').attr('src', file_reader.result);
 		});
-
-	file_reader.readAsText(e.target.files[0]);
+		file_reader.readAsDataURL(e.target.files[0]);
 	});
 });
 </script>

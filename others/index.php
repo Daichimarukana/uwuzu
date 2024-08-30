@@ -364,7 +364,8 @@ if( !empty($_POST['btn_submit']) ) {
 
 
 if( !empty($_POST['session_submit']) ) {
-	$loginid = sha1(uniqid(mt_rand(), true));
+	$LoginIdBytes = random_bytes(64);
+	$loginid = hash('sha3-512', $LoginIdBytes);
 	$pdo->beginTransaction();
 		try {
 			

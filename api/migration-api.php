@@ -161,6 +161,13 @@ if(isset($_GET['migration_code'])) {
             $ueuse_array = $ueuseQuery->fetchAll();  
             */
             if(!(empty($UserData))){
+
+                if(!(empty($UserData["encryption_ivkey"]))){
+                    $view_mailadds = DecryptionUseEncrKey($UserData["mailadds"], GenUserEnckey($UserData["datetime"]), $UserData["encryption_ivkey"]);
+                }else{
+                    $view_mailadds = $UserData["mailadds"];
+                }
+
                 /*
                 if(!(empty($ueuse_array))){
                     foreach ($ueuse_array as $value) {
@@ -188,7 +195,7 @@ if(isset($_GET['migration_code'])) {
                         "user_icon" => (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$domain."/".safetext($UserData["iconname"]),
                         "user_header" => (empty($_SERVER['HTTPS']) ? 'http://' : 'https://').$domain."/".safetext($UserData["headname"]),
                         "user_profile" => safetext($UserData["profile"]),
-                        "mail_adds" => safetext($UserData["mailadds"]),
+                        "mail_adds" => safetext($view_mailadds),
                     ),
                 ];
             
