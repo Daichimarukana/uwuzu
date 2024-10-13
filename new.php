@@ -576,7 +576,7 @@ $pdo = null;
             <!--アカウント関連-->
             <div>
                 <p>パスワード *</p>
-                <div class="p2">ログイン時に必要となります。<br>※サービス管理者が確認できません。</div>
+                <div class="p2">ログイン時に必要となります。<br>最大256文字まで使用可能です。<br>※サービス管理者が確認できません。</div>
                 <input placeholder="" class="inbox" id="password" type="text" name="password" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
                 <div class="p2" id="password_zxcvbn" style="display: none;"></div>
             </div>

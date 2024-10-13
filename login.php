@@ -308,7 +308,7 @@ $pdo = null;
                 </div>
                 <div>
                     <p>パスワード</p>
-                    <input id="password" class="inbox" type="password" name="password" maxlength="32" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
+                    <input id="password" class="inbox" type="password" name="password" maxlength="256" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
                 </div>
                 <div class="switch_flexbox">
                     <div class="switch_button">

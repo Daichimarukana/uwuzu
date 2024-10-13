@@ -188,8 +188,9 @@ if( !empty($_POST['ads_btn_submit']) ) {
 
 	$ads_url = safetext($_POST['ads_url']);
 	$ads_img_url = safetext($_POST['ads_img_url']);
-	$ads_start_date = safetext(date($_POST['ads_start_date']));
-	$ads_limit_date = safetext(date($_POST['ads_limit_date']));
+	$ads_start_date = date('Y/m/d H:i:s', strtotime(safetext(date($_POST['ads_start_date']))));
+	$ads_limit_date = date('Y/m/d H:i:s', strtotime(safetext(date($_POST['ads_limit_date']))));
+
 	$ads_memo = safetext($_POST['ads_memo']);
 
 	if(empty($ads_url)){
@@ -342,12 +343,12 @@ if (!empty($pdo)) {
 				<div>
 					<p>掲載開始日時</p>
 					<div class="p2">広告の掲載開始日時です。</div>
-					<input type="date" name="ads_start_date" class="inbox" value="">
+					<input type="datetime-local" name="ads_start_date" class="inbox" value="">
 				</div>
 				<div>
 					<p>掲載終了日時</p>
 					<div class="p2">広告の掲載終了日時です。</div>
-					<input type="date" name="ads_limit_date" class="inbox" value="">
+					<input type="datetime-local" name="ads_limit_date" class="inbox" value="">
 				</div>
 				<div>
 					<p>広告のメモ</p>
@@ -372,7 +373,7 @@ if (!empty($pdo)) {
 										}else{
 											echo "設置解除済⛔";
 										}}?></p>
-									<p>設置期間:<?php echo date("Y年m月d日",strtotime($value["start_date"])).' から '.date("Y年m月d日",strtotime($value["limit_date"])).' まで';?>
+									<p>設置期間:<?php echo date("Y/m/d H:i",strtotime($value["start_date"])).' - '.date("Y/m/d H:i",strtotime($value["limit_date"])).'';?>
 									<hr>
 									<p>URL:<?php echo safetext($value["url"]);?></p>
 									<p>画像URL:<?php echo safetext($value["image_url"]);?></p>

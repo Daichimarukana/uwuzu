@@ -343,7 +343,7 @@ function replaceURLsWithLinks($postText, $maxLength = 48) {
     $convertedText = preg_replace_callback($pattern, function($matches) use ($maxLength) {
         $link = $matches[0];
         if(!(preg_match('/:(\w+):/',$link))){
-            $no_https_link = str_replace("https://", "", $link);
+            $no_https_link = preg_replace('/https:\/\//', '', $link, 1);
             if (mb_strlen($link) > $maxLength) {
                 $truncatedLink = mb_substr($no_https_link, 0, $maxLength).'...';
                 return '<a href="'.$link.'" target="_blank">'.$truncatedLink.'</a>';
@@ -620,63 +620,68 @@ function send_notification($to,$from,$title,$message,$url,$category){
         return false;
     }
 
-    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
-    $query->execute(array(':userid' => $from));
-    $result = $query->fetch();
+    if(!($to == $from)){
+        $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+        $query->execute(array(':userid' => $from));
+        $result = $query->fetch();
 
-    $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other"];
-    if(in_array($category, $category_list)){
-        if(in_array($category, explode(',', $result["notification_settings"])) || empty($result["notification_settings"]) || $category === "system" || $category === "other"){
-            if(!(empty($pdo))){		
-                $pdo->beginTransaction();
+        $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other"];
+        if(in_array($category, $category_list)){
+            if(in_array($category, explode(',', $result["notification_settings"])) || empty($result["notification_settings"]) || $category === "system" || $category === "other"){
+                if(!(empty($pdo))){		
+                    $pdo->beginTransaction();
 
-                try {
-                    $fromuserid = safetext($from);
-                    $touserid = safetext($to);
-                    $datetime = date("Y-m-d H:i:s");
-                    $msg = safetext($message);
-                    $title = safetext($title);
-                    $url = safetext($url);
-                    $userchk = 'none';
-                    $notification_category = safetext($category);
-            
-                    // 通知用SQL作成
-                    $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category)");
-            
-                    $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
-                    $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                    $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                    $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                    $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-                    $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
-            
-                    $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-            
-                    $res = $stmt->execute();
-            
-                    $res = $pdo->commit();
-            
-                    if($res){
-                        return true;
-                    }else{
+                    try {
+                        $fromuserid = safetext($from);
+                        $touserid = safetext($to);
+                        $datetime = date("Y-m-d H:i:s");
+                        $msg = safetext($message);
+                        $title = safetext($title);
+                        $url = safetext($url);
+                        $userchk = 'none';
+                        $notification_category = safetext($category);
+                
+                        // 通知用SQL作成
+                        $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category)");
+                
+                        $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
+                        $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                        $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                        $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                        $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
+                
+                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                
+                        $res = $stmt->execute();
+                
+                        $res = $pdo->commit();
+                
+                        if($res){
+                            return true;
+                        }else{
+                            $pdo->rollBack();
+                            return false;
+                        }
+                
+                    } catch(Exception $e) {
                         $pdo->rollBack();
                         return false;
                     }
-            
-                } catch(Exception $e) {
-                    $pdo->rollBack();
+                }else{
                     return false;
                 }
             }else{
-                return false;
+                // 受信しない設定なのでtrue
+                return true;
             }
         }else{
-            // 受信しない設定なのでtrue
-            return true;
+            return false;
         }
     }else{
-        return false;
+        // 送信元と送信先が同じなら送信しない
+        return true;
     }
 }
 // ユーズするとき全部この関数
@@ -1290,5 +1295,4 @@ function EncryptionUseEncrKey($data,$key,$iv){
 function DecryptionUseEncrKey($data,$key,$iv){
     return openssl_decrypt($data, "aes-256-cbc", $key, 0, $iv);
 }
-
 ?>

@@ -1,5 +1,5 @@
 <?php
-require("../function/function.php");
+require("../../function/function.php");
 
 $serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);

@@ -104,6 +104,11 @@ if (in_array("mysqli", get_loaded_extensions())) {
 } else {
     $check_mysqli = false;
 }
+if (in_array("zip", get_loaded_extensions())) {
+    $check_zip = true;
+} else {
+    $check_zip = false;
+}
 // データベースの接続を閉じる
 $pdo = null;
 
@@ -171,6 +176,7 @@ $pdo = null;
             <p>mbstring : <?php if($check_mbstring == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
             <p>pdo_mysql : <?php if($check_pdo_mysql == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
             <p>mysqli : <?php if($check_mysqli == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
+            <p>ZipArchive : <?php if($check_zip == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
         </div>
 
 
