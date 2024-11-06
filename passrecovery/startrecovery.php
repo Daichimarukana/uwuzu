@@ -114,7 +114,8 @@ if(!($userid == null)){
                                 if( empty($error_message) ) {
                                     // トランザクション開始
                                     $pdo->beginTransaction();
-                                    $hashpassword = password_hash($password, PASSWORD_DEFAULT);
+                                    
+                                    $hashpassword = uwuzu_password_hash($password);
                                 
                                     try {
                                         // SQL作成
@@ -209,8 +210,10 @@ if(!($userid == null)){
                 
                                 if( empty($error_message) ) {
                                     // トランザクション開始
-                                $pdo->beginTransaction();
-                                $hashpassword = password_hash($password, PASSWORD_DEFAULT);
+                                    $pdo->beginTransaction();
+                                    
+                                    $hashpassword = uwuzu_password_hash($password);
+
                                 
                                     try {
                                         // SQL作成

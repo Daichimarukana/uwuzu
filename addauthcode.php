@@ -124,7 +124,7 @@ if( !empty($_POST['btn_submit']) ) {
     if ($checkResult) {
         if( empty($error_message) ) {
             $backupcode = random();
-            $hashbackupcode = password_hash($backupcode, PASSWORD_DEFAULT);
+            $hashbackupcode = uwuzu_password_hash($backupcode);
             $secret = $_SESSION['secretcode'];
 
             if(!(empty($userData["encryption_ivkey"]))){

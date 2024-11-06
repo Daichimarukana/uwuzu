@@ -281,63 +281,70 @@ function replaceProfileEmojiImages($postText) {
     return $postTextWithImages;
 }
 // ユーズ内の絵文字やhashtagを画像に置き換える
-function replaceEmojisWithImages($postText) {
-    $postText = str_replace('&#039;', '\'', $postText);
-    // ユーズ内で絵文字名（:emoji:）を検出して画像に置き換える
-    $emojiPattern = '/:(\w+):/';
-    $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) {
-        $emojiName = $matches[1];
-        //絵文字path取得
-        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-        ));
-        $emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname");
-        $emoji_Query->bindValue(':emojiname', $emojiName);
-        $emoji_Query->execute();
-        $emoji_row = $emoji_Query->fetch();
-        if(empty($emoji_row["emojifile"])){
-            $emoji_path = "img/sysimage/errorimage/emoji_404.png";
-            return ":".$emojiName.":";
-        }else{
-            $emoji_path = $emoji_row["emojifile"];
-            return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>";
-        }
-    }, $postText);
-    
-    // @username を検出してリンクに置き換える
-    $usernamePattern = '/@(\w+)/';
-    $postTextWithImagesAndUsernames = preg_replace_callback($usernamePattern, function($matches) {
-        $username = $matches[1];
+function replaceEmojisWithImages($postText) { 
+    $postText = str_replace('&#039;', '\'', $postText); 
 
-        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-        ));
-    
-        $mentionsuserQuery = $dbh->prepare("SELECT username, userid FROM account WHERE userid = :userid");
-        $mentionsuserQuery->bindValue(':userid', $username);
-        $mentionsuserQuery->execute();
-        $mentionsuserData = $mentionsuserQuery->fetch();   
-        
-        if(empty($mentionsuserData)){
-            return "@$username";
-        }else{
-            return "<a class = 'mta' href='/@".htmlentities($mentionsuserData["userid"], ENT_QUOTES, 'UTF-8', false)."'>@".replaceProfileEmojiImages(htmlentities($mentionsuserData["username"], ENT_QUOTES, 'UTF-8', false))."</a>";
-        }
+    $emojiPattern = '/:(\w+):/'; 
+    $postTextWithImages = preg_replace_callback($emojiPattern, function($matches) { 
+        $emojiName = $matches[1]; 
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array( 
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, 
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true, 
+        )); 
+        $emoji_Query = $dbh->prepare("SELECT emojifile, emojiname FROM emoji WHERE emojiname = :emojiname"); 
+        $emoji_Query->bindValue(':emojiname', $emojiName); 
+        $emoji_Query->execute(); 
+        $emoji_row = $emoji_Query->fetch(); 
+        if(empty($emoji_row["emojifile"])){ 
+            $emoji_path = "img/sysimage/errorimage/emoji_404.png"; 
+            return ":".$emojiName.":"; 
+        }else{ 
+            $emoji_path = $emoji_row["emojifile"]; 
+            return "<img src='../".$emoji_path."' alt=':$emojiName:' title=':$emojiName:'>"; 
+        } 
+    }, $postText); 
+
+    $urlPattern = '/https?:\/\/[^\s]+/';
+    $urlPlaceholders = [];
+    $postTextWithPlaceholders = preg_replace_callback($urlPattern, function($matches) use (&$urlPlaceholders) {
+        $placeholder = 'URL_PLACEHOLDER_' . count($urlPlaceholders);
+        $urlPlaceholders[$placeholder] = $matches[0];
+        return $placeholder;
     }, $postTextWithImages);
 
-    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_!]+)/u';
-    $postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) {
-        $hashtags = $matches[1];
-        return "<a class='hashtags' href='/search?q=" . urlencode('#' . $hashtags) . "'>" . '#' . $hashtags . "</a>";
-    }, $postTextWithImagesAndUsernames);
+    $usernamePattern = '/@(\w+)/';
+    $postTextWithUsernames = preg_replace_callback($usernamePattern, function($matches) { 
+        $username = $matches[1]; 
+
+        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array( 
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, 
+            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true, 
+        )); 
+
+        $mentionsuserQuery = $dbh->prepare("SELECT username, userid FROM account WHERE userid = :userid"); 
+        $mentionsuserQuery->bindValue(':userid', $username); 
+        $mentionsuserQuery->execute(); 
+        $mentionsuserData = $mentionsuserQuery->fetch();    
+
+        if(empty($mentionsuserData)){ 
+            return "@".$username.""; 
+        }else{ 
+            return "<a class='mta' href='/@".htmlentities($mentionsuserData["userid"], ENT_QUOTES, 'UTF-8', false)."'>@".replaceProfileEmojiImages(htmlentities($mentionsuserData["username"], ENT_QUOTES, 'UTF-8', false))."</a>"; 
+        } 
+    }, $postTextWithPlaceholders);
+
+    $postTextWithUrlsRestored = str_replace(array_keys($urlPlaceholders), array_values($urlPlaceholders), $postTextWithUsernames);
+
+    $hashtagsPattern = '/#([\p{Han}\p{Hiragana}\p{Katakana}A-Za-z0-9ー_!]+)/u'; 
+    $postTextWithHashtags = preg_replace_callback($hashtagsPattern, function($matches) { 
+        $hashtags = $matches[1]; 
+        return "<a class='hashtags' href='/search?q=" . urlencode('#' . $hashtags) . "'>" . '#' . $hashtags . "</a>"; 
+    }, $postTextWithUrlsRestored);
 
     return $postTextWithHashtags;
 }
-
 function replaceURLsWithLinks($postText, $maxLength = 48) {
     $pattern = '/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一-龠々\w\-\/?=&%.]+)/';
     $convertedText = preg_replace_callback($pattern, function($matches) use ($maxLength) {
@@ -1283,7 +1290,7 @@ function deleteDirectory($dir) {
 
     return rmdir($dir);
 }
-
+// ユーザーデータの暗号化関連
 function GenUserEnckey($datetime){
     $dateBaseKey = hash('sha3-512', $datetime);
     $complexEncKey = hash('sha3-512', ENC_KEY . $dateBaseKey);
@@ -1294,5 +1301,49 @@ function EncryptionUseEncrKey($data,$key,$iv){
 }
 function DecryptionUseEncrKey($data,$key,$iv){
     return openssl_decrypt($data, "aes-256-cbc", $key, 0, $iv);
+}
+// パスワードのArgon2&bcrypt対応認証
+function uwuzu_password_hash($password){
+    if (in_array("argon2id", password_algos())) {
+        $hashpassword = password_hash($password, PASSWORD_ARGON2ID);
+    }else{
+        if(strlen($password) > 72){
+            $onehash = hash('sha3-256', $password);
+            $hashpassword = password_hash($onehash, PASSWORD_BCRYPT);
+        }else{
+            $hashpassword = password_hash($password, PASSWORD_BCRYPT);
+        }
+    }
+
+    return $hashpassword;
+}
+function uwuzu_password_verify($password, $hash){
+    if (in_array("argon2id", password_algos())) {
+        if(password_verify($password, $hash)){
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        if(strlen($password) > 72){
+            $shapass = hash('sha3-256', $password);
+            if(password_verify($shapass, $hash)){
+                return true;
+            }else{
+                $pass72 = substr($password, 0, 72);
+                if(password_verify($pass72, $hash)){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else{
+            if(password_verify($password, $hash)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }
 }
 ?>

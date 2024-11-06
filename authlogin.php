@@ -135,7 +135,7 @@ if( !empty($_POST['btn_submit']) ) {
             $backuplogin = false;
         }
         
-        if($backuplogin === true || password_verify($userbackupcode,$row["backupcode"])){
+        if($backuplogin === true || uwuzu_password_verify($userbackupcode,$row["backupcode"])){
             $pdo->beginTransaction();
             
             try {

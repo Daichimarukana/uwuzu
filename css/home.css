@@ -4533,7 +4533,7 @@ hr{
 .hny .textmain{
     background-color: #F5F5F5;
     padding-top: 8px;
-    padding-bottom: 8px;
+    padding-bottom: 24px;
     padding-left: 24px;
     padding-right: 24px;
 }
@@ -6929,7 +6929,7 @@ noscript .noscript_modal .inner .center_text p{
     .hny .textmain{
         background-color: #f5f4f0;
         padding-top: 8px;
-        padding-bottom: 8px;
+        padding-bottom: 24px;
         padding-left: 24px;
         padding-right: 24px;
     }

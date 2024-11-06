@@ -82,8 +82,13 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                                 $userQuery->bindValue(':userid', $value['fromuserid']);
                                 $userQuery->execute();
                                 $user_array = $userQuery->fetch();
-                                $value['fromusericon'] = "../".$user_array["iconname"];
-                                $value['fromusername'] = $user_array["username"];
+                                if(!(empty($user_array))){
+                                    $value['fromusericon'] = "../".$user_array["iconname"];
+                                    $value['fromusername'] = $user_array["username"];
+                                }else{
+                                    $value['fromusericon'] = "../img/deficon/icon.png";
+                                    $value['fromusername'] = "でふぉると";
+                                }
                             }
                         }
                         $messageDisplay = new MessageDisplay($value); // userid を渡さない

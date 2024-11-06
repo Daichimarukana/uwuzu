@@ -487,6 +487,11 @@ if( !empty($_POST['send_ban_submit']) ) {
 		$deleteQuery->bindValue(':touserid', $userId2, PDO::PARAM_STR);
 		$res = $deleteQuery->execute();
 
+		// 通知削除クエリを実行(自分からの通知)
+		$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE fromuserid = :fromuserid");
+		$deleteQuery->bindValue(':fromuserid', $userId2, PDO::PARAM_STR);
+		$res = $deleteQuery->execute();
+
 		// ユーザーIDを削除したい全てのアカウントを取得
 		$query = $pdo->prepare("SELECT * FROM account WHERE follow LIKE :pattern1 OR follow LIKE :pattern2 OR follow LIKE :pattern3 OR follower LIKE :pattern1 OR follower LIKE :pattern2 OR follower LIKE :pattern3");
 		$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);

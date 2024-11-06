@@ -318,7 +318,9 @@ if( !empty($_POST['btn_submit']) ) {
 
         $role = "official";
         $admin = "yes";
-        $hashpassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $hashpassword = uwuzu_password_hash($password);
+
         $LoginIdBytes = random_bytes(64);
 	    $loginid = hash('sha3-512', $LoginIdBytes);
 

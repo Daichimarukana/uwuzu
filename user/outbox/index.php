@@ -62,7 +62,6 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
                     "url" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
                     "published" => date(DATE_ATOM, strtotime($value["datetime"])),
                     "to" => [
-                        "https://" . $domain . "/followers",
                         "https://www.w3.org/ns/activitystreams#Public",
                     ],
                     "actor" => "https://" . $domain . "/actor/?actor=@" . $userid,
@@ -73,7 +72,6 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
                         "url" => "https://" . $domain . "/!" . $value["uniqid"],
                         "published" => date(DATE_ATOM, strtotime($value["datetime"])),
                         "to" => [
-                            "https://" . $domain . "/followers",
                             "https://www.w3.org/ns/activitystreams#Public",
                         ],
                         "attributedTo" => "https://" . $domain . "/@" . $value["account"],
@@ -87,7 +85,7 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
             $item = array(
                 "type" => "OrderedCollection",
                 "@context" => "https://www.w3.org/ns/activitystreams",
-                "id" => "https://" . $domain . "/user/outbox/?actor=@" . $userid . "?page=true",
+                "id" => "https://" . $domain . "/user/outbox/?actor=@" . $userid . "&page=true",
                 "partOf" => "https://" . $domain . "/user/outbox/?actor=@" . $userid,
                 "summary" => "outbox of " . $userid,
                 "totalItems" => count($messages),

@@ -268,9 +268,14 @@ if( !empty($_POST['btn_submit']) ) {
 				$deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
 				$res = $deleteQuery->execute();
 
-				// 通知削除クエリを実行
+				// 通知削除クエリを実行(自分宛ての通知)
 				$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE touserid = :touserid");
 				$deleteQuery->bindValue(':touserid', $userid, PDO::PARAM_STR);
+				$res = $deleteQuery->execute();
+				
+				// 通知削除クエリを実行(自分からの通知)
+				$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE fromuserid = :fromuserid");
+				$deleteQuery->bindValue(':fromuserid', $userid, PDO::PARAM_STR);
 				$res = $deleteQuery->execute();
 
 				// ユーザーIDを削除したい全てのアカウントを取得

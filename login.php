@@ -199,7 +199,7 @@ if( !empty($_POST['btn_submit']) ) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
 
                 if($row["userid"] == $userid){
-                    if(password_verify($password,$row["password"])){
+                    if(uwuzu_password_verify($password,$row["password"])){
                         if(empty($row["authcode"])){
                             $_SESSION['admin_login'] = true;
 

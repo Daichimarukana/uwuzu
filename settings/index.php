@@ -303,7 +303,6 @@ if( !empty($_POST['btn_submit']) ) {
     if( empty($error_message) ) {
 		// トランザクション開始
 		$pdo->beginTransaction();
-		$hashpassword = password_hash($password, PASSWORD_DEFAULT);
 
 		try {
 			// SQL作成
@@ -352,8 +351,6 @@ if( !empty($_POST['pass_submit']) ) {
 	$pass_chk = safetext($_POST['passchk_userid']);
 	$password = $_POST['password'];
 
-	$hashpassword = password_hash($password, PASSWORD_DEFAULT);
-
 	if(empty($pass_chk)){
 		$error_message[] = 'ユーザーidを入力してください。(USERID_INPUT_PLEASE)';
 	}else{
@@ -389,7 +386,8 @@ if( !empty($_POST['pass_submit']) ) {
     if( empty($error_message) ) {
 		// トランザクション開始
 	$pdo->beginTransaction();
-	$hashpassword = password_hash($password, PASSWORD_DEFAULT);
+	
+	$hashpassword = uwuzu_password_hash($password);
 
 	try {
 		// SQL作成

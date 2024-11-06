@@ -153,7 +153,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                         }
                     }
                     if($message['ads'] === "true"){
-                        echo '<div class="ads"><a href = "' . safetext($message['ads_url']) . '"><img src="' . safetext($message['ads_img_url']) . '" title="' . safetext($message['ads_memo']) . '"></a></div>';
+                        echo '<div class="ads"><a href = "' . safetext($message['ads_url']) . '" target="_blank"><img src="' . safetext($message['ads_img_url']) . '" title="' . safetext($message['ads_memo']) . '"></a></div>';
                     }
                 }else{
                     echo '<div class="tokonone" id="noueuse"><p>ユーズがありません</p></div>';
