@@ -1394,20 +1394,26 @@ function val_OtherSettings($dataname, $jsontext){
 //ユーザーのOther_Settings追加関数
 function val_AddOtherSettings($dataname, $data, $jsontext){
     $other_settings = json_decode($jsontext, true);
-    if(isset($dataname) && isset($data) && isset($jsontext)) {
-        if(is_bool($data) === true){
-            $new_data = [$dataname=>$data];
-            $ret = json_encode(array_merge($other_settings,$new_data));
-        }elseif(is_int($data) === true){
-            $new_data = [$dataname=>(int)$data];
-            $ret = json_encode(array_merge($other_settings,$new_data));
-        }elseif(is_string($data)){
-            $new_data = [$dataname=>$data];
-            $ret = json_encode(array_merge($other_settings,$new_data));
-        }
+    if(empty($other_settings)){
+        $new_data = [$dataname=>$data];
+        $ret = json_encode($new_data);
     }else{
-        $ret = false;
+        if(isset($dataname) && isset($data) && isset($jsontext)) {
+            if(is_bool($data) === true){
+                $new_data = [$dataname=>$data];
+                $ret = json_encode(array_merge($other_settings,$new_data));
+            }elseif(is_int($data) === true){
+                $new_data = [$dataname=>(int)$data];
+                $ret = json_encode(array_merge($other_settings,$new_data));
+            }elseif(is_string($data)){
+                $new_data = [$dataname=>$data];
+                $ret = json_encode(array_merge($other_settings,$new_data));
+            }
+        }else{
+            $ret = false;
+        }
     }
+    
     return $ret;
 }
 ?>

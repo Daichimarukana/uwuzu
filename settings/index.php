@@ -235,7 +235,12 @@ if( !empty($_POST['btn_submit']) ) {
 
     $mailadds = safetext($_POST['mailadds']);
 
-	$new_isAIBlock = safetext($_POST['isAIBlock']);
+	if( !empty($_POST['isAIBlock']) ) {
+		$new_isAIBlock = safetext($_POST['isAIBlock']);
+	}else{
+		$new_isAIBlock = "false";
+	}
+
 	if($new_isAIBlock === "true"){
 		$save_isAIBlock = true;
 	}else{
@@ -243,7 +248,11 @@ if( !empty($_POST['btn_submit']) ) {
 	}
 	$other_settings_json = val_AddOtherSettings("isAIBlock", $save_isAIBlock, $userData["other_settings"]);
 
-	$new_isAIBMW = safetext($_POST['isAIBMW']);
+	if( !empty($_POST['isAIBMW']) ) {
+		$new_isAIBMW = safetext($_POST['isAIBMW']);
+	}else{
+		$new_isAIBMW = "false";
+	}
 	if($new_isAIBMW === "true"){
 		$save_isAIBMW = true;
 	}else{

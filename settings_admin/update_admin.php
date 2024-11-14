@@ -180,55 +180,63 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
 
-if( !empty($_POST['update_submit']) ) {
-	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['extract_path'])) {
-		$extractPath = safetext($_POST['extract_path']);
-		
-		// JSONファイルの再読み込み
-		$jsonFile = $extractPath . '/update.json';
-		if (file_exists($jsonFile)) {
-			$jsonData = json_decode(file_get_contents($jsonFile), true);
-			if (json_last_error() === JSON_ERROR_NONE) {
-				// 上書きファイルの処理
-				if(!(empty($jsonData['files']['overwrite']))){
-					foreach ($jsonData['files']['overwrite'] as $file) {
-						$sourceFile = $extractPath . '/' . $file;
-						$destinationFile = $_SERVER['DOCUMENT_ROOT'] . '/' . $file;
-						if (file_exists($sourceFile)) {
-							copy($sourceFile, $destinationFile);
-						}else{
-							$error_message[] = "アップデート元のzipファイルに本来予定されていたファイルがありませんでしたが、アップデート作業は完了しました。(UPDATE_FILE_NOT_FOUND)";
-						}
-					}
-				}
-				
-				// 削除ファイルの処理
-				if(!(empty($jsonData['files']['delete']))){
-					foreach ($jsonData['files']['delete'] as $file) {
-						$deleteFile = $_SERVER['DOCUMENT_ROOT'] . '/' . $file;
-						if (file_exists($deleteFile)) {
-							unlink($deleteFile);
-						}else{
-							$error_message[] = "削除予定のファイルがありませんでしたが、アップデート作業は完了しました。(DELETE_FILE_NOT_FOUND)";
-						}
-					}
-				}				
-			} else {
-				$error_message[] = "update.jsonがうまく読み込めませんでした。(LOADING_ERROR)";
-			}
-		} else {
-			$error_message[] = "update.jsonが見つかりませんでした。(LOADING_ERROR)";
-		}
+if (!empty($_POST['update_submit'])) { 
+	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['extract_path'])) { 
+		$extractPath = safetext($_POST['extract_path']); 
+		 
+		// JSONファイルの再読み込み 
+		$jsonFile = $extractPath . '/update.json'; 
+		if (file_exists($jsonFile)) { 
+			$jsonData = json_decode(file_get_contents($jsonFile), true); 
+			if (json_last_error() === JSON_ERROR_NONE) { 
+				// 上書きファイルの処理 
+				if (!(empty($jsonData['files']['overwrite']))) { 
+					foreach ($jsonData['files']['overwrite'] as $file) { 
+						$sourceFile = $extractPath . '/' . $file; 
+						$destinationFile = $_SERVER['DOCUMENT_ROOT'] . '/' . $file; 
 
-		if (file_exists($extractPath)) {
-			if (is_dir($extractPath)) {
-				deleteDirectory($extractPath);
-			}
-		}
-	} else {
-		$error_message[] = "不正なリクエストです。(BAD_REQUEST)";
-	}
+						if (file_exists($sourceFile)) {
+							// ディレクトリが存在しない場合は作成
+							$destinationDir = dirname($destinationFile);
+							if (!file_exists($destinationDir)) {
+								mkdir($destinationDir, 0775, true);
+							}
+
+							copy($sourceFile, $destinationFile);
+						} else { 
+							$error_message[] = "アップデート元のzipファイルに本来予定されていたファイルがありませんでしたが、アップデート作業は完了しました。(UPDATE_FILE_NOT_FOUND)"; 
+						} 
+					} 
+				} 
+				 
+				// 削除ファイルの処理 
+				if (!(empty($jsonData['files']['delete']))) { 
+					foreach ($jsonData['files']['delete'] as $file) { 
+						$deleteFile = $_SERVER['DOCUMENT_ROOT'] . '/' . $file; 
+						if (file_exists($deleteFile)) { 
+							unlink($deleteFile); 
+						} else { 
+							$error_message[] = "削除予定のファイルがありませんでしたが、アップデート作業は完了しました。(DELETE_FILE_NOT_FOUND)"; 
+						} 
+					} 
+				}				 
+			} else { 
+				$error_message[] = "update.jsonがうまく読み込めませんでした。(LOADING_ERROR)"; 
+			} 
+		} else { 
+			$error_message[] = "update.jsonが見つかりませんでした。(LOADING_ERROR)"; 
+		} 
+ 
+		if (file_exists($extractPath)) { 
+			if (is_dir($extractPath)) { 
+				deleteDirectory($extractPath); 
+			} 
+		} 
+	} else { 
+		$error_message[] = "不正なリクエストです。(BAD_REQUEST)"; 
+	} 
 }
+
 require('../logout/logout.php');
 ?>
 <!DOCTYPE html>
