@@ -184,19 +184,11 @@ function customStripTags($html, $allowedTags)
 $allowedTags = array('h1', 'h2', 'h3', 'center', 'font');
 
 if (!empty($pdo)) {
-
-	// データベース接続の設定
-	$dbh = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, array(
-		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-		PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-	));
-
 	$uwuzuid2 = safetext(str_replace('@', '', $_GET['uwuzuid']));
 
 	$uwuzuid = safetext(str_replace('@' . $domain, '', $uwuzuid2));
 
-	$userQuery = $dbh->prepare("SELECT username, userid, profile, role, follower, blocklist FROM account WHERE userid = :userid");
+	$userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower, blocklist FROM account WHERE userid = :userid");
 	$userQuery->bindValue(':userid', $uwuzuid);
 	$userQuery->execute();
 	$userData = $userQuery->fetch();
@@ -207,7 +199,7 @@ if (!empty($pdo)) {
 
 		$roles = explode(',', $userData["role"]); // カンマで区切られたロールを配列に分割
 
-		$rerole = $dbh->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime FROM account WHERE userid = :userid");
+		$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings FROM account WHERE userid = :userid");
 
 		$rerole->bindValue(':userid', $uwuzuid);
 		// SQL実行
@@ -218,12 +210,13 @@ if (!empty($pdo)) {
 		$roleDataArray = array();
 
 		foreach ($roles as $roleId) {
-			$rerole = $dbh->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
+			$rerole = $pdo->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
 			$rerole->bindValue(':role', $roleId);
 			$rerole->execute();
 			$roleDataArray[$roleId] = $rerole->fetch();
 		}
 
+		$isAIBlock = val_OtherSettings("isAIBlock", $userdata["other_settings"]);
 
 		//-------フォロー数---------
 		$follow = $userdata['follow']; // コンマで区切られたユーザーIDを含む変数
@@ -250,7 +243,7 @@ if (!empty($pdo)) {
 		$profileText = safetext($userData['profile']);
 
 
-		$allueuse = $dbh->prepare("SELECT account FROM ueuse WHERE account = :userid");
+		$allueuse = $pdo->prepare("SELECT account FROM ueuse WHERE account = :userid");
 		$allueuse->bindValue(':userid', $uwuzuid);
 		$allueuse->execute();
 		$ueuse_cnt = $allueuse->rowCount();
@@ -508,6 +501,10 @@ $pdo = null;
 	<script src="../js/nsfw_event.js"></script>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<?php if($isAIBlock === true){?>
+		<meta name="robots" content="noimageai">
+		<meta name="robots" content="noai">
+	<?php }?>
 	<link rel="stylesheet" href="../css/home.css">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">

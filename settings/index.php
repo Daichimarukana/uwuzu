@@ -190,6 +190,7 @@ $mail_settings = safetext($res["mail_settings"]);
 //phpmailer--------------------------------------------
 require('../settings_admin/plugin_settings/phpmailer_settings.php');
 //------------------------------------------------------
+require('../settings_admin/plugin_settings/aiblockwatermark_settings.php');
 if( !empty($pdo) ) {
 	
 	// データベース接続の設定
@@ -199,6 +200,9 @@ if( !empty($pdo) ) {
 	$userData = $userQuery->fetch();
 
 	$role = $userData["role"];
+
+	$isAIBlock = val_OtherSettings("isAIBlock", $userData["other_settings"]);
+	$isAIBWM = val_OtherSettings("isAIBlockWaterMark", $userData["other_settings"]);
 
 	if(!(empty($userData["encryption_ivkey"]))){
 		$view_mailadds = DecryptionUseEncrKey($userData["mailadds"], GenUserEnckey($userData["datetime"]), $userData["encryption_ivkey"]);
@@ -230,6 +234,22 @@ if( !empty($_POST['btn_submit']) ) {
 	$username = safetext($_POST['username']);
 
     $mailadds = safetext($_POST['mailadds']);
+
+	$new_isAIBlock = safetext($_POST['isAIBlock']);
+	if($new_isAIBlock === "true"){
+		$save_isAIBlock = true;
+	}else{
+		$save_isAIBlock = false;
+	}
+	$other_settings_json = val_AddOtherSettings("isAIBlock", $save_isAIBlock, $userData["other_settings"]);
+
+	$new_isAIBMW = safetext($_POST['isAIBMW']);
+	if($new_isAIBMW === "true"){
+		$save_isAIBMW = true;
+	}else{
+		$save_isAIBMW = false;
+	}
+	$other_settings_json = val_AddOtherSettings("isAIBlockWaterMark", $save_isAIBMW, $other_settings_json);
 
 	if( !empty($_POST['mail_important']) ) {
 		$mail_important = safetext($_POST['mail_important']);
@@ -306,7 +326,7 @@ if( !empty($_POST['btn_submit']) ) {
 
 		try {
 			// SQL作成
-			$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot, mail_settings = :mail_settings WHERE userid = :userid;");
+			$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot, mail_settings = :mail_settings, other_settings = :other_settings WHERE userid = :userid;");
 
 			// 他の値をセット
 			$stmt->bindParam(':username', $username, PDO::PARAM_STR);
@@ -314,6 +334,7 @@ if( !empty($_POST['btn_submit']) ) {
 			$stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
 			$stmt->bindParam(':saveimbot', $saveim_bot, PDO::PARAM_STR);
 			$stmt->bindParam(':mail_settings', $savemail_important, PDO::PARAM_STR);
+			$stmt->bindParam(':other_settings', $other_settings_json, PDO::PARAM_STR);
 
 			// 条件を指定
 			// 以下の部分を適切な条件に置き換えてください
@@ -842,6 +863,36 @@ $pdo = null;
 							<?php }else{?>
 								<input id="mail_important" class="switch_input" type='checkbox' name="mail_important" value="true" />
 								<label for="mail_important" class="switch_label"></label>
+							<?php }?>
+						</div>
+					<?php }?>
+
+					<p>AIによる学習を拒否する</p>
+					<div class="p2">あなたのプロフィールにAIが訪れた際に、ユーズや画像などのコンテンツを学習しないように要求します。<br>
+						これはHTML内にnoaiフラグを含むことで実装されているため、必ずしもすべてのAIがこれに従うとは限りません。<br>
+						なお、この機能はまだ確実な動作が保証されないためベータ版です。</div>
+					<div class="switch_button">
+						<?php if($isAIBlock == true){?>
+							<input id="isAIBlock" class="switch_input" type='checkbox' name="isAIBlock" value="true" checked/>
+							<label for="isAIBlock" class="switch_label"></label>
+						<?php }else{?>
+							<input id="isAIBlock" class="switch_input" type='checkbox' name="isAIBlock" value="true" />
+							<label for="isAIBlock" class="switch_label"></label>
+						<?php }?>
+					</div>
+
+					<?php if(!empty(AIBWM_CHK && AIBWM_CHK == "true")){?>
+						<p>AI学習防止透かしを自動挿入する</p>
+						<div class="p2">画像を添付してユーズした際に自動的に画像の右下に「AI学習禁止」と書かれた透かしを挿入する機能です。<br>
+							この機能はまだ確実な動作が確認されていないためベータ版です。<br>
+							また、gif、tiffやsvgなどの一部画像形式では挿入されません。</div>
+						<div class="switch_button">
+							<?php if($isAIBWM == true){?>
+								<input id="isAIBMW" class="switch_input" type='checkbox' name="isAIBMW" value="true" checked/>
+								<label for="isAIBMW" class="switch_label"></label>
+							<?php }else{?>
+								<input id="isAIBMW" class="switch_input" type='checkbox' name="isAIBMW" value="true" />
+								<label for="isAIBMW" class="switch_label"></label>
 							<?php }?>
 						</div>
 					<?php }?>

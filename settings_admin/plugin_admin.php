@@ -37,6 +37,10 @@ require('plugin_settings/phpmailer_settings.php');
 require('plugin_settings/phpmailer_sender.php');
 //------------------------------------------------------
 
+//AIBlockWaterMark--------------------------------------------
+require('plugin_settings/aiblockwatermark_settings.php');
+//------------------------------------------------------
+
 session_name('uwuzu_s_id');
 session_set_cookie_params([
     'lifetime' => 0,
@@ -229,6 +233,22 @@ if( !empty($_POST['btn_submit']) ) {
 	fputs($file, $data);
 	fclose($file);
 
+	//----------------------------------------------------------------------
+
+	$N_AIBWM_ONOFF = safetext($_POST['aibwmchk_onoff']);
+
+	$New_AIBWM_Settings = "
+	<?php // AIBlockWaterMarkの設定
+	define( 'AIBWM_CHK', '".$N_AIBWM_ONOFF."');// trueならAIBlockWaterMarkが有効
+	?>
+	";
+
+	//設定上書き
+	$file = fopen('plugin_settings/aiblockwatermark_settings.php', 'w');
+	$data = $New_AIBWM_Settings;
+	fputs($file, $data);
+	fclose($file);
+
 	$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	header("Location:".$url."");
 	exit;  
@@ -355,8 +375,21 @@ require('../logout/logout.php');
 								<input type="radio" name="ssl_tls_none" value="NONE" id="NONE" class="radiobtn_input" <?php if(!empty(MAIL_SSL_ && MAIL_SSL_ == "NONE")){echo "checked";}?>>
 								<label for="NONE" class="radiobtn_label">なし</label>
 							</div>
-							
+						</div>
 
+						<hr>
+
+						<p>AIBlockWaterMarkプラグイン</p>
+						<div class="p2">AI学習対策に、ユーザー単位で画像に透かしを自動挿入できるプラグインです。<b>pluginフォルダに解凍済みのAIBlockWaterMarkのファイル一式が入っていることが必須要件になります。</b><br>plugin/AIBlockWaterMark/README.MDなど一式</div>
+						<p>AIBlockWaterMarkのオンオフ</p>
+						<div class="switch_button">
+							<?php if(!empty(AIBWM_CHK && AIBWM_CHK == "true")){?>
+								<input id="aibwmchk_onoff" class="switch_input" type='checkbox' name="aibwmchk_onoff" value="true" checked/>
+								<label for="aibwmchk_onoff" class="switch_label"></label>
+							<?php }else{?>
+								<input id="aibwmchk_onoff" class="switch_input" type='checkbox' name="aibwmchk_onoff" value="true" />
+								<label for="aibwmchk_onoff" class="switch_label"></label>
+							<?php }?>
 						</div>
 					</div>
 					<input type="submit" class = "irobutton" name="btn_submit" value="保存&更新">

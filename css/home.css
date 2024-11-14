@@ -3745,7 +3745,7 @@ label>input {
 
 .rightbox .btmbox{
     position: absolute;
-    bottom: 6px; /*下に固定*/
+    bottom: 8px; /*下に固定*/
     height: fit-content;
     max-width: 45dvh;
     width: 90%;

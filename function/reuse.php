@@ -43,12 +43,14 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) &&
             $video1 = "";
         
             $rpUniqid = "";
+
+            $AIBWM = false;
             if(!(empty($result["ueuse"]))){
                 $ruUniqid = $postUniqid;
             }else{
                 $ruUniqid = $result["ruuniqid"];
             }
-            $ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$reusetext,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk);
+            $ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$reusetext,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk,$AIBWM);
 
             if($ueuse_result == null){
                 echo json_encode(['success' => true]);

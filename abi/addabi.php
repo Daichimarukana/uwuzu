@@ -3,7 +3,7 @@ $mojisizefile = "../server/textsize.txt";
 
 $banurldomainfile = "../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
-$banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
+$banurl = array_filter(preg_split("/\r\n|\n|\r/", $banurl_info));
 
 require('../db.php');
 
@@ -57,16 +57,19 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && s
                     exit;
                 }
                 // 禁止url確認
-                for($i = 0; $i < count($banurl); $i++) {
-                    if (false !== strpos($abitext, 'https://'.$banurl[$i])) {
-                        $err = "contains_prohibited_url";
-                        $response = array(
-                            'error_code' => $err,
-                        );
-                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        exit;
+                if(!(empty($banurl))){
+                    for($i = 0; $i < count($banurl); $i++) {
+                        if (false !== strpos($abitext, 'https://'.$banurl[$i])) {
+                            $err = "contains_prohibited_url";
+                            $response = array(
+                                'error_code' => $err,
+                            );
+                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                            exit;
+                        }
                     }
                 }
+                
 
                 try {
                     $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);

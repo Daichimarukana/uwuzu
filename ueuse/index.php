@@ -213,7 +213,7 @@ if (!(empty($pdo))) {
 
 //-----------------URLから取得----------------
 if(isset($_GET['text'])) { 
-    $ueuse = safetext($_GET['text']);
+    $ueuse = safetext(urldecode($_GET['text']));
 }elseif(isset($_COOKIE['ueuse'])) { 
     $ueuse = safetext($_COOKIE['ueuse']);
 }
@@ -221,6 +221,16 @@ if(isset($_GET['text'])) {
 //-------------------------------------------
 
 if( !empty($_POST['btn_submit']) ) {
+	$settingsJsonQuery = $pdo->prepare("SELECT userid, other_settings FROM account WHERE userid = :userid");
+	$settingsJsonQuery->bindValue(':userid', $userid);
+	$settingsJsonQuery->execute();
+	$settingsJson = $settingsJsonQuery->fetch();
+	if(!(empty($settingsJson["other_settings"]))){
+		$isAIBWM = val_OtherSettings("isAIBlockWaterMark", $settingsJson["other_settings"]);
+	}else{
+		$isAIBWM = false;
+	}
+
 	$ueuse = safetext($_POST['ueuse']);
 
 	if(isset($_POST['nsfw_chk'])){
@@ -237,7 +247,7 @@ if( !empty($_POST['btn_submit']) ) {
 
 	$rpUniqid = $ueuseid;
 	$ruUniqid = "";
-	$ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk);
+	$ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk,$isAIBWM);
 
 	if($ueuse_result == null){
 		//一時保存していたユーズ内容の削除

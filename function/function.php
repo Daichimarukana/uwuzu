@@ -405,7 +405,7 @@ function YouTube_and_nicovideo_Links($postText) {
                     }
                     $video_id = str_replace('&amp;', '?', $video_id);
                 } elseif (isset($parsedUrl['path'])) {
-                    if (preg_match('/^\/watch\/|^\/embed\/|^\/shorts\/|^\/v\//', $parsedUrl['path'])) {
+                    if (preg_match('/^\/watch\/|^\/embed\/|^\/shorts\/|^\/v\/|\//', $parsedUrl['path'])) {
                         $video_id = str_replace('/', '', htmlentities($parsedUrl['path'], ENT_QUOTES, 'UTF-8', false));
                         $video_time = 0;
                         $iframe = true;
@@ -692,7 +692,11 @@ function send_notification($to,$from,$title,$message,$url,$category){
     }
 }
 // ユーズするとき全部この関数
-function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw){
+function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw,$aibwm){
+    //AIBlockWaterMark--------------------------------------------
+    require('../settings_admin/plugin_settings/aiblockwatermark_settings.php');
+    //------------------------------------------------------
+
     $rpUniqid = safetext($rpUniqid);
     $ruUniqid = safetext($ruUniqid);
     $userid = safetext($userid);
@@ -707,7 +711,8 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
 
     $banurldomainfile = "../server/banurldomain.txt";
     $banurl_info = file_get_contents($banurldomainfile);
-    $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
+    $banurl = array_filter(preg_split("/\r\n|\n|\r/", $banurl_info));
+
 
     // データベースに接続
     try {
@@ -743,13 +748,16 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
             }
 
             // 禁止url確認
-            for($i = 0; $i < count($banurl); $i++) {
-                if(!($banurl[$i] == "")){
-                    if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
-                        $error_message[] = '投稿が禁止されているURLが含まれています。(INPUT_CONTAINS_PROHIBITED_URL)';
+            if(!(empty($banurl))){
+                for($i = 0; $i < count($banurl); $i++) {
+                    if(!($banurl[$i] == "")){
+                        if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+                            $error_message[] = '投稿が禁止されているURLが含まれています。(INPUT_CONTAINS_PROHIBITED_URL)';
+                        }
                     }
                 }
             }
+            
         }
 
         $old_datetime = date("Y-m-d H:i:00");
@@ -960,6 +968,22 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     }
                 }else{
                     $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                }
+            }
+
+            if($aibwm === true && !empty(AIBWM_CHK && AIBWM_CHK == "true")){
+                require('../plugin/AIBlockWaterMark/aiblockwatermark.php');
+                if(!($save_photo1 == "none")){
+                    AIBlockWaterMark($save_photo1, $userid);
+                }
+                if(!($save_photo2 == "none")){
+                    AIBlockWaterMark($save_photo2, $userid);
+                }
+                if(!($save_photo3 == "none")){
+                    AIBlockWaterMark($save_photo3, $userid);
+                }
+                if(!($save_photo4 == "none")){
+                    AIBlockWaterMark($save_photo4, $userid);
                 }
             }
 
@@ -1345,5 +1369,45 @@ function uwuzu_password_verify($password, $hash){
             }
         }
     }
+}
+
+//ユーザーのOther_Settings読み取り関数
+function val_OtherSettings($dataname, $jsontext){
+    $other_settings = json_decode($jsontext, true);
+    if(!(empty($other_settings[$dataname]))) {
+        if(is_bool($other_settings[$dataname]) === true){
+            if($other_settings[$dataname] == true){
+                $ret = true;
+            }else{
+                $ret = false;
+            }
+        }elseif(is_int($other_settings[$dataname]) === true){
+            $ret = (int)$other_settings[$dataname];
+        }elseif(is_string($other_settings[$dataname])){
+            $ret = $other_settings[$dataname];
+        }
+    }else{
+        $ret = false;
+    }
+    return $ret;
+}
+//ユーザーのOther_Settings追加関数
+function val_AddOtherSettings($dataname, $data, $jsontext){
+    $other_settings = json_decode($jsontext, true);
+    if(isset($dataname) && isset($data) && isset($jsontext)) {
+        if(is_bool($data) === true){
+            $new_data = [$dataname=>$data];
+            $ret = json_encode(array_merge($other_settings,$new_data));
+        }elseif(is_int($data) === true){
+            $new_data = [$dataname=>(int)$data];
+            $ret = json_encode(array_merge($other_settings,$new_data));
+        }elseif(is_string($data)){
+            $new_data = [$dataname=>$data];
+            $ret = json_encode(array_merge($other_settings,$new_data));
+        }
+    }else{
+        $ret = false;
+    }
+    return $ret;
 }
 ?>

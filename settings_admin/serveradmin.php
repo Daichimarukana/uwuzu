@@ -284,7 +284,7 @@ if( !empty($_POST['btn_submit']) ) {
 	if($postrobots === "true"){
 		//GPTBotによるクロールを拒否
 		$file = fopen($robots, 'w');
-		$data = "User-agent: GPTBot\nDisallow: /";
+		$data = "User-agent: GPTBot\nDisallow: /\n\nUser-agent: ChatGPT-User\nDisallow: /\n\nUser-agent: Google-Extended\nDisallow: /\n\nUser-agent: ClaudeBot\nDisallow: /\n\nUser-agent: CCBot\nDisallow: /";
 		fputs($file, $data);
 		fclose($file);
 	}else{
@@ -348,7 +348,7 @@ if( !empty($_POST['btn_submit']) ) {
 
 	$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	header("Location:".$url."");
-	exit;  
+	exit;
 }
 require('../logout/logout.php');
 ?>
@@ -496,9 +496,11 @@ require('../logout/logout.php');
 					</div>
 
 					<div>
-						<p>OpenAIによるクロールを拒否するかどうか<br>※robots.txtによりOpenAIからのクロールを拒否するものであり、他のAI企業によるクロールを完全拒否するものではございません。</p>
+						<p>AI学習を拒否するかどうか</p>
+						<div class="p2">robots.txtを使用し、OpenAI、Google、Anthropic、Common Crawlのクローラーを拒否します。<br>
+							必ずしもすべてのAI学習用クローラーをブロックできるわけではありません。</div>
 						<div class="switch_button">
-							<?php if(file_get_contents($robots) === "User-agent: GPTBot\nDisallow: /"){?>
+							<?php if(file_get_contents($robots) === "User-agent: GPTBot\nDisallow: /\n\nUser-agent: ChatGPT-User\nDisallow: /\n\nUser-agent: Google-Extended\nDisallow: /\n\nUser-agent: ClaudeBot\nDisallow: /\n\nUser-agent: CCBot\nDisallow: /"){?>
 								<input id="robots" class="switch_input" type='checkbox' name="robots" value="true" checked/>
 								<label for="robots" class="switch_label"></label>
 							<?php }else{?>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2024-08-19 10:03:35
+-- 生成日時: 2024-11-14 11:59:48
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -50,7 +50,8 @@ CREATE TABLE `account` (
   `sacinfo` varchar(256) NOT NULL,
   `notification_settings` varchar(256) NOT NULL,
   `mail_settings` mediumtext NOT NULL,
-  `encryption_ivkey` varchar(256) NOT NULL
+  `encryption_ivkey` varchar(256) NOT NULL,
+  `other_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`other_settings`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

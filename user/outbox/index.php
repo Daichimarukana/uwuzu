@@ -57,7 +57,6 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
             foreach ($messages as $value) {
                 $activity = array(
                     "type" => "Create",
-                    "@context" => "https://www.w3.org/ns/activitystreams",
                     "id" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
                     "url" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
                     "published" => date(DATE_ATOM, strtotime($value["datetime"])),
@@ -86,7 +85,6 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
                 "type" => "OrderedCollection",
                 "@context" => "https://www.w3.org/ns/activitystreams",
                 "id" => "https://" . $domain . "/user/outbox/?actor=@" . $userid . "&page=true",
-                "partOf" => "https://" . $domain . "/user/outbox/?actor=@" . $userid,
                 "summary" => "outbox of " . $userid,
                 "totalItems" => count($messages),
                 "orderedItems" => $orderedItems,

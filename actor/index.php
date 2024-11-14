@@ -61,6 +61,8 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
             "preferredUsername" => "".$userData["userid"]."",
             "name" => "".$userData["username"]."",
             "summary" => "".nl2br($userData["profile"])."",
+            "followers" => "https://".$domain."/user/followers/?actor=@".$userid."",
+            "following" => "https://".$domain."/user/following/?actor=@".$userid."",
             "inbox" => "https://".$domain."/user/inbox/?actor=@".$userid."",
             "outbox" => "https://".$domain."/user/outbox/?actor=@".$userid."",
             "published" => "".date(DATE_ATOM, strtotime($userData["datetime"]))."",
