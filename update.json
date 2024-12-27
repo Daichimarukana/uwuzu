@@ -1,0 +1,16 @@
+{
+    "software": "uwuzu",
+    "version": "1.4.10",
+    "release_date": "2024/12/27",
+    "release_notes": "このアップデートではserverinfo-apiが使用できない問題の修正が含まれます！",
+    "notices": "アップデートの前にデータのバックアップを行うことをおすすめします！",
+    "files": {
+        "overwrite": [
+            "/api/serverinfo-api.php",
+            "/server/uwuzuabout.txt",
+            "/server/uwuzuinfo.txt",
+            "/server/uwuzurelease.txt"
+        ],
+        "delete": []
+    }
+}

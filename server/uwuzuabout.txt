@@ -1,0 +1,100 @@
+## 1. まずそもそもuwuzuとは何か
+使っている方ならわかると思いますが普通のSNSです！
+これと言った大きな特徴もなく、平凡で、なんとも言えないSNSです…
+あっ！特徴かもしれないのが誰でもサーバーを建てられることです！！！
+詳細はdocs.uwuzu.xyzを確認してください！
+### 1.1 uwuzuのよみは？
+uwuzuの読みはゆずです。
+
+## 2. 誰でもサーバーを建てれるってことは、分散型？
+残念っ！
+uwuzuにはActivityPubやその他の連合用機能がないため基本的に導入されたサーバー中心の中央集権型SNSです！
+いやでも中央集権型でも誰でもサーバーを立てれるから分散型...？
+分散中央型SNSな気がしてきました！（？）
+今後いつかはActivityPubも本格導入しようかと思っています...
+
+## 3. 名前の由来って何？
+おっ！いい着眼点ですねぇ～～～
+uwuzu(ゆず)の名前の由来は、開発者のdaichimarukanaがサービス名を考えていたときに某X社のSNSに「TwitterみたいなSNS作ってるけどサービス名が全く思いつかねぇ()」と投稿したところ思ったより多くの名前の案が集まり、
+その中に「With you」という名前の案があったところから来ています。
+daichimarukana < 「うぃずゆー(With you)」「うぃじゅー(witzou)」「うずー(wuzu)」「ゆず(yuzu)」あれっ？なんか普通すぎ？そうだ！！！！これでいいやん！！！！
+### 「ゆず(uwuzu)」
+
+ちなみに、この案が来るまでは「Twilus」という名前にする予定だったんですよっ！
+
+## 4. 開発言語は？
+uwuzuはPHPとJS、HTML(プログラミング言語じゃないか)、CSSで作られています！
+ライブラリはjQueryを導入しています！
+使用している画像は友人またはGoogle Icons様より使わせて頂いております！
+
+## 5. サーバーの建て方
+docs.uwuzu.xyzをご確認いただくかgithubのreadme.mdをよんでください！
+
+## 6. Android、iOS、その他OS向けのアプリについて
+残念ですが今現在は公式アプリ等はなく、Webブラウザからお楽しみいただけます。
+誰かが作ってくれたらありがたいな～
+PWA機能によってアプリっぽくすることはできます！
+
+## 7. 開発したいです！！！
+uwuzuを自分の思うように改造して使いたい場合はUPULライセンスのもと改造後ソースコードを公開するということで改造してください！
+場合によってはdaichimarukanaの作る本家(?)uwuzuにも改造で追加された機能が実装されるかも...
+daichimarukanaと一緒に開発したいよ～って人は私のHPからメールとか某Xとかから連絡してくださいな～
+(uwuzuはv1.3.0よりAGPLからUPULに変更されました。)
+
+## 8. ロゴは誰が作ったのですか？
+ロゴはまだない。
+ロゴは下記のリンクよりuwuzuに関連しているコンテンツのみDLしてご利用いただけます。(uwuzuへ飛ぶリンクボタンなどはOK)
+
+### 色付き
+#img ../img/uwuzucolorlogo.svg
+### まっしろ
+#img ../img/uwuzulogo.svg
+
+## 9. ライセンス
+UPULライセンスです！
+UPULライセンスに関しては同梱されているUPUL_License.txtを確認するか、uwuzu.xyzより詳細をご確認ください。
+
+## 10. 利用させていただいているライブラリなどのライセンス
+
+### Google Authenticator PHP class
+Copyright (c) 2012, Michael Kliewe All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+1.Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+2.Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+なお、使わせていただいているコードは改変させていただいでおります。
+
+### jQuery 3.7.1
+MITライセンスで提供されているようです。
+詳細は以下のリンク先をご覧ください。
+https://jquery.com/license/
+
+### QRcode image PHP scripts
+Y.Swetake様よりお借りしています。
+
+### zxcvbn
+Copyright (c) 2012-2016 Dan Wheeler and Dropbox, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+## 更新情報
+編集者 : daichimarukana
+最終更新日 : 2024/11/06 21:54

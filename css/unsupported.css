@@ -1,0 +1,121 @@
+
+@import url("color.css");
+body{
+    max-width: 640px;
+    height: auto;
+    margin:0px;
+    margin-top: 128px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color:#f5f5f5;
+    display: block;
+}
+main{
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+main .server_icon_zone{
+    margin:12px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+main .server_icon_zone img{
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+h1{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    color:#252525;
+    font-size: 32px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: bold;
+}
+h3{
+    line-height: 28px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    margin-left: 0px;
+    margin-right: auto;
+    text-align: left;
+    color:#252525;
+    font-size: 20px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: bold;
+}
+p{
+    line-height: 20px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    text-align: left;
+    color:#252525;
+    font-size: 16px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: normal;
+}
+.maintext{
+    margin-top: 16px;
+    margin-bottom: 16px;
+    
+}
+.infobtn{
+    display: block;
+    width: 128px;
+    padding: 6px;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    background-color:#FFC832;
+    color:#ffffff;
+    border-radius: 32px;
+    font-size: 20px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: normal;
+    text-decoration: none;
+}
+.center_text{
+    margin-top: 32px;
+    display: block;
+}
+.center_text p{
+    line-height: 20px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    text-align: center;
+    color:#252525;
+    font-size: 16px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: normal;
+}
+.center_text .p2{
+    line-height: 20px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    text-align: center;
+    color:#777;
+    font-size: 16px;
+    font-family: 'BIZ UDGothic', 'Yu Mincho Regular', 'ヒラギノ角ゴシック', sans-serif;
+    font-weight: normal;
+}
+hr{
+    height: 0;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    padding: 0;
+    border: 0;
+    border-top: 1px solid #252525;
+}
+@media screen and (max-width:640px) {
+    body{
+        margin:24px;
+        margin-top: 32px;
+    }
+}
