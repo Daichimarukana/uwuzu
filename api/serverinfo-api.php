@@ -24,13 +24,7 @@ for( $i=0;$i<$cnt;$i++ ){
     $uwuzuinfo[$i] = ($softwaredata[$i]);
 }
 
-function decode_yajirushi($postText){
-    $postText = str_replace('&larr;', '←', $postText);
-    $postText = str_replace('&darr;', '↓', $postText);
-    $postText = str_replace('&uarr;', '↑', $postText);
-    $postText = str_replace('&rarr;', '→', $postText);
-    return $postText;
-}
+
     require('../db.php');
 
     $datetime = array();

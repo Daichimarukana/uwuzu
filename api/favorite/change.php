@@ -85,46 +85,22 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             exit;
         }else{
             //本文取得
-            if(!(empty($_GET['userid']))){
-                $follow_userid = safetext($_GET['userid']);
-            }elseif(!(empty($post_json["userid"]))){
-                $follow_userid = safetext($post_json["userid"]);
+            if(!(empty($_GET['uniqid']))){
+                $fav_uniqid = safetext($_GET['uniqid']);
+            }elseif(!(empty($post_json["uniqid"]))){
+                $fav_uniqid = safetext($post_json["uniqid"]);
             }
 
-            if(!(empty($follow_userid))){
-                $DataQuery = $pdo->prepare("SELECT username,userid,follow,follower FROM account WHERE userid = :userid");
-                $DataQuery->bindValue(':userid', $follow_userid);
-                $DataQuery->execute();
-                $Follow_userdata = $DataQuery->fetch();
-
-                $userid = $userData["userid"];
-
-                if(!(empty($Follow_userdata))){
-                    if(!($userid == $Follow_userdata['userid'])){
-                        $res = follow_user($pdo, $Follow_userdata['userid'], $userid);
-                        if($res === true){
-                            //フォロー完了
-                            $response = array(
-                                'userid' => decode_yajirushi(htmlspecialchars_decode($Follow_userdata["userid"])),
-                                'success' => true
-                            );
-                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        }else{
-                            $err = "could_not_complete";
-                            $response = array(
-                                'error_code' => $err,
-                            );
-                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                        }
-                    }else{
-                        $err = "you_cant_it_to_yourself";
-                        $response = array(
-                            'error_code' => $err,
-                        );
-                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                    }
+            if(!(empty($fav_uniqid))){
+                $res = addFavorite($pdo, $fav_uniqid, $userData["userid"]);
+                if($res[0] === true){
+                    $response = array(
+                        'favorite_list' => decode_yajirushi(htmlspecialchars_decode($res[2])),
+                        'success' => true
+                    );
+                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
                 }else{
-                    $err = "critical_error_userdata_not_found";
+                    $err = "input_not_found";
                     $response = array(
                         'error_code' => $err,
                     );

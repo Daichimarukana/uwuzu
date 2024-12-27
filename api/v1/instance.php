@@ -2,13 +2,7 @@
 require("../../function/function.php");
 $serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
-function decode_yajirushi($postText){
-    $postText = str_replace('&larr;', '←', $postText);
-    $postText = str_replace('&darr;', '↓', $postText);
-    $postText = str_replace('&uarr;', '↑', $postText);
-    $postText = str_replace('&rarr;', '→', $postText);
-    return $postText;
-}
+
 if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
     header("Content-Type: application/json");
     header("charset=utf-8");

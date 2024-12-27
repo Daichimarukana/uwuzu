@@ -9,7 +9,7 @@
             <p>JavaScriptを無効にしている状態での使用はできません。</p>
             <p>詳細は下記のリンクよりご確認ください。</p>
             
-            <a href="https://uwuzu.com/docs/uwuzusupport" class="infobtn">詳細</a>
+            <a href="https://docs.uwuzu.xyz/docs/uwuzusupport" class="infobtn">詳細</a>
             <div class="p2">JS_BLOCKED_ERROR</div>
             
             <div class="center_text">

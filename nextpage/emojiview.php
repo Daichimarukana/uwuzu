@@ -24,6 +24,9 @@ if (isset($_GET['userid']) && isset($_GET['account_id']) && isset($_GET['search_
 
     $itemsPerPage = 50;
     $pageNumber = safetext(isset($_GET['page'])) ? safetext(intval($_GET['page'])) : 1;
+    if($pageNumber <= 0 || (!(is_numeric($pageNumber)))){
+        $pageNumber = 1;
+    }
     $offset = ($pageNumber - 1) * $itemsPerPage;
 
     // データベース接続の設定

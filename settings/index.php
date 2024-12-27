@@ -75,28 +75,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -131,28 +131,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -491,10 +491,10 @@ if( !empty($_POST['img1btn_submit']) ) {
 
 			if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
 				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = uniqid() . '-'.$userid.'.webp';
+				$newFilename = createUniqId() . '-'.$userid.'.webp';
 			}else{
 				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+				$newFilename = createUniqId() . '-'.$userid.'.' . $extension;
 			}
 			// 保存先のパスを生成
 			$uploadedPath = 'userheads/' . $newFilename;
@@ -582,10 +582,10 @@ if( !empty($_POST['img2btn_submit']) ) {
 
 			if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
 				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = uniqid() . '-'.$userid.'.webp';
+				$newFilename = createUniqId() . '-'.$userid.'.webp';
 			}else{
 				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = uniqid() . '-'.$userid.'.' . $extension;
+				$newFilename = createUniqId() . '-'.$userid.'.' . $extension;
 			}
 			// 保存先のパスを生成
 			$uploadedPath = 'usericons/' . $newFilename;

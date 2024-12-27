@@ -70,28 +70,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -126,28 +126,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -263,6 +263,7 @@ if( !empty($_POST['send_ice_submit']) ) {
 
 		// エラーが発生した時はロールバック
 		$pdo->rollBack();
+		actionLog($userid, "error", "send_ice_submit", $touserid, $e, 4);
 	}
 
 	//凍結通知メール
@@ -315,13 +316,16 @@ if( !empty($_POST['send_ice_submit']) ) {
 
 			// エラーが発生した時はロールバック
 			$pdo->rollBack();
+			actionLog($userid, "error", "send_ice_submit", $touserid, $e, 4);
 		}
 
 		if ($res) {
+			actionLog($userid, "info", "send_ice_submit", $touserid, $touserid."さんを".$userid."さんが凍結しました", 0);
 			header("Location:useradmin");
 			exit; 
 		} else {
 			$error_message[] = '凍結に失敗しました。(USER_ICE_DAME)';
+			actionLog($userid, "error", "send_ice_submit", $touserid, $error_message, 4);
 		}
 }
 if( !empty($_POST['send_water_submit']) ) {
@@ -354,6 +358,7 @@ if( !empty($_POST['send_water_submit']) ) {
 		$error_message[] = "えらー(ERROR)";
 		// エラーが発生した時はロールバック
 		$pdo->rollBack();
+		actionLog($userid, "error", "send_water_submit", $touserid, $e, 4);
 	}
 
 	//凍結通知メール
@@ -406,13 +411,16 @@ if( !empty($_POST['send_water_submit']) ) {
 			$error_message[] = "えらー(ERROR)";
 			// エラーが発生した時はロールバック
 			$pdo->rollBack();
+			actionLog($userid, "error", "send_water_submit", $touserid, $e, 4);
 		}
 
 		if ($res) {
+			actionLog($userid, "info", "send_water_submit", $touserid, $touserid."さんを".$userid."さんが解凍しました", 0);
 			header("Location:useradmin");
 			exit; 
 		} else {
 			$error_message[] = '解凍に失敗しました。(USER_WATER_DAME)';
+			actionLog($userid, "error", "send_water_submit", $touserid, $error_message, 4);
 		}
 
 }
@@ -568,13 +576,16 @@ if( !empty($_POST['send_ban_submit']) ) {
 
 		// エラーが発生した時はロールバック
 		$pdo->rollBack();
+		actionLog($userid, "error", "send_ban_submit", $userId2, $e, 4);
 	}
 
 	if ($res) {
+		actionLog($userid, "info", "send_ban_submit", $userId2, $userid."さんが".$userId2."さんをBANしました", 4);
 		header("Location:useradmin");
 		exit; 
 	} else {
 		$error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
+		actionLog($userid, "error", "send_ban_submit", $userId2, $error_message, 4);
 	}
 
 

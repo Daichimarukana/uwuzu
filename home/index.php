@@ -78,28 +78,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -134,28 +134,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -323,7 +323,8 @@ if ("serviceWorker" in navigator) {
 		<?php }?>
 
 		<div class="tlchange">
-			<button class="btn on" id="timeline_local">ローカル</button>
+			<button class="btn" id="timeline_foryou">おすすめ</button>
+			<button class="btn" id="timeline_local">ローカル</button>
 			<button class="btn" id="timeline_follow">フォロー</button>
 		</div>
 		<?php if( !empty($error_message) ): ?>
@@ -470,20 +471,55 @@ $(document).ready(function() {
 	var account_id = '<?php echo $loginid; ?>';
 
 	var pageNumber = 1;
-    var isLoading = false;
-	var mode = "local";
+	var isLoading = false;
 
-	loadPosts();
+	var mode = getCookie('mode') || "local";
 
-    function loadPosts() {
-        if (isLoading) return;
-        isLoading = true;
+	if (mode == "foryou") {
+        $('#timeline_foryou').addClass('on');
+        $('#timeline_local').removeClass('on');
+        $('#timeline_follow').removeClass('on');
+    } else if (mode == "local") {
+        $('#timeline_foryou').removeClass('on');
+        $('#timeline_local').addClass('on');
+        $('#timeline_follow').removeClass('on');
+    } else if (mode == "follow") {
+        $('#timeline_foryou').removeClass('on');
+        $('#timeline_local').removeClass('on');
+        $('#timeline_follow').addClass('on');
+    }
+    loadPosts();
+
+	function setCookie(name, value, days) {
+		var expires = "";
+		if (days) {
+			var date = new Date();
+			date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+			expires = "; expires=" + date.toUTCString();
+		}
+		document.cookie = name + "=" + (value || "") + expires + "; path=/";
+	}
+
+	function getCookie(name) {
+		var nameEQ = name + "=";
+		var ca = document.cookie.split(';');
+		for (var i = 0; i < ca.length; i++) {
+			var c = ca[i];
+			while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+			if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+		}
+		return null;
+	}
+
+	function loadPosts() {
+		if (isLoading) return;
+		isLoading = true;
 		$("#loading").show();
-		if(mode == "local"){
+		if (mode == "local") {
 			$.ajax({
 				url: '../nextpage/nextpage.php', // PHPファイルへのパス
 				method: 'GET',
-				data: { page: pageNumber, userid: userid , account_id: account_id },
+				data: { page: pageNumber, userid: userid, account_id: account_id },
 				dataType: 'html',
 				timeout: 300000,
 				success: function(response) {
@@ -492,17 +528,17 @@ $(document).ready(function() {
 					isLoading = false;
 					$("#loading").hide();
 				},
-				error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+				error: function(xhr, textStatus, errorThrown) {  // エラーと判定された場合
 					isLoading = false;
 					$("#loading").hide();
 					$("#error").show();
 				},
 			});
-		}else if(mode == "follow"){
+		} else if (mode == "follow") {
 			$.ajax({
 				url: '../nextpage/ftlpage.php', // PHPファイルへのパス
 				method: 'GET',
-				data: { page: pageNumber, userid: userid , account_id: account_id },
+				data: { page: pageNumber, userid: userid, account_id: account_id },
 				dataType: 'html',
 				timeout: 300000,
 				success: function(response) {
@@ -511,15 +547,49 @@ $(document).ready(function() {
 					isLoading = false;
 					$("#loading").hide();
 				},
-				error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+				error: function(xhr, textStatus, errorThrown) {  // エラーと判定された場合
 					isLoading = false;
 					$("#loading").hide();
 					$("#error").show();
 				},
 			});
-		}        
-    }
+		} else if (mode == "foryou") {
+			$.ajax({
+				url: '../nextpage/foryoupage.php', // PHPファイルへのパス
+				method: 'GET',
+				data: { page: pageNumber, userid: userid, account_id: account_id },
+				dataType: 'html',
+				timeout: 300000,
+				success: function(response) {
+					$('#postContainer').append(response);
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				},
+				error: function(xhr, textStatus, errorThrown) {  // エラーと判定された場合
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				},
+			});
+		}
+	}
+
+	$("#timeline_foryou").on('click', function(event) {
+		$('#timeline_foryou').addClass('on');
+		$('#timeline_local').removeClass('on');
+		$('#timeline_follow').removeClass('on');
+
+		event.preventDefault();
+		$("#postContainer").empty();
+		pageNumber = 1;
+		mode = "foryou";
+		setCookie('mode', mode, 28);
+		loadPosts();
+	});
+
 	$("#timeline_local").on('click', function(event) {
+		$('#timeline_foryou').removeClass('on');
 		$('#timeline_local').addClass('on');
 		$('#timeline_follow').removeClass('on');
 
@@ -527,9 +597,12 @@ $(document).ready(function() {
 		$("#postContainer").empty();
 		pageNumber = 1;
 		mode = "local";
+		setCookie('mode', mode, 28);
 		loadPosts();
 	});
+
 	$("#timeline_follow").on('click', function(event) {
+		$('#timeline_foryou').removeClass('on');
 		$('#timeline_local').removeClass('on');
 		$('#timeline_follow').addClass('on');
 
@@ -537,6 +610,7 @@ $(document).ready(function() {
 		$("#postContainer").empty();
 		pageNumber = 1;
 		mode = "follow";
+		setCookie('mode', mode, 28);
 		loadPosts();
 	});
 

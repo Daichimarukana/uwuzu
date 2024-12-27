@@ -49,6 +49,9 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
             $itemsPerPage = 15; // 1ページあたりのユーズ数
             $pageNumber = safetext(isset($_GET['page'])) ? safetext(intval($_GET['page'])) : 1;
+            if($pageNumber <= 0 || (!(is_numeric($pageNumber)))){
+                $pageNumber = 1;
+            }
             $offset = ($pageNumber - 1) * $itemsPerPage;
 
             $messages = array();

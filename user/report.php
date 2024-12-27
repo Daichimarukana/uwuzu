@@ -69,28 +69,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -125,28 +125,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -257,21 +257,21 @@ if (!empty($_POST['report'])) {
 			$url = "/settings_admin/useradmin";
 			$category = "system";
 
-			send_notification($fromuserid, $touserid2, $title, $msg, $url, $category);
-	
+			send_notification($touserid2, $fromuserid, $title, $msg, $url, $category);
 		}
-
 	} catch(Exception $e) {
 
 		// エラーが発生した時はロールバック
+		actionLog($userid, "error", "report", $touserid, $e, 4);
 		$pdo->rollBack();
 	}
 
 	if( $res ) {
-		header("Location:success?q=".var_dump($admin_res["userid"]));
+		header("Location:success");
         exit;
 	} else {
-		$error_message[] = $e->getMessage();
+		$error_message[] = "通報に失敗しました。(REGISTED_DAME)";
+		actionLog($userid, "error", "report", $touserid, "通報に失敗しました", 3);
 	}
 
 	// プリペアドステートメントを削除

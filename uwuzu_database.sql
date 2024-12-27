@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2024-11-14 11:59:48
+-- 生成日時: 2024-12-27 08:43:51
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -52,6 +52,24 @@ CREATE TABLE `account` (
   `mail_settings` mediumtext NOT NULL,
   `encryption_ivkey` varchar(256) NOT NULL,
   `other_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`other_settings`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `actionlog`
+--
+
+CREATE TABLE `actionlog` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
+  `userid` varchar(512) NOT NULL,
+  `type` varchar(512) NOT NULL,
+  `place` varchar(512) NOT NULL,
+  `target` varchar(512) NOT NULL,
+  `content` mediumtext NOT NULL,
+  `importance` int(11) NOT NULL,
+  `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -215,6 +233,12 @@ ALTER TABLE `account`
   ADD PRIMARY KEY (`sysid`);
 
 --
+-- テーブルのインデックス `actionlog`
+--
+ALTER TABLE `actionlog`
+  ADD PRIMARY KEY (`sysid`);
+
+--
 -- テーブルのインデックス `ads`
 --
 ALTER TABLE `ads`
@@ -276,6 +300,12 @@ ALTER TABLE `ueuse`
 -- テーブルの AUTO_INCREMENT `account`
 --
 ALTER TABLE `account`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `actionlog`
+--
+ALTER TABLE `actionlog`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

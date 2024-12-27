@@ -18,13 +18,7 @@ header("Content-Type: application/json");
 header("charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
-function decode_yajirushi($postText){
-    $postText = str_replace('&larr;', '←', $postText);
-    $postText = str_replace('&darr;', '↓', $postText);
-    $postText = str_replace('&uarr;', '↑', $postText);
-    $postText = str_replace('&rarr;', '→', $postText);
-    return $postText;
-}
+
 
 
 $pdo = null;
@@ -108,52 +102,20 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
 
                 if(!(empty($Follow_userdata))){
                     if(!($userid == $Follow_userdata['userid'])){
-                        $followerList = explode(',', $Follow_userdata['follower']);
-                        if (in_array($userid, $followerList)) {
-                            // 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
-                            $followerList = array_diff($followerList, array($userid));
-                            $newFollowerList = implode(',', $followerList);
-
-                            // UPDATE文を実行してフォロー情報を更新
-                            $updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-                            $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-                            $updateQuery->bindValue(':userid', $Follow_userdata['userid'], PDO::PARAM_STR);
-                            $res = $updateQuery->execute();
-
-                            $myflwlist = explode(',', $myfollowlist);
-                            $delfollowList = array_diff($myflwlist, array($Follow_userdata['userid']));
-                            $deluserid = implode(',', $delfollowList);
-
-                            // 自分のfollowカラムから相手のユーザーIDを削除
-                            $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-                            $updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
-                            $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-                            $res_follow = $updateQuery->execute();
-
-                            if ($res && $res_follow) {
-                                $response = array(
-                                    'userid' => decode_yajirushi(htmlspecialchars_decode($Follow_userdata["userid"])),
-                                    'success' => true
-                                );
-                                echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                                exit;
-                            } else {
-                                $err = "db_error_".$e->getMessage();
-                                $response = array(
-                                    'error_code' => $err,
-                                );
-                                echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                                exit;
-                            }
-
-                            $stmt = null;
+                        $res = follow_user($pdo, $Follow_userdata['userid'], $userid);
+                        if($res === true){
+                            //フォロー完了
+                            $response = array(
+                                'userid' => decode_yajirushi(htmlspecialchars_decode($Follow_userdata["userid"])),
+                                'success' => true
+                            );
+                            echo json_encode($response, JSON_UNESCAPED_UNICODE);
                         }else{
-                            $err = "already_been_completed";
+                            $err = "could_not_complete";
                             $response = array(
                                 'error_code' => $err,
                             );
                             echo json_encode($response, JSON_UNESCAPED_UNICODE);
-                            exit;
                         }
                     }else{
                         $err = "you_cant_it_to_yourself";

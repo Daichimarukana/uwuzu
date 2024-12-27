@@ -42,6 +42,13 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
             $keyword = safetext(isset($_GET['keyword'])) ? safetext($_GET['keyword']) : '';
             $userid = safetext($_GET['userid']);
 
+            $itemsPerPage = 15; // 1ページあたりのユーズ数
+            $pageNumber = safetext(isset($_GET['page'])) ? safetext(intval($_GET['page'])) : 1;
+            if($pageNumber <= 0 || (!(is_numeric($pageNumber)))){
+                $pageNumber = 1;
+            }
+            $offset = ($pageNumber - 1) * $itemsPerPage;
+
             $messages = array();
 
             if (!empty($pdo)) {
@@ -64,20 +71,26 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                         $username = $matches[1];
                         $searchKeyword = $matches[2];
 
-                        $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :username AND (ueuse LIKE :searchKeyword OR abi LIKE :searchKeyword) ORDER BY datetime DESC");
+                        $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE account = :username AND (ueuse LIKE :searchKeyword OR abi LIKE :searchKeyword) ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
                         $messageQuery->bindValue(':username', $username, PDO::PARAM_STR);
                         $messageQuery->bindValue(':searchKeyword', '%' . $searchKeyword . '%', PDO::PARAM_STR);
+                        $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                        $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                         $messageQuery->execute();
                         $message_array = $messageQuery->fetchAll();
                     } else {
-                        $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC");
+                        $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
                         $messageQuery->bindValue(':keyword', '%' . $keyword . '%', PDO::PARAM_STR);
+                        $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                        $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                         $messageQuery->execute();
                         $message_array = $messageQuery->fetchAll();
                     }
 
                     $user_keyword = str_replace('@', '', $keyword);
-                    $usersQuery = $dbh->prepare("SELECT * FROM account WHERE username LIKE :keyword OR userid LIKE :keyword OR profile LIKE :keyword ORDER BY datetime DESC");
+                    $usersQuery = $dbh->prepare("SELECT * FROM account WHERE username LIKE :keyword OR userid LIKE :keyword OR profile LIKE :keyword ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
+                    $usersQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                    $usersQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                     $usersQuery->bindValue(':keyword', '%' . $user_keyword . '%', PDO::PARAM_STR);
                     $usersQuery->execute();
                     $users_array = $usersQuery->fetchAll();

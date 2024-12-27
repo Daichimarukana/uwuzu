@@ -264,10 +264,10 @@ if( !empty($_POST['btn_submit']) ) {
 
                                     if(check_mime($temp_file) == "image/webp"){
                                         // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = uniqid() . '-'.$new_userid.'.webp';
+                                        $newFilename = createUniqId() . '-'.$new_userid.'.webp';
                                     }else{
                                         // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = uniqid() . '-'.$new_userid.'.' . $extension;
+                                        $newFilename = createUniqId() . '-'.$new_userid.'.' . $extension;
                                     }
                                     
                                     // 保存先のパスを生成
@@ -316,10 +316,10 @@ if( !empty($_POST['btn_submit']) ) {
 
                                     if(check_mime($temp_file) == "image/webp"){
                                         // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = uniqid() . '-'.$new_userid.'.webp';
+                                        $newFilename = createUniqId() . '-'.$new_userid.'.webp';
                                     }else{
                                         // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = uniqid() . '-'.$new_userid.'.' . $extension;
+                                        $newFilename = createUniqId() . '-'.$new_userid.'.' . $extension;
                                     }
                                     
                                     // 保存先のパスを生成

@@ -112,45 +112,50 @@ if(!($userid == null)){
                                 }
                 
                                 if( empty($error_message) ) {
-                                    // トランザクション開始
-                                    $pdo->beginTransaction();
+                                    $other_settings_me = is_OtherSettings($pdo, $userid);
+                                    if($other_settings_me === true){
+                                        // トランザクション開始
+                                        $pdo->beginTransaction();
+                                        
+                                        $hashpassword = uwuzu_password_hash($password);
                                     
-                                    $hashpassword = uwuzu_password_hash($password);
-                                
-                                    try {
-                                        // SQL作成
-                                        $stmt = $pdo->prepare("UPDATE account SET password = :password WHERE userid = :userid;");
-                                
-                                        // 他の値をセット
-                                        $stmt->bindParam(':password', $hashpassword, PDO::PARAM_STR);
-                                
-                                        // 条件を指定
-                                        // 以下の部分を適切な条件に置き換えてください
-                                        $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-                                
-                                        // SQLクエリの実行
-                                        $res = $stmt->execute();
-                                
-                                        // コミット
-                                        $res = $pdo->commit();
-                                
-                                    } catch (Exception $e) {
-                                
-                                        // エラーが発生した時はロールバック
-                                        $pdo->rollBack();
-                                    }
-                                
-                                    if ($res) {
-                                        $msg = "お使いのアカウントのパスワードがパスワードの復元により変更されました。\n変更した覚えがない場合はパスワードを変更し、セッショントークンを再生成してください。";
-                                        send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others", "system");
-                
-                                        $_SESSION['userid'] = "";
-                                        $url = 'donerecovery.php';
-                                        header('Location: ' . $url, true, 303);
-                
-                                        // すべての出力を終了
-                                        exit;
-                                    } else {
+                                        try {
+                                            // SQL作成
+                                            $stmt = $pdo->prepare("UPDATE account SET password = :password WHERE userid = :userid;");
+                                    
+                                            // 他の値をセット
+                                            $stmt->bindParam(':password', $hashpassword, PDO::PARAM_STR);
+                                    
+                                            // 条件を指定
+                                            // 以下の部分を適切な条件に置き換えてください
+                                            $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+                                    
+                                            // SQLクエリの実行
+                                            $res = $stmt->execute();
+                                    
+                                            // コミット
+                                            $res = $pdo->commit();
+                                    
+                                        } catch (Exception $e) {
+                                    
+                                            // エラーが発生した時はロールバック
+                                            $pdo->rollBack();
+                                        }
+                                    
+                                        if ($res) {
+                                            $msg = "お使いのアカウントのパスワードがパスワードの復元により変更されました。\n変更した覚えがない場合はパスワードを変更し、セッショントークンを再生成してください。";
+                                            send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others", "system");
+                    
+                                            $_SESSION['userid'] = "";
+                                            $url = 'donerecovery.php';
+                                            header('Location: ' . $url, true, 303);
+                    
+                                            // すべての出力を終了
+                                            exit;
+                                        } else {
+                                            $error_message[] = 'パスワードの更新に失敗しました。(REGISTERED_DAME)';
+                                        }
+                                    }else{
                                         $error_message[] = 'パスワードの更新に失敗しました。(REGISTERED_DAME)';
                                     }
                                 }

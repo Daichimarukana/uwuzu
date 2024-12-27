@@ -70,28 +70,28 @@ if (isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 		$_SESSION['username'] = $username;
 		$_SESSION['loginid'] = $res["loginid"];
 		setcookie('userid', $userid, [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
 			'httponly' => true,
 		]);
 		setcookie('username', $username, [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
 			'httponly' => true,
 		]);
 		setcookie('loginid', $res["loginid"], [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
 			'httponly' => true,
 		]);
 		setcookie('admin_login', true, [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
@@ -124,28 +124,28 @@ if (isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 		$_SESSION['username'] = $username;
 		$_SESSION['loginid'] = $res["loginid"];
 		setcookie('userid', $userid, [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
 			'httponly' => true,
 		]);
 		setcookie('username', $username, [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
 			'httponly' => true,
 		]);
 		setcookie('loginid', $res["loginid"], [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
 			'httponly' => true,
 		]);
 		setcookie('admin_login', true, [
-			'expires' => time() + 60 * 60 * 24 * 14,
+			'expires' => time() + 60 * 60 * 24 * 28,
 			'path' => '/',
 			'samesite' => 'lax',
 			'secure' => true,
@@ -205,7 +205,7 @@ if (!empty($pdo)) {
 		// SQL実行
 		$rerole->execute();
 
-		$userdata = $rerole->fetch(); // ここでデータベースから取得した値を $role に代入する
+		$userdata = $rerole->fetch();
 
 		$roleDataArray = array();
 
@@ -300,183 +300,43 @@ if (!empty($pdo)) {
 }
 
 if (!empty($_POST['follow'])) {
-	// トランザクションを開始
-	$pdo->beginTransaction();
-	try {
-		// フォローボタンが押された場合の処理
-		$followerList = explode(',', $userdata['follower']);
-		if (!(in_array($userid, $followerList))) {
-			// 自分が相手をフォローしていない場合、相手のfollowerカラムと自分のfollowカラムを更新
-			$followerList[] = $userid;
-			$newFollowerList = implode(',', $followerList);
-
-			// UPDATE文を実行してフォロー情報を更新
-			$updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-			$updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-			$updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
-			$res = $updateQuery->execute();
-
-			// 自分のfollowカラムを更新
-			$myflwlist = explode(',', $myfollowlist);
-			$myflwlist[] = $userData['userid'];
-			$newFollowList = implode(',', array_unique($myflwlist));
-
-			$updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-			$updateQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
-			$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-			$res_follow = $updateQuery->execute();
-
-			send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow");
-
-			if ($res && $res_follow) {
-				$pdo->commit();
-				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-				header("Location:" . $url);
-				exit;
-			} else {
-				$pdo->rollBack();
-				$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-			}
-		}
-	} catch (Exception $e) {
-		// ロールバック
-		$pdo->rollBack();
+	$res_follow = follow_user($pdo, $userData['userid'], $userid);
+	if($res_follow === false){
 		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+	}else{
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:" . $url);
+		exit;
 	}
 } elseif (!empty($_POST['unfollow'])) {
-	// トランザクションを開始
-	$pdo->beginTransaction();
-	try {
-		// フォロー解除ボタンが押された場合の処理
-		$followerList = explode(',', $userdata['follower']);
-		if (in_array($userid, $followerList)) {
-			// 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
-			$followerList = array_diff($followerList, array($userid));
-			$newFollowerList = implode(',', $followerList);
-
-			// UPDATE文を実行してフォロー情報を更新
-			$updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-			$updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-			$updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
-			$res = $updateQuery->execute();
-
-			$myflwlist = explode(',', $myfollowlist);
-			$delfollowList = array_diff($myflwlist, array($userData['userid']));
-			$deluserid = implode(',', $delfollowList);
-
-			// 自分のfollowカラムから相手のユーザーIDを削除
-			$updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-			$updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
-			$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-			$res_follow = $updateQuery->execute();
-
-			if ($res && $res_follow) {
-				// コミット
-				$pdo->commit();
-
-				// リダイレクト
-				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-				header("Location:" . $url);
-				exit;
-			} else {
-				// ロールバック
-				$pdo->rollBack();
-				$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-			}
-
-			$stmt = null;
-		}
-	} catch (Exception $e) {
-		// ロールバック
-		$pdo->rollBack();
+	$res_unfollow = unfollow_user($pdo, $userData['userid'], $userid);
+	if($res_unfollow === false){
 		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+	}else{
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:" . $url);
+		exit;
 	}
 }
 
 
 if (!empty($_POST['send_block_submit'])) {
-
-	$pdo->beginTransaction();
-	try {
-		$updateQuery = $pdo->prepare("UPDATE account SET blocklist = CONCAT_WS(',', blocklist, :blocklist) WHERE userid = :userid");
-		$updateQuery->bindValue(':blocklist', $userData["userid"], PDO::PARAM_STR);
-		$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-		$res_block = $updateQuery->execute();
-
-		// フォロー解除ボタンが押された場合の処理
-		$followerList = explode(',', $userdata['follower']);
-		if (in_array($userid, $followerList)) {
-			// 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
-			$followerList = array_diff($followerList, array($userid));
-			$newFollowerList = implode(',', $followerList);
-
-			// UPDATE文を実行してフォロー情報を更新
-			$updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-			$updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-			$updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
-			$res = $updateQuery->execute();
-
-			$myflwlist = explode(',', $myfollowlist);
-			$delfollowList = array_diff($myflwlist, array($userData['userid']));
-			$deluserid = implode(',', $delfollowList);
-			// 自分のfollowカラムから相手のユーザーIDを削除
-			$updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-			$updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
-			$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-			$res_follow = $updateQuery->execute();
-
-			if ($res && $res_follow) {
-				$pdo->commit();
-				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-				header("Location:" . $url);
-				exit;
-			} else {
-				$pdo->rollBack();
-				$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-			}
-
-			$stmt = null;
-		}
-
-		if ($res_block) {
-			$pdo->commit();
-			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			header("Location:" . $url);
-			exit;
-		} else {
-			$pdo->rollBack();
-			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-		}
-	} catch (Exception $e) {
-		// ロールバック
-		$pdo->rollBack();
+	$res_block = block_user($pdo, $userData['userid'], $userid);
+	if($res_block === false){
 		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+	}else{
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:" . $url);
+		exit;
 	}
 } elseif (!empty($_POST['send_un_block_submit'])) {
-	$pdo->beginTransaction();
-	try {
-		$myblklist = explode(',', $myblocklist);
-		$delblkList = array_diff($myblklist, array($userData['userid']));
-		$deluserid = implode(',', $delblkList);
-		// 自分のfollowカラムから相手のユーザーIDを削除
-		$updateQuery = $pdo->prepare("UPDATE account SET blocklist = :blocklist WHERE userid = :userid");
-		$updateQuery->bindValue(':blocklist', $deluserid, PDO::PARAM_STR);
-		$updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-		$res_block = $updateQuery->execute();
-
-		if ($res_block) {
-			$pdo->commit();
-			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			header("Location:" . $url);
-			exit;
-		} else {
-			$pdo->rollBack();
-			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-		}
-	} catch (Exception $e) {
-		// ロールバック
-		$pdo->rollBack();
+	$res_unblock = unblock_user($pdo, $userData['userid'], $userid);
+	if($res_unblock === false){
 		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+	}else{
+		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+		header("Location:" . $url);
+		exit;
 	}
 }
 
@@ -799,6 +659,7 @@ $pdo = null;
 		<div id="FollowerUserModal" class="modal">
 			<div class="modal-content">
 				<p><?php echo replaceProfileEmojiImages(safetext($userData["username"])); ?>さんをフォローしているユーザー</p>
+				<div class="modal-follow-area">
 				<?php
 				if (!empty($follower_userdata)) {
 					foreach ($follower_userdata as $value) {
@@ -816,6 +677,7 @@ $pdo = null;
 					echo "<p>" . replaceProfileEmojiImages(safetext($userData["username"])) . "さんは誰にもフォローされていません。</p>";
 				}
 				?>
+				</div>
 				<div class="btn_area">
 					<input type="button" id="CloseButton4" class="fbtn" value="閉じる">
 				</div>
@@ -825,6 +687,7 @@ $pdo = null;
 		<div id="FollowUserModal" class="modal">
 			<div class="modal-content">
 				<p><?php echo replaceProfileEmojiImages(safetext($userData["username"])); ?>さんがフォローしているユーザー</p>
+				<div class="modal-follow-area">
 				<?php
 				if (!empty($follow_userdata)) {
 					foreach ($follow_userdata as $value) {
@@ -842,6 +705,7 @@ $pdo = null;
 					echo "<p>" . replaceProfileEmojiImages(safetext($userData["username"])) . "さんは誰もフォローしていません。</p>";
 				}
 				?>
+				</div>
 				<div class="btn_area">
 					<input type="button" id="CloseButton5" class="fbtn" value="閉じる">
 				</div>

@@ -42,7 +42,7 @@ if (isset($_FILES['update_zip']) && isset($_POST['userid']) && isset($_POST['acc
             $uploadFile = $uploadDir . '/' . basename($_FILES['update_zip']['name']);
 
             if (move_uploaded_file($_FILES['update_zip']['tmp_name'], $uploadFile)) {
-                $extractPath = $uploadDir . '/uwuzu_update_' . uniqid();
+                $extractPath = $uploadDir . '/uwuzu_update_' . createUniqId();
 
                 $zip = new ZipArchive;
                 if ($zip->open($uploadFile) == true) {

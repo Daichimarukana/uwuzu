@@ -3270,7 +3270,12 @@ label>input {
     transform: translateY(-1%);
     }
 }
-
+.modal-content .modal-follow-area{
+    max-height: 220px;
+    overflow: scroll;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
 .Image_modal {
     display: none;
     position: fixed;
@@ -4490,7 +4495,7 @@ hr{
     display: flex;
 }
 .tlchange .btn{
-    width: 45%;
+    width: 30%;
     line-height: 32px;
     margin-left: auto;
     margin-right: auto;
@@ -5724,6 +5729,85 @@ noscript .noscript_modal .inner .center_text p{
     font-weight: bold;
 }
 
+.actionlog {
+    margin-top: 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    padding: 0px 12px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    width: auto;
+    min-height: 32px; /* 閉じた状態での最小高さ */
+    line-height: 32px;
+}
+
+.actionlog details {
+    padding: 0px;
+    margin-top: 8px;
+    margin-bottom: 0px;
+    text-align: left;
+    color: var(--text-color);
+    font-family: var(--Mono-fonts), sans-serif;
+    word-wrap: break-word;
+    font-size: 18px;
+    font-weight: bold;
+}
+.actionlog details span {
+    margin: 0px 6px 0px 4px;
+    padding: 2px 6px;
+    border-radius: 32px;
+    font-family: var(--Mono-fonts), sans-serif;
+    font-weight: normal;
+    font-size: 16px;
+}
+.actionlog details .INFO {
+    background-color: color-mix(in srgb, var(--background-color) 90%, var(--success));
+    border: solid 1px var(--success);
+    color: var(--success);
+}
+.actionlog details .NOTICE {
+    background-color: color-mix(in srgb, var(--background-color) 90%, var(--good));
+    border: solid 1px var(--good);
+    color: var(--good);
+}
+.actionlog details .WARNING {
+    background-color: color-mix(in srgb, var(--background-color) 90%, var(--warn));
+    border: solid 1px var(--warn);
+    color: var(--warn);
+}
+.actionlog details .ERROR {
+    background-color: color-mix(in srgb, var(--background-color) 90%, var(--danger));
+    border: solid 1px var(--danger);
+    color: var(--danger);
+}
+.actionlog details .CRITICAL {
+    background-color: color-mix(in srgb, var(--background-color) 90%, var(--error));
+    border: solid 1px var(--error);
+    color: var(--error);
+}
+.actionlog summary {
+    display: block;
+    list-style: none;
+    padding: 0px;
+    line-height: 32px;
+    overflow: hidden;
+}
+.actionlog summary::-webkit-details-marker {
+    display: none;
+}
+.actionlog p {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    text-align: left;
+    color: var(--text-color);
+    font-family: var(--Mono-fonts), sans-serif;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 22px;
+    font-weight: normal;
+}
+
+
 /*------------------------------------------------------------------------------------------------------------*/
 /*--------------------------------------------------スマホ向け--------------------------------------------------*/
 /*--------------------------------------------------ここから--------------------------------------------------*/
@@ -6597,7 +6681,7 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: auto;
         margin-bottom: auto;
-        margin-left: -6px;
+        margin-left: 0px;
         font-size: 16px;
         color:var(--text-color);
         text-decoration: none;
@@ -6609,7 +6693,7 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: 12px;
         margin-bottom: 6px;
-        margin-left: -6px;
+        margin-left: 0px;
         font-size: 18px;
         color:var(--text-color);
         text-decoration: none;
@@ -6622,7 +6706,7 @@ noscript .noscript_modal .inner .center_text p{
         margin-top: auto;
         margin-bottom: auto;
         margin-left: auto;
-        margin-right: -6px;
+        margin-right: 0px;
         text-align: right;
         font-size: 12px;
         color:var(--subtext-color);
@@ -6677,7 +6761,7 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: auto;
         margin-bottom: auto;
-        margin-left: -6px;
+        margin-left: 0px;
         font-size: 16px;
         color:var(--text-color);
         text-decoration: none;
@@ -6689,7 +6773,7 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: 12px;
         margin-bottom: 6px;
-        margin-left: -6px;
+        margin-left: 0px;
         font-size: 18px;
         color:var(--text-color);
         text-decoration: none;
@@ -6702,7 +6786,7 @@ noscript .noscript_modal .inner .center_text p{
         margin-top: auto;
         margin-bottom: auto;
         margin-left: auto;
-        margin-right: -6px;
+        margin-right: 0px;
         text-align: right;
         font-size: 12px;
         color:var(--subtext-color);
@@ -6713,7 +6797,7 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: 32px;
         margin-bottom: auto;
-        margin-left: -6px;
+        margin-left: 0px;
         font-size: 16px;
         color:var(--link-color);
         text-decoration: none;
@@ -6846,6 +6930,9 @@ noscript .noscript_modal .inner .center_text p{
         transform: translateY(-1%);
         }
     }
+    .modal-content .modal-follow-area{
+        max-height: 40dvh;
+    }
     .Image_modal{
         -moz-box-sizing: border-box;
         box-sizing: border-box;
@@ -6890,24 +6977,24 @@ noscript .noscript_modal .inner .center_text p{
         display: flex;
     }
     .tlchange .off{
-        width: 45%;
+        width: 30%;
         line-height: 24px;
         margin-left: auto;
         margin-right: auto;
         overflow-wrap:  break-word;
         margin-top: 12px;
         margin-bottom: 12px;
-        font-size: 20px;
+        font-size: 24px;
     }
     .tlchange .on{
-        width: 45%;
+        width: 30%;
         line-height: 24px;
         margin-left: auto;
         margin-right: auto;
         overflow-wrap:  break-word;
         margin-top: 12px;
         margin-bottom: 12px;
-        font-size: 20px;
+        font-size: 24px;
     }
 
     .hny{
@@ -8223,5 +8310,31 @@ noscript .noscript_modal .inner .center_text p{
     }
     .emoji_admin p{
         color:var(--dark-text-color);
+    }
+    
+    .actionlog {
+        background-color: var(--dark-background-color);
+        border: solid 1px var(--dark-background-color);
+    }
+    .actionlog details {
+        color: var(--dark-text-color);
+    }
+    .actionlog details .INFO {
+        background-color: color-mix(in srgb, var(--dark-background-color) 90%, var(--success));
+    }
+    .actionlog details .NOTICE {
+        background-color: color-mix(in srgb, var(--dark-background-color) 90%, var(--good));
+    }
+    .actionlog details .WARNING {
+        background-color: color-mix(in srgb, var(--dark-background-color) 90%, var(--warn));
+    }
+    .actionlog details .ERROR {
+        background-color: color-mix(in srgb, var(--dark-background-color) 90%, var(--danger));
+    }
+    .actionlog details .CRITICAL {
+        background-color: color-mix(in srgb, var(--dark-background-color) 90%, var(--error));
+    }
+    .actionlog p {
+        color: var(--dark-text-color);
     }
 }

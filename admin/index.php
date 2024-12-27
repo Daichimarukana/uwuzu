@@ -167,7 +167,7 @@ $pdo = null;
                 これらのデータをあなたが知っているのであれば早速セットアップを開始しましょう！<br>
             <?php }?>
             <br>
-            セットアップ中にエラーに遭遇した場合はuwuzu.comを確認し、解消に向けて取り組みましょう！</p>
+            セットアップ中にエラーに遭遇した場合はdocs.uwuzu.xyzを確認し、解消に向けて取り組みましょう！</p>
         
         <div class="module_chk">
             <div class="p2">Already setが設定済みでNot setが未設定です。</div>

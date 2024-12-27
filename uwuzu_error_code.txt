@@ -27,6 +27,7 @@ no_reply_destination - リプライ先のユーズが存在しない際に表示
 migration_bad_success - アカウントの移行後に移行の完了処理が正常に完了できなかった際に表示されます。
 already_been_completed - 処理が既に完了している場合に表示されます。
 you_cant_it_to_yourself - 自分に対して行えない処理を行おうとした際に表示されます。
+could_not_complete - 処理を完了できなかった場合に表示されます。
 
 ----------(UWUZU ERR CODE)----------
 FILE_DEKASUGUI_PHP_INI_KAKUNIN - php.iniで設定されているファイルサイズ上限を上回っている時に表示されます。

@@ -104,7 +104,7 @@ if( !empty($_POST['btn_submit']) ) {
         $localFilePathhead = '../img/deficon/icon.png';
     
         // 新しいファイル名を生成（uniqid + 拡張子）
-        $newFilename = uniqid() . '-'.$userid.'.png';
+        $newFilename = createUniqId() . '-'.$userid.'.png';
         
         // 保存先のパスを生成
         $uploadedPath = 'usericons/' . $newFilename;
@@ -142,10 +142,10 @@ if( !empty($_POST['btn_submit']) ) {
 
                 if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
                     // 新しいファイル名を生成（uniqid + 拡張子）
-                    $newFilename = uniqid() . '-'.$userid.'.webp';
+                    $newFilename = createUniqId() . '-'.$userid.'.webp';
                 }else{
                     // 新しいファイル名を生成（uniqid + 拡張子）
-                    $newFilename = uniqid() . '-'.$userid.'.' . $extension;
+                    $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
                 }
                 // 保存先のパスを生成
                 $uploadedPath = 'usericons/' . $newFilename;
@@ -178,7 +178,7 @@ if( !empty($_POST['btn_submit']) ) {
     $localFilePathhead = '../img/defhead/head.png';
     
     // 新しいファイル名を生成（uniqid + 拡張子）
-    $newFilename = uniqid() . '-'.$userid.'.png';
+    $newFilename = createUniqId() . '-'.$userid.'.png';
     
     // 保存先のパスを生成
     $uploadedPath = 'userheads/' . $newFilename;
@@ -314,6 +314,9 @@ if( !empty($_POST['btn_submit']) ) {
         $enc_mailadds = "";
     }
 
+    $other_settings = [];
+    $other_settings_json = json_encode($other_settings);
+
     try {
 
         $role = "official";
@@ -325,7 +328,7 @@ if( !empty($_POST['btn_submit']) ) {
 	    $loginid = hash('sha3-512', $LoginIdBytes);
 
         // SQL作成
-        $stmt = $pdo->prepare("INSERT INTO account (username, userid, password, loginid, mailadds, profile, iconname, headname, role, datetime, admin, encryption_ivkey) VALUES (:username, :userid, :password, :loginid, :mailadds, :profile, :iconname, :headname, :role, :datetime, :admin ,:encryption_ivkey)");
+        $stmt = $pdo->prepare("INSERT INTO account (username, userid, password, loginid, mailadds, profile, iconname, headname, role, datetime, admin, encryption_ivkey, other_settings) VALUES (:username, :userid, :password, :loginid, :mailadds, :profile, :iconname, :headname, :role, :datetime, :admin, :encryption_ivkey, :other_settings)");
 
         // アイコン画像
         $stmt->bindValue(':iconname', $iconName, PDO::PARAM_STR);
@@ -342,6 +345,7 @@ if( !empty($_POST['btn_submit']) ) {
         $stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
         $stmt->bindParam(':role', $role, PDO::PARAM_STR);
         $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+        $stmt->bindParam(':other_settings', $other_settings_json, PDO::PARAM_STR);
         
         $stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
 

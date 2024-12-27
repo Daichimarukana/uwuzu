@@ -1,12 +1,12 @@
 
 	<?php // メールサーバーの情報
-	define( 'MAIL_CHKS', '');// trueならPHPMailerが有効
+	define( 'MAIL_CHKS', 'true');// trueならPHPMailerが有効
 
-	define( 'MAIL_ADDS', '');
-	define( 'MAIL_HOST', '');
-	define( 'MAIL_PORT', '');
-	define( 'MAIL_USER', '');
-	define( 'MAIL_PASS', '');
-	define( 'MAIL_SSL_', '');
+	define( 'MAIL_ADDS', 'localhoster@uwuzu.net');
+	define( 'MAIL_HOST', 'smtp.gmail.com');
+	define( 'MAIL_PORT', '587');
+	define( 'MAIL_USER', 'mjiusong25@gmail.com');
+	define( 'MAIL_PASS', 'dnjspbevwckrpzex');
+	define( 'MAIL_SSL_', 'TLS');
 	?>
 	

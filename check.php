@@ -193,28 +193,28 @@ if( !empty($_POST['btn_submit']) ) {
     }
 
     setcookie('userid', $userid,[
-        'expires' => time() + 60 * 60 * 24 * 14,
+        'expires' => time() + 60 * 60 * 24 * 28,
         'path' => '/',
         'samesite' => 'lax',
         'secure' => true,
         'httponly' => true,
     ]);
     setcookie('loginid', $userData["loginid"],[
-        'expires' => time() + 60 * 60 * 24 * 14,
+        'expires' => time() + 60 * 60 * 24 * 28,
         'path' => '/',
         'samesite' => 'lax',
         'secure' => true,
         'httponly' => true,
     ]);
     setcookie('username', $username,[
-        'expires' => time() + 60 * 60 * 24 * 14,
+        'expires' => time() + 60 * 60 * 24 * 28,
         'path' => '/',
         'samesite' => 'lax',
         'secure' => true,
         'httponly' => true,
     ]);
     setcookie('admin_login', true,[
-        'expires' => time() + 60 * 60 * 24 * 14,
+        'expires' => time() + 60 * 60 * 24 * 28,
         'path' => '/',
         'samesite' => 'lax',
         'secure' => true,

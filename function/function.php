@@ -131,7 +131,7 @@ function base64_mime($Base64,$userid){
 
         delete_exif($extension, $temp_file);
 
-        $newFilename = uniqid() . '-' . $userid . '.' . $extension;
+        $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
         $uploadedPath = '../ueuseimages/' . $newFilename;
 
         $result = copy($temp_file, "../".$uploadedPath);
@@ -624,10 +624,11 @@ function send_notification($to,$from,$title,$message,$url,$category){
         );
         $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
     } catch(PDOException $e) {
+        actionLog($from, "error", "send_notification", $to, $e, 4);
         return false;
     }
 
-    if(!($to == $from)){
+    if(!($to == $from) || $category === "system" || $category === "other"){
         $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
         $query->execute(array(':userid' => $from));
         $result = $query->fetch();
@@ -722,6 +723,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
         );
         $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
     } catch(PDOException $e) {
+        actionLog($userid, "error", "send_ueuse", null, $e, 4);
         return false;
     }
 
@@ -780,7 +782,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         // アップロードされたファイルの拡張子を取得
                         $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
                         // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename = uniqid() . '-'.$userid.'.' . $extension;
+                        $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
                         // 保存先のパスを生成
                         $uploadedPath = '../ueuseimages/' . $newFilename;
                         // EXIF削除
@@ -823,7 +825,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         // アップロードされたファイルの拡張子を取得
                         $extension2 = pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION);
                         // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename2 = uniqid() . '-'.$userid.'.' . $extension2;
+                        $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
                         // 保存先のパスを生成
                         $uploadedPath2 = '../ueuseimages/' . $newFilename2;
                         // EXIF削除
@@ -865,7 +867,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         // アップロードされたファイルの拡張子を取得
                         $extension3 = pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION);
                         // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename3 = uniqid() . '-'.$userid.'.' . $extension3;
+                        $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
                         // 保存先のパスを生成
                         $uploadedPath3 = '../ueuseimages/' . $newFilename3;
                         // EXIF削除
@@ -906,7 +908,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         // アップロードされたファイルの拡張子を取得
                         $extension4 = pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION);
                         // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename4 = uniqid() . '-'.$userid.'.' . $extension4;
+                        $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
                         // 保存先のパスを生成
                         $uploadedPath4 = '../ueuseimages/' . $newFilename4;
                         // EXIF削除
@@ -945,7 +947,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         // アップロードされたファイルの拡張子を取得
                         $extensionVideo = strtolower(pathinfo($uploadedVideo['name'], PATHINFO_EXTENSION)); // 小文字に変換
                         // 正しい拡張子の場合、新しいファイル名を生成
-                        $newFilenameVideo = uniqid() . '-'.$userid.'.' . $extensionVideo;
+                        $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
                         // 保存先のパスを生成
                         $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
                         // ファイルを移動
@@ -1033,6 +1035,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     } catch(Exception $e) {
                         // エラーが発生した時はロールバック
                         $pdo->rollBack();
+                        actionLog($userid, "error", "send_ueuse", null, $e, 4);
                     }
                 }elseif((!empty($rpUniqid)) && empty($ruUniqid)){
                     $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
@@ -1086,6 +1089,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     } catch(Exception $e) {
                         // エラーが発生した時はロールバック
                         $pdo->rollBack();
+                        actionLog($userid, "error", "send_ueuse", null, $e, 4);
                     }
                 }elseif(empty($rpUniqid) && (!empty($ruUniqid))){
                     $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
@@ -1140,6 +1144,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     } catch(Exception $e) {
                         // エラーが発生した時はロールバック
                         $pdo->rollBack();
+                        actionLog($userid, "error", "send_ueuse", null, $e, 4);
                     }
                 }
                 if( $res ) {
@@ -1152,10 +1157,12 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 // プリペアドステートメントを削除
                 $stmt = null;
             }else{
+                actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
                 return $error_message;
             }
         }else{
             $error_message[] = "投稿回数のレート制限を超過しています。(OVER_RATE_LIMIT)";
+            actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
             return $error_message;
         }
     }
@@ -1176,6 +1183,7 @@ function delete_ueuse($uniqid, $userid, $account_id){
         } catch (PDOException $e) {
             // 接続エラーのときエラー内容を取得する
             $error_message[] = $e->getMessage();
+            actionLog($userid, "error", "delete_ueuse", null, $e, 4);
         }
     
         $query = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :uniqid limit 1');
@@ -1250,10 +1258,12 @@ function delete_ueuse($uniqid, $userid, $account_id){
                             if (!($res)){
                                 $pdo->rollBack();
                                 $error_message[] = "リユーズの削除ができませんでした。";
+                                actionLog($userid, "error", "delete_ueuse", null, $error_message, 3);
                             }
                         } catch(PDOException $e) {
                             $pdo->rollBack();
                             $error_message[] = 'データベースエラー：' . $e->getMessage();
+                            actionLog($userid, "error", "delete_ueuse", null, $e, 4);
                         }
                     }
     
@@ -1272,6 +1282,7 @@ function delete_ueuse($uniqid, $userid, $account_id){
                         }
                     } catch(PDOException $e) {
                         $pdo->rollBack();
+                        actionLog($userid, "error", "delete_ueuse", null, $e, 4);
                         return [false, "削除に失敗しました！"];
                     }
                 }
@@ -1285,10 +1296,441 @@ function delete_ueuse($uniqid, $userid, $account_id){
         return [true, "削除に成功しました！"];
     }
 }
+// SQL操作関数pdo引っ張ってくるように変更(あとでほかもする)
+function follow_user($pdo, $to_userid, $userid){
+    if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
+        $myData = getUserData($pdo, $userid);
+        $userData = getUserData($pdo, $to_userid);
 
+        if (empty($myData) || empty($userData)) {
+            return false;
+        }
+
+        $other_settings_me = is_OtherSettings($pdo, $userid);
+        $other_settings_user = is_OtherSettings($pdo, $to_userid);
+        if($other_settings_me === true && $other_settings_user === true){
+            // トランザクションを開始
+            $pdo->beginTransaction();
+            try {
+                // フォローボタンが押された場合の処理
+                $followerList = explode(',', $userData['follower']);
+                if (!(in_array($userid, $followerList))) {
+                    // 自分が相手をフォローしていない場合、相手のfollowerカラムと自分のfollowカラムを更新
+                    $followerList[] = $userid;
+                    $newFollowerList = implode(',', $followerList);
+
+                    // UPDATE文を実行してフォロー情報を更新
+                    $updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
+                    $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
+
+                    // 自分のfollowカラムを更新
+                    $myflwlist = explode(',', $myData["follow"]);
+                    $myflwlist[] = $userData['userid'];
+                    $newFollowList = implode(',', array_unique($myflwlist));
+
+                    $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
+                    $updateQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                    $res_follow = $updateQuery->execute();
+
+                    send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow");
+
+                    if ($res && $res_follow) {
+                        $pdo->commit();
+                        return true;
+                    } else {
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "unfollow_user", $to_userid, "フォロー解除に失敗", 3);
+                        return false;
+                    }
+                }else{
+                    return true;
+                }
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                actionLog($userid, "error", "unfollow_user", $to_userid, $e, 4);
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+function unfollow_user($pdo, $to_userid, $userid){
+    if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
+        $myData = getUserData($pdo, $userid);
+        $userData = getUserData($pdo, $to_userid);
+
+        if (empty($myData) || empty($userData)) {
+            return false;
+        }
+
+        $other_settings_me = is_OtherSettings($pdo, $userid);
+        $other_settings_user = is_OtherSettings($pdo, $to_userid);
+        if($other_settings_me === true && $other_settings_user === true){
+            // トランザクションを開始
+            $pdo->beginTransaction();
+            try {
+                // フォロー解除ボタンが押された場合の処理
+                $followerList = explode(',', $userData['follower']);
+                if (in_array($userid, $followerList)) {
+                    // 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
+                    $followerList = array_diff($followerList, array($userid));
+                    $newFollowerList = implode(',', $followerList);
+
+                    // UPDATE文を実行してフォロー情報を更新
+                    $updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
+                    $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
+
+                    $myflwlist = explode(',', $myData["follow"]);
+                    $delfollowList = array_diff($myflwlist, array($userData['userid']));
+                    $deluserid = implode(',', $delfollowList);
+
+                    // 自分のfollowカラムから相手のユーザーIDを削除
+                    $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
+                    $updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                    $res_follow = $updateQuery->execute();
+
+                    if ($res && $res_follow) {
+                        // コミット
+                        $pdo->commit();
+                        return true;
+                    } else {
+                        // ロールバック
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "unfollow_user", $to_userid, "フォロー解除に失敗", 3);
+                        return false;
+                    }
+                }else{
+                    return true;
+                }
+            } catch (Exception $e) {
+                // ロールバック
+                $pdo->rollBack();
+                actionLog($userid, "error", "unfollow_user", $to_userid, $e, 4);
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+function block_user($pdo, $to_userid, $userid){
+    if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
+        $myData = getUserData($pdo, $userid);
+        $userData = getUserData($pdo, $to_userid);
+
+        if (empty($myData) || empty($userData)) {
+            return false;
+        }
+
+        $other_settings_me = is_OtherSettings($pdo, $userid);
+        $other_settings_user = is_OtherSettings($pdo, $to_userid);
+        if($other_settings_me === true && $other_settings_user === true){
+            // トランザクションを開始
+            $pdo->beginTransaction();
+            try {
+                // フォロー解除ボタンが押された場合の処理
+                $blockList = explode(',', $myData['blocklist']);
+                if (!(in_array($userData['userid'], $blockList))) {
+                    $blockList[] = $userData['userid'];
+                    $newBlockList = implode(',', array_unique($blockList));
+
+                    // UPDATE文を実行してフォロー情報を更新
+                    $updateQuery = $pdo->prepare("UPDATE account SET blocklist = :blocklist WHERE userid = :userid");
+                    $updateQuery->bindValue(':blocklist', $newBlockList, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $myData['userid'], PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
+
+                    if ($res) {
+                        // コミット
+                        $pdo->commit();
+
+                        $unfollow = unfollow_user($pdo, $to_userid, $userid);
+                        if($unfollow === true){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    } else {
+                        // ロールバック
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "block_user", $to_userid, "ブロックに失敗", 3);
+                        return false;
+                    }
+                }else{
+                    return true;
+                }
+            } catch (Exception $e) {
+                // ロールバック
+                $pdo->rollBack();
+                actionLog($userid, "error", "block_user", $to_userid, $e, 4);
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+function unblock_user($pdo, $to_userid, $userid){
+    if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
+        $myData = getUserData($pdo, $userid);
+        $userData = getUserData($pdo, $to_userid);
+
+        if (empty($myData) || empty($userData)) {
+            return false;
+        }
+
+        $other_settings_me = is_OtherSettings($pdo, $userid);
+        $other_settings_user = is_OtherSettings($pdo, $to_userid);
+        if($other_settings_me === true && $other_settings_user === true){
+            // トランザクションを開始
+            $pdo->beginTransaction();
+            try {
+                // フォロー解除ボタンが押された場合の処理
+                $blockList = explode(',', $myData['blocklist']);
+                if (in_array($userData['userid'], $blockList)) {
+                    $blockList = array_diff($blockList, array($userData['userid']));
+                    $newBlockList = implode(',', $blockList);
+
+                    // UPDATE文を実行してフォロー情報を更新
+                    $updateQuery = $pdo->prepare("UPDATE account SET blocklist = :blocklist WHERE userid = :userid");
+                    $updateQuery->bindValue(':blocklist', $newBlockList, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $myData['userid'], PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
+
+                    if ($res) {
+                        // コミット
+                        $pdo->commit();
+                        return true;
+                    } else {
+                        // ロールバック
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "unblock_user", $to_userid, "ブロック解除に失敗", 3);
+                        return false;
+                    }
+                }else{
+                    return true;
+                }
+            } catch (Exception $e) {
+                // ロールバック
+                $pdo->rollBack();
+                actionLog($userid, "error", "unblock_user", $to_userid, $e, 4);
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+function addFavorite($pdo, $uniqid, $userid){
+    if (!(empty($pdo)) && !(empty($uniqid)) && !(empty($userid))){
+        $pdo->beginTransaction();
+        try {
+            // 投稿のいいね情報を取得
+            $stmt = $pdo->prepare("SELECT account,ueuse,favorite FROM ueuse WHERE uniqid = :uniqid");
+            $stmt->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+            $stmt->execute();
+            $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!(empty($post))) {
+                $favoriteList = explode(',', $post['favorite']);
+                $index = array_search($userid, $favoriteList);
+
+                if ($index === false) {
+                    // ユーザーIDを追加
+                    $favoriteList[] = $userid;
+
+                    send_notification(safetext($post['account']),$userid,"".$userid."さんがいいねしました！",safetext($post['ueuse']),"/!".$uniqid."","favorite");
+
+                } else {
+                    // ユーザーIDを削除
+                    array_splice($favoriteList, $index, 1);
+                }
+
+                // 新しいいいね情報を更新
+                $newFavorite = implode(',', $favoriteList);
+                $updateQuery = $pdo->prepare("UPDATE ueuse SET favorite = :favorite WHERE uniqid = :uniqid");
+                $updateQuery->bindValue(':favorite', $newFavorite, PDO::PARAM_STR);
+                $updateQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+                $res = $updateQuery->execute();
+
+                if ($res) {
+                    $pdo->commit();
+                    return [true, "いいねに成功しました", $newFavorite];
+                } else {
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "addFavorite", $uniqid, "いいねに失敗しました", 3);
+                    return [false, "いいねに失敗しました", $post['favorite']];
+                }
+            } else {
+                $pdo->rollBack();
+                return [false, "投稿が見つかりませんでした", null];
+            }
+        } catch(PDOException $e) {
+            actionLog($userid, "error", "addFavorite", $uniqid, $e, 4);
+            return [false, "データベースエラー", null];
+        }
+    }
+}
+function getFavorite($pdo, $uniqid){
+    if (!(empty($pdo)) && !(empty($uniqid))){
+
+        try {
+            // 投稿のいいね情報を取得
+            $stmt = $pdo->prepare("SELECT account,ueuse,favorite FROM ueuse WHERE uniqid = :uniqid");
+            $stmt->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+            $stmt->execute();
+            $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!(empty($post))) {
+                return [true, "いいねを取得しました", $post['favorite']];
+            } else {
+                return [false, "投稿が見つかりませんでした", null];
+            }
+        } catch(PDOException $e) {
+            actionLog(null, "error", "getFavorite", $uniqid, $e, 4);
+            return [false, "データベースエラー", null];
+        }
+    }
+}
+function getUserData($pdo, $userid) {
+    $query = $pdo->prepare("SELECT * FROM account WHERE userid = :userid");
+    $query->bindValue(':userid', $userid, PDO::PARAM_STR);
+    $query->execute();
+    return $query->fetch();
+}
+function actionLog($userid, $type, $place, $target, $content, $importance){
+
+    if(empty($userid)){
+        $userid = "uwuzu-fromsys";
+    }
+
+    switch ($importance) {
+        case 0:
+            $importance_level = 0;
+            break;
+        case 1:
+            $importance_level = 1;
+            break;
+        case 2:
+            $importance_level = 2;
+            break;
+        case 3:
+            $importance_level = 3;
+            break;
+        case 4:
+            $importance_level = 4;
+            break;
+        case "none":
+            $importance_level = 0;
+            break;
+        case "low":
+            $importance_level = 1;
+            break;
+        case "middle":
+            $importance_level = 2;
+            break;
+        case "high":
+            $importance_level = 3;
+            break;
+        case "critical":
+            $importance_level = 4;
+            break;
+        default:
+            $importance_level = 0;
+            break;
+    }
+
+    if(empty($type)){
+        $type = "none";
+    }
+
+    if(empty($target)){
+        $target = "none";
+    }
+
+    if(empty($content)){
+        $content = "none";
+    }
+    if(is_array($content)){
+        $content = implode(', ', $content);
+    }
+
+    if(empty($place)){
+        $place = "none";
+    }
+
+    // データベースに接続
+    try {
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    } catch(PDOException $e) {
+        return false;
+    }
+
+    if(!(empty($pdo))){
+        $uniqid = createUniqId();
+        $datetime = date('Y-m-d H:i:s');
+
+        // トランザクション開始
+        $pdo->beginTransaction();
+
+        try {
+            // SQL作成
+            $stmt = $pdo->prepare("INSERT INTO actionlog (uniqid, userid, type, place, target, content, importance, datetime) VALUES (:uniqid, :userid, :type, :place, :target, :content, :importance, :datetime)");
+
+            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+            $stmt->bindParam(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindParam(':type', $type, PDO::PARAM_STR);
+            $stmt->bindParam(':place', $place, PDO::PARAM_STR);
+
+            $stmt->bindParam(':target', $target, PDO::PARAM_STR);
+            $stmt->bindParam(':content', $content, PDO::PARAM_STR);
+            $stmt->bindParam(':importance', $importance_level, PDO::PARAM_INT);
+            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+            $res = $stmt->execute();
+            if($res){
+                $pdo->commit();
+                return true;
+            }else{
+                $pdo->rollBack();
+                return false;
+            }
+        } catch(Exception $e) {
+            // エラーが発生した時はロールバック
+            // ここでログを残そうとすると無限ループ入るのでなし
+            $pdo->rollBack();
+            return false;
+        }
+    }
+}
 function safetext($text){
     // テキストの安全化
     return htmlspecialchars($text, ENT_QUOTES, 'UTF-8', false);
+}
+function decode_yajirushi($postText){
+    $postText = str_replace('&larr;', '←', $postText);
+    $postText = str_replace('&darr;', '↓', $postText);
+    $postText = str_replace('&uarr;', '↑', $postText);
+    $postText = str_replace('&rarr;', '→', $postText);
+    return $postText;
 }
 function deleteDirectory($dir) {
     //ディレクトリを一括で消すやつ
@@ -1415,5 +1857,43 @@ function val_AddOtherSettings($dataname, $data, $jsontext){
     }
     
     return $ret;
+}
+//ユーザーのOther_Settingsが既にあるかないか(なければ空のJSONを追加)
+function is_OtherSettings($pdo, $userid, $add = true){
+    $other_settings = getUserData($pdo, $userid)["other_settings"];
+    if(empty($other_settings)){
+        if($add === true){
+            $new_data = [];
+            $new_json = json_encode($new_data);
+
+            $pdo->beginTransaction();
+            try {
+                // UPDATE文を実行してフォロー情報を更新
+                $updateQuery = $pdo->prepare("UPDATE account SET other_settings = :other_settings WHERE userid = :userid");
+                $updateQuery->bindValue(':other_settings', $new_json, PDO::PARAM_STR);
+                $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $res = $updateQuery->execute();
+
+                if($res){
+                    $pdo->commit();
+                    return true;
+                }else{
+                    // ロールバック
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "is_OtherSettings", null, "空のOtherSettingsを追加できませんでした", 3);
+                    return false;
+                }
+            } catch (Exception $e) {
+                // ロールバック
+                $pdo->rollBack();
+                actionLog($userid, "error", "is_OtherSettings", null, $e, 4);
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }else{
+        return true;
+    }
 }
 ?>

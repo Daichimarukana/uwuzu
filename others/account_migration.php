@@ -78,28 +78,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -134,28 +134,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -371,6 +371,7 @@ require('../logout/logout.php');
             - アイコン<br>
             - ヘッダー<br>
             - メールアドレス</p>
+			<p>アカウントの移行後このサーバーのアカウントは自動凍結されます。</p>
 			<?php
 			if($migration == true){?>
 				<?php if($userData['role']==='ice'){ ?>

@@ -68,28 +68,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -124,28 +124,28 @@ if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 	$_SESSION['username'] = $username;
 	$_SESSION['loginid'] = $res["loginid"];
 	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
 		'httponly' => true,
 	]);
 	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 14,
+		'expires' => time() + 60 * 60 * 24 * 28,
 		'path' => '/',
 		'samesite' => 'lax',
 		'secure' => true,
@@ -339,21 +339,27 @@ $pdo = null;
 $(document).ready(function() {
 	var userid = '<?php echo $userid; ?>';
 	var account_id = '<?php echo $loginid; ?>';
+	var pageNumber = 1;
 
 	if(ueusetext.value){
+		$('#postContainer').empty();
+		pageNumber = 1;
 		loadPosts();
 	}
 
 	$(document).on('click', '.search_btn', function(event) {
+		$('#postContainer').empty();
+		pageNumber = 1;
 		loadPosts();
 	});
 
     window.document.onkeydown = function(event){
         if (event.key === 'Enter') {
+			$('#postContainer').empty();
+			pageNumber = 1;
             loadPosts();
         }
     }
-
 
 	var isLoading = false;
 
@@ -361,23 +367,21 @@ $(document).ready(function() {
 		if (isLoading) return;
 		isLoading = true;
 		$("#loading").show();
-		
+
 		var ueusetext = document.getElementById('ueusetext');
 		var keyword = ueusetext.value;
-		
-		// 前回の検索結果をクリア
-		$('#postContainer').empty();
 		
 		// 新しいキーワードで検索を実行
 		$.ajax({
 			url: '../nextpage/searchpage.php', // PHPファイルへのパス
 			method: 'GET',
-			data: { keyword: keyword, userid: userid , account_id: account_id},
+			data: {page: pageNumber, keyword: keyword, userid: userid , account_id: account_id},
 			dataType: 'html',
 			timeout: 300000,
 			success: function(response) {
 				$('#postContainer').append(response);
 				$("#loading").hide();
+				pageNumber++;
 				isLoading = false;
 			},
 			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
@@ -388,6 +392,22 @@ $(document).ready(function() {
 		});
 	}
 
+	$('.outer').on('scroll', function() {
+		var innerHeight = $('.inner').innerHeight(), //内側の要素の高さ
+			outerHeight = $('.outer').innerHeight(), //外側の要素の高さ
+			outerBottom = innerHeight - outerHeight; //内側の要素の高さ - 外側の要素の高さ
+		if (outerBottom <= $('.outer').scrollTop()) {
+			var elem = document.getElementById("noueuse");
+
+			if (elem === null){
+				// 存在しない場合の処理
+				loadPosts();
+			} else {
+				// 存在する場合の処理
+				return;
+			}
+		}
+	});
 
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
 
