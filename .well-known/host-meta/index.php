@@ -5,8 +5,7 @@ $serversettings = parse_ini_file($serversettings_file, true);
 require("../../function/function.php");
 
 if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
-    header("Content-Type: application/xml");
-    header("charset=UTF-8");
+    header("Content-Type: application/xml; charset=UTF-8");
     header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];

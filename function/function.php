@@ -144,6 +144,57 @@ function base64_mime($Base64,$userid){
         return false;
     }
 }
+//APIユーズと通常ユーズ統合時に使うのでけさない
+function base64_to_files($Base64, $userid) { 
+    // Base64デコード
+    $decodedData = base64_decode($Base64); 
+    if ($decodedData === false) {
+        return false;
+    }
+
+    // MIMEタイプの検出
+    $finfo = finfo_open(FILEINFO_MIME_TYPE); 
+    $mime_type = finfo_buffer($finfo, $decodedData); 
+    finfo_close($finfo);
+
+    // 許可されているMIMEタイプと拡張子の対応
+    $safe_img_mime = [ 
+        "image/gif" => 'gif', 
+        "image/jpeg" => 'jpg', 
+        "image/png" => 'png', 
+        "image/svg+xml" => 'svg', 
+        "image/webp" => 'webp', 
+        "image/bmp" => 'bmp', 
+        "image/x-icon" => 'ico', 
+        "image/tiff" => 'tiff' 
+    ]; 
+ 
+    if (!(isset($safe_img_mime[$mime_type]))) { 
+        return false;
+    }
+
+    $extension = $safe_img_mime[$mime_type];
+
+    // 一時ファイルを作成
+    $temp_file = tempnam(sys_get_temp_dir(), 'img'); 
+    file_put_contents($temp_file, $decodedData);
+
+    // 必要に応じてEXIFデータを削除
+    delete_exif($extension, $temp_file);
+
+    // ファイル名とアップロードパスを生成
+    $newFilename = createUniqId() . '-' . $userid . '.' . $extension; 
+
+    // $_FILES形式の配列を作成して返す
+    return [
+        'name' => $newFilename,
+        'type' => $mime_type,
+        'tmp_name' => $temp_file,
+        'error' => 0,
+        'size' => filesize($temp_file),
+    ];
+}
+
 function resizeImage($filePath, $maxWidth, $maxHeight) {
     if (file_exists($filePath)) {  
         // 元の画像タイプを取得
@@ -670,11 +721,13 @@ function send_notification($to,$from,$title,$message,$url,$category){
                             return true;
                         }else{
                             $pdo->rollBack();
+                            actionLog($from, "error", "send_notification", $to, "通知の送信に失敗しました(rollBack)", 3);
                             return false;
                         }
                 
                     } catch(Exception $e) {
                         $pdo->rollBack();
+                        actionLog($from, "error", "send_notification", $to, $e, 4);
                         return false;
                     }
                 }else{
@@ -728,13 +781,12 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
     }
 
     if(!(empty($pdo))){		
-        
-        $result = $pdo->prepare("SELECT username FROM account WHERE userid = :userid");
-        $result->bindValue(':userid', $userid);
-        $result->execute();
-        $row = $result->fetch();
-        $username = safetext($row["username"]);
-
+        $userData = getUserData($pdo, $userid);
+        $username = safetext($userData["username"]);
+        $userRoleList = explode(',', safetext($userData["role"]));
+        if(in_array("ice", $userRoleList)){
+            $error_message[] = 'アカウントが凍結されています。(ACCOUNT_HAS_BEEN_FROZEN)';
+        }
         $ueuse = safetext($ueuse);
         if(safetext($nsfw) === "true"){
             $save_nsfw = "true";
@@ -771,391 +823,400 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
         $rate_Query->execute();
         $rate_count = $rate_Query->rowCount();
         if(!($rate_count > $max_ueuse_rate_limit-1)){
-            if (empty($photo1['name'])) {
-                $save_photo1 = "none";
-            } else {
-                // アップロードされたファイル情報
-                $uploadedFile = $photo1;
-
-                if(!(empty($uploadedFile['tmp_name']))){
-                    if(check_mime($uploadedFile['tmp_name'])){
-                        // アップロードされたファイルの拡張子を取得
-                        $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-                        // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-                        // 保存先のパスを生成
-                        $uploadedPath = '../ueuseimages/' . $newFilename;
-                        // EXIF削除
-                        delete_exif($extension, $uploadedFile['tmp_name']);
-                        // ファイルを移動
-                        $result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
-                        
-                        if ($result) {
-                            $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
-                        } else {
-                            $errnum = $uploadedFile['error'];
-                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
-                        }
-                    }else{
-                        $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                    }
-                }else{
-                    $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                }
-            }
-
-            if (empty($photo2['name'])) {
-                $save_photo2 = "none";
-            } else {
-                if (empty($photo1['name'])){
-                    $error_message[] = '画像1から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                }
-                // アップロードされたファイル情報
-                $uploadedFile2 = $photo2;
-
-                if(!(empty($uploadedFile2['tmp_name']))){
-                    if(check_mime($uploadedFile2['tmp_name'])){
-                        // アップロードされたファイルの拡張子を取得
-                        $extension2 = pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION);
-                        // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
-                        // 保存先のパスを生成
-                        $uploadedPath2 = '../ueuseimages/' . $newFilename2;
-                        // EXIF削除
-                        delete_exif($extension, $uploadedFile2['tmp_name']);
-                        // ファイルを移動
-                        $result2 = move_uploaded_file($uploadedFile2['tmp_name'], $uploadedPath2);
-                        if ($result2) {
-                            $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
-                        } else {
-                            $errnum = $uploadedFile2['error'];
-                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                            $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-                        }
-                    }else{
-                        $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                    }
-                }else{
-                    $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                }
-            }
-
-            if (empty($photo3['name'])) {
-                $save_photo3 = "none";
-            } else {
-                if (empty($photo2['name'])){
-                    $error_message[] = '画像2から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                }
-                // アップロードされたファイル情報
-                $uploadedFile3 = $photo3;
-
-                if(!(empty($uploadedFile3['tmp_name']))){
-                    if(check_mime($uploadedFile3['tmp_name'])){
-                        // アップロードされたファイルの拡張子を取得
-                        $extension3 = pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION);
-                        // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
-                        // 保存先のパスを生成
-                        $uploadedPath3 = '../ueuseimages/' . $newFilename3;
-                        // EXIF削除
-                        delete_exif($extension3, $uploadedFile3['tmp_name']);
-                        // ファイルを移動
-                        $result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
-                        if ($result3) {
-                            $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
-                        } else {
-                            $errnum = $uploadedFile3['error'];
-                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
-                        }
-                    }else{
-                        $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                    }
-                }else{
-                    $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                }
-            }
-
-            if (empty($photo4['name'])) {
-                $save_photo4 = "none";
-            } else {
-                if (empty($photo3['name'])){
-                    $error_message[] = '画像3から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                }
-                // アップロードされたファイル情報
-                $uploadedFile4 = $photo4;
-                if(!(empty($uploadedFile4['tmp_name']))){
-                    if(check_mime($uploadedFile4['tmp_name'])){
-                        // アップロードされたファイルの拡張子を取得
-                        $extension4 = pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION);
-                        // 新しいファイル名を生成（uniqid + 拡張子）
-                        $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
-                        // 保存先のパスを生成
-                        $uploadedPath4 = '../ueuseimages/' . $newFilename4;
-                        // EXIF削除
-                        delete_exif($extension4, $uploadedFile4['tmp_name']);
-                        // ファイルを移動
-                        $result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);  
-                        if ($result4) {
-                            $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
-                        } else {
-                            $errnum = $uploadedFile4['error'];
-                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                            $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
-                        }
-                    }else{
-                        $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                    }
-                }else{
-                    $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                }
-            }
-
-            if (empty($video1['name'])) {
-                $save_video1 = "none";
-            } else {
-                // アップロードされたファイル情報
-                $uploadedVideo = $video1;
-
-                if(!(empty($uploadedVideo['tmp_name']))){
-                    if(check_mime_video($uploadedVideo['tmp_name'])){
-                        // アップロードされたファイルの拡張子を取得
-                        $extensionVideo = strtolower(pathinfo($uploadedVideo['name'], PATHINFO_EXTENSION)); // 小文字に変換
-                        // 正しい拡張子の場合、新しいファイル名を生成
-                        $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
-                        // 保存先のパスを生成
-                        $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
-                        // ファイルを移動
-                        $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], $uploadedPathVideo);
-                        if ($resultVideo) {
-                            $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
-                        } else {
-                            $errnum = $uploadedVideo['error'];
-                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                            $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
-                        }
-                    } else {
-                        $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
-                    }
-                }else{
-                    $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                }
-            }
-
-            if($aibwm === true && !empty(AIBWM_CHK && AIBWM_CHK == "true")){
-                require('../plugin/AIBlockWaterMark/aiblockwatermark.php');
-                if(!($save_photo1 == "none")){
-                    AIBlockWaterMark($save_photo1, $userid);
-                }
-                if(!($save_photo2 == "none")){
-                    AIBlockWaterMark($save_photo2, $userid);
-                }
-                if(!($save_photo3 == "none")){
-                    AIBlockWaterMark($save_photo3, $userid);
-                }
-                if(!($save_photo4 == "none")){
-                    AIBlockWaterMark($save_photo4, $userid);
-                }
-            }
-
-            if(empty($error_message)) {                
-                // 書き込み日時を取得
-                $datetime = date("Y-m-d H:i:s");
-                $uniqid = createUniqId();
-                $abi = "none";
-
-                if(empty($rpUniqid) && empty($ruUniqid)){
-                    // トランザクション開始
-                    $pdo->beginTransaction();
-
-                    try {
-
-                        // SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
-                
-                        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                        $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                        $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                        $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
-                        $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-
-                        // SQLクエリの実行
-                        $res = $stmt->execute();
-
-                        // コミット
-                        $res = $pdo->commit();
-
-                        $mentionedUsers = array_unique(get_mentions_userid($ueuse));
-
-                        foreach ($mentionedUsers as $mentionedUser) {
-                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
-                        }
-
-                    } catch(Exception $e) {
-                        // エラーが発生した時はロールバック
-                        $pdo->rollBack();
-                        actionLog($userid, "error", "send_ueuse", null, $e, 4);
-                    }
-                }elseif((!empty($rpUniqid)) && empty($ruUniqid)){
-                    $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
-                    $toUserIdQuery->bindValue(':ueuseid', $rpUniqid, PDO::PARAM_STR);
-                    $toUserIdQuery->execute();
-                    $toUserId_res = $toUserIdQuery->fetch();    
-
-                    if(!(empty($toUserId_res))){
-                        $touserid = $toUserId_res["account"];
-                    }else{
-                        $touserid = null;
-                    }
-
-                    // トランザクション開始
-                    $pdo->beginTransaction();
-                    
-                    try {
-                        // SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
-
-                        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                        $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                        $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                        $stmt->bindParam(':rpuniqid', $rpUniqid, PDO::PARAM_STR);
-                        $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
-                        $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-
-                        // SQLクエリの実行
-                        $res = $stmt->execute();
-
-                        // コミット
-                        $res = $pdo->commit();
-
-                        $mentionedUsers = array_unique(get_mentions_userid($ueuse));
-
-                        foreach ($mentionedUsers as $mentionedUser) {
-                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
-                        }
-
-                        send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply");
-                    } catch(Exception $e) {
-                        // エラーが発生した時はロールバック
-                        $pdo->rollBack();
-                        actionLog($userid, "error", "send_ueuse", null, $e, 4);
-                    }
-                }elseif(empty($rpUniqid) && (!empty($ruUniqid))){
-                    $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
-                    $toUserIdQuery->bindValue(':ueuseid', $ruUniqid, PDO::PARAM_STR);
-                    $toUserIdQuery->execute();
-                    $toUserId_res = $toUserIdQuery->fetch();
-
-                    if(!(empty($toUserId_res))){
-                        $touserid = $toUserId_res["account"];
-                    }else{
-                        $touserid = null;
-                    }
-                    // トランザクション開始
-                    $pdo->beginTransaction();
-
-                    try {
-                        // SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ruuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ruuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
-
-                        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                        $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                        $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                        $stmt->bindParam(':ruuniqid', $ruUniqid, PDO::PARAM_STR);
-                        $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
-                        $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
-                        $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
-
-                        $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-
-
-                        // SQLクエリの実行
-                        $res = $stmt->execute();
-
-                        // コミット
-                        $res = $pdo->commit();
-
-                        $mentionedUsers = array_unique(get_mentions_userid($ueuse));
-
-                        foreach ($mentionedUsers as $mentionedUser) {
-                            send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
-                        }
-
-                        send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse");
-
-                    } catch(Exception $e) {
-                        // エラーが発生した時はロールバック
-                        $pdo->rollBack();
-                        actionLog($userid, "error", "send_ueuse", null, $e, 4);
-                    }
-                }
-                if( $res ) {
-                    return null;
+            if(empty($error_message)) {   
+                if (empty($photo1['name'])) {
+                    $save_photo1 = "none";
                 } else {
-                    $error_message[] = $e->getMessage();
+                    // アップロードされたファイル情報
+                    $uploadedFile = $photo1;
+
+                    if(!(empty($uploadedFile['tmp_name']))){
+                        if(check_mime($uploadedFile['tmp_name'])){
+                            // アップロードされたファイルの拡張子を取得
+                            $extension = strtolower(pathinfo($uploadedFile['name'], PATHINFO_EXTENSION));
+                            // 新しいファイル名を生成（uniqid + 拡張子）
+                            $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
+                            // 保存先のパスを生成
+                            $uploadedPath = '../ueuseimages/' . $newFilename;
+                            // EXIF削除
+                            delete_exif($extension, $uploadedFile['tmp_name']);
+                            // ファイルを移動
+                            $result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
+                            
+                            if ($result) {
+                                $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
+                            } else {
+                                $errnum = $uploadedFile['error'];
+                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
+                            }
+                        }else{
+                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                        }
+                    }else{
+                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                    }
+                }
+
+                if (empty($photo2['name'])) {
+                    $save_photo2 = "none";
+                } else {
+                    if (empty($photo1['name'])){
+                        $error_message[] = '画像1から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+                    }
+                    // アップロードされたファイル情報
+                    $uploadedFile2 = $photo2;
+
+                    if(!(empty($uploadedFile2['tmp_name']))){
+                        if(check_mime($uploadedFile2['tmp_name'])){
+                            // アップロードされたファイルの拡張子を取得
+                            $extension2 = strtolower(pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION));
+                            // 新しいファイル名を生成（uniqid + 拡張子）
+                            $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
+                            // 保存先のパスを生成
+                            $uploadedPath2 = '../ueuseimages/' . $newFilename2;
+                            // EXIF削除
+                            delete_exif($extension2, $uploadedFile2['tmp_name']);
+                            // ファイルを移動
+                            $result2 = move_uploaded_file($uploadedFile2['tmp_name'], $uploadedPath2);
+                            if ($result2) {
+                                $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
+                            } else {
+                                $errnum = $uploadedFile2['error'];
+                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+                            }
+                        }else{
+                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                        }
+                    }else{
+                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                    }
+                }
+
+                if (empty($photo3['name'])) {
+                    $save_photo3 = "none";
+                } else {
+                    if (empty($photo2['name'])){
+                        $error_message[] = '画像2から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+                    }
+                    // アップロードされたファイル情報
+                    $uploadedFile3 = $photo3;
+
+                    if(!(empty($uploadedFile3['tmp_name']))){
+                        if(check_mime($uploadedFile3['tmp_name'])){
+                            // アップロードされたファイルの拡張子を取得
+                            $extension3 = strtolower(pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION));
+                            // 新しいファイル名を生成（uniqid + 拡張子）
+                            $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
+                            // 保存先のパスを生成
+                            $uploadedPath3 = '../ueuseimages/' . $newFilename3;
+                            // EXIF削除
+                            delete_exif($extension3, $uploadedFile3['tmp_name']);
+                            // ファイルを移動
+                            $result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
+                            if ($result3) {
+                                $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
+                            } else {
+                                $errnum = $uploadedFile3['error'];
+                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
+                            }
+                        }else{
+                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                        }
+                    }else{
+                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                    }
+                }
+
+                if (empty($photo4['name'])) {
+                    $save_photo4 = "none";
+                } else {
+                    if (empty($photo3['name'])){
+                        $error_message[] = '画像3から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+                    }
+                    // アップロードされたファイル情報
+                    $uploadedFile4 = $photo4;
+                    if(!(empty($uploadedFile4['tmp_name']))){
+                        if(check_mime($uploadedFile4['tmp_name'])){
+                            // アップロードされたファイルの拡張子を取得
+                            $extension4 = strtolower(pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION));
+                            // 新しいファイル名を生成（uniqid + 拡張子）
+                            $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
+                            // 保存先のパスを生成
+                            $uploadedPath4 = '../ueuseimages/' . $newFilename4;
+                            // EXIF削除
+                            delete_exif($extension4, $uploadedFile4['tmp_name']);
+                            // ファイルを移動
+                            $result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);  
+                            if ($result4) {
+                                $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
+                            } else {
+                                $errnum = $uploadedFile4['error'];
+                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
+                            }
+                        }else{
+                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                        }
+                    }else{
+                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                    }
+                }
+
+                if (empty($video1['name'])) {
+                    $save_video1 = "none";
+                } else {
+                    // アップロードされたファイル情報
+                    $uploadedVideo = $video1;
+
+                    if(!(empty($uploadedVideo['tmp_name']))){
+                        if(check_mime_video($uploadedVideo['tmp_name'])){
+                            // アップロードされたファイルの拡張子を取得
+                            $extensionVideo = strtolower(pathinfo($uploadedVideo['name'], PATHINFO_EXTENSION)); // 小文字に変換
+                            // 正しい拡張子の場合、新しいファイル名を生成
+                            $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
+                            // 保存先のパスを生成
+                            $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
+                            // ファイルを移動
+                            $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], $uploadedPathVideo);
+                            if ($resultVideo) {
+                                $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
+                            } else {
+                                $errnum = $uploadedVideo['error'];
+                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
+                            }
+                        } else {
+                            $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
+                        }
+                    }else{
+                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                    }
+                }
+
+                if($aibwm === true && !empty(AIBWM_CHK && AIBWM_CHK == "true")){
+                    require('../plugin/AIBlockWaterMark/aiblockwatermark.php');
+                    if(!($save_photo1 == "none")){
+                        AIBlockWaterMark($save_photo1, $userid);
+                    }
+                    if(!($save_photo2 == "none")){
+                        AIBlockWaterMark($save_photo2, $userid);
+                    }
+                    if(!($save_photo3 == "none")){
+                        AIBlockWaterMark($save_photo3, $userid);
+                    }
+                    if(!($save_photo4 == "none")){
+                        AIBlockWaterMark($save_photo4, $userid);
+                    }
+                }
+
+                if(empty($error_message)) {                
+                    // 書き込み日時を取得
+                    $datetime = date("Y-m-d H:i:s");
+                    $uniqid = createUniqId();
+                    $abi = "none";
+
+                    if(empty($rpUniqid) && empty($ruUniqid)){
+                        // トランザクション開始
+                        $pdo->beginTransaction();
+
+                        try {
+
+                            // SQL作成
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+                    
+                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
+                            $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
+                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+
+                            // SQLクエリの実行
+                            $res = $stmt->execute();
+
+                            // コミット
+                            $res = $pdo->commit();
+
+                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
+
+                            foreach ($mentionedUsers as $mentionedUser) {
+                                send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                            }
+
+                        } catch(Exception $e) {
+                            // エラーが発生した時はロールバック
+                            $pdo->rollBack();
+                            actionLog($userid, "error", "send_ueuse", null, $e, 4);
+                        }
+                    }elseif((!empty($rpUniqid)) && empty($ruUniqid)){
+                        $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
+                        $toUserIdQuery->bindValue(':ueuseid', $rpUniqid, PDO::PARAM_STR);
+                        $toUserIdQuery->execute();
+                        $toUserId_res = $toUserIdQuery->fetch();    
+
+                        if(!(empty($toUserId_res))){
+                            $touserid = $toUserId_res["account"];
+                        }else{
+                            $touserid = null;
+                        }
+
+                        // トランザクション開始
+                        $pdo->beginTransaction();
+                        
+                        try {
+                            // SQL作成
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+
+                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                            $stmt->bindParam(':rpuniqid', $rpUniqid, PDO::PARAM_STR);
+                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
+                            $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
+                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+
+                            // SQLクエリの実行
+                            $res = $stmt->execute();
+
+                            // コミット
+                            $res = $pdo->commit();
+
+                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
+
+                            foreach ($mentionedUsers as $mentionedUser) {
+                                send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                            }
+
+                            send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply");
+                        } catch(Exception $e) {
+                            // エラーが発生した時はロールバック
+                            $pdo->rollBack();
+                            actionLog($userid, "error", "send_ueuse", null, $e, 4);
+                        }
+                    }elseif(empty($rpUniqid) && (!empty($ruUniqid))){
+                        $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
+                        $toUserIdQuery->bindValue(':ueuseid', $ruUniqid, PDO::PARAM_STR);
+                        $toUserIdQuery->execute();
+                        $toUserId_res = $toUserIdQuery->fetch();
+
+                        if(!(empty($toUserId_res))){
+                            $touserid = $toUserId_res["account"];
+                        }else{
+                            $touserid = null;
+                        }
+                        // トランザクション開始
+                        $pdo->beginTransaction();
+
+                        try {
+                            // SQL作成
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ruuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ruuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+
+                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                            $stmt->bindParam(':ruuniqid', $ruUniqid, PDO::PARAM_STR);
+                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
+                            $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
+                            $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
+                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+
+
+                            // SQLクエリの実行
+                            $res = $stmt->execute();
+
+                            // コミット
+                            $res = $pdo->commit();
+
+                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
+
+                            foreach ($mentionedUsers as $mentionedUser) {
+                                send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                            }
+
+                            send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse");
+
+                        } catch(Exception $e) {
+                            // エラーが発生した時はロールバック
+                            $pdo->rollBack();
+                            actionLog($userid, "error", "send_ueuse", null, $e, 4);
+                        }
+                    }else{
+                        $error_message[] = '返信とリユーズを同時に行うことはできません。(ERROR)';
+                        return $error_message;
+                    }
+
+                    if( $res ) {
+                        return null;
+                    } else {
+                        $error_message[] = "ユーズに失敗しました。(REGISTERED_DAME)";
+                        return $error_message;
+                    }
+
+                    // プリペアドステートメントを削除
+                    $stmt = null;
+                }else{
+                    actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
                     return $error_message;
                 }
-
-                // プリペアドステートメントを削除
-                $stmt = null;
             }else{
                 actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
                 return $error_message;

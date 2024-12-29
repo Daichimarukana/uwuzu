@@ -14,8 +14,7 @@ $banurldomainfile = "../../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
 $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 
-header("Content-Type: application/json");
-header("charset=utf-8");
+header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
 

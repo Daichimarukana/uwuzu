@@ -247,9 +247,6 @@ if (!empty($_POST['report'])) {
 		$res = $pdo->commit();
 
 		foreach ($admin_res as $to_admin) {
-		
-			$pdo->beginTransaction();
-
 			$fromuserid = $userid;
 			$touserid2 = $to_admin["userid"];//管理者宛通知
 			$msg = "通報情報をご確認ください！";

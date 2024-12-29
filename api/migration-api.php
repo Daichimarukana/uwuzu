@@ -1,9 +1,7 @@
 <?php
 require("../function/function.php");
-header("Content-Type: application/json");
-header("charset=utf-8");
+header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
-
 
 function random_iv($length = 16){
     return substr(str_shuffle('1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'), 0, $length);
@@ -60,6 +58,7 @@ if(isset($_GET['migration_code'])) {
                     $res = $pdo->commit();
                 } catch(Exception $e) {
                     $pdo->rollBack();
+                    actionLog($account, "error", "migration-api", null, $e, 4);
                 }
                 $newrole = "ice";
                 $newtoken = "ice";
@@ -87,6 +86,7 @@ if(isset($_GET['migration_code'])) {
 
                     // エラーが発生した時はロールバック
                     $pdo->rollBack();
+                    actionLog($account, "error", "migration-api", null, $e, 4);
                 }
                 //メール送信はナシ
                 //------------

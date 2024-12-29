@@ -21,14 +21,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
     $userid = safetext($_GET['userid']);
     $loginid = safetext($_GET['account_id']);
 
-    // データベース接続の設定
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    ));
-
-    $query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
 
     $query->execute(array(':userid' => $userid));
 
@@ -57,17 +50,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
             $messages = array();
 
             if (!empty($pdo)) {
-
-
-                // データベース接続の設定
-                $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-                ));
-
                 // 投稿内容の取得（新しい順に取得）
-                $messageQuery = $dbh->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
+                $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
                 $messageQuery->bindValue(':ueuseid', $ueuseid, PDO::PARAM_STR);
                 $messageQuery->bindValue(':rpueuseid', $ueuseid, PDO::PARAM_STR);
                 $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -76,9 +60,6 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $message_array = $messageQuery->fetchAll();    
                     
                 $messages = array();
-
-                
-                
 
                 foreach ($message_array as $row) {
                     if(!(empty($row["rpuniqid"]))){

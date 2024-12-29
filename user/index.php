@@ -222,7 +222,7 @@ if (!empty($pdo)) {
 		$follow = $userdata['follow']; // コンマで区切られたユーザーIDを含む変数
 
 		// コンマで区切って配列に分割し、要素数を数える
-		$followIds = explode(',', $follow);
+		$followIds = array_reverse(explode(',', $follow));
 		$followCount = count($followIds) - 1;
 
 		$follow_on_me = array_search($userid, $followIds);
@@ -237,7 +237,7 @@ if (!empty($pdo)) {
 		$follower = $userdata['follower']; // コンマで区切られたユーザーIDを含む変数
 
 		// コンマで区切って配列に分割し、要素数を数える
-		$followerIds = explode(',', $follower);
+		$followerIds = array_reverse(explode(',', $follower));
 		$followerCount = count($followerIds) - 1;
 
 		$profileText = safetext($userData['profile']);

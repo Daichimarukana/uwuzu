@@ -51,14 +51,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
             $messages = array();
 
             if (!empty($pdo)) {
-
-                $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-                ));
-
-                $messageQuery = $dbh->prepare("SELECT fromuserid,title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
+                $messageQuery = $pdo->prepare("SELECT fromuserid,title,msg,url,datetime,userchk FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
                 $messageQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
                 $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
                 $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
@@ -81,7 +74,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                         $value["servericon"] = safetext($serversettings["serverinfo"]["server_icon"]);
                         if(!(empty($value['fromuserid']))){
                             if(!($value['fromuserid'] == "uwuzu-fromsys")){
-                                $userQuery = $dbh->prepare("SELECT username,iconname FROM account WHERE userid = :userid");
+                                $userQuery = $pdo->prepare("SELECT username,iconname FROM account WHERE userid = :userid");
                                 $userQuery->bindValue(':userid', $value['fromuserid']);
                                 $userQuery->execute();
                                 $user_array = $userQuery->fetch();

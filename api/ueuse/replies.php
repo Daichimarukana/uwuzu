@@ -4,8 +4,7 @@ $domain = $_SERVER['HTTP_HOST'];
 require('../../db.php');
 require("../../function/function.php");
 
-header("Content-Type: application/json");
-header("charset=utf-8");
+header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
 

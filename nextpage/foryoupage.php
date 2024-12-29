@@ -22,14 +22,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
     $userid = safetext($_GET['userid']);
     $loginid = safetext($_GET['account_id']);
 
-    // データベース接続の設定
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    ));
-
-    $query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
 
     $query->execute(array(':userid' => $userid));
 
@@ -68,9 +61,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $all_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                 $all_stmt->execute();
 
-                while ($row = $all_stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $all_messages[] = $row;
-                }
+                $all_messages = $all_stmt->fetchAll(PDO::FETCH_ASSOC);
                 if(empty($all_messages)){
                     $all_messages = [];
                 }
@@ -87,13 +78,14 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $Before7daysPosts = $cnt_stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 // 結果が15件に満たない場合
-                if(count($Before7daysPosts) < 15){
+                $postCount = count($Before7daysPosts);
+                if($postCount < 15){
                     $get_day = 90;
-                }elseif(count($Before7daysPosts) > 15 && count($Before7daysPosts) < 150){
+                }elseif($postCount > 15 && $postCount < 150){
                     $get_day = 31;
-                }elseif(count($Before7daysPosts) > 150 && count($Before7daysPosts) < 750){
+                }elseif($postCount > 150 && $postCount < 750){
                     $get_day = 7;
-                }elseif(count($Before7daysPosts) > 750){
+                }elseif($postCount > 750){
                     $get_day = 5;
                 }else{
                     $get_day = 2;
@@ -127,10 +119,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $pop_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
                 $pop_stmt->execute();
 
-                while ($row = $pop_stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $pop_messages[] = $row;
-                }
-                if(empty($flw_messages)){
+                $pop_messages = $pop_stmt->fetchAll(PDO::FETCH_ASSOC);
+                if(empty($pop_messages)){
                     $pop_messages = [];
                 }
 
@@ -175,53 +165,45 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $fav_stmt = $pdo->prepare($fav_sql);
                 $fav_stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
                 $fav_stmt->execute();
-                while ($row = $fav_stmt->fetch(PDO::FETCH_ASSOC)) {
-                    $fav_ueuse_lists[] = $row;
-                }
-                if(!(empty($fav_ueuse_lists))){
+                $fav_ueuse_lists = $fav_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($fav_ueuse_lists)) {
                     $many_fav_accounts = array_column($fav_ueuse_lists, 'account');
                     $many_fav_account_counts = array_count_values($many_fav_accounts);
                     arsort($many_fav_account_counts);
-                    $top_fav_accounts = array_slice($many_fav_account_counts, 0, 15, true); 
+                    $top_fav_accounts = array_slice($many_fav_account_counts, 0, 15, true);
 
-                    foreach ($top_fav_accounts as $favUserId => $count) {
-                        $favget_sql = "SELECT ueuse.* 
+                    $favget_messages = [];
+                    $favget_sql = "SELECT ueuse.* 
                                 FROM ueuse 
                                 LEFT JOIN account ON ueuse.account = account.userid 
                                 WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :fav_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY 
                                 ORDER BY ueuse.datetime DESC 
                                 LIMIT :offset, :itemsPerPage";
-    
-                        $favget_stmt = $pdo->prepare($favget_sql);
-                        $favget_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
-                        $favget_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-                        $favget_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+
+                    $favget_stmt = $pdo->prepare($favget_sql);
+                    $favget_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
+                    $favget_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                    $favget_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+
+                    foreach ($top_fav_accounts as $favUserId => $count) {
                         $favget_stmt->bindValue(':fav_account', $favUserId, PDO::PARAM_STR);
                         $favget_stmt->execute();
-    
-                        while ($row = $favget_stmt->fetch(PDO::FETCH_ASSOC)) {
-                            $favget_messages[] = $row;
-                        }
+                        $favget_messages = array_merge($favget_messages, $favget_stmt->fetchAll(PDO::FETCH_ASSOC));
                     }
-                    if(empty($favget_messages)){
-                        $favget_messages = [];
-                    }
-                }else{
+                } else {
                     $favget_messages = [];
                 }
 
-                //基本的には人気・フォロー中・いいねする事が多いユーザーのユーズでTLを構成するけど全部出きったらLTLと同じにする
-                if(empty($pop_messages) && empty($flw_messages) && empty($favget_messages)){
+                // 基本的には人気・フォロー中・いいねする事が多いユーザーのユーズでTLを構成するけど全部出きったらLTLと同じにする
+                $messages = array_merge($pop_messages, $flw_messages, $favget_messages);
+                if (empty($messages)) {
                     $messages = $all_messages;
-                }elseif(count(array_merge($pop_messages, $flw_messages, $favget_messages)) < 15){
-                    $total_messages = array_unique(array_merge($all_messages, $pop_messages, $flw_messages, $favget_messages), SORT_REGULAR);
-                    shuffle($total_messages);
-                    $messages = array_slice($total_messages, 0, 15);
-                }else{
-                    $total_messages = array_unique(array_merge($pop_messages, $flw_messages, $favget_messages), SORT_REGULAR);
-                    shuffle($total_messages);
-                    $messages = array_slice($total_messages, 0, 15);
+                } elseif (count($messages) < 15) {
+                    $messages = array_merge($messages, $all_messages);
                 }
+                $messages = array_slice(array_unique($messages, SORT_REGULAR), 0, 15);
+                shuffle($messages);
 
                 // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
                 foreach ($messages as &$message) {

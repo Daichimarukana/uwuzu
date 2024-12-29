@@ -23,14 +23,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
     $userid = safetext($_GET['userid']);
     $loginid = safetext($_GET['account_id']);
 
-    // データベース接続の設定
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    ));
-
-    $query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
 
     $query->execute(array(':userid' => $userid));
 
@@ -57,15 +50,8 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
             $messages = array();
 
             if (!empty($pdo)) {
-                
-                $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-                ));
-
                 // フォローしているユーザーIDを取得し、カンマで区切る
-                $followQuery = $dbh->prepare("SELECT follow FROM account WHERE userid = :userid");
+                $followQuery = $pdo->prepare("SELECT follow FROM account WHERE userid = :userid");
                 $followQuery->bindValue(':userid', $userid);
                 $followQuery->execute();
                 $followData = $followQuery->fetch();

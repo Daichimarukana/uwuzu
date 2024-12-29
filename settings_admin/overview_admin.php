@@ -217,22 +217,56 @@ if(!empty($pdo)){
 	//DB_Data
 	try {
 		$dbname = DB_NAME;
-
-		$query = "
-			SELECT
-				table_name AS `Table`,
-				ROUND(((data_length + index_length) / 1024 / 1024), 2) AS `Size`
-			FROM
-				information_schema.TABLES
-			WHERE
-				table_schema = :database
-			ORDER BY
-				`Size` DESC;
-		";
+		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+	
+		// データベース内の全テーブル名を取得
+		$query = "SELECT table_name FROM information_schema.tables WHERE table_schema = :database";
 		$stmt = $pdo->prepare($query);
 		$stmt->bindParam(':database', $dbname);
 		$stmt->execute();
-		$db_results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+	
+		// 各テーブルの正確な行数を取得
+		$db_results = [];
+		foreach ($tables as $table) {
+			// 行数を取得
+			$rowQuery = "SELECT COUNT(*) as count FROM `$table`";
+			$rowStmt = $pdo->query($rowQuery);
+			$rowCount = (int)$rowStmt->fetchColumn();
+	
+			// テーブルサイズを取得
+			$sizeQuery = " 
+				SELECT 
+					ROUND(((data_length + index_length) / 1024 / 1024), 2) AS `Size` 
+				FROM 
+					information_schema.TABLES 
+				WHERE 
+					table_schema = :database AND table_name = :table;
+			";
+			$sizeStmt = $pdo->prepare($sizeQuery);
+			$sizeStmt->execute([':database' => $dbname, ':table' => $table]);
+			$size = (float)$sizeStmt->fetchColumn();
+	
+			// 結果を格納
+			$db_results[] = [
+				'Table' => $table,
+				'Rows' => $rowCount,
+				'Size' => $size,
+			];
+		}
+	
+		// サイズで並び替え
+		usort($db_results, function ($a, $b) {
+			return $b['Size'] <=> $a['Size'];
+		});
+	
+		// 行数を最大桁数に揃えて0埋め
+		$maxRows = max(array_column($db_results, 'Rows'));
+		foreach ($db_results as &$table) {
+			$table['Rows'] = str_pad($table['Rows'], strlen($maxRows), '0', STR_PAD_LEFT);
+		}
+		unset($table); // 参照を解除
+	
 	} catch (PDOException $e) {
 		$db_results = null;
 	}
@@ -405,6 +439,7 @@ require('../logout/logout.php');
 									echo "<tr>";
 									echo "<td>".$value['Table']."</td>";
 									echo "<td>".$value['Size']." MB</td>";
+									echo "<td>".$value['Rows']." Records</td>";
 									echo "</tr>";
 								}
 							}

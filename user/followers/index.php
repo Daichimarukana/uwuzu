@@ -4,8 +4,7 @@ require("../../function/function.php");
 $serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
-    header("Content-Type: application/activity+json");
-    header("charset=utf-8");
+    header("Content-Type: application/activity+json; charset=utf-8");
     header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];
