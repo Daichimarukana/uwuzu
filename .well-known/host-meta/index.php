@@ -2,7 +2,9 @@
 $serversettings_file = "../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
+require('../../db.php');
 require("../../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
     header("Content-Type: application/xml; charset=UTF-8");

@@ -59,136 +59,23 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_SESSION['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // セッションに格納されている値をそのままセット
-	$username = safetext($res['username']); // セッションに格納されている値をそのままセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-		
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_COOKIE['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // クッキーから取得した値をセット
-	$username = safetext($res['username']); // クッキーから取得した値をセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-
-} else {
-	// ログインが許可されていない場合、ログインページにリダイレクト
-	header("Location: ../login.php");
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "admin");
+if($is_login === false){
+	header("Location: ../index.php");
 	exit;
-}
-if(empty($userid)){
-	header("Location: ../login.php");
-	exit;
-} 
-if(empty($username)){
-	header("Location: ../login.php");
-	exit;
+}else{
+	$userid = safetext($is_login['userid']);
+	$username = safetext($is_login['username']);
+	$loginid = safetext($is_login["loginid"]);
+	$role = safetext($is_login["role"]);
+	$sacinfo = safetext($is_login["sacinfo"]);
+	$myblocklist = safetext($is_login["blocklist"]);
+	$myfollowlist = safetext($is_login["follow"]);
+	$is_Admin = safetext($is_login["admin"]);
 }
 
-if(!($res["admin"] === "yes")){
-	header("Location: ../login.php");
-	exit;
-}
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -280,6 +167,13 @@ if( !empty($_POST['btn_submit']) ) {
 		$savemigration = "false";
 	}
 
+	$get_ip_addr = safetext($_POST['get_ip_addr']);
+	if($get_ip_addr === "true"){
+		$saveget_ip_addr = "true";
+	}else{
+		$saveget_ip_addr = "false";
+	}
+
 	$postrobots = safetext($_POST['robots']);
 	if($postrobots === "true"){
 		//GPTBotによるクロールを拒否
@@ -319,6 +213,8 @@ if( !empty($_POST['btn_submit']) ) {
 	server_activitypub = "'.$saveactivitypub.'"
 	;アカウントの移行登録を許可するか
 	server_account_migration = "'.$savemigration.'"
+	;IPアドレスを取得するか
+	server_get_ip = "'.$saveget_ip_addr.'"
 	';
 
 	//サーバー設定上書き
@@ -471,7 +367,7 @@ require('../logout/logout.php');
 					<div>
 						<p>招待制にするかどうか</p>
 						<div class="switch_button">
-							<?php if($serversettings["serverinfo"]["server_invitation"] === "true"){?>
+							<?php if(isset($serversettings["serverinfo"]["server_invitation"]) && $serversettings["serverinfo"]["server_invitation"] === "true"){?>
 								<input id="onlyuser" class="switch_input" type='checkbox' name="onlyuser" value="true" checked/>
 								<label for="onlyuser" class="switch_label"></label>
 							<?php }else{?>
@@ -485,7 +381,7 @@ require('../logout/logout.php');
 						<p>アカウントの移行登録を許可するか</p>
 						<div class="p2">他のuwuzuサーバーからのアカウント移行を許可するかです。<br>このサーバーが招待制の場合移行登録にも招待コードが必要となります。</div>
 						<div class="switch_button">
-							<?php if($serversettings["serverinfo"]["server_account_migration"] === "true"){?>
+							<?php if(isset($serversettings["serverinfo"]["server_account_migration"]) && $serversettings["serverinfo"]["server_account_migration"] === "true"){?>
 								<input id="migration" class="switch_input" type='checkbox' name="migration" value="true" checked/>
 								<label for="migration" class="switch_label"></label>
 							<?php }else{?>
@@ -514,12 +410,26 @@ require('../logout/logout.php');
 						<p>ActivityPubサーバーとして認識されるようにするか</p>
 						<div class="p2">ActivityPubの仮実装をオンにするかです。inboxに入ってきた内容には今現在これといったレスポンスを返しません。<br>また、publicKeyも返却しません。<br>現状ActivityPubサーバーと連合を組むことは出来ません。(リモートユーザーの確認程度なら出来ます。)<br>オフの状態だと410 Goneを返します。</div>
 						<div class="switch_button">
-							<?php if($serversettings["serverinfo"]["server_activitypub"] === "true"){?>
+							<?php if(isset($serversettings["serverinfo"]["server_activitypub"]) && $serversettings["serverinfo"]["server_activitypub"] === "true"){?>
 								<input id="activitypub" class="switch_input" type='checkbox' name="activitypub" value="true" checked/>
 								<label for="activitypub" class="switch_label"></label>
 							<?php }else{?>
 								<input id="activitypub" class="switch_input" type='checkbox' name="activitypub" value="true" />
 								<label for="activitypub" class="switch_label"></label>
+							<?php }?>
+						</div>
+					</div>
+
+					<div>
+						<p>IPアドレスを取得するか</p>
+						<div class="p2">ユーザーの最終アクセス時のIPアドレスを取得して保存するかどうかを設定します。<br>IPアドレスは最終アクセス時のものを暗号化されて保存されます。<br>プライバシーに関わる事項のため注意して設定してください。</div>
+						<div class="switch_button">
+							<?php if(isset($serversettings["serverinfo"]["server_get_ip"]) && $serversettings["serverinfo"]["server_get_ip"] === "true"){?>
+								<input id="get_ip_addr" class="switch_input" type='checkbox' name="get_ip_addr" value="true" checked/>
+								<label for="get_ip_addr" class="switch_label"></label>
+							<?php }else{?>
+								<input id="get_ip_addr" class="switch_input" type='checkbox' name="get_ip_addr" value="true" />
+								<label for="get_ip_addr" class="switch_label"></label>
 							<?php }?>
 						</div>
 					</div>

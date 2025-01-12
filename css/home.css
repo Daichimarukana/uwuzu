@@ -2598,6 +2598,31 @@ main h1{
     }
 }
 
+.sendbox .harmful_notice{
+    animation: Up_to_down_slideY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 24px;
+    margin-bottom: 0px;
+    border-radius: 10px;
+    padding: 12px;
+    background-color: color-mix(in srgb, var(--tl-color) 90%, var(--warn));
+    border: 1px solid var(--warn);
+    width: auto;
+    max-height: 260px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+.sendbox .harmful_notice p{
+    margin: 0px;
+    word-wrap: break-word;
+    line-height: 16px;
+    color: var(--text-color);
+    font-size: 16px;
+    font-family: var(--Text-fonts), sans-serif;
+    font-weight: normal;
+}
+
 .ueusebtn{
     cursor: pointer;
     border: none;
@@ -4057,6 +4082,7 @@ label>input {
     border-radius: 50%;
     width: 32px;
     height: 32px;
+    object-fit: cover;
 }
 .notification .flebox .icon a{
     margin:0px;
@@ -7773,7 +7799,14 @@ noscript .noscript_modal .inner .center_text p{
     .sendbox .emoji_picker .tokonone p{
         color:var(--dark-text-color);
     }
-    
+
+    .sendbox .harmful_notice{
+        background-color: color-mix(in srgb, var(--dark-sub-color) 90%, var(--warn));
+        border: 1px solid var(--warn);
+    }
+    .sendbox .harmful_notice p{
+        color: var(--dark-text-color);
+    }
 
     .emjtex{
         background-color: var(--dark-sub-color);

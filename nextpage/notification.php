@@ -5,7 +5,7 @@ $serversettings = parse_ini_file($serversettings_file, true);
 
 require('../db.php');
 require("../function/function.php");
-
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 require('notificationview.php');
 

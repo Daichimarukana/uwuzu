@@ -12,6 +12,7 @@
     <a href="maintenance_admin" class="admin_leftbtn">メンテナンス</a>
     <a href="plugin_admin" class="admin_leftbtn">プラグイン</a>
     <a href="update_admin" class="admin_leftbtn">アップデート</a>
+    <a href="ipblock_admin" class="admin_leftbtn">IPブロック</a>
     <a href="actionlog_admin" class="admin_leftbtn">ログ</a>
 </div>
 <?php ?>

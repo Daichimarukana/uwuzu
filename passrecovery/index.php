@@ -66,13 +66,18 @@ try {
     $error_message[] = $e->getMessage();
 }
 
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if(!($is_login === false)){
+	header("Location: ../home/");
+	exit;
+}
+//-------------------------------------------------------------
+
 if( !empty($_POST['btn_submit']) ) {
-
-
-    //$row['userid'] = "daichimarukn";
-
-    $userid = $_POST['userid'];
-    $mailadds = $_POST['mailadds'];
+    $userid = safetext($_POST['userid']);
+    $mailadds = safetext($_POST['mailadds']);
 
     if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){
         if(isset($_POST['h-captcha-response'])){
@@ -218,10 +223,6 @@ if( !empty($_POST['btn_submit']) ) {
         }
 
     }
-
-    // ... (後略)
-
-
 
 }
 

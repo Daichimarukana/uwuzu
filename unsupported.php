@@ -1,4 +1,5 @@
 <?php 
+require('db.php');
 require("function/function.php");
 
 $serversettings_file = "server/serversettings.ini";
@@ -24,18 +25,20 @@ for( $i=0;$i<$cnt;$i++ ){
     $uwuzuinfo[$i] = ($softwaredata[$i]);
 }
 
-if(isset($_GET['errcode']) || isset($_GET['browser']) || isset($_GET['os']) || isset($_GET['cookie']) || isset($_GET['ssl'])){
+if(isset($_GET['errcode']) || isset($_GET['browser']) || isset($_GET['os']) || isset($_GET['cookie']) || isset($_GET['ssl']) || isset($_GET['block'])){
 	if(isset($_GET['errcode'])){$errcode = safetext($_GET['errcode']);}else{$errcode = "NULL";};
     if(isset($_GET['browser'])){$browser = safetext($_GET['browser']);}else{$browser = "NULL";};
     if(isset($_GET['os'])){$os = safetext($_GET['os']);}else{$os = "NULL";};
     if(isset($_GET['cookie'])){$cookie = safetext($_GET['cookie']);}else{$cookie = "NULL";};
     if(isset($_GET['ssl'])){$ssl = safetext($_GET['ssl']);}else{$ssl = "NULL";};
+    if(isset($_GET['block'])){$block = safetext($_GET['block']);}else{$block = "NULL";};
 }else{
     $errcode = "NULL";
     $browser = "NULL";
     $os = "NULL";
     $cookie = "NULL";
     $ssl = "NULL";
+    $block = "NULL";
 }
 
 if($errcode == "UNSUPPORTED_BROWSER"){
@@ -48,6 +51,8 @@ if($errcode == "UNSUPPORTED_BROWSER"){
     $errabout = "http通信で表示されていません。";
 }elseif($errcode == "NONE_SSL_SERVER"){
     $errabout = "サーバー側でSSLが設定されていません。サーバー管理者にuwuzuの動作にSSLの設定が必要であることを伝えてください。";
+}elseif($errcode == "IP_BANNED"){
+    $errabout = "お使いの環境のIPアドレスがブロックされています。".safetext($serversettings["serverinfo"]["server_name"])."を使用することはできません。";
 }else{
     $errabout = "エラーコードの説明はありません。";
 }
@@ -76,7 +81,7 @@ if($errcode == "UNSUPPORTED_BROWSER"){
     </div>
     <h1>お使いの環境での利用はできません</h1>
     <div class="maintext">
-        <p>申し訳ございませんが、uwuzuをお使いの環境で使用されますとバグやエラーなどの問題が発生する可能性が非常に高いためこのページにリダイレクトさせていただきました。
+        <p>申し訳ございませんが、お使いの環境でuwuzuを利用すると問題が発生する恐れがあるため、リダイレクトさせていただきました。
         <br>引き続きuwuzuを使用するには推奨されている環境をご利用ください。
         <br>詳細は下記のリンクよりご確認ください。</p>
     </div>

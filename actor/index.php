@@ -2,15 +2,15 @@
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
+require('../db.php');
 require("../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
     header("Content-Type: application/activity+json; charset=utf-8");
     header("Access-Control-Allow-Origin: *");
 
     $domain = $_SERVER['HTTP_HOST'];
-
-    require('../db.php');
 
     // データベースに接続
     try {

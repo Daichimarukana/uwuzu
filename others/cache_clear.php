@@ -1,6 +1,8 @@
 <?php
-
+require('../db.php');
 require("../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
+
 header( 'Cache-Control: no-store, no-cache, must-revalidate' );
 header( 'Cache-Control: post-check=0, pre-check=0', FALSE );
 header( 'Pragma: no-cache' );
@@ -16,12 +18,24 @@ if(isset($_SERVER['HTTP_REFERER'])){
 <script src="../js/unsupported.js?v=<?php echo createUniqId();?>"></script>
 <script src="../js/console_notice.js?v=<?php echo createUniqId();?>"></script>
 <script src="../js/nsfw_event.js?v=<?php echo createUniqId();?>"></script>
-<link rel="manifest" href="../manifest/manifest.json?v=<?php echo createUniqId();?>" />
+<link rel="manifest" href="../manifest/manifest.json" />
 <link rel="stylesheet" href="../css/home.css?v=<?php echo createUniqId();?>">
 <title>キャッシュクリア中</title>
 </head>
 <script>
 window.addEventListener('load', function(){
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistration()
+            .then(registration => {
+                registration.unregister();
+                navigator.serviceWorker.register("../../sw.js").then(reg => {
+                    console.log("ServiceWorker OK", reg);
+                }).catch(err => {
+                    console.log("ServiceWorker BAD", err);
+                });
+            });
+    }
+
     window.location.href = "<?php echo $back?>";
 });
 </script>

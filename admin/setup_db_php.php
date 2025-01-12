@@ -2,6 +2,7 @@
 
 require('../db.php');
 require("../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 $softwarefile = "../server/uwuzuinfo.txt";
 $softwaredata = file_get_contents($softwarefile);

@@ -1,4 +1,5 @@
 <?php
+require('../db.php');
 require("../function/function.php");
 
 $serverstopfile = "../server/serverstop.txt";

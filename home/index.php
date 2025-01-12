@@ -55,129 +55,24 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
 
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_SESSION['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // セッションに格納されている値をそのままセット
-	$username = safetext($res['username']); // セッションに格納されている値をそのままセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-		
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_COOKIE['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // クッキーから取得した値をセット
-	$username = safetext($res['username']); // クッキーから取得した値をセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-} else {
-	// ログインが許可されていない場合、ログインページにリダイレクト
-	header("Location: ../login.php");
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if($is_login === false){
+	header("Location: ../index.php");
 	exit;
+}else{
+	$userid = safetext($is_login['userid']);
+	$username = safetext($is_login['username']);
+	$loginid = safetext($is_login["loginid"]);
+	$role = safetext($is_login["role"]);
+	$sacinfo = safetext($is_login["sacinfo"]);
+	$myblocklist = safetext($is_login["blocklist"]);
+	$myfollowlist = safetext($is_login["follow"]);
+	$is_Admin = safetext($is_login["admin"]);
 }
-if(empty($userid)){
-	header("Location: ../login.php");
-	exit;
-} 
-if(empty($username)){
-	header("Location: ../login.php");
-	exit;
-}
+
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -375,6 +270,10 @@ if ("serviceWorker" in navigator) {
 						<div class="moji_cnt" id="moji_cnt"><?php echo safetext($mojisize); ?></div>
 
 						<input type="submit" class="ueusebtn" id='ueusebtn' name="btn_submit" value="ユーズする">
+					</div>
+
+					<div class="harmful_notice" id="harmful_ueuse_warn" style="display:none;">
+						<p>この内容は他のユーザーを傷つけてしまう可能性があります。少し見直してみませんか？</p>
 					</div>
 
 					<div class="emoji_picker" id="emoji_picker" style="display:none;">
@@ -1131,6 +1030,11 @@ $(document).ready(function() {
     });
 
 	$('#ueuse').on('input', function () {
+		if(check_Harmful_ueuse($(this).val())){
+			$('#harmful_ueuse_warn').show();
+		}else{
+			$('#harmful_ueuse_warn').hide();
+		}
 		var mojisize = '<?php echo $mojisize; ?>';
 		var mojicount = Number(mojisize) - $(this).val().length;
 		if(mojicount >= 0){

@@ -113,7 +113,7 @@ console.log('errorcode : '+errcode);
 if (user_agent_access == 'bad') {
     setTimeout(link(), 0);
     function link() {
-        location.href = "../unsupported.php?errcode=" + errcode + "&browser=" + user_agent_browser + "&os=" + user_agent_os + "&cookie=" + user_agent_cookie + "&ssl=" + user_agent_ssl + ""
+        location.href = "../unsupported.php?errcode=" + errcode + "&browser=" + user_agent_browser + "&os=" + user_agent_os + "&cookie=" + user_agent_cookie + "&ssl=" + user_agent_ssl + "&block=null"
     }
 }
 

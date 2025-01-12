@@ -3,6 +3,7 @@ require('../db.php');
 //関数呼び出し
 //- EXIF
 require('../function/function.php');
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);

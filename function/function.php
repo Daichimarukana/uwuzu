@@ -1,4 +1,180 @@
 <?php
+function blockedIP($ip_addr){
+    // データベースに接続
+    try {
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    } catch(PDOException $e) {
+        actionLog(null, "error", "blockedIP", null, $e, 4);
+        return false;
+    }
+
+    $search_query = $pdo->prepare('SELECT * FROM ipblock WHERE ipaddr = :ipaddr limit 1');
+    $search_query->execute(array(':ipaddr' => $ip_addr));
+    $result = $search_query->fetch();
+
+    if($result > 0){
+        $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . "/unsupported.php?errcode=IP_BANNED";
+        header("Location:".$url."");
+	    exit;
+    }
+}
+function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "user") {
+    //セッション,クッキー,IPアドレス,閲覧権限(userかadminかの二種類)を受け取る
+    $serversettings_file = $_SERVER['DOCUMENT_ROOT']."/server/serversettings.ini";
+    $serversettings = parse_ini_file($serversettings_file, true);
+    // データベースに接続
+    try {
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    } catch(PDOException $e) {
+        actionLog(null, "error", "uwuzuUserLogin", null, $e, 4);
+        return false;
+    }
+
+    if(isset($session['loginid'])){
+        $loginid = safetext($session['loginid']);
+        if(isset($session['loginkey'])) {
+            $loginkey = safetext($session['loginkey']);
+        } else {
+            $loginkey = null;
+        }
+    } elseif (isset($cookie['loginid'])){
+        $loginid = safetext($cookie['loginid']);
+        if(isset($cookie['loginkey'])) {
+            $loginkey = safetext($cookie['loginkey']);
+        } else {
+            $loginkey = null;
+        }
+    } else {
+        return false;
+    }
+
+    $loginQuery = $pdo->prepare("SELECT * FROM account WHERE loginid = :loginid");
+    $loginQuery->bindValue(':loginid', $loginid);
+    $loginQuery->execute();
+    $loginResponse = $loginQuery->fetch();
+    if(empty($loginResponse["userid"])){
+        return false;
+    }elseif($loginid === $loginResponse["loginid"]){
+        $userEncKey = GenUserEnckey($loginResponse["datetime"]);
+        $userLoginKey = hash_hmac('sha256', $loginResponse["loginid"], $userEncKey);
+
+        if(!(empty($loginkey))){
+            if(hash_equals($loginkey, $userLoginKey)){
+                if($operation_permission == "admin"){
+                    if($loginResponse["admin"] == "yes"){
+                        $is_login = true;
+                    }else{
+                        $is_login = false;
+                    }
+                }else{
+                    $is_login = true;
+                }
+            }else{
+                $is_login = false;
+            }
+        }else{
+            if(isset($session['userid']) && isset($session['username'])){
+                if($session['userid'] === $loginResponse["userid"] && $session['username'] === $loginResponse["username"]){
+                    if($operation_permission === "admin"){
+                        if($loginResponse["admin"] == "yes"){
+                            $is_login = true;
+                        }else{
+                            $is_login = false;
+                        }
+                    }else{
+                        $is_login = true;
+                    }
+                }else{
+                    $is_login = false;
+                }
+            }
+
+            if(isset($cookie['userid']) && isset($cookie['username'])){
+                if($cookie['userid'] === $loginResponse["userid"] && $cookie['username'] === $loginResponse["username"]){
+                    if($operation_permission === "admin"){
+                        if($loginResponse["admin"] == "yes"){
+                            $is_login = true;
+                        }else{
+                            $is_login = false;
+                        }
+                    }else{
+                        $is_login = true;
+                    }
+                }else{
+                    $is_login = false;
+                }
+            }
+        }
+
+        if($is_login === true){
+            $userid = safetext($loginResponse['userid']); // セッションに格納されている値をそのままセット
+            $username = safetext($loginResponse['username']); // セッションに格納されている値をそのままセット
+            $loginid = safetext($loginResponse["loginid"]);
+
+            $_SESSION['userid'] = $userid;
+            $_SESSION['username'] = $username;
+            $_SESSION['loginid'] = $loginid;
+
+            setcookie('loginid', $loginid,[
+                'expires' => time() + 60 * 60 * 24 * 28,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
+
+            setcookie('loginkey', $userLoginKey,[
+                'expires' => time() + 60 * 60 * 24 * 28,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
+
+            //IP保存が有効であれば保存する---------------------------------------------------
+            if(safetext($serversettings["serverinfo"]["server_get_ip"]) === "true"){
+                if(filter_var($ip_addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($ip_addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+                    $enc_ip_addr = EncryptionUseEncrKey($ip_addr, $userEncKey, $loginResponse["encryption_ivkey"]);
+                    $pdo->beginTransaction();
+                    try {
+                        $updateQuery = $pdo->prepare("UPDATE account SET last_ip = :last_ip WHERE userid = :userid");
+                        $updateQuery->bindValue(':last_ip', $enc_ip_addr, PDO::PARAM_STR);
+                        $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                        $res = $updateQuery->execute();
+
+                        if($res){
+                            $pdo->commit();
+                        }else{
+                            // ロールバック
+                            $pdo->rollBack();
+                            actionLog($userid, "error", "uwuzuUserLogin", null, "IPアドレスを記録できませんでした！", 3);
+                        }
+                    } catch (Exception $e) {
+                        // ロールバック
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "uwuzuUserLogin", null, $e, 4);
+                    }
+                }else{
+                    actionLog($userid, "notice", "uwuzuUserLogin", null, "ユーザーのIPアドレスが不正な値でした！", 2);
+                }
+            }
+
+            return $loginResponse;
+        }else{
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
 //---------UNIQID-MAKER---------
 function createUniqId(){
     list($msec, $sec) = explode(" ", microtime());

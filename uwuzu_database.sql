@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2024-12-27 08:43:51
+-- 生成日時: 2025-01-12 11:11:44
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -51,7 +51,8 @@ CREATE TABLE `account` (
   `notification_settings` varchar(256) NOT NULL,
   `mail_settings` mediumtext NOT NULL,
   `encryption_ivkey` varchar(256) NOT NULL,
-  `other_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`other_settings`))
+  `other_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`other_settings`)),
+  `last_ip` varchar(1024) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -113,6 +114,20 @@ CREATE TABLE `invitation` (
   `sysid` int(11) NOT NULL,
   `code` varchar(512) NOT NULL,
   `used` varchar(32) NOT NULL,
+  `datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `ipblock`
+--
+
+CREATE TABLE `ipblock` (
+  `sysid` int(11) NOT NULL,
+  `ipaddr` varchar(256) NOT NULL,
+  `note` mediumtext NOT NULL,
+  `adduserid` varchar(512) NOT NULL,
   `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -257,6 +272,12 @@ ALTER TABLE `invitation`
   ADD PRIMARY KEY (`sysid`);
 
 --
+-- テーブルのインデックス `ipblock`
+--
+ALTER TABLE `ipblock`
+  ADD PRIMARY KEY (`sysid`);
+
+--
 -- テーブルのインデックス `migration`
 --
 ALTER TABLE `migration`
@@ -324,6 +345,12 @@ ALTER TABLE `emoji`
 -- テーブルの AUTO_INCREMENT `invitation`
 --
 ALTER TABLE `invitation`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `ipblock`
+--
+ALTER TABLE `ipblock`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

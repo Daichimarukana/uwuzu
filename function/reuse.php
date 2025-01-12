@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 
 require('../db.php');
 require("function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id']))) {
     try {
         $option = array(

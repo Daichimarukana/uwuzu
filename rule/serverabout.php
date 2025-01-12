@@ -6,6 +6,7 @@ require('../db.php');
 //関数呼び出し
 //- php.iniのファイル最大サイズ
 require('../function/function.php');
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 session_name('uwuzu_s_id');
 session_start();

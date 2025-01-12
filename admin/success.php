@@ -1,6 +1,7 @@
 <?php 
 require('../db.php');
 require("../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);

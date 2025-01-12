@@ -46,55 +46,21 @@ try {
     );
     $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
+    $userData = getUserData($pdo, $userid);
 } catch(PDOException $e) {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset($_COOKIE['loginid']) && isset($_SESSION['userid'])) {
-    $options = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
-    $acck->bindValue(':userid', $_SESSION['userid']);
-    $acck->execute();
-    $acck_data = $acck->fetch();
-    if(!empty($acck_data)){
-        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_SESSION['userid'] === $acck_data["userid"] ){
-            header("Location: home/index.php");
-            exit;
-        }
-    }
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true && isset($_COOKIE['loginid']) && isset($_COOKIE['userid'])) {
-    $options = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
-    $acck->bindValue(':userid', $_COOKIE['userid']);
-    $acck->execute();
-    $acck_data = $acck->fetch();
-    if(!empty($acck_data)){
-        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_COOKIE['userid'] === $acck_data["userid"] ){
-            header("Location: home/index.php");
-            exit;
-        }
-    }
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if(!($is_login === false)){
+	header("Location: /home/");
+	exit;
 }
+//-------------------------------------------------------------
 
 if( !empty($_POST['btn_submit']) ) {
     $useragent = safetext($_SERVER['HTTP_USER_AGENT']);
@@ -180,41 +146,30 @@ if( !empty($_POST['btn_submit']) ) {
                 }
             }
 
-            setcookie('userid', $userid,[
+            setcookie('loginid', $userData["loginid"],[
                 'expires' => time() + 60 * 60 * 24 * 28,
                 'path' => '/',
                 'samesite' => 'lax',
                 'secure' => true,
                 'httponly' => true,
             ]);
-            setcookie('loginid', $row["loginid"],[
-                'expires' => time() + 60 * 60 * 24 * 28,
-                'path' => '/',
-                'samesite' => 'lax',
-                'secure' => true,
-                'httponly' => true,
-            ]);
-            setcookie('username', $row["username"],[
-                'expires' => time() + 60 * 60 * 24 * 28,
-                'path' => '/',
-                'samesite' => 'lax',
-                'secure' => true,
-                'httponly' => true,
-            ]);
-            setcookie('admin_login', true,[
-                'expires' => time() + 60 * 60 * 24 * 28,
-                'path' => '/',
-                'samesite' => 'lax',
-                'secure' => true,
-                'httponly' => true,
-            ]);
-
-            $_SESSION['admin_login'] = true;
-            $_SESSION['userid'] = $userid;
-            $_SESSION['loginid'] = $row["loginid"];
         
-            $_SESSION['username'] = $row["username"];
-            $_SESSION['password'] = "";
+            $userEncKey = GenUserEnckey($userData["datetime"]);
+            $userLoginKey = hash_hmac('sha256', $userData["loginid"], $userEncKey);
+            setcookie('loginkey', $userLoginKey,[
+                'expires' => time() + 60 * 60 * 24 * 28,
+                'path' => '/',
+                'samesite' => 'lax',
+                'secure' => true,
+                'httponly' => true,
+            ]);
+        
+            $_SESSION['userid'] = $userid;
+            $_SESSION['loginid'] = $userData["loginid"];
+            $_SESSION['loginkey'] = $userLoginKey;
+        
+            $_SESSION['username'] = $username;
+            $_SESSION['password'] = null;
         
             // リダイレクト先のURLへ転送する
             $url = '/home';
@@ -292,41 +247,29 @@ if( !empty($_POST['btn_submit']) ) {
                         }
                     }
 
-                    setcookie('userid', $userid,[
+                    setcookie('loginid', $userData["loginid"],[
                         'expires' => time() + 60 * 60 * 24 * 28,
                         'path' => '/',
                         'samesite' => 'lax',
                         'secure' => true,
                         'httponly' => true,
                     ]);
-                    setcookie('loginid', $row["loginid"],[
-                        'expires' => time() + 60 * 60 * 24 * 28,
-                        'path' => '/',
-                        'samesite' => 'lax',
-                        'secure' => true,
-                        'httponly' => true,
-                    ]);
-                    setcookie('username', $row["username"],[
-                        'expires' => time() + 60 * 60 * 24 * 28,
-                        'path' => '/',
-                        'samesite' => 'lax',
-                        'secure' => true,
-                        'httponly' => true,
-                    ]);
-                    setcookie('admin_login', true,[
-                        'expires' => time() + 60 * 60 * 24 * 28,
-                        'path' => '/',
-                        'samesite' => 'lax',
-                        'secure' => true,
-                        'httponly' => true,
-                    ]);
-
-                    $_SESSION['admin_login'] = true;
-
-                    $_SESSION['userid'] = $userid;
-                    $_SESSION['loginid'] = $row["loginid"];
                 
-                    $_SESSION['username'] = $row["username"];
+                    $userEncKey = GenUserEnckey($userData["datetime"]);
+                    $userLoginKey = hash_hmac('sha256', $userData["loginid"], $userEncKey);
+                    setcookie('loginkey', $userLoginKey,[
+                        'expires' => time() + 60 * 60 * 24 * 28,
+                        'path' => '/',
+                        'samesite' => 'lax',
+                        'secure' => true,
+                        'httponly' => true,
+                    ]);
+                
+                    $_SESSION['userid'] = $userid;
+                    $_SESSION['loginid'] = $userData["loginid"];
+                    $_SESSION['loginkey'] = $userLoginKey;
+                
+                    $_SESSION['username'] = $username;
                     $_SESSION['password'] = null;
                 
                     // リダイレクト先のURLへ転送する

@@ -63,6 +63,7 @@ PASSWORD_OVER_MAX_COUNT - パスワードの最大文字数を超過している
 PASS_AND_ID_CHIGAUYANKE - パスワードまたはユーザーIDが間違っている場合、もしくはその両方が間違っている場合に表示されます。
 
 REGISTERED_DAME - データの登録・更新に失敗した場合に表示されます。
+ACCOUNT_HAS_BEEN_FROZEN - アカウントが凍結されている際にできない操作をした際に表示されます。
 
 EMOJI_ID_INPUT_PLEASE - 絵文字IDが入力されていない時に表示されます。
 EMOJI_ID_OVER_MAX_COUNT - 絵文字IDの文字数が最大文字数を超過している時に表示されます。

@@ -8,6 +8,7 @@ $banurl = array_filter(preg_split("/\r\n|\n|\r/", $banurl_info));
 require('../db.php');
 
 require("../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id']))) {
     $userid = safetext($_POST['userid']);

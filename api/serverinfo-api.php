@@ -1,6 +1,7 @@
 <?php
+require('../db.php');
 require("../function/function.php");
-
+blockedIP($_SERVER['REMOTE_ADDR']);
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
@@ -22,9 +23,6 @@ $cnt = count( $softwaredata );
 for( $i=0;$i<$cnt;$i++ ){
     $uwuzuinfo[$i] = ($softwaredata[$i]);
 }
-
-
-    require('../db.php');
 
     $datetime = array();
     $pdo = null;

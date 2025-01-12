@@ -1,37 +1,37 @@
-<?php
-require("../function/function.php");
+<?php 
+require('../db.php');
+require("../function/function.php"); 
+blockedIP($_SERVER['REMOTE_ADDR']);
 
-$serversettings_file = "../server/serversettings.ini";
-$serversettings = parse_ini_file($serversettings_file, true);
+$serversettings_file = "../server/serversettings.ini"; 
+$serversettings = parse_ini_file($serversettings_file, true); 
 
-if (isset($_SERVER['HTTP_COOKIE'])) {
-    $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-    foreach($cookies as $cookie) {
-        $parts = explode('=', $cookie);
-        $name = trim($parts[0]);
-        setcookie($name, '', time()-1000);
-        setcookie($name, '', time()-1000, '');
-        setcookie($name, '', time()-1000, '/');
-        setcookie($name, '', time()-1000, '/emoji');
-        setcookie($name, '', time()-1000, '/home');
-        setcookie($name, '', time()-1000, '/notice');
-        setcookie($name, '', time()-1000, '/notification');
-        setcookie($name, '', time()-1000, '/others');
-        setcookie($name, '', time()-1000, '/search');
-        setcookie($name, '', time()-1000, '/settings');
-        setcookie($name, '', time()-1000, '/emoji');
-        setcookie($name, '', time()-1000, '/user');
-        setcookie('admin_login', '', time()-1000, '');
-        setcookie('loginid', '', time()-1000, '');
-        setcookie('userid', '', time()-1000, '');
-        setcookie('username', '', time()-1000, '');
-    }
-    header("Location: " . $_SERVER['PHP_SELF']);
-}
+session_name('uwuzu_s_id');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
 session_start();
-$_SESSION = array();
-session_destroy();
-?>
+$_SESSION = array(); 
+session_regenerate_id(true);
+session_destroy(); 
+
+if (isset($_SERVER['HTTP_COOKIE'])) { 
+    $cookies = explode(';', $_SERVER['HTTP_COOKIE']); 
+    foreach ($cookies as $cookie) { 
+        $parts = explode('=', $cookie); 
+        $name = trim($parts[0]); 
+        
+        // Cookie削除（パスとドメインを指定）
+        setcookie($name, '', time() - 3600, '/'); 
+        setcookie($name, '', time() - 3600, '/', $_SERVER['HTTP_HOST']); 
+    } 
+} 
+?> 
 
 <!DOCTYPE html>
 
@@ -67,9 +67,9 @@ session_destroy();
         <h1>ログアウト完了</h1>
         <p><br>ログアウトが完了しました！</p>
         <p>ボタンを押すとログインページにリダイレクトします。</p>
-
+        
         <div class="btnbox">
-            <a href="../login.php" class="sirobutton">ログイン</a>
+            <a href="../index.php" class="sirobutton">ログイン</a>
         </div>
     </div>
 </div>
@@ -77,6 +77,3 @@ session_destroy();
 </body>
 
 </html>
-<script>
-document.cookie.split(";").forEach(function(c) { document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); });
-</script>

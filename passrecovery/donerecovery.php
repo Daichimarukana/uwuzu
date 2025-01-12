@@ -1,9 +1,18 @@
 <?php 
+require('../db.php');
 require("../function/function.php");
 
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if(!($is_login === false)){
+	header("Location: ../home/");
+	exit;
+}
+//-------------------------------------------------------------
 ?>
 
 <!DOCTYPE html>

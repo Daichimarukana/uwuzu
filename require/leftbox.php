@@ -26,15 +26,11 @@ $serversettings = parse_ini_file($serversettings_file, true);
         <a href="/@<?php echo $userid; ?>" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/profile.svg#profile"></use></svg>プロフィール</a>
         <a href="/settings" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/settings.svg#settings"></use></svg>設定</a>
         <a href="/others" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/others.svg#others"></use></svg>その他</a>
-        <?php if($res["admin"] === "yes"){?>
+        <?php if($is_Admin === "yes"){?>
             <hr>
             <a href="/notice/addnotice" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/addnotice.svg#addnotice"></use></svg>お知らせ配信</a>
             <a href="/settings_admin/serveradmin" class="leftbutton"><svg><use xlink:href="../img/sysimage/menuicon/server.svg#server"></use></svg>サーバー設定</a>
         <?php }?>
-        <hr>
-        <form method="post">
-            <input type="submit" name="logout" class="leftbutton" value="ログアウト">
-        </form>
     </div>
 </div>
 <?php ?>

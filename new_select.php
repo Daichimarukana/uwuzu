@@ -15,50 +15,14 @@ session_set_cookie_params([
 ]);
 session_start();
 
-
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] === true && isset($_COOKIE['loginid']) && isset($_SESSION['userid'])) {
-    $option = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
-    $acck->bindValue(':userid', $_SESSION['userid']);
-    $acck->execute();
-    $acck_data = $acck->fetch();
-    if(!empty($acck_data)){
-        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_SESSION['userid'] === $acck_data["userid"] ){
-            header("Location: home/index.php");
-            exit;
-        }
-    }
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true && isset($_COOKIE['loginid']) && isset($_COOKIE['userid'])) {
-    $option = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    $acck = $dbh->prepare("SELECT userid, loginid FROM account WHERE userid = :userid");
-    $acck->bindValue(':userid', $_COOKIE['userid']);
-    $acck->execute();
-    $acck_data = $acck->fetch();
-    if(!empty($acck_data)){
-        if($_COOKIE['loginid'] === $acck_data["loginid"] && $_COOKIE['userid'] === $acck_data["userid"] ){
-            header("Location: home/index.php");
-            exit;
-        }
-    }
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if(!($is_login === false)){
+	header("Location: /home/");
+	exit;
 }
+//-------------------------------------------------------------
 
 $serversettings_file = "server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);

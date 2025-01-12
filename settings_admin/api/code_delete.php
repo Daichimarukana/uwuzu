@@ -1,6 +1,7 @@
 <?php
 require('../../db.php');
 require("../../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");

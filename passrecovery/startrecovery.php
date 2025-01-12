@@ -62,6 +62,16 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = 'データベース接続エラー: ' . $e->getMessage();
 }
+
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if(!($is_login === false)){
+	header("Location: ../home/");
+	exit;
+}
+//-------------------------------------------------------------
+
 if(!($userid == null)){
     if( !empty($_SESSION['mailadds']) ) {
         $result = $pdo->prepare("SELECT userid, username, mailadds, loginid, authcode, encryption_ivkey, datetime FROM account WHERE userid = :userid");

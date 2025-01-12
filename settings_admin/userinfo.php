@@ -47,135 +47,21 @@ try {
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_SESSION['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // セッションに格納されている値をそのままセット
-	$username = safetext($res['username']); // セッションに格納されている値をそのままセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-		
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_COOKIE['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // クッキーから取得した値をセット
-	$username = safetext($res['username']); // クッキーから取得した値をセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-
-} else {
-	// ログインが許可されていない場合、ログインページにリダイレクト
-	header("Location: ../login.php");
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "admin");
+if($is_login === false){
+	header("Location: ../index.php");
 	exit;
-}
-if(empty($userid)){
-	header("Location: ../login.php");
-	exit;
-} 
-if(empty($username)){
-	header("Location: ../login.php");
-	exit;
-}
-
-if(!($res["admin"] === "yes")){
-	header("Location: ../login.php");
-	exit;
+}else{
+	$userid = safetext($is_login['userid']);
+	$username = safetext($is_login['username']);
+	$loginid = safetext($is_login["loginid"]);
+	$role = safetext($is_login["role"]);
+	$sacinfo = safetext($is_login["sacinfo"]);
+	$myblocklist = safetext($is_login["blocklist"]);
+	$myfollowlist = safetext($is_login["follow"]);
+	$is_Admin = safetext($is_login["admin"]);
 }
 
 if(empty($_SESSION["query_userid"])){
@@ -204,8 +90,10 @@ if (!empty($pdo)) {
 
 	if(!(empty($userdata["encryption_ivkey"]))){
 		$view_mailadds = DecryptionUseEncrKey($userdata["mailadds"], GenUserEnckey($userdata["datetime"]), $userdata["encryption_ivkey"]);
+		$view_ip_addr = DecryptionUseEncrKey($userdata["last_ip"], GenUserEnckey($userdata["datetime"]), $userdata["encryption_ivkey"]);
 	}else{
 		$view_mailadds = $userdata["mailadds"];
+		$view_ip_addr = $userdata["last_ip"];
 	}
 
 	$roles = explode(',', $userdata["role"]);
@@ -682,6 +570,9 @@ require('../logout/logout.php');
 					<hr>
 					<div class="p2">アカウント登録日時</div>
 					<p><?php echo safetext($userdata["datetime"]); ?></p>
+					<hr>
+					<div class="p2">最終アクセス時のIPアドレス</div>
+					<p><?php if( !empty($view_ip_addr) ){ echo safetext($view_ip_addr); }else{echo "記録なし";} ?></p>
 					<hr>
 					<div class="p2">アカウント操作</div>
 					<div class="banzone">

@@ -52,130 +52,21 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-if(isset($_SESSION['admin_login']) && $_SESSION['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist,mail_settings FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_SESSION['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_SESSION['loginid'] === $res["loginid"] && $_SESSION['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // セッションに格納されている値をそのままセット
-	$username = safetext($res['username']); // セッションに格納されている値をそのままセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid, [
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-		
-} elseif (isset($_COOKIE['admin_login']) && $_COOKIE['admin_login'] == true) {
-
-	$passQuery = $pdo->prepare("SELECT username,userid,loginid,follow,admin,role,sacinfo,blocklist,mail_settings FROM account WHERE userid = :userid");
-	$passQuery->bindValue(':userid', safetext($_COOKIE['userid']));
-	$passQuery->execute();
-	$res = $passQuery->fetch();
-	if(empty($res["userid"])){
-		header("Location: ../login.php");
-		exit;
-	}elseif($_COOKIE['loginid'] === $res["loginid"] && $_COOKIE['userid'] == $res["userid"]){
-	// セッションに値をセット
-	$userid = safetext($res['userid']); // クッキーから取得した値をセット
-	$username = safetext($res['username']); // クッキーから取得した値をセット
-	$loginid = safetext($res["loginid"]);
-	$role = safetext($res["role"]);
-	$sacinfo = safetext($res["sacinfo"]);
-	$myblocklist = safetext($res["blocklist"]);
-	$myfollowlist = safetext($res["follow"]);
-	$_SESSION['admin_login'] = true;
-	$_SESSION['userid'] = $userid;
-	$_SESSION['username'] = $username;
-	$_SESSION['loginid'] = $res["loginid"];
-	setcookie('userid', $userid,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('username', $username,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('loginid', $res["loginid"],[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	setcookie('admin_login', true,[
-		'expires' => time() + 60 * 60 * 24 * 28,
-		'path' => '/',
-		'samesite' => 'lax',
-		'secure' => true,
-		'httponly' => true,
-	]);
-	}else{
-		header("Location: ../login.php");
-		exit;
-	}
-
-
-} else {
-	// ログインが許可されていない場合、ログインページにリダイレクト
-	header("Location: ../login.php");
+//ログイン認証---------------------------------------------------
+blockedIP($_SERVER['REMOTE_ADDR']);
+$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+if($is_login === false){
+	header("Location: ../index.php");
 	exit;
-}
-if(empty($userid)){
-	header("Location: ../login.php");
-	exit;
-} 
-if(empty($username)){
-	header("Location: ../login.php");
-	exit;
+}else{
+	$userid = safetext($is_login['userid']);
+	$username = safetext($is_login['username']);
+	$loginid = safetext($is_login["loginid"]);
+	$role = safetext($is_login["role"]);
+	$sacinfo = safetext($is_login["sacinfo"]);
+	$myblocklist = safetext($is_login["blocklist"]);
+	$myfollowlist = safetext($is_login["follow"]);
+	$is_Admin = safetext($is_login["admin"]);
 }
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
@@ -185,19 +76,14 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 $notificationcount = $notiData['notification_count'];
 
 //ページ内のみ使用変数-------------------------
-$mail_settings = safetext($res["mail_settings"]);
+$mail_settings = safetext($is_login["mail_settings"]);
 //------------------------------------------
 //phpmailer--------------------------------------------
 require('../settings_admin/plugin_settings/phpmailer_settings.php');
 //------------------------------------------------------
 require('../settings_admin/plugin_settings/aiblockwatermark_settings.php');
 if( !empty($pdo) ) {
-	
-	// データベース接続の設定
-	$userQuery = $pdo->prepare("SELECT * FROM account WHERE userid = :userid");
-	$userQuery->bindValue(':userid', $userid);
-	$userQuery->execute();
-	$userData = $userQuery->fetch();
+	$userData = getUserData($pdo, $userid);
 
 	$role = $userData["role"];
 
@@ -220,158 +106,164 @@ if( !empty($pdo) ) {
 
 
 if( !empty($_POST['btn_submit']) ) {
-
-	if(!(empty($_POST['im_bot']))){
-		if($_POST['im_bot'] == "on"){
-			$saveim_bot = "bot";
+	$userRoleList = explode(',', safetext($role));
+	if(in_array("ice", $userRoleList)){
+		$error_message[] = 'アカウントが凍結されています。(ACCOUNT_HAS_BEEN_FROZEN)';
+	}
+    if( empty($error_message) ) {
+		if(!(empty($_POST['im_bot']))){
+			if($_POST['im_bot'] == "on"){
+				$saveim_bot = "bot";
+			}else{
+				$saveim_bot = "none";
+			}
 		}else{
 			$saveim_bot = "none";
 		}
-	}else{
-		$saveim_bot = "none";
-	}
 
-	$username = safetext($_POST['username']);
+		$username = safetext($_POST['username']);
 
-    $mailadds = safetext($_POST['mailadds']);
+		$mailadds = safetext($_POST['mailadds']);
 
-	if( !empty($_POST['isAIBlock']) ) {
-		$new_isAIBlock = safetext($_POST['isAIBlock']);
-	}else{
-		$new_isAIBlock = "false";
-	}
+		if( !empty($_POST['isAIBlock']) ) {
+			$new_isAIBlock = safetext($_POST['isAIBlock']);
+		}else{
+			$new_isAIBlock = "false";
+		}
 
-	if($new_isAIBlock === "true"){
-		$save_isAIBlock = true;
-	}else{
-		$save_isAIBlock = false;
-	}
-	$other_settings_json = val_AddOtherSettings("isAIBlock", $save_isAIBlock, $userData["other_settings"]);
+		if($new_isAIBlock === "true"){
+			$save_isAIBlock = true;
+		}else{
+			$save_isAIBlock = false;
+		}
+		$other_settings_json = val_AddOtherSettings("isAIBlock", $save_isAIBlock, $userData["other_settings"]);
 
-	if( !empty($_POST['isAIBMW']) ) {
-		$new_isAIBMW = safetext($_POST['isAIBMW']);
-	}else{
-		$new_isAIBMW = "false";
-	}
-	if($new_isAIBMW === "true"){
-		$save_isAIBMW = true;
-	}else{
-		$save_isAIBMW = false;
-	}
-	$other_settings_json = val_AddOtherSettings("isAIBlockWaterMark", $save_isAIBMW, $other_settings_json);
+		if( !empty($_POST['isAIBMW']) ) {
+			$new_isAIBMW = safetext($_POST['isAIBMW']);
+		}else{
+			$new_isAIBMW = "false";
+		}
+		if($new_isAIBMW === "true"){
+			$save_isAIBMW = true;
+		}else{
+			$save_isAIBMW = false;
+		}
+		$other_settings_json = val_AddOtherSettings("isAIBlockWaterMark", $save_isAIBMW, $other_settings_json);
 
-	if( !empty($_POST['mail_important']) ) {
-		$mail_important = safetext($_POST['mail_important']);
-	}else{
-		$mail_important = "false";
-	}
-	if(!(empty($mailadds))){
-		if(filter_var($mailadds, FILTER_VALIDATE_EMAIL)){
-			if($mail_important === "true"){
-				$savemail_important = "important";
+		if( !empty($_POST['mail_important']) ) {
+			$mail_important = safetext($_POST['mail_important']);
+		}else{
+			$mail_important = "false";
+		}
+		if(!(empty($mailadds))){
+			if(filter_var($mailadds, FILTER_VALIDATE_EMAIL)){
+				if($mail_important === "true"){
+					$savemail_important = "important";
+				}else{
+					$savemail_important = "none";
+				}
+
+				if(!(empty($userData["encryption_ivkey"]))){
+					$userEnckey = GenUserEnckey($userData["datetime"]);
+					$enc_mailadds = EncryptionUseEncrKey($mailadds, $userEnckey, $userData["encryption_ivkey"]);
+				}else{
+					$ivLength = openssl_cipher_iv_length('aes-256-cbc');
+					$randomBytes = random_bytes($ivLength);
+					$randomhash = hash('sha3-512', $randomBytes);
+					$iv = substr($randomhash, 0, $ivLength);
+
+					// トランザクション開始
+					$pdo->beginTransaction();
+
+					try {
+						// SQL作成
+						$stmt = $pdo->prepare("UPDATE account SET encryption_ivkey = :encryption_ivkey WHERE userid = :userid;");
+						$stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
+						$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+						$res = $stmt->execute();
+						$res = $pdo->commit();
+
+					} catch (Exception $e) {
+						$pdo->rollBack();
+					}
+
+					if (!($res)) {
+						$error_message[] = "アカウント操作に失敗しました(ERROR)";
+					}
+					$stmt = null;
+
+					$userEnckey = GenUserEnckey($userData["datetime"]);
+					$enc_mailadds = EncryptionUseEncrKey($mailadds, $userEnckey, $iv);
+				}
 			}else{
 				$savemail_important = "none";
-			}
-
-			if(!(empty($userData["encryption_ivkey"]))){
-				$userEnckey = GenUserEnckey($userData["datetime"]);
-				$enc_mailadds = EncryptionUseEncrKey($mailadds, $userEnckey, $userData["encryption_ivkey"]);
-			}else{
-				$ivLength = openssl_cipher_iv_length('aes-256-cbc');
-				$randomBytes = random_bytes($ivLength);
-				$randomhash = hash('sha3-512', $randomBytes);
-				$iv = substr($randomhash, 0, $ivLength);
-
-				// トランザクション開始
-				$pdo->beginTransaction();
-
-				try {
-					// SQL作成
-					$stmt = $pdo->prepare("UPDATE account SET encryption_ivkey = :encryption_ivkey WHERE userid = :userid;");
-					$stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
-					$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-					$res = $stmt->execute();
-					$res = $pdo->commit();
-
-				} catch (Exception $e) {
-					$pdo->rollBack();
-				}
-
-				if (!($res)) {
-					$error_message[] = "アカウント操作に失敗しました(ERROR)";
-				}
-				$stmt = null;
-
-				$userEnckey = GenUserEnckey($userData["datetime"]);
-				$enc_mailadds = EncryptionUseEncrKey($mailadds, $userEnckey, $iv);
+				$error_message[] = 'メールアドレスが正しい形式ではありません。(MAILADDS_CHECK_DAME)';
 			}
 		}else{
-			$savemail_important = "none";
-			$error_message[] = 'メールアドレスが正しい形式ではありません。(MAILADDS_CHECK_DAME)';
+			$enc_mailadds = "";
 		}
-	}else{
-		$enc_mailadds = "";
-	}
-	
+		
 
-    $profile = safetext($_POST['profile']);
-	if( 1024 < mb_strlen($profile, 'UTF-8') ) {
-        $error_message[] = 'プロフィールは1024文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
-    }
-
-	// ユーザーネームの入力チェック
-	if( empty($username) ) {
-		$error_message[] = '表示名を入力してください。(USERNAME_INPUT_PLEASE)';
-	} else {
-        // 文字数を確認
-        if( 50 < mb_strlen($username, 'UTF-8') ) {
-			$error_message[] = 'ユーザーネームは50文字以内で入力してください。(USERNAME_OVER_MAX_COUNT)';
-		}
-    }
-
-    if( empty($error_message) ) {
-		// トランザクション開始
-		$pdo->beginTransaction();
-
-		try {
-			// SQL作成
-			$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot, mail_settings = :mail_settings, other_settings = :other_settings WHERE userid = :userid;");
-
-			// 他の値をセット
-			$stmt->bindParam(':username', $username, PDO::PARAM_STR);
-			$stmt->bindParam(':mailadds', $enc_mailadds, PDO::PARAM_STR);
-			$stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
-			$stmt->bindParam(':saveimbot', $saveim_bot, PDO::PARAM_STR);
-			$stmt->bindParam(':mail_settings', $savemail_important, PDO::PARAM_STR);
-			$stmt->bindParam(':other_settings', $other_settings_json, PDO::PARAM_STR);
-
-			// 条件を指定
-			// 以下の部分を適切な条件に置き換えてください
-			$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-
-			// SQLクエリの実行
-			$res = $stmt->execute();
-
-			// コミット
-			$res = $pdo->commit();
-
-		} catch (Exception $e) {
-
-			// エラーが発生した時はロールバック
-			$pdo->rollBack();
+		$profile = safetext($_POST['profile']);
+		if( 1024 < mb_strlen($profile, 'UTF-8') ) {
+			$error_message[] = 'プロフィールは1024文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
 		}
 
-		if ($res) {
-			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-			header("Location:".$url."");
-			exit; 
+		// ユーザーネームの入力チェック
+		if( empty($username) ) {
+			$error_message[] = '表示名を入力してください。(USERNAME_INPUT_PLEASE)';
 		} else {
-			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+			// 文字数を確認
+			if( 50 < mb_strlen($username, 'UTF-8') ) {
+				$error_message[] = 'ユーザーネームは50文字以内で入力してください。(USERNAME_OVER_MAX_COUNT)';
+			}
 		}
 
-		// プリペアドステートメントを削除
-		$stmt = null;
-    }
+		if( empty($error_message) ) {
+			// トランザクション開始
+			$pdo->beginTransaction();
+
+			try {
+				// SQL作成
+				$stmt = $pdo->prepare("UPDATE account SET username = :username, mailadds = :mailadds, profile = :profile, sacinfo = :saveimbot, mail_settings = :mail_settings, other_settings = :other_settings WHERE userid = :userid;");
+
+				// 他の値をセット
+				$stmt->bindParam(':username', $username, PDO::PARAM_STR);
+				$stmt->bindParam(':mailadds', $enc_mailadds, PDO::PARAM_STR);
+				$stmt->bindParam(':profile', $profile, PDO::PARAM_STR);
+				$stmt->bindParam(':saveimbot', $saveim_bot, PDO::PARAM_STR);
+				$stmt->bindParam(':mail_settings', $savemail_important, PDO::PARAM_STR);
+				$stmt->bindParam(':other_settings', $other_settings_json, PDO::PARAM_STR);
+
+				// 条件を指定
+				// 以下の部分を適切な条件に置き換えてください
+				$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+
+				// SQLクエリの実行
+				$res = $stmt->execute();
+
+				// コミット
+				$res = $pdo->commit();
+
+			} catch (Exception $e) {
+
+				// エラーが発生した時はロールバック
+				$pdo->rollBack();
+				actionLog($userid, "error", "user-settings", null, $e, 4);
+			}
+
+			if ($res) {
+				$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+				header("Location:".$url."");
+				exit; 
+			} else {
+				$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+			}
+
+			// プリペアドステートメントを削除
+			$stmt = null;
+		}
+	}
 }
 
 
