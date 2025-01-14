@@ -27,7 +27,7 @@
             <a href="/rule/serverabout" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/info.svg#info"></use></svg><div>サーバー情報</div></a>
             <a href="/notice" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/addnotice.svg#addnotice"></use></svg><div>お知らせ</div></a>
 
-            <?php if($res["admin"] === "yes"){?>
+            <?php if($is_Admin === "yes"){?>
                 <a href="/settings_admin/addemoji_admin" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/addemoji.svg#addemoji"></use></svg><div>絵文字登録</div></a>
                 <a href="/notice/addnotice" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/addnotice.svg#addnotice"></use></svg><div>お知らせ配信</div></a>
                 <a href="/settings_admin/serveradmin" class="menubutton"><svg><use xlink:href="../img/sysimage/menuicon/server.svg#server"></use></svg><div>サーバー設定</div></a>

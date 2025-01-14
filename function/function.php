@@ -40,20 +40,18 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
 
     if(isset($session['loginid'])){
         $loginid = safetext($session['loginid']);
-        if(isset($session['loginkey'])) {
-            $loginkey = safetext($session['loginkey']);
-        } else {
-            $loginkey = null;
-        }
-    } elseif (isset($cookie['loginid'])){
+    }else if(isset($cookie['loginid'])){
         $loginid = safetext($cookie['loginid']);
-        if(isset($cookie['loginkey'])) {
-            $loginkey = safetext($cookie['loginkey']);
-        } else {
-            $loginkey = null;
-        }
     } else {
         return false;
+    }
+
+    if(isset($session['loginkey'])) {
+        $loginkey = safetext($session['loginkey']);
+    }else if(isset($cookie['loginkey'])){
+        $loginkey = safetext($cookie['loginkey']);
+    } else {
+        $loginkey = null;
     }
 
     $loginQuery = $pdo->prepare("SELECT * FROM account WHERE loginid = :loginid");
@@ -95,9 +93,7 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                 }else{
                     $is_login = false;
                 }
-            }
-
-            if(isset($cookie['userid']) && isset($cookie['username'])){
+            }else if(isset($cookie['userid']) && isset($cookie['username'])){
                 if($cookie['userid'] === $loginResponse["userid"] && $cookie['username'] === $loginResponse["username"]){
                     if($operation_permission === "admin"){
                         if($loginResponse["admin"] == "yes"){
@@ -111,6 +107,8 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                 }else{
                     $is_login = false;
                 }
+            }else{
+                $is_login = false;
             }
         }
 

@@ -1,6 +1,7 @@
 <?php
 require('../db.php');
 require("../function/function.php");
+blockedIP($_SERVER['REMOTE_ADDR']);
 
 if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id']))) {
     $postUniqid = safetext($_POST['uniqid']);

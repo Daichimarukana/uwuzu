@@ -163,10 +163,7 @@ if( !empty($_POST['btn_submit']) ) {
                 if($row["userid"] == $userid){
                     if(uwuzu_password_verify($password,$row["password"])){
                         if(empty($row["authcode"])){
-                            $_SESSION['admin_login'] = true;
-
                             $_SESSION['userid'] = $userid;
-                            $_SESSION['loginid'] = $row["loginid"];
 
                             $_SESSION['form_data'] = array();//フォーム初期化
                             // リダイレクト先のURLへ転送する
