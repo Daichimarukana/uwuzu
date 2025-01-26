@@ -145,17 +145,48 @@ if( !empty($_POST['btn_submit']) ) {
 				}
 			}
 			
+			// フォロー・フォロワー情報を削除したい全てのアカウントを取得
+			$flw_query = $pdo->prepare("SELECT * 
+				FROM account 
+				WHERE follow LIKE :pattern1 
+				OR follow LIKE :pattern2 
+				OR follow LIKE :pattern3 
+				OR follower LIKE :pattern1 
+				OR follower LIKE :pattern2 
+				OR follower LIKE :pattern3
+			"); 				
+			$flw_query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);  // 中間に位置する場合
+			$flw_query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);   // 末尾に位置する場合
+			$flw_query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);   // 先頭に位置する場合
+			$flw_query->execute();
+			$flw_accounts = $flw_query->fetchAll();
 
+			foreach ($flw_accounts as $account) {
+				unfollow_user($pdo, $account['userid'], $userid);
+				unfollow_user($pdo, $userid, $account['userid']);
+			}
+
+			// ユーザーIDを削除したい全てのアカウントを取得
+			$blk_query = $pdo->prepare("SELECT * 
+				FROM account 
+				WHERE blocklist LIKE :pattern1 
+				OR blocklist LIKE :pattern2 
+				OR blocklist LIKE :pattern3
+			"); 				
+			$blk_query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);  // 中間に位置する場合
+			$blk_query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);   // 末尾に位置する場合
+			$blk_query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);   // 先頭に位置する場合
+			$blk_query->execute();
+			$blk_accounts = $blk_query->fetchAll();
+
+			foreach ($blk_accounts as $account) {
+				unblock_user($pdo, $userid, $account['userid']);
+			}
+
+			$pdo->beginTransaction(); 
 			try {
-				$pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
-		
 				// 投稿削除クエリを実行
 				$deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE account = :userid");
-				$deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-				$res = $deleteQuery->execute();
-				
-				// アカウント削除クエリを実行
-				$deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
 				$deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
 				$res = $deleteQuery->execute();
 
@@ -169,40 +200,7 @@ if( !empty($_POST['btn_submit']) ) {
 				$deleteQuery->bindValue(':fromuserid', $userid, PDO::PARAM_STR);
 				$res = $deleteQuery->execute();
 
-				// ユーザーIDを削除したい全てのアカウントを取得
-				$query = $pdo->prepare("SELECT * FROM account WHERE follow LIKE :pattern1 OR follow LIKE :pattern2 OR follow LIKE :pattern3 OR follower LIKE :pattern1 OR follower LIKE :pattern2 OR follower LIKE :pattern3");
-				$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);
-				$query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);
-				$query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);
-				$query->execute();
-				$accounts = $query->fetchAll();
-
-				foreach ($accounts as $account) {
-					// フォローの更新
-					if (strpos($account['follow'], ",$userid,") !== false || strpos($account['follow'], ",$userid") !== false || strpos($account['follow'], "$userid,") !== false) {
-						$followList = explode(',', $account['follow']);
-						$followList = array_diff($followList, array($userid));
-						$newFollowList = implode(',', $followList);
-
-						$updateFollowQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-						$updateFollowQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
-						$updateFollowQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
-						$updateFollowQuery->execute();
-					}
-
-					// フォロワーの更新
-					if (strpos($account['follower'], ",$userid,") !== false || strpos($account['follower'], ",$userid") !== false || strpos($account['follower'], "$userid,") !== false) {
-						$followerList = explode(',', $account['follower']);
-						$followerList = array_diff($followerList, array($userid));
-						$newFollowerList = implode(',', $followerList);
-
-						$updateFollowerQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-						$updateFollowerQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-						$updateFollowerQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
-						$updateFollowerQuery->execute();
-					}
-				}
-
+				// いいねの削除
 				$query = $pdo->prepare("SELECT * FROM ueuse WHERE favorite LIKE :pattern1 OR favorite LIKE :pattern2 OR favorite LIKE :pattern3");
 				$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);
 				$query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);
@@ -224,11 +222,15 @@ if( !empty($_POST['btn_submit']) ) {
 					}
 				}
 
-		
+				$deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
+				$deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+				$res = $deleteQuery->execute();
+
+				$pdo->commit();
 			} catch (Exception $e) {
-		
 				// エラーが発生した時はロールバック
 				$pdo->rollBack();
+				actionLog($userid, "error", "deleteAccount", null, $e, 4);
 			}
 		
 			if ($res) {
@@ -242,7 +244,7 @@ if( !empty($_POST['btn_submit']) ) {
 					}
 				}
 				header("Location:../index.php");
-				exit; 
+				exit;
 			} else {
 				$error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
 			}
@@ -451,7 +453,7 @@ require('../logout/logout.php');
 		<hr>
 		<h1>アカウント削除</h1>
 		<p>アカウント誤削除を防ぐため下の入力ボックスにご自身のユーザーIDを入力する必要があります。</p>
-		<?php if($res["admin"] === "yes"){?>
+		<?php if($is_Admin === "yes"){?>
 			<p class="errmsg">あなたはこのサーバーの管理者のようです。<br>管理者アカウントの移行は済んでいますか？<br>アカウントを削除しても大丈夫なのですか...？</p>
 		<?php }?>
 		<div>

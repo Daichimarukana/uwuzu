@@ -1091,24 +1091,45 @@ $(document).ready(function() {
 				if($("#error").length){
 					$("#error").hide();
 				}
-				
-				EmojiClickEvent();
 			},
 			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
 				isEmojiLoading = false;
 				$("#error").show();
-				EmojiClickEvent();
 			},
 		});
 	}
-	function EmojiClickEvent() {
-		$(".one_emoji").click(function (event) {
-			event.preventDefault();
-			var children = $(this).children("img");
-			var custom_emojiname = children.attr("title");
-			$("#ueuse").val($("#ueuse").val() + custom_emojiname);
-		});
-	}
+
+	var last_cursor_at = 0;
+	$('body').on('click', '.one_emoji', function(event) {
+		event.preventDefault();
+
+		var children = $(this).children("img");
+		var custom_emojiname = children.attr("title");
+
+		var input = $("#ueuse").get(0);
+		var now_ueuse = $("#ueuse").val();
+
+		var cursor_at = (input && input.selectionStart !== undefined) ? input.selectionStart : last_cursor_at;
+
+		var front = now_ueuse.slice(0, cursor_at);
+		var back = now_ueuse.slice(cursor_at);
+		$("#ueuse").val(front + custom_emojiname + back);
+
+		last_cursor_at = cursor_at + custom_emojiname.length;
+
+		// 挿入後にフォーカスとカーソルを維持
+		$("#ueuse").focus();
+		if (input) {
+			input.setSelectionRange(last_cursor_at, last_cursor_at);
+		}
+	});
+
+	$("#ueuse").on("click keyup", function() {
+		var input = $(this).get(0);
+		if (input && input.selectionStart !== undefined) {
+			last_cursor_at = input.selectionStart;
+		}
+	});
 });
 </script>
 </html>

@@ -119,6 +119,35 @@ if (!empty($pdo)) {
 	$upload_cnt1 = $result->rowCount();
 
 }
+
+if( !empty($_POST['send_notification_submit']) ) {
+	$notice_title = safetext($_POST['notice_title']);
+	$notice_msg = safetext($_POST['notice_msg']);
+	if(empty($notice_title)){
+		$error_message[] = "通知のタイトルを空欄にすることはできません。(INPUT_PLEASE)";
+	}elseif(mb_strlen($notice_title) > 128){
+		$error_message[] = "通知のタイトルを512文字以上にすることはできません。(INPUT_OVER_MAX_COUNT)";
+	}
+	if(empty($notice_msg)){
+		$error_message[] = "通知の本文を空欄にすることはできません。(INPUT_PLEASE)";
+	}elseif(mb_strlen($notice_msg) > 128){
+		$error_message[] = "通知の本文を16777216文字以上にすることはできません。(INPUT_OVER_MAX_COUNT)";
+	}
+	if(empty($error_message)){
+		$url = safetext("/rule/serverabout");
+		$response = send_notification($userdata['userid'], "uwuzu-fromsys", $notice_title, $notice_msg, $url, "system");
+		if($response == true){
+			actionLog($userid, "info", "send_notification_submit", $userdata['userid'], $userdata['userid']."さんに".$userid."さんが通知を送信しました。\n".$notice_msg, 0);
+			header("Location:useradmin");
+			exit; 
+		}else{
+			actionLog($userid, "error", "send_notification_submit", $userdata['userid'], $userdata['userid']."さんに".$userid."さんが通知を送信できませんでした。\n".$notice_msg, 4);
+			header("Location:useradmin");
+			exit; 
+		}
+	}
+}
+
 if( !empty($_POST['send_ice_submit']) ) {
 
 	$notice_msg = $_POST['notice_msg'];
@@ -366,81 +395,92 @@ if( !empty($_POST['send_ban_submit']) ) {
 	
 
 	try {
-		$pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
+		// フォロー・フォロワー情報を削除したい全てのアカウントを取得
+		$flw_query = $pdo->prepare("SELECT * 
+			FROM account 
+			WHERE follow LIKE :pattern1 
+			OR follow LIKE :pattern2 
+			OR follow LIKE :pattern3 
+			OR follower LIKE :pattern1 
+			OR follower LIKE :pattern2 
+			OR follower LIKE :pattern3
+		"); 				
+		$flw_query->bindValue(':pattern1', "%,$userId2,%", PDO::PARAM_STR);  // 中間に位置する場合
+		$flw_query->bindValue(':pattern2', "%,$userId2", PDO::PARAM_STR);   // 末尾に位置する場合
+		$flw_query->bindValue(':pattern3', "$userId2,%", PDO::PARAM_STR);   // 先頭に位置する場合
+		$flw_query->execute();
+		$flw_accounts = $flw_query->fetchAll();
 
-		// 投稿削除クエリを実行
-		$deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE account = :userid");
-		$deleteQuery->bindValue(':userid', $userId2, PDO::PARAM_STR);
-		$res = $deleteQuery->execute();
-		
-		// アカウント削除クエリを実行
-		$deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
-		$deleteQuery->bindValue(':userid', $userId2, PDO::PARAM_STR);
-		$res = $deleteQuery->execute();
-
-		// 通知削除クエリを実行
-		$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE touserid = :touserid");
-		$deleteQuery->bindValue(':touserid', $userId2, PDO::PARAM_STR);
-		$res = $deleteQuery->execute();
-
-		// 通知削除クエリを実行(自分からの通知)
-		$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE fromuserid = :fromuserid");
-		$deleteQuery->bindValue(':fromuserid', $userId2, PDO::PARAM_STR);
-		$res = $deleteQuery->execute();
-
-		// ユーザーIDを削除したい全てのアカウントを取得
-		$query = $pdo->prepare("SELECT * FROM account WHERE follow LIKE :pattern1 OR follow LIKE :pattern2 OR follow LIKE :pattern3 OR follower LIKE :pattern1 OR follower LIKE :pattern2 OR follower LIKE :pattern3");
-		$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);
-		$query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);
-		$query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);
-		$query->execute();
-		$accounts = $query->fetchAll();
-
-		foreach ($accounts as $account) {
-			// フォローの更新
-			if (strpos($account['follow'], ",$userid,") !== false || strpos($account['follow'], ",$userid") !== false || strpos($account['follow'], "$userid,") !== false) {
-				$followList = explode(',', $account['follow']);
-				$followList = array_diff($followList, array($userid));
-				$newFollowList = implode(',', $followList);
-
-				$updateFollowQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-				$updateFollowQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
-				$updateFollowQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
-				$updateFollowQuery->execute();
-			}
-
-			// フォロワーの更新
-			if (strpos($account['follower'], ",$userid,") !== false || strpos($account['follower'], ",$userid") !== false || strpos($account['follower'], "$userid,") !== false) {
-				$followerList = explode(',', $account['follower']);
-				$followerList = array_diff($followerList, array($userid));
-				$newFollowerList = implode(',', $followerList);
-
-				$updateFollowerQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-				$updateFollowerQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-				$updateFollowerQuery->bindValue(':userid', $account['userid'], PDO::PARAM_STR);
-				$updateFollowerQuery->execute();
-			}
+		foreach ($flw_accounts as $account) {
+			unfollow_user($pdo, $account['userid'], $userId2);
+			unfollow_user($pdo, $userId2, $account['userid']);
 		}
 
-		$query = $pdo->prepare("SELECT * FROM ueuse WHERE favorite LIKE :pattern1 OR favorite LIKE :pattern2 OR favorite LIKE :pattern3");
-		$query->bindValue(':pattern1', "%,$userid,%", PDO::PARAM_STR);
-		$query->bindValue(':pattern2', "%,$userid", PDO::PARAM_STR);
-		$query->bindValue(':pattern3', "$userid,%", PDO::PARAM_STR);
-		$query->execute();
-		$accounts = $query->fetchAll();
+		// ユーザーIDを削除したい全てのアカウントを取得
+		$blk_query = $pdo->prepare("SELECT * 
+			FROM account 
+			WHERE blocklist LIKE :pattern1 
+			OR blocklist LIKE :pattern2 
+			OR blocklist LIKE :pattern3
+		"); 				
+		$blk_query->bindValue(':pattern1', "%,$userId2,%", PDO::PARAM_STR);  // 中間に位置する場合
+		$blk_query->bindValue(':pattern2', "%,$userId2", PDO::PARAM_STR);   // 末尾に位置する場合
+		$blk_query->bindValue(':pattern3', "$userId2,%", PDO::PARAM_STR);   // 先頭に位置する場合
+		$blk_query->execute();
+		$blk_accounts = $blk_query->fetchAll();
 
-		foreach ($accounts as $account) {
-			// いいねの更新
-			if (strpos($account['favorite'], ",$userid,") !== false || strpos($account['favorite'], ",$userid") !== false || strpos($account['favorite'], "$userid,") !== false) {
-				$favoriteList = explode(',', $account['favorite']);
-				$favoriteList = array_diff($favoriteList, array($userid));
-				$newFavoriteList = implode(',', $favoriteList);
+		foreach ($blk_accounts as $account) {
+			unblock_user($pdo, $userId2, $account['userid']);
+		}
 
-				$updateFavoriteQuery = $pdo->prepare("UPDATE ueuse SET favorite = :favorite WHERE uniqid = :uniqid");
-				$updateFavoriteQuery->bindValue(':favorite', $newFavoriteList, PDO::PARAM_STR);
-				$updateFavoriteQuery->bindValue(':uniqid', $account['uniqid'], PDO::PARAM_STR);
-				$updateFavoriteQuery->execute();
+		$pdo->beginTransaction(); 
+		try {
+			// 投稿削除クエリを実行
+			$deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE account = :userid");
+			$deleteQuery->bindValue(':userid', $userId2, PDO::PARAM_STR);
+			$res = $deleteQuery->execute();
+
+			// 通知削除クエリを実行(自分宛ての通知)
+			$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE touserid = :touserid");
+			$deleteQuery->bindValue(':touserid', $userId2, PDO::PARAM_STR);
+			$res = $deleteQuery->execute();
+			
+			// 通知削除クエリを実行(自分からの通知)
+			$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE fromuserid = :fromuserid");
+			$deleteQuery->bindValue(':fromuserid', $userId2, PDO::PARAM_STR);
+			$res = $deleteQuery->execute();
+
+			// いいねの削除
+			$query = $pdo->prepare("SELECT * FROM ueuse WHERE favorite LIKE :pattern1 OR favorite LIKE :pattern2 OR favorite LIKE :pattern3");
+			$query->bindValue(':pattern1', "%,$userId2,%", PDO::PARAM_STR);
+			$query->bindValue(':pattern2', "%,$userId2", PDO::PARAM_STR);
+			$query->bindValue(':pattern3', "$userId2,%", PDO::PARAM_STR);
+			$query->execute();
+			$accounts = $query->fetchAll();
+
+			foreach ($accounts as $account) {
+				// いいねの更新
+				if (strpos($account['favorite'], ",$userId2,") !== false || strpos($account['favorite'], ",$userId2") !== false || strpos($account['favorite'], "$userId2,") !== false) {
+					$favoriteList = explode(',', $account['favorite']);
+					$favoriteList = array_diff($favoriteList, array($userId2));
+					$newFavoriteList = implode(',', $favoriteList);
+
+					$updateFavoriteQuery = $pdo->prepare("UPDATE ueuse SET favorite = :favorite WHERE uniqid = :uniqid");
+					$updateFavoriteQuery->bindValue(':favorite', $newFavoriteList, PDO::PARAM_STR);
+					$updateFavoriteQuery->bindValue(':uniqid', $account['uniqid'], PDO::PARAM_STR);
+					$updateFavoriteQuery->execute();
+				}
 			}
+
+			$deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
+			$deleteQuery->bindValue(':userid', $userId2, PDO::PARAM_STR);
+			$res = $deleteQuery->execute();
+
+			$pdo->commit();
+		} catch (Exception $e) {
+			// エラーが発生した時はロールバック
+			$pdo->rollBack();
+			actionLog($userId2, "error", "deleteAccount", null, $e, 4);
 		}
 
 		//BAN通知メール
@@ -576,15 +616,32 @@ require('../logout/logout.php');
 					<hr>
 					<div class="p2">アカウント操作</div>
 					<div class="banzone">
+						<button id="notification_btn" class="waterbtn">通知</button>
 						<?php if($roleId === "ice"){?>
-							<button id="water" class="waterbtn">解凍</button>
+							<button id="water_btn" class="waterbtn">解凍</button>
 						<?php }else{?>
-							<button id="ice" class="icebtn">凍結</button>
+							<button id="ice_btn" class="icebtn">凍結</button>
 						<?php }?>
-						<button id="ban" class="banbtn">BAN</button>
+						<button id="ban_btn" class="banbtn">BAN</button>
 					</div>
 				</div>
 			</div>
+		</div>
+	</div>
+
+	<div id="account_NotificationModal" class="modal">
+		<div class="modal-content">
+			<h1>通知を送信しますか？</h1>
+			<p><?php echo safetext($userdata['username']); ?>さんのアカウントに個別で通知を送信しますか？<br>送信時、送信元のアカウントはシステムアカウントとなります。<br><?php echo safetext($userdata['username']); ?>さんがすべての通知をオフにしていても通知されます。</p>
+			<form method="post" id="deleteForm">
+				<input class="inbox" id="notice_title" placeholder="通知のタイトル" name="notice_title" value=""/>
+				<hr>
+				<textarea id="notice_msg" placeholder="<?php echo safetext($userdata['username']); ?>さんへのメッセージ" name="notice_msg"></textarea>
+				<div class="btn_area">
+					<input type="submit" id="deleteButton4" class="fbtn_no" name="send_notification_submit" value="送信">
+					<input type="button" id="cancelButton4" class="fbtn" value="キャンセル">
+				</div>
+			</form>
 		</div>
 	</div>
 
@@ -635,13 +692,39 @@ require('../logout/logout.php');
 </body>
 <script>
 $(document).ready(function() {
+	var modal4 = document.getElementById('account_NotificationModal');
+    var deleteButton4 = document.getElementById('deleteButton4');
+    var cancelButton4 = document.getElementById('cancelButton4'); // 追加
+	var modalMain = $('.modal-content');
+
+    $(document).on('click', '#notification_btn', function (event) {
+        modal4.style.display = 'block';
+		modalMain.addClass("slideUp");
+    	modalMain.removeClass("slideDown");
+
+        deleteButton4.addEventListener('click', () => {
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal4.style.display = 'none';
+			}, 150);
+        });
+
+        cancelButton3.addEventListener('click', () => { // 追加
+            modalMain.removeClass("slideUp");
+			modalMain.addClass("slideDown");
+			window.setTimeout(function(){
+				modal4.style.display = 'none';
+			}, 150);
+        });
+    });
 
 	var modal3 = document.getElementById('account_WaterModal');
     var deleteButton3 = document.getElementById('deleteButton3');
     var cancelButton3 = document.getElementById('cancelButton3'); // 追加
 	var modalMain = $('.modal-content');
 
-    $(document).on('click', '.waterbtn', function (event) {
+    $(document).on('click', '#water_btn', function (event) {
         modal3.style.display = 'block';
 		modalMain.addClass("slideUp");
     	modalMain.removeClass("slideDown");
@@ -669,7 +752,7 @@ $(document).ready(function() {
     var cancelButton = document.getElementById('cancelButton'); // 追加
 	var modalMain = $('.modal-content');
 
-    $(document).on('click', '.icebtn', function (event) {
+    $(document).on('click', '#ice_btn', function (event) {
         modal.style.display = 'block';
 		modalMain.addClass("slideUp");
     	modalMain.removeClass("slideDown");
@@ -696,7 +779,7 @@ $(document).ready(function() {
     var cancelButton2 = document.getElementById('cancelButton2'); // 追加
 	var modalMain = $('.modal-content');
 
-    $(document).on('click', '.banbtn', function (event) {
+    $(document).on('click', '#ban_btn', function (event) {
         modal2.style.display = 'block';
 		modalMain.addClass("slideUp");
     	modalMain.removeClass("slideDown");

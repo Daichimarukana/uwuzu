@@ -81,6 +81,7 @@ if (navigator.cookieEnabled) {
 }
 
 /*Main Access check*/
+
 if (user_agent_browser == 'Microsoft_Internet_Explorer' || user_agent_browser == 'NintendoBrowser') {
     user_agent_access = 'bad';
     errcode = 'UNSUPPORTED_BROWSER';

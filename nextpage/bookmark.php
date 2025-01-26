@@ -57,30 +57,33 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $bookmarkQuery->execute();
                 $bookmarkData = $bookmarkQuery->fetch();
                 $bookmark = $bookmarkData['bookmark'];
-                $bookmarkList = explode(',', $bookmark);
+                $bookmarkList = array_chunk(array_reverse(explode(',', $bookmark)),$itemsPerPage);
 
                 // フォローしているユーザーの投稿を取得し、日時順に並び替える
                 $messages = array(); // 初期化
 
-                foreach ($bookmarkList as $bookmarkUniqId) {
-                    $sql = "SELECT ueuse.* 
-                            FROM ueuse 
-                            LEFT JOIN account ON ueuse.account = account.userid 
-                            WHERE uniqid = :bookmarkUniqId AND account.role != 'ice'
-                            ORDER BY ueuse.datetime DESC 
-                            LIMIT :offset, :itemsPerPage";
+                $list_Page = (int)$pageNumber - 1;
 
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->bindValue(':bookmarkUniqId', $bookmarkUniqId, PDO::PARAM_STR);
-                    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-                    $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-                    $stmt->execute();
+                if(!(empty($bookmarkList[$list_Page]))){
+                    foreach ($bookmarkList[$list_Page] as $bookmarkUniqId) {
+                        $sql = "SELECT ueuse.* 
+                                FROM ueuse 
+                                LEFT JOIN account ON ueuse.account = account.userid 
+                                WHERE uniqid = :bookmarkUniqId AND account.role != 'ice'
+                                ORDER BY ueuse.datetime DESC";
 
-                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                        $messages[] = $row;
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->bindValue(':bookmarkUniqId', $bookmarkUniqId, PDO::PARAM_STR);
+                        $stmt->execute();
+
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                            $messages[] = $row;
+                        }
                     }
+                }else{
+                    $messages = [];
                 }
-                $messages = array_reverse($messages);
+                
                 // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
                 foreach ($messages as &$message) {
                     $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");

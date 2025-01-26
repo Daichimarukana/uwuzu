@@ -221,6 +221,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 $uniqid = safetext(createUniqId());
                 $abi = "none";
                 $nones = "none";
+                $popularity = 0;
 
                 // トランザクション開始
                 $pdo->beginTransaction();
@@ -228,7 +229,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 try {
 
                     // SQL作成
-                    $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+                    $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
             
                     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                     $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
@@ -246,6 +247,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
 
                     $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
                     $stmt->bindParam(':nsfw', $nsfw, PDO::PARAM_STR);
+                    $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
 
                     // SQLクエリの実行
                     $res = $stmt->execute();

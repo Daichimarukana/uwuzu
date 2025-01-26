@@ -150,7 +150,7 @@ if (!empty($pdo)) {
 								<p>ターゲット: <?php echo safetext($value["target"]);?></p>
 								<hr>
 								<p>内容</p>
-								<p><?php echo safetext($value["content"]);?></p>
+								<p><?php echo nl2br(safetext($value["content"]));?></p>
 								<hr>
 							</details>
 						</div>

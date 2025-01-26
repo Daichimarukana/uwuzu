@@ -66,7 +66,7 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
                         echo json_encode(['success' => true, 'newbookmark' => 'success']);
                         exit;
                     } else {
-                        echo json_encode(['success' => false, 'error' => 'いいねの更新に失敗しました。']);
+                        echo json_encode(['success' => false, 'error' => 'ブックマークの更新に失敗しました。']);
                         exit;
                     }
 
@@ -76,7 +76,7 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
                     exit;
                 }
             } catch(PDOException $e) {
-                echo json_encode(['success' => false, 'error' => 'データベースエラー：' . $e->getMessage()]);
+                echo json_encode(['success' => false, 'error' => 'データベースエラー']);
                 exit;
             }
         }

@@ -78,7 +78,7 @@ function isHarmfulContent(text, examples, keywords, similarityThreshold = 0.7) {
             nonHarmfulCharCount -= harmfulText.length;
         }
 
-        if (harmfulCharCount > nonHarmfulCharCount) {
+        if (harmfulCharCount > nonHarmfulCharCount || harmfulCharCount > 6) {
             return true;
         } else {
             return false;

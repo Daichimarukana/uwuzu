@@ -17,7 +17,7 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
         exit;
     }
 }else{
-    echo json_encode(['success' => false, 'error' => '削除に失敗しました。(sess_err)']);
+    echo json_encode(['success' => false, 'error' => '削除に失敗しました。(ERROR)']);
     exit;
 }
 ?>

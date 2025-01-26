@@ -94,11 +94,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $get_day = $get_day * (2 ** floor($pageNumber / 3));
 
                 $pop_sql = "SELECT 
-                            ueuse.*,
-                            (LENGTH(ueuse.favorite) - LENGTH(REPLACE(ueuse.favorite, ',', '')) - 1) AS favorite_count,
-                            (SELECT COUNT(*) FROM ueuse AS reuse WHERE reuse.ruuniqid = ueuse.uniqid) AS reuse_count,
-                            ((LENGTH(ueuse.favorite) - LENGTH(REPLACE(ueuse.favorite, ',', '')) - 1) + 
-                             (SELECT COUNT(*) FROM ueuse AS reuse WHERE reuse.ruuniqid = ueuse.uniqid)) AS total_score
+                            ueuse.*
                         FROM 
                             ueuse
                         LEFT JOIN account ON ueuse.account = account.userid 
@@ -109,7 +105,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                         AND 
                             account.role != 'ice' 
                         ORDER BY 
-                            total_score DESC
+                            ueuse.popularity DESC
                         LIMIT :offset, :itemsPerPage;
                     ";
 

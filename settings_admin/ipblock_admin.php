@@ -108,12 +108,25 @@ if (!empty($pdo)) {
 
 if( !empty($_POST['ip_btn_submit']) ) {
 	$ipaddr = safetext($_POST['ipaddr']);
+	if (strpos($ipaddr, '/')) {
+		[$network, $prefixLength] = explode('/', $ipaddr);
+	}else{
+		$network = $ipaddr;
+		$prefixLength = null;
+	}
+	
 	$note = safetext($_POST['note']);
 
-	if(filter_var($ipaddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($ipaddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+	if(filter_var($network, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($network, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
 
 		$search_query = $pdo->prepare('SELECT * FROM ipblock WHERE ipaddr = :ipaddr limit 1');
-		$search_query->execute(array(':ipaddr' => $ipaddr));
+		if(!(empty($prefixLength))){
+			$pre_ip = $network."/".$prefixLength;
+			$search_query->execute(array(':ipaddr' => $pre_ip));
+		}else{
+			$search_query->execute(array(':ipaddr' => $network));
+		}
+		
 		$result = $search_query->fetch();
 
 		if($result > 0){
@@ -157,10 +170,22 @@ if( !empty($_POST['ip_btn_submit']) ) {
 
 if( !empty($_POST['ip_del_submit']) ) {
 	$ipaddr = safetext($_POST['del_ipaddr']);
-	
-	if(filter_var($ipaddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($ipaddr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
+
+	if (strpos($ipaddr, '/')) {
+		[$network, $prefixLength] = explode('/', $ipaddr);
+	}else{
+		$network = $ipaddr;
+		$prefixLength = null;
+	}
+
+	if(filter_var($network, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($network, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)){
 		$search_query = $pdo->prepare('SELECT * FROM ipblock WHERE ipaddr = :ipaddr limit 1');
-		$search_query->execute(array(':ipaddr' => $ipaddr));
+		if(!(empty($prefixLength))){
+			$pre_ip = $network."/".$prefixLength;
+			$search_query->execute(array(':ipaddr' => $pre_ip));
+		}else{
+			$search_query->execute(array(':ipaddr' => $network));
+		}
 		$result = $search_query->fetch();
 
 		if($result > 0){
@@ -168,6 +193,12 @@ if( !empty($_POST['ip_del_submit']) ) {
 			try{
 				$deleteQuery = $pdo->prepare("DELETE FROM ipblock WHERE ipaddr = :ipaddr");
 				$deleteQuery->bindValue(':ipaddr', $ipaddr, PDO::PARAM_STR);
+				if(!(empty($prefixLength))){
+					$pre_ip = $network."/".$prefixLength;
+					$deleteQuery->bindValue(':ipaddr', $pre_ip, PDO::PARAM_STR);
+				}else{
+					$deleteQuery->bindValue(':ipaddr', $network, PDO::PARAM_STR);
+				}
 				$res = $deleteQuery->execute();
 				$res = $pdo->commit();
 			} catch (Exception $e) {
@@ -229,7 +260,8 @@ require('../logout/logout.php');
 					<p>IPアドレスのブロック機能です。</p>
 					<div>
 						<p>IPアドレス</p>
-						<div class="p2">IPv4とIPv6に対応しています。</div>
+						<div class="p2">IPv4とIPv6に対応しています。<br>
+							CIDR表記にも対応しています。</div>
 						<input id="ipaddr" placeholder="000.000.000.000" class="inbox" type="text" name="ipaddr">
 					</div>
 					<div>

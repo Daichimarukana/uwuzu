@@ -1,25 +1,70 @@
 <?php
-function blockedIP($ip_addr){
+function isIpInCIDR($ip, $cidr){
+    if (!strpos($cidr, '/')) {
+        return $ip === $cidr;
+    }
+
+    [$network, $prefixLength] = explode('/', $cidr);
+    if((filter_var($network, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($network, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) && (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) || filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))){
+        $prefixLength = (int)$prefixLength;
+
+        $ipBinary = inet_pton($ip);
+        $networkBinary = inet_pton($network);
+
+        if ($ipBinary === false || $networkBinary === false) {
+            actionLog(null, "error", "isIpInCIDR", null, "invalid_ip_or_network_".$ipBinary."/".$networkBinary, 4); 
+            return false;
+        }
+
+        $totalBits = strlen($networkBinary) * 8;
+
+        if ($prefixLength < 0 || $prefixLength > $totalBits) {
+            actionLog(null, "error", "isIpInCIDR", null, "bad_prefix_length_".$prefixLength, 4); 
+            return false;
+        }
+
+        $mask = str_repeat("\xFF", (int)($prefixLength / 8));
+        $remainingBits = $prefixLength % 8;
+
+        if ($remainingBits > 0) {
+            $mask .= chr((0xFF << (8 - $remainingBits)) & 0xFF);
+        }
+        $mask = str_pad($mask, strlen($networkBinary), "\x00");
+
+        return ($ipBinary & $mask) === ($networkBinary & $mask);
+    }else{
+        actionLog(null, "error", "isIpInCIDR", null, "bad_ip", 4); 
+        return false;
+    }
+}
+function blockedIP($ip_addr) {
     // データベースに接続
     try {
-        $option = array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        $pdo = new PDO(
+            'mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST,
+            DB_USER,
+            DB_PASS,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false,
+            ]
         );
-        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    } catch(PDOException $e) {
-        actionLog(null, "error", "blockedIP", null, $e, 4);
+    } catch (PDOException $e) {
+        error_log("Database connection failed: " . $e->getMessage());
         return false;
     }
 
-    $search_query = $pdo->prepare('SELECT * FROM ipblock WHERE ipaddr = :ipaddr limit 1');
-    $search_query->execute(array(':ipaddr' => $ip_addr));
-    $result = $search_query->fetch();
+    // IPブロックリストの取得
+    $search_query = $pdo->prepare('SELECT ipaddr FROM ipblock');
+    $search_query->execute();
+    $blocked_ips = $search_query->fetchAll(PDO::FETCH_COLUMN);
 
-    if($result > 0){
-        $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . "/unsupported.php?errcode=IP_BANNED";
-        header("Location:".$url."");
-	    exit;
+    foreach ($blocked_ips as $blocked_ip) {
+        if (isIpInCIDR($ip_addr, $blocked_ip)) {
+            $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . "/unsupported.php?errcode=IP_BANNED";
+            header("Location: " . $url);
+            exit;
+        }
     }
 }
 function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "user") {
@@ -854,58 +899,60 @@ function send_notification($to,$from,$title,$message,$url,$category){
     }
 
     if(!($to == $from) || $category === "system" || $category === "other"){
-        $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
-        $query->execute(array(':userid' => $from));
-        $result = $query->fetch();
+        $to_result = getUserData($pdo, $to);
 
         $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other"];
         if(in_array($category, $category_list)){
-            if(in_array($category, explode(',', $result["notification_settings"])) || empty($result["notification_settings"]) || $category === "system" || $category === "other"){
-                if(!(empty($pdo))){		
-                    $pdo->beginTransaction();
-
-                    try {
-                        $fromuserid = safetext($from);
-                        $touserid = safetext($to);
-                        $datetime = date("Y-m-d H:i:s");
-                        $msg = safetext($message);
-                        $title = safetext($title);
-                        $url = safetext($url);
-                        $userchk = 'none';
-                        $notification_category = safetext($category);
-                
-                        // 通知用SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category)");
-                
-                        $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
-                        $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
-                        $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
-                        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-                        $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
-                        $stmt->bindParam(':title', $title, PDO::PARAM_STR);
-                        $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
-                
-                        $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-                
-                        $res = $stmt->execute();
-                
-                        $res = $pdo->commit();
-                
-                        if($res){
-                            return true;
-                        }else{
+            if(in_array($category, explode(',', $to_result["notification_settings"])) || empty($to_result["notification_settings"]) || $category === "system" || $category === "other"){
+                //ブロックされてたら送らない
+                if(!(in_array($from, explode(',', $to_result["blocklist"])))){
+                    if(!(empty($pdo))){		
+                        $pdo->beginTransaction();
+                        try {
+                            $fromuserid = safetext($from);
+                            $touserid = safetext($to);
+                            $datetime = date("Y-m-d H:i:s");
+                            $msg = safetext($message);
+                            $title = safetext($title);
+                            $url = safetext($url);
+                            $userchk = 'none';
+                            $notification_category = safetext($category);
+                    
+                            // 通知用SQL作成
+                            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category)");
+                    
+                            $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
+                            $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
+                            $stmt->bindParam(':msg', $msg, PDO::PARAM_STR);
+                            $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+                            $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
+                            $stmt->bindParam(':title', $title, PDO::PARAM_STR);
+                            $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
+                    
+                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+                    
+                            $res = $stmt->execute();
+                    
+                            $res = $pdo->commit();
+                    
+                            if($res){
+                                return true;
+                            }else{
+                                $pdo->rollBack();
+                                actionLog($from, "error", "send_notification", $to, "通知の送信に失敗しました(rollBack)", 3);
+                                return false;
+                            }
+                    
+                        } catch(Exception $e) {
                             $pdo->rollBack();
-                            actionLog($from, "error", "send_notification", $to, "通知の送信に失敗しました(rollBack)", 3);
+                            actionLog($from, "error", "send_notification", $to, $e, 4);
                             return false;
                         }
-                
-                    } catch(Exception $e) {
-                        $pdo->rollBack();
-                        actionLog($from, "error", "send_notification", $to, $e, 4);
+                    }else{
                         return false;
                     }
                 }else{
-                    return false;
+                    return true;
                 }
             }else{
                 // 受信しない設定なのでtrue
@@ -1221,15 +1268,17 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     $datetime = date("Y-m-d H:i:s");
                     $uniqid = createUniqId();
                     $abi = "none";
+                    $popularity = 0;
 
                     if(empty($rpUniqid) && empty($ruUniqid)){
+                        //-----------通常ユーズ-----------
                         // トランザクション開始
                         $pdo->beginTransaction();
 
                         try {
 
                             // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
                     
                             $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                             $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
@@ -1244,6 +1293,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                             $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
                             $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+                            $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
 
                             $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
 
@@ -1265,6 +1315,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                             actionLog($userid, "error", "send_ueuse", null, $e, 4);
                         }
                     }elseif((!empty($rpUniqid)) && empty($ruUniqid)){
+                        //-----------リプライ-----------
                         $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
                         $toUserIdQuery->bindValue(':ueuseid', $rpUniqid, PDO::PARAM_STR);
                         $toUserIdQuery->execute();
@@ -1276,12 +1327,13 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                             $touserid = null;
                         }
 
+                        changePopularity($pdo, $rpUniqid, $userid, 3);
                         // トランザクション開始
                         $pdo->beginTransaction();
                         
                         try {
                             // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
 
                             $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                             $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
@@ -1299,6 +1351,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                             $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
 
                             $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+                            $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
 
                             // SQLクエリの実行
                             $res = $stmt->execute();
@@ -1319,6 +1372,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                             actionLog($userid, "error", "send_ueuse", null, $e, 4);
                         }
                     }elseif(empty($rpUniqid) && (!empty($ruUniqid))){
+                        //-----------リユーズ-----------
                         $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
                         $toUserIdQuery->bindValue(':ueuseid', $ruUniqid, PDO::PARAM_STR);
                         $toUserIdQuery->execute();
@@ -1329,12 +1383,15 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         }else{
                             $touserid = null;
                         }
+
+                        changePopularity($pdo, $ruUniqid, $userid, 2);
+
                         // トランザクション開始
                         $pdo->beginTransaction();
 
                         try {
                             // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ruuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw) VALUES (:username, :account, :uniqid, :ruuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw)");
+                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ruuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :ruuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
 
                             $stmt->bindParam(':username', $username, PDO::PARAM_STR);
                             $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
@@ -1352,6 +1409,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                             $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
 
                             $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+                            $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
 
 
                             // SQLクエリの実行
@@ -1502,6 +1560,20 @@ function delete_ueuse($uniqid, $userid, $account_id){
                         }
                     }
     
+                    $ru_tree_Chkquery = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :ruuniqid limit 1');
+                    $ru_tree_Chkquery->execute(array(':ruuniqid' => $result["ruuniqid"]));
+                    $result4 = $ru_tree_Chkquery->fetch();
+                    if($result4 > 0){
+                        changePopularity($pdo, $result["ruuniqid"], $userid, -2);
+                    }
+
+                    $rp_tree_Chkquery = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :rpuniqid limit 1');
+                    $rp_tree_Chkquery->execute(array(':rpuniqid' => $result["rpuniqid"]));
+                    $result5 = $rp_tree_Chkquery->fetch();
+                    if($result5 > 0){
+                        changePopularity($pdo, $result["rpuniqid"], $userid, -3);
+                    }
+
                     try {
                         // 削除クエリを実行
                         $deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE uniqid = :uniqid AND account = :userid");
@@ -1581,6 +1653,7 @@ function follow_user($pdo, $to_userid, $userid){
                         return false;
                     }
                 }else{
+                    $pdo->rollBack();
                     return true;
                 }
             } catch (Exception $e) {
@@ -1644,6 +1717,7 @@ function unfollow_user($pdo, $to_userid, $userid){
                         return false;
                     }
                 }else{
+                    $pdo->rollBack();
                     return true;
                 }
             } catch (Exception $e) {
@@ -1703,6 +1777,7 @@ function block_user($pdo, $to_userid, $userid){
                         return false;
                     }
                 }else{
+                    $pdo->rollBack();
                     return true;
                 }
             } catch (Exception $e) {
@@ -1756,6 +1831,7 @@ function unblock_user($pdo, $to_userid, $userid){
                         return false;
                     }
                 }else{
+                    $pdo->rollBack();
                     return true;
                 }
             } catch (Exception $e) {
@@ -1771,31 +1847,80 @@ function unblock_user($pdo, $to_userid, $userid){
         return false;
     }
 }
+function changePopularity($pdo, $uniqid, $userid, $change_range){
+    if (!(empty($pdo)) && !(empty($uniqid))){
+        if(is_numeric($change_range)){
+            $pdo->beginTransaction();
+            try {
+                // 投稿のいいね情報を取得
+                $stmt = $pdo->prepare("SELECT popularity FROM ueuse WHERE uniqid = :uniqid");
+                $stmt->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+                $stmt->execute();
+                $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!(empty($post))) {
+                    $new_popularity = (int)$post['popularity'] + (int)$change_range;
+                    if($new_popularity >= 2147483647){
+                        $new_popularity = 2147483647;
+                    }
+
+                    $updateQuery = $pdo->prepare("UPDATE ueuse SET popularity = :popularity WHERE uniqid = :uniqid");
+                    $updateQuery->bindValue(':popularity', $new_popularity, PDO::PARAM_INT);
+                    $updateQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
+
+                    if ($res) {
+                        $pdo->commit();
+                        return true;
+                    } else {
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "changePopularity", $uniqid, "いいねに失敗しました", 3);
+                        return false;
+                    }
+                } else {
+                    $pdo->rollBack();
+                    return false;
+                }
+            } catch(PDOException $e) {
+                actionLog($userid, "error", "changePopularity", $uniqid, $e, 4);
+                return false;
+            }
+        }else{
+            actionLog($userid, "error", "changePopularity", $uniqid, "不正な変更値です", 4);
+            return false;
+        }        
+    }
+}
 function addFavorite($pdo, $uniqid, $userid){
     if (!(empty($pdo)) && !(empty($uniqid)) && !(empty($userid))){
-        $pdo->beginTransaction();
-        try {
-            // 投稿のいいね情報を取得
-            $stmt = $pdo->prepare("SELECT account,ueuse,favorite FROM ueuse WHERE uniqid = :uniqid");
-            $stmt->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
-            $stmt->execute();
-            $post = $stmt->fetch(PDO::FETCH_ASSOC);
+        // 投稿のいいね情報を取得
+        $stmt = $pdo->prepare("SELECT account,ueuse,favorite FROM ueuse WHERE uniqid = :uniqid");
+        $stmt->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+        $stmt->execute();
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!(empty($post))) {
-                $favoriteList = explode(',', $post['favorite']);
-                $index = array_search($userid, $favoriteList);
+        if (!(empty($post))) {
+            $favoriteList = explode(',', $post['favorite']);
+            $index = array_search($userid, $favoriteList);
 
-                if ($index === false) {
-                    // ユーザーIDを追加
-                    $favoriteList[] = $userid;
+            if ($index === false) {
+                // ユーザーIDを追加
+                $favoriteList[] = $userid;
 
-                    send_notification(safetext($post['account']),$userid,"".$userid."さんがいいねしました！",safetext($post['ueuse']),"/!".$uniqid."","favorite");
+                send_notification(safetext($post['account']),$userid,"".$userid."さんがいいねしました！",safetext($post['ueuse']),"/!".$uniqid."","favorite");
+                
+                //1いいねでスコアが1増加
+                changePopularity($pdo, $uniqid, $userid, 1);
+            } else {
+                // ユーザーIDを削除
+                array_splice($favoriteList, $index, 1);
+                
+                //1いいね解除でスコアが1減る
+                changePopularity($pdo, $uniqid, $userid, -1);
+            }
 
-                } else {
-                    // ユーザーIDを削除
-                    array_splice($favoriteList, $index, 1);
-                }
-
+            $pdo->beginTransaction();
+            try {
                 // 新しいいいね情報を更新
                 $newFavorite = implode(',', $favoriteList);
                 $updateQuery = $pdo->prepare("UPDATE ueuse SET favorite = :favorite WHERE uniqid = :uniqid");
@@ -1811,13 +1936,13 @@ function addFavorite($pdo, $uniqid, $userid){
                     actionLog($userid, "error", "addFavorite", $uniqid, "いいねに失敗しました", 3);
                     return [false, "いいねに失敗しました", $post['favorite']];
                 }
-            } else {
-                $pdo->rollBack();
-                return [false, "投稿が見つかりませんでした", null];
+            } catch(PDOException $e) {
+                actionLog($userid, "error", "addFavorite", $uniqid, $e, 4);
+                return [false, "データベースエラー", null];
             }
-        } catch(PDOException $e) {
-            actionLog($userid, "error", "addFavorite", $uniqid, $e, 4);
-            return [false, "データベースエラー", null];
+        } else {
+            $pdo->rollBack();
+            return [false, "投稿が見つかりませんでした", null];
         }
     }
 }

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-01-12 11:11:44
+-- 生成日時: 2025-01-26 07:32:55
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -234,7 +234,8 @@ CREATE TABLE `ueuse` (
   `favorite` mediumtext NOT NULL,
   `abi` mediumtext NOT NULL,
   `abidate` datetime NOT NULL,
-  `nsfw` varchar(32) NOT NULL
+  `nsfw` varchar(32) NOT NULL,
+  `popularity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
