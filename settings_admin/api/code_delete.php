@@ -6,10 +6,17 @@ blockedIP($_SERVER['REMOTE_ADDR']);
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
-if (safetext(isset($_POST['code'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id']))){
+if (safetext(isset($_POST['code'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey']))) {
     $postUserid = safetext($_POST['userid']);
     $postCode= safetext($_POST['code']);
     $loginid = safetext($_POST['account_id']);
+    $loginkey = safetext($_COOKIE['loginkey']);
+
+    $is_login = uwuzuUserLoginCheck($loginid, $loginkey, "admin");
+    if ($is_login === false) {
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
+    }
 
     try {
         $option = array(

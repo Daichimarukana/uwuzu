@@ -110,8 +110,8 @@ if (!empty($pdo)) {
 		$follow = $userdata['follow']; // コンマで区切られたユーザーIDを含む変数
 
 		// コンマで区切って配列に分割し、要素数を数える
-		$followIds = array_reverse(explode(',', $follow));
-		$followCount = count($followIds) - 1;
+		$followIds = array_reverse(array_values(array_filter(explode(',', $follow))));
+		$followCount = count($followIds);
 
 		$follow_on_me = array_search($userid, $followIds);
 
@@ -125,8 +125,8 @@ if (!empty($pdo)) {
 		$follower = $userdata['follower']; // コンマで区切られたユーザーIDを含む変数
 
 		// コンマで区切って配列に分割し、要素数を数える
-		$followerIds = array_reverse(explode(',', $follower));
-		$followerCount = count($followerIds) - 1;
+		$followerIds = array_reverse(array_values(array_filter(explode(',', $follower))));
+		$followerCount = count($followerIds);
 
 		$profileText = safetext($userData['profile']);
 
@@ -138,49 +138,54 @@ if (!empty($pdo)) {
 
 		//-------フォロワー取得---------
 
-		// フォロワーのユーザーIDを $follower_userids 配列に追加
-		foreach ($followerIds as $follower_userid) {
-			$follower_userids[] = $follower_userid;
-		}
-
-		// フォロワーのユーザー情報を取得
 		$follower_userdata = array();
+		if(!(empty($followerIds))){
+			// フォロワーのユーザーIDを $follower_userids 配列に追加
+			foreach ($followerIds as $follower_userid) {
+				$follower_userids[] = $follower_userid;
+			}
 
-		foreach ($follower_userids as $follower_userid) {
-			$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-			$follower_userQuery->bindValue(':userid', $follower_userid);
-			$follower_userQuery->execute();
-			$follower_userinfo = $follower_userQuery->fetch();
+			// フォロワーのユーザー情報を取得
 
-			if ($follower_userinfo) {
-				// フォロワーのユーザー情報を $follower_userdata 配列に追加
-				$follower_userdata[] = $follower_userinfo;
+			foreach ($follower_userids as $follower_userid) {
+				$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+				$follower_userQuery->bindValue(':userid', $follower_userid);
+				$follower_userQuery->execute();
+				$follower_userinfo = $follower_userQuery->fetch();
+
+				if ($follower_userinfo) {
+					// フォロワーのユーザー情報を $follower_userdata 配列に追加
+					$follower_userdata[] = $follower_userinfo;
+				}
 			}
 		}
 
 		//-------フォロー取得---------
 
-		foreach ($followIds as $follow_userid) {
-			$follow_userids[] = $follow_userid;
-		}
-
 		$follow_userdata = array();
 
-		foreach ($follow_userids as $follow_userid) {
-			$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-			$follow_userQuery->bindValue(':userid', $follow_userid);
-			$follow_userQuery->execute();
-			$follow_userinfo = $follow_userQuery->fetch();
+		if(!(empty($followIds))){
+			foreach ($followIds as $follow_userid) {
+				$follow_userids[] = $follow_userid;
+			}
 
-			if ($follow_userinfo) {
-				// フォロワーのユーザー情報を $follower_userdata 配列に追加
-				$follow_userdata[] = $follow_userinfo;
+			foreach ($follow_userids as $follow_userid) {
+				$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+				$follow_userQuery->bindValue(':userid', $follow_userid);
+				$follow_userQuery->execute();
+				$follow_userinfo = $follow_userQuery->fetch();
+
+				if ($follow_userinfo) {
+					// フォロワーのユーザー情報を $follower_userdata 配列に追加
+					$follow_userdata[] = $follow_userinfo;
+				}
 			}
 		}
 	} else {
 		$userData["userid"] = "none";
 		$userData['username'] = "でふぉると";
 
+		$isAIBlock = false;
 		$ueuse_cnt = "zero";
 		$followCount = "zero";
 		$followerCount = "zero";
@@ -370,7 +375,7 @@ $pdo = null;
 		</div>
 		<div class="fzone">
 			<div class="time">
-				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
+				<p><?php echo date('Y年m月d日 H:i', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
 				<p><?php if (safetext($userdata['role']) === "ice") {
 						echo "このアカウントは凍結されています。";
 					}; ?></p>
@@ -432,7 +437,7 @@ $pdo = null;
 
 		<div class="sp_time_area">
 			<div class="time">
-				<p><?php echo date('Y年m月d日 H:i:s', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
+				<p><?php echo date('Y年m月d日 H:i', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
 				<p><?php if (safetext($userdata['role']) === "ice") {
 						echo "このアカウントは凍結されています。";
 					}; ?></p>
@@ -1037,57 +1042,56 @@ $pdo = null;
 
 		//---------------リユーズ----------------
 
-		$(document).on('click', '#quote_reuse_btn', function (event) {
-			var modalMain = $('.modal-content');
-			var reuseModal = $('#myQuoteReuseModal');
+		$(document).on('click', '#quote_reuse_btn', function (event) { 
+			var modalMain = $('.modal-content'); 
+			var reuseModal = $('#myQuoteReuseModal'); 
 
-			reuseModal.show();
-			modalMain.addClass("slideUp");
-			modalMain.removeClass("slideDown");
+			reuseModal.show(); 
+			modalMain.addClass("slideUp"); 
+			modalMain.removeClass("slideDown"); 
 
-			var uniqid = $(this).parents().attr('data-uniqid');
+			var uniqid = $(this).parents().attr('data-uniqid'); 
 
-			$('#ReuseCancelButton').on('click', function (event) {
-				modalMain.removeClass("slideUp");
-				modalMain.addClass("slideDown");
-				window.setTimeout(function(){
-					reuseModal.hide();
-				}, 150);
-			});
+			$('#ReuseCancelButton').off('click').on('click', function (event) { 
+				modalMain.removeClass("slideUp"); 
+				modalMain.addClass("slideDown"); 
+				window.setTimeout(function(){ 
+					reuseModal.hide(); 
+				}, 150); 
+			}); 
 
-			$('#ReuseButton').on('click', function (event) {
-				event.preventDefault();
+			$('#ReuseButton').off('click').on('click', function (event) {  // ここを修正
+				event.preventDefault(); 
 
-				var reusetext = $("#reusetexts").val();
+				var reusetext = $("#reusetexts").val(); 
 
-				if(reusetext == ""){
-					modalMain.removeClass("slideUp");
-					modalMain.addClass("slideDown");
-					window.setTimeout(function(){
-						reuseModal.hide();
-					}, 150);
-				}else{
-					$.ajax({
-						url: '../function/reuse.php',
-						method: 'POST',
-						data: { uniqid: uniqid, reusetext: reusetext, userid: userid, account_id: account_id},
-						dataType: 'json',
-						success: function (response) {
-							if (response.success) {
-								reuseModal.hide();
-								view_notify("引用リユーズしました");
-							} else {
-								reuseModal.hide();
-								view_notify("引用リユーズに失敗しました");
-							}
-						},
-						error: function (xhr, status, error) {
-							reuseModal.hide();
-							view_notify("引用リユーズに失敗しました");
-						}
-					});
-				}
-			});
+				if (reusetext == "") { 
+					modalMain.removeClass("slideUp"); 
+					modalMain.addClass("slideDown"); 
+					window.setTimeout(function(){ 
+						reuseModal.hide(); 
+					}, 150); 
+				} else { 
+					$.ajax({ 
+						url: '../function/reuse.php', 
+						method: 'POST', 
+						data: { uniqid: uniqid, reusetext: reusetext, userid: userid, account_id: account_id }, 
+						dataType: 'json', 
+						success: function (response) { 
+							reuseModal.hide(); 
+							if (response.success) { 
+								view_notify("引用リユーズしました"); 
+							} else { 
+								view_notify("引用リユーズに失敗しました"); 
+							} 
+						}, 
+						error: function (xhr, status, error) { 
+							reuseModal.hide(); 
+							view_notify("引用リユーズに失敗しました"); 
+						} 
+					}); 
+				} 
+			}); 
 		});
 
 		$(document).on('click', '#normal_reuse_btn', function (event) {

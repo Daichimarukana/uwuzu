@@ -67,6 +67,7 @@ function blockedIP($ip_addr) {
         }
     }
 }
+//通常のログイン処理
 function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "user") {
     //セッション,クッキー,IPアドレス,閲覧権限(userかadminかの二種類)を受け取る
     $serversettings_file = $_SERVER['DOCUMENT_ROOT']."/server/serversettings.ini";
@@ -214,6 +215,66 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
         }else{
             return false;
         }
+    }else{
+        return false;
+    }
+}
+//APIなどのログイン処理(loginidとloginkeyが有効かを確かめる)
+function uwuzuUserLoginCheck($loginid, $loginkey, $operation_permission = "user") {
+    //セッション,クッキー,IPアドレス,閲覧権限(userかadminかの二種類)を受け取る
+    $serversettings_file = $_SERVER['DOCUMENT_ROOT']."/server/serversettings.ini";
+    $serversettings = parse_ini_file($serversettings_file, true);
+    // データベースに接続
+    try {
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    } catch(PDOException $e) {
+        actionLog(null, "error", "uwuzuUserLogin", null, $e, 4);
+        return false;
+    }
+
+    if(!(isset($loginid))){
+        return false;
+        exit;
+    }
+
+    if(!(isset($loginkey))){
+        return false;
+        exit;
+    }
+
+    $loginQuery = $pdo->prepare("SELECT * FROM account WHERE loginid = :loginid");
+    $loginQuery->bindValue(':loginid', $loginid);
+    $loginQuery->execute();
+    $loginResponse = $loginQuery->fetch();
+    if(empty($loginResponse["userid"])){
+        return false;
+    }elseif($loginid === $loginResponse["loginid"]){
+        $userEncKey = GenUserEnckey($loginResponse["datetime"]);
+        $userLoginKey = hash_hmac('sha256', $loginResponse["loginid"], $userEncKey);
+
+        if(!(empty($loginkey))){
+            if(hash_equals($loginkey, $userLoginKey)){
+                if($operation_permission == "admin"){
+                    if($loginResponse["admin"] == "yes"){
+                        $is_login = true;
+                    }else{
+                        $is_login = false;
+                    }
+                }else{
+                    $is_login = true;
+                }
+            }else{
+                $is_login = false;
+            }
+        }else{
+            $is_login = false;
+        }
+
+        return $is_login;
     }else{
         return false;
     }
@@ -1620,10 +1681,11 @@ function follow_user($pdo, $to_userid, $userid){
             $pdo->beginTransaction();
             try {
                 // フォローボタンが押された場合の処理
-                $followerList = explode(',', $userData['follower']);
+                $followerList = explode(',', $userData['follower'] ?? '');
                 if (!(in_array($userid, $followerList))) {
                     // 自分が相手をフォローしていない場合、相手のfollowerカラムと自分のfollowカラムを更新
                     $followerList[] = $userid;
+                    $followerList = array_values(array_unique(array_filter($followerList)));
                     $newFollowerList = implode(',', $followerList);
 
                     // UPDATE文を実行してフォロー情報を更新
@@ -1635,7 +1697,8 @@ function follow_user($pdo, $to_userid, $userid){
                     // 自分のfollowカラムを更新
                     $myflwlist = explode(',', $myData["follow"]);
                     $myflwlist[] = $userData['userid'];
-                    $newFollowList = implode(',', array_unique($myflwlist));
+                    $myflwlist = array_values(array_unique(array_filter($myflwlist)));
+                    $newFollowList = implode(',', $myflwlist);
 
                     $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
                     $updateQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
@@ -1649,16 +1712,16 @@ function follow_user($pdo, $to_userid, $userid){
                         return true;
                     } else {
                         $pdo->rollBack();
-                        actionLog($userid, "error", "unfollow_user", $to_userid, "フォロー解除に失敗", 3);
+                        actionLog($userid, "error", "follow_user", $to_userid, "フォローに失敗", 3);
                         return false;
                     }
                 }else{
-                    $pdo->rollBack();
+                    $pdo->commit();
                     return true;
                 }
             } catch (Exception $e) {
                 $pdo->rollBack();
-                actionLog($userid, "error", "unfollow_user", $to_userid, $e, 4);
+                actionLog($userid, "error", "follow_user", $to_userid, $e, 4);
                 return false;
             }
         }else{
@@ -1688,6 +1751,7 @@ function unfollow_user($pdo, $to_userid, $userid){
                 if (in_array($userid, $followerList)) {
                     // 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
                     $followerList = array_diff($followerList, array($userid));
+                    $followerList = array_values(array_unique(array_filter($followerList)));
                     $newFollowerList = implode(',', $followerList);
 
                     // UPDATE文を実行してフォロー情報を更新
@@ -1698,6 +1762,7 @@ function unfollow_user($pdo, $to_userid, $userid){
 
                     $myflwlist = explode(',', $myData["follow"]);
                     $delfollowList = array_diff($myflwlist, array($userData['userid']));
+                    $delfollowList = array_values(array_unique(array_filter($delfollowList)));
                     $deluserid = implode(',', $delfollowList);
 
                     // 自分のfollowカラムから相手のユーザーIDを削除
@@ -1717,7 +1782,7 @@ function unfollow_user($pdo, $to_userid, $userid){
                         return false;
                     }
                 }else{
-                    $pdo->rollBack();
+                    $pdo->commit();
                     return true;
                 }
             } catch (Exception $e) {

@@ -485,57 +485,56 @@ $(document).ready(function() {
 		});
 	});
 
-	$(document).on('click', '#quote_reuse_btn', function (event) {
-		var modalMain = $('.modal-content');
-		var reuseModal = $('#myQuoteReuseModal');
+	$(document).on('click', '#quote_reuse_btn', function (event) { 
+		var modalMain = $('.modal-content'); 
+		var reuseModal = $('#myQuoteReuseModal'); 
 
-		reuseModal.show();
-		modalMain.addClass("slideUp");
-		modalMain.removeClass("slideDown");
+		reuseModal.show(); 
+		modalMain.addClass("slideUp"); 
+		modalMain.removeClass("slideDown"); 
 
-		var uniqid = $(this).parents().attr('data-uniqid');
+		var uniqid = $(this).parents().attr('data-uniqid'); 
 
-		$('#ReuseCancelButton').on('click', function (event) {
-			modalMain.removeClass("slideUp");
-			modalMain.addClass("slideDown");
-			window.setTimeout(function(){
-				reuseModal.hide();
-			}, 150);
-		});
+		$('#ReuseCancelButton').off('click').on('click', function (event) { 
+			modalMain.removeClass("slideUp"); 
+			modalMain.addClass("slideDown"); 
+			window.setTimeout(function(){ 
+				reuseModal.hide(); 
+			}, 150); 
+		}); 
 
-		$('#ReuseButton').on('click', function (event) {
-			event.preventDefault();
+		$('#ReuseButton').off('click').on('click', function (event) {  // ここを修正
+			event.preventDefault(); 
 
-			var reusetext = $("#reusetexts").val();
+			var reusetext = $("#reusetexts").val(); 
 
-			if(reusetext == ""){
-				modalMain.removeClass("slideUp");
-				modalMain.addClass("slideDown");
-				window.setTimeout(function(){
-					reuseModal.hide();
-				}, 150);
-			}else{
-				$.ajax({
-					url: '../function/reuse.php',
-					method: 'POST',
-					data: { uniqid: uniqid, reusetext: reusetext, userid: userid, account_id: account_id},
-					dataType: 'json',
-					success: function (response) {
-						if (response.success) {
-							reuseModal.hide();
-							view_notify("引用リユーズしました");
-						} else {
-							reuseModal.hide();
-							view_notify("引用リユーズに失敗しました");
-						}
-					},
-					error: function (xhr, status, error) {
-						reuseModal.hide();
-						view_notify("引用リユーズに失敗しました");
-					}
-				});
-			}
-		});
+			if (reusetext == "") { 
+				modalMain.removeClass("slideUp"); 
+				modalMain.addClass("slideDown"); 
+				window.setTimeout(function(){ 
+					reuseModal.hide(); 
+				}, 150); 
+			} else { 
+				$.ajax({ 
+					url: '../function/reuse.php', 
+					method: 'POST', 
+					data: { uniqid: uniqid, reusetext: reusetext, userid: userid, account_id: account_id }, 
+					dataType: 'json', 
+					success: function (response) { 
+						reuseModal.hide(); 
+						if (response.success) { 
+							view_notify("引用リユーズしました"); 
+						} else { 
+							view_notify("引用リユーズに失敗しました"); 
+						} 
+					}, 
+					error: function (xhr, status, error) { 
+						reuseModal.hide(); 
+						view_notify("引用リユーズに失敗しました"); 
+					} 
+				}); 
+			} 
+		}); 
 	});
 
 	$(document).on('click', '#normal_reuse_btn', function (event) {

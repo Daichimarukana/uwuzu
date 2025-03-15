@@ -139,7 +139,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
                 if(!empty($messages)){
                     foreach ($messages as $value) {
-                        if (false === strpos($myblocklist, ','.safetext($value['account']))) {
+                        if (!(in_array(safetext($value['account']), explode(",", $myblocklist)))){
                             if(!($value["role"] === "ice")){
                                 $value["bookmark"] = $mybookmark;
                                 

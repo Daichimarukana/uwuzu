@@ -36,8 +36,12 @@ session_set_cookie_params([
 session_start();
 session_regenerate_id(true);
 
-$userid = $_SESSION['userid'];
-
+if( !empty($_SESSION['userid']) ) {
+    $userid = $_SESSION['userid'];
+}else{
+    header("Location: login.php");
+	exit;
+}
 try {
 
     $option = array(
@@ -61,8 +65,20 @@ if(!($is_login === false)){
 	exit;
 }
 //-------------------------------------------------------------
+//パスワード試行回数制限-------------------------------------------
+if (!isset($_SESSION['login_passtry'])) {
+    $_SESSION['login_passtry'] = 0;
+}
+//-------------------------------------------------------------
 
 if( !empty($_POST['btn_submit']) ) {
+    if ($_SESSION["login_passtry"] <= 5) {
+        $delay = $_SESSION["login_passtry"] * 2;
+    } else {
+        $delay = min(pow(2, $_SESSION["login_passtry"] - 2), 60);
+    }
+    sleep($delay);
+
     $useragent = safetext($_SERVER['HTTP_USER_AGENT']);
     $device = UserAgent_to_Device($useragent);
 
@@ -170,6 +186,7 @@ if( !empty($_POST['btn_submit']) ) {
         
             $_SESSION['username'] = $username;
             $_SESSION['password'] = null;
+            $_SESSION["login_passtry"] = 0;
         
             // リダイレクト先のURLへ転送する
             $url = '/home';
@@ -178,6 +195,7 @@ if( !empty($_POST['btn_submit']) ) {
             // すべての出力を終了
             exit;
         }else{
+            $_SESSION["login_passtry"]++;
             $error_message[] = "そのバックアップコードは使用できません。(BACKUPCODE_DAME)";
         }
     }else{
@@ -270,7 +288,8 @@ if( !empty($_POST['btn_submit']) ) {
                     $_SESSION['loginkey'] = $userLoginKey;
                 
                     $_SESSION['username'] = $username;
-                    $_SESSION['password'] = null;
+                    $_SESSION['password'] = null; 
+                    $_SESSION["login_passtry"] = 0;
                 
                     // リダイレクト先のURLへ転送する
                     $url = '/home';
@@ -280,6 +299,7 @@ if( !empty($_POST['btn_submit']) ) {
                     exit;
                         
                 }else {
+                    $_SESSION["login_passtry"]++;
                     $error_message[] = '二段階認証が出来ませんでした。再度お試しください。(AUTHCODE_CHECK_DAME)';
                 }
             }

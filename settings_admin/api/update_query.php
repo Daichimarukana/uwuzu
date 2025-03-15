@@ -6,10 +6,17 @@ blockedIP($_SERVER['REMOTE_ADDR']);
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
-if (isset($_FILES['update_zip']) && isset($_POST['userid']) && isset($_POST['account_id'])){
+if (isset($_FILES['update_zip']) && isset($_POST['userid']) && isset($_POST['account_id']) && isset($_COOKIE['loginkey'])) {
     $postUserid = safetext($_POST['userid']);
     $postZip= $_FILES['update_zip'];
     $loginid = safetext($_POST['account_id']);
+    $loginkey = safetext($_COOKIE['loginkey']);
+
+    $is_login = uwuzuUserLoginCheck($loginid, $loginkey, "admin");
+    if ($is_login === false) {
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
+    }
 
     try {
         $option = array(

@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 require('../db.php');
 require("function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
-if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id']))) {
+if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey']))) {
     try {
         $option = array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -21,6 +21,13 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) &&
     $postUniqid = safetext($_POST['uniqid']);
     $reusetext = safetext($_POST['reusetext']);
     $loginid = safetext($_POST['account_id']);
+    $loginkey = safetext($_COOKIE['loginkey']);
+
+    $is_login = uwuzuUserLoginCheck($loginid, $loginkey, "user");
+    if ($is_login === false) {
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
+    }
 
     $reusedate = date("Y-m-d H:i:s");
 

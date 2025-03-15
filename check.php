@@ -42,7 +42,12 @@ try {
     );
     $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 
-    $userid = $_SESSION['userid'];
+    if( !empty($_SESSION['userid']) ) {
+        $userid = $_SESSION['userid'];
+    }else{
+        header("Location: login.php");
+        exit;
+    }
 
 	$userData = getUserData($pdo, $userid);
 	$roles = explode(',', $userData["role"]); // カンマで区切られたロールを配列に分割

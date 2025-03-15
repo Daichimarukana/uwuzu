@@ -56,19 +56,27 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                 $userQuery->execute();
                 $userData = $userQuery->fetch();    
 
-                $sql = "SELECT ueuse.* 
-                        FROM ueuse 
-                        LEFT JOIN account ON ueuse.account = account.userid 
-                        WHERE ueuse.favorite LIKE :userid AND account.role != 'ice'
-                        ORDER BY ueuse.datetime DESC 
-                        LIMIT :offset, :itemsPerPage";
+                $itemsPerPage = 15; // 取得件数の基準
+                $offset = ($pageNumber - 1) * $itemsPerPage;
+                $message_array = [];
 
-                $stmt = $pdo->prepare($sql);
-                $stmt->bindValue(':userid', '%,' . $uwuzuid . '%', PDO::PARAM_STR);
-                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-                $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-                $stmt->execute();
-                $message_array = $stmt->fetchAll();
+                $sql = "SELECT ueuse.*  
+                        FROM ueuse  
+                        LEFT JOIN account ON ueuse.account = account.userid  
+                        WHERE FIND_IN_SET(:userid, REPLACE(ueuse.favorite, ' ', '')) > 0 
+                        AND account.role != 'ice'  
+                        ORDER BY ueuse.datetime DESC  
+                        LIMIT :offset, :itemsPerPage"; 
+
+                $stmt = $pdo->prepare($sql); 
+                $stmt->bindValue(':userid', $uwuzuid, PDO::PARAM_STR); 
+                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT); 
+                $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT); 
+                $stmt->execute(); 
+                $results = $stmt->fetchAll();
+
+                // 結果を追加
+                $message_array = array_merge($message_array, $results);
                 
                 $messages = array();
                 foreach ($message_array as $row) {
@@ -129,7 +137,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
 
                 if(!empty($messages)){
                     foreach ($messages as $value) {
-                        if (false === strpos($myblocklist, ','.safetext($value['account']))) {
+                        if (!(in_array(safetext($value['account']), explode(",", $myblocklist)))){
                             $value["bookmark"] = $mybookmark;
 
                             $fav = $value['favorite']; // コンマで区切られたユーザーIDを含む変数

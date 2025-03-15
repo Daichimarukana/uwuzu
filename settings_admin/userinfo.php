@@ -130,7 +130,7 @@ if( !empty($_POST['send_notification_submit']) ) {
 	}
 	if(empty($notice_msg)){
 		$error_message[] = "通知の本文を空欄にすることはできません。(INPUT_PLEASE)";
-	}elseif(mb_strlen($notice_msg) > 128){
+	}elseif(mb_strlen($notice_msg) > 16777216){
 		$error_message[] = "通知の本文を16777216文字以上にすることはできません。(INPUT_OVER_MAX_COUNT)";
 	}
 	if(empty($error_message)){
@@ -710,7 +710,7 @@ $(document).ready(function() {
 			}, 150);
         });
 
-        cancelButton3.addEventListener('click', () => { // 追加
+        cancelButton4.addEventListener('click', () => { // 追加
             modalMain.removeClass("slideUp");
 			modalMain.addClass("slideDown");
 			window.setTimeout(function(){

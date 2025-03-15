@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 $mojisizefile = "../server/textsize.txt";
 
 $banurldomainfile = "../server/banurldomain.txt";
@@ -10,12 +11,19 @@ require('../db.php');
 require("../function/function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 
-if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id']))) {
+if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey']))) {
     $userid = safetext($_POST['userid']);
 
     $postUniqid = safetext($_POST['uniqid']);
     $abitext = safetext($_POST['abitext']);
     $loginid = safetext($_POST['account_id']);
+    $loginkey = safetext($_COOKIE['loginkey']);
+
+    $is_login = uwuzuUserLoginCheck($loginid, $loginkey, "user");
+    if ($is_login === false) {
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
+    }
 
     $abidate = date("Y-m-d H:i:s");
 
@@ -105,21 +113,17 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && s
                     }
 
                     if ($res) {
-                        header('Content-Type: application/json');
                         echo json_encode(['success' => true]);
                         exit;
                     } else {
-                        header('Content-Type: application/json');
                         echo json_encode(['success' => false, 'error' => '追加に失敗しました。']);
                         exit;
                     }
                 } catch(PDOException $e) {
-                    header('Content-Type: application/json');
                     echo json_encode(['success' => false, 'error' => 'データベースエラー：' . $e->getMessage()]);
                     exit;
                 }
             }else{
-                header('Content-Type: application/json');
                 echo json_encode(['success' => false, 'error' => 'すでに追記済みです。']);
                 exit; 
             }

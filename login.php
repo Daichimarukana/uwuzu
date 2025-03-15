@@ -66,6 +66,12 @@ if(!($is_login === false)){
 }
 //-------------------------------------------------------------
 
+//パスワード試行回数制限-------------------------------------------
+if (!isset($_SESSION['login_passtry'])) {
+    $_SESSION['login_passtry'] = 0;
+}
+//-------------------------------------------------------------
+
 if( !empty($_POST['btn_submit']) ) {
     $_SESSION['form_data'] = $_POST;
 
@@ -157,6 +163,13 @@ if( !empty($_POST['btn_submit']) ) {
         }
 
         if(empty($error_message)){
+            if ($_SESSION["login_passtry"] <= 5) {
+                $delay = $_SESSION["login_passtry"] * 2;
+            } else {
+                $delay = min(pow(2, $_SESSION["login_passtry"] - 2), 60);
+            }
+            sleep($delay);
+
             if($result->rowCount() > 0) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
 
@@ -164,6 +177,7 @@ if( !empty($_POST['btn_submit']) ) {
                     if(uwuzu_password_verify($password,$row["password"])){
                         if(empty($row["authcode"])){
                             $_SESSION['userid'] = $userid;
+                            $_SESSION["login_passtry"] = 0;
 
                             $_SESSION['form_data'] = array();//フォーム初期化
                             // リダイレクト先のURLへ転送する
@@ -174,6 +188,7 @@ if( !empty($_POST['btn_submit']) ) {
                             exit;
                         }else{
                             $_SESSION['userid'] = $userid;
+                            $_SESSION["login_passtry"] = 0;
                             
                             $_SESSION['form_data'] = array();//フォーム初期化
                             $url = 'authlogin.php';
@@ -182,15 +197,16 @@ if( !empty($_POST['btn_submit']) ) {
                             // すべての出力を終了
                             exit;
                         }
-                    }
-                    else{
+                    }else{
+                        $_SESSION["login_passtry"]++;
                         $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)'; 
                     }
                 }else{
+                    $_SESSION["login_passtry"]++;
                     $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)'; 
                 }
-            }
-            else {
+            }else {
+                $_SESSION["login_passtry"]++;
                 $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)';
             }
         }
