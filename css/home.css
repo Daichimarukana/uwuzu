@@ -5948,7 +5948,7 @@ noscript .noscript_modal .inner .center_text p{
     }
 
     main{
-        height: 93.7dvh;
+        height: 100dvh;
         overflow: auto;
         border-radius: 0px;
         margin-top: 0px;
@@ -5957,9 +5957,7 @@ noscript .noscript_modal .inner .center_text p{
         width: auto;
         background-color: var(--tl-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         border: none;
-        border-bottom: 1px solid var(--main-color);
     }
 
     main h1{
@@ -6076,6 +6074,14 @@ noscript .noscript_modal .inner .center_text p{
         display: block;
         margin-bottom: 0px;
         margin-top: 0px;
+        position: fixed;
+        top: auto;
+        right: 0px;
+        bottom: 0px;
+        left: 0px;
+        background-color: var(--tl-color);
+        border-top: 1px solid var(--border-color);
+        z-index: 9999;
     }
 
     .botbox .lbtnzone{
@@ -7916,7 +7922,7 @@ noscript .noscript_modal .inner .center_text p{
         border-bottom: 3px solid var(--main-color);
     }
     .botbox{
-        border-top: 1px solid var(--main-color);
+        border-top: 1px solid var(--dark-sub-color);
     }
 
     .btmbutton{
