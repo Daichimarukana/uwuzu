@@ -79,7 +79,7 @@ if (isset($_GET['userid']) && isset($_GET['account_id'])) {
                                 $userQuery->execute();
                                 $user_array = $userQuery->fetch();
                                 if(!(empty($user_array))){
-                                    $value['fromusericon'] = "../".$user_array["iconname"];
+                                    $value['fromusericon'] = filter_var($user_array["iconname"], FILTER_VALIDATE_URL) ? $user_array["iconname"] : "../" . $user_array["iconname"];
                                     $value['fromusername'] = $user_array["username"];
                                 }else{
                                     $value['fromusericon'] = "../img/deficon/icon.png";

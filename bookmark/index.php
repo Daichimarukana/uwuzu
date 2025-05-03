@@ -93,6 +93,7 @@ $pdo = null;
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
+<script src="../js/view_function.js"></script>
 <link rel="stylesheet" href="../css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -237,27 +238,33 @@ $pdo = null;
 $(document).ready(function () {
     var userid = '<?php echo $userid; ?>';
 	var account_id = '<?php echo $loginid; ?>';
-
-    loadPosts();
+    view_ueuse_init(userid, account_id);
 
     var pageNumber = 1;
     var isLoading = false;
 
+    loadPosts();
     function loadPosts() {
         if (isLoading) return;
         isLoading = true;
         $("#loading").show();
         $.ajax({
-            url: '../nextpage/bookmark.php', // PHPファイルへのパス
-            method: 'GET',
+            url: '../nextpage/bookmarktimeline.php',
+            method: 'POST',
             data: { page: pageNumber, userid: userid, account_id: account_id },
-            dataType: 'html',
-            success: function (response) {
-                $('#postContainer').append(response);
+            dataType: 'json',
+            timeout: 300000,
+            success: function(response) {
+                renderUeuses(response);
                 pageNumber++;
                 isLoading = false;
                 $("#loading").hide();
-            }
+            },
+            error: function(xhr, textStatus, errorThrown) {
+                isLoading = false;
+                $("#loading").hide();
+                $("#error").show();
+            },
         });
     }
 

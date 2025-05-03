@@ -96,7 +96,7 @@ if (!empty($pdo)) {
 		$view_ip_addr = $userdata["last_ip"];
 	}
 
-	$roles = explode(',', $userdata["role"]);
+	$roles = array_filter(explode(',', $userdata["role"]));
 
 	$roleDataArray = array();
 			
@@ -118,6 +118,7 @@ if (!empty($pdo)) {
 	$result->execute();
 	$upload_cnt1 = $result->rowCount();
 
+	$userdata['iconname'] = filter_var($userdata['iconname'], FILTER_VALIDATE_URL) ? $userdata['iconname'] : "../" . $userdata['iconname'];
 }
 
 if( !empty($_POST['send_notification_submit']) ) {
@@ -344,178 +345,41 @@ if( !empty($_POST['send_water_submit']) ) {
 
 
 if( !empty($_POST['send_ban_submit']) ) {
-	$userId2 = $userdata['userid']; // 削除対象のユーザーID
-	$folderPath = "../ueuseimages/"; // フォルダのパス
+	try{
+		$userId2 = $userdata['userid']; // 削除対象のユーザーID
+		$res = addJob($pdo, $userId2, "deleteUser", "stop_account");
 	
-	// 指定したフォルダ内でユーザーIDを含むファイルを検索
-	$filesToDelete = glob($folderPath . "*-$userId2.*"); // 「-ユーザーID.拡張子」というパターンを検索
-	
-	// ファイルを順に削除
-	foreach ($filesToDelete as $file) {
-		if (is_file($file)) {
-			unlink($file); // ファイルを削除
-		}
-	}
-	
-	$folderPath2 = "../ueusevideos/"; // フォルダのパス
-	
-	// 指定したフォルダ内でユーザーIDを含むファイルを検索
-	$filesToDelete2 = glob($folderPath2 . "*-$userId2.*"); // 「-ユーザーID.拡張子」というパターンを検索
-	
-	// ファイルを順に削除
-	foreach ($filesToDelete2 as $file2) {
-		if (is_file($file2)) {
-			unlink($file2); // ファイルを削除
-		}
-	}
+		if ($res) {
+			actionLog($userid, "info", "send_ban_submit", $userId2, $userid."さんが".$userId2."さんをBANしました", 4);
+			header("Location:useradmin");
+			exit;
 
-	$folderPath3 = "../usericons/"; // フォルダのパス
-	
-	// 指定したフォルダ内でユーザーIDを含むファイルを検索
-	$filesToDelete3 = glob($folderPath3 . "*-$userId2.*"); // 「-ユーザーID.拡張子」というパターンを検索
-	
-	// ファイルを順に削除
-	foreach ($filesToDelete3 as $file3) {
-		if (is_file($file3)) {
-			unlink($file3); // ファイルを削除
-		}
-	}
+			//BAN通知メール
+			if(false !== strpos($userdata["mail_settings"], 'important')) {
+				if(!empty(MAIL_CHKS)){
+					if(MAIL_CHKS == "true"){
+						if( !empty($view_mailadds) ){
+							if(filter_var($view_mailadds, FILTER_VALIDATE_EMAIL)){
+								$mail_title = "お使いの".safetext($serversettings["serverinfo"]["server_name"])."アカウントはBANされました";
+								$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  この度、ご利用のアカウント(".$userdata["userid"].")が".safetext($serversettings["serverinfo"]["server_name"])."管理者によりBAN(削除)されたためお知らせいたします。  今後は今までご利用いただいた".safetext($serversettings["serverinfo"]["server_name"])."アカウントは利用できません。  ".safetext($serversettings["serverinfo"]["server_name"])."サーバー上から今までご利用いただいていたアカウントの情報は削除されたためログインなどもできません。    ご理解とご協力のほどよろしくお願いします。";
 
-	$folderPath4 = "../userheads/"; // フォルダのパス
-	
-	// 指定したフォルダ内でユーザーIDを含むファイルを検索
-	$filesToDelete4 = glob($folderPath4 . "*-$userId2.*"); // 「-ユーザーID.拡張子」というパターンを検索
-	
-	// ファイルを順に削除
-	foreach ($filesToDelete4 as $file4) {
-		if (is_file($file4)) {
-			unlink($file4); // ファイルを削除
-		}
-	}
-	
-
-	try {
-		// フォロー・フォロワー情報を削除したい全てのアカウントを取得
-		$flw_query = $pdo->prepare("SELECT * 
-			FROM account 
-			WHERE follow LIKE :pattern1 
-			OR follow LIKE :pattern2 
-			OR follow LIKE :pattern3 
-			OR follower LIKE :pattern1 
-			OR follower LIKE :pattern2 
-			OR follower LIKE :pattern3
-		"); 				
-		$flw_query->bindValue(':pattern1', "%,$userId2,%", PDO::PARAM_STR);  // 中間に位置する場合
-		$flw_query->bindValue(':pattern2', "%,$userId2", PDO::PARAM_STR);   // 末尾に位置する場合
-		$flw_query->bindValue(':pattern3', "$userId2,%", PDO::PARAM_STR);   // 先頭に位置する場合
-		$flw_query->execute();
-		$flw_accounts = $flw_query->fetchAll();
-
-		foreach ($flw_accounts as $account) {
-			unfollow_user($pdo, $account['userid'], $userId2);
-			unfollow_user($pdo, $userId2, $account['userid']);
-		}
-
-		// ユーザーIDを削除したい全てのアカウントを取得
-		$blk_query = $pdo->prepare("SELECT * 
-			FROM account 
-			WHERE blocklist LIKE :pattern1 
-			OR blocklist LIKE :pattern2 
-			OR blocklist LIKE :pattern3
-		"); 				
-		$blk_query->bindValue(':pattern1', "%,$userId2,%", PDO::PARAM_STR);  // 中間に位置する場合
-		$blk_query->bindValue(':pattern2', "%,$userId2", PDO::PARAM_STR);   // 末尾に位置する場合
-		$blk_query->bindValue(':pattern3', "$userId2,%", PDO::PARAM_STR);   // 先頭に位置する場合
-		$blk_query->execute();
-		$blk_accounts = $blk_query->fetchAll();
-
-		foreach ($blk_accounts as $account) {
-			unblock_user($pdo, $userId2, $account['userid']);
-		}
-
-		$pdo->beginTransaction(); 
-		try {
-			// 投稿削除クエリを実行
-			$deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE account = :userid");
-			$deleteQuery->bindValue(':userid', $userId2, PDO::PARAM_STR);
-			$res = $deleteQuery->execute();
-
-			// 通知削除クエリを実行(自分宛ての通知)
-			$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE touserid = :touserid");
-			$deleteQuery->bindValue(':touserid', $userId2, PDO::PARAM_STR);
-			$res = $deleteQuery->execute();
-			
-			// 通知削除クエリを実行(自分からの通知)
-			$deleteQuery = $pdo->prepare("DELETE FROM notification WHERE fromuserid = :fromuserid");
-			$deleteQuery->bindValue(':fromuserid', $userId2, PDO::PARAM_STR);
-			$res = $deleteQuery->execute();
-
-			// いいねの削除
-			$query = $pdo->prepare("SELECT * FROM ueuse WHERE favorite LIKE :pattern1 OR favorite LIKE :pattern2 OR favorite LIKE :pattern3");
-			$query->bindValue(':pattern1', "%,$userId2,%", PDO::PARAM_STR);
-			$query->bindValue(':pattern2', "%,$userId2", PDO::PARAM_STR);
-			$query->bindValue(':pattern3', "$userId2,%", PDO::PARAM_STR);
-			$query->execute();
-			$accounts = $query->fetchAll();
-
-			foreach ($accounts as $account) {
-				// いいねの更新
-				if (strpos($account['favorite'], ",$userId2,") !== false || strpos($account['favorite'], ",$userId2") !== false || strpos($account['favorite'], "$userId2,") !== false) {
-					$favoriteList = explode(',', $account['favorite']);
-					$favoriteList = array_diff($favoriteList, array($userId2));
-					$newFavoriteList = implode(',', $favoriteList);
-
-					$updateFavoriteQuery = $pdo->prepare("UPDATE ueuse SET favorite = :favorite WHERE uniqid = :uniqid");
-					$updateFavoriteQuery->bindValue(':favorite', $newFavoriteList, PDO::PARAM_STR);
-					$updateFavoriteQuery->bindValue(':uniqid', $account['uniqid'], PDO::PARAM_STR);
-					$updateFavoriteQuery->execute();
-				}
-			}
-
-			$deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
-			$deleteQuery->bindValue(':userid', $userId2, PDO::PARAM_STR);
-			$res = $deleteQuery->execute();
-
-			$pdo->commit();
-		} catch (Exception $e) {
-			// エラーが発生した時はロールバック
-			$pdo->rollBack();
-			actionLog($userId2, "error", "deleteAccount", null, $e, 4);
-		}
-
-		//BAN通知メール
-		if(false !== strpos($userdata["mail_settings"], 'important')) {
-			if(!empty(MAIL_CHKS)){
-				if(MAIL_CHKS == "true"){
-					if( !empty($view_mailadds) ){
-						if(filter_var($view_mailadds, FILTER_VALIDATE_EMAIL)){
-							$mail_title = "お使いの".safetext($serversettings["serverinfo"]["server_name"])."アカウントはBANされました";
-							$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  この度、ご利用のアカウント(".$userdata["userid"].")が".safetext($serversettings["serverinfo"]["server_name"])."管理者によりBAN(削除)されたためお知らせいたします。  今後は今までご利用いただいた".safetext($serversettings["serverinfo"]["server_name"])."アカウントは利用できません。  ".safetext($serversettings["serverinfo"]["server_name"])."サーバー上から今までご利用いただいていたアカウントの情報は削除されたためログインなどもできません。    ご理解とご協力のほどよろしくお願いします。";
-
-							$error_message[] = send_html_mail($view_mailadds,$mail_title,$mail_text,"../");
+								$error_message[] = send_html_mail($view_mailadds,$mail_title,$mail_text,"../");
+							}
 						}
 					}
 				}
 			}
+			//------------
+		} else {
+			$error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
+			actionLog($userid, "error", "send_ban_submit", $userId2, $error_message[], 4);
 		}
-		//------------
-
 	} catch (Exception $e) {
 
 		// エラーが発生した時はロールバック
 		$pdo->rollBack();
 		actionLog($userid, "error", "send_ban_submit", $userId2, $e, 4);
 	}
-
-	if ($res) {
-		actionLog($userid, "info", "send_ban_submit", $userId2, $userid."さんが".$userId2."さんをBANしました", 4);
-		header("Location:useradmin");
-		exit; 
-	} else {
-		$error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
-		actionLog($userid, "error", "send_ban_submit", $userId2, $error_message, 4);
-	}
-
 
 	// プリペアドステートメントを削除
 	$stmt = null;
@@ -555,7 +419,7 @@ require('../logout/logout.php');
 		<div class="admin_right">
 			<div class="admin_userinfo">
 				<div class="icon">
-					<img src="<?php echo safetext('../'.$userdata['iconname']); ?>">
+					<img src="<?php echo safetext($userdata['iconname']); ?>">
 					<div class="tatext">
 						<h2><?php echo safetext($userdata['username']); ?></h2>
 						<p>@<?php echo safetext($userdata['userid']); ?></p>
@@ -566,13 +430,17 @@ require('../logout/logout.php');
 					<?php foreach ($roles as $roleId): ?>
 						<?php $roleData = $roleDataArray[$roleId]; ?>
 						<?php 
-							if(safetext($roleData["roleeffect"]) == '' || safetext($roleData["roleeffect"]) == 'none'){
-								$role_view_effect = "";
-							}elseif(safetext($roleData["roleeffect"]) == 'shine'){
-								$role_view_effect = "shine";
-							}elseif(safetext($roleData["roleeffect"]) == 'rainbow'){
-								$role_view_effect = "rainbow";
-							}else{
+							if(!(empty($roleData))){
+								if (safetext($roleData["roleeffect"]) == '' || safetext($roleData["roleeffect"]) == 'none') {
+									$role_view_effect = "";
+								} elseif (safetext($roleData["roleeffect"]) == 'shine') {
+									$role_view_effect = "shine";
+								} elseif (safetext($roleData["roleeffect"]) == 'rainbow') {
+									$role_view_effect = "rainbow";
+								} else {
+									$role_view_effect = "";
+								}
+							} else {
 								$role_view_effect = "";
 							}
 						?>

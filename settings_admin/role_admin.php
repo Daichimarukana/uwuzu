@@ -401,7 +401,6 @@ if (!empty($pdo)) {
 				<input type="submit" class = "irobutton" name="role_btn_submit" value="作成">
 			</form>
 			<div class="formarea">
-				<hr>
 				<h1>ロール付与</h1>
 				<p>特定のユーザーにロール付与するときに使用してください。</p>
 				<button id="addrole" class="irobutton">付与</button>

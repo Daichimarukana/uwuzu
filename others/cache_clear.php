@@ -25,15 +25,11 @@ if(isset($_SERVER['HTTP_REFERER'])){
 <script>
 window.addEventListener('load', function(){
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistration()
-            .then(registration => {
-                registration.unregister();
-                navigator.serviceWorker.register("../../sw.js").then(reg => {
-                    console.log("ServiceWorker OK", reg);
-                }).catch(err => {
-                    console.log("ServiceWorker BAD", err);
-                });
-            });
+        navigator.serviceWorker.ready.then(function(registration) {
+            if (registration.active) {
+                registration.active.postMessage({ action: 'clearCache' });
+            }
+        });
     }
 
     window.location.href = "<?php echo $back?>";

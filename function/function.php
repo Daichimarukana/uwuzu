@@ -67,6 +67,25 @@ function blockedIP($ip_addr) {
         }
     }
 }
+function stopLoadAvg(){
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+		$loadAve = 0;
+	} else {
+		if (function_exists("sys_getloadavg")) {
+            $load = sys_getloadavg();
+            $loadAve = is_array($load) && isset($load[0]) ? $load[0] : 0;
+        } else {
+            $loadAve = 0;
+        }
+	}
+
+    if (defined('STOP_LA') && (int)STOP_LA !== -1) {
+        if ($loadAve > (int)STOP_LA) {
+            include_once __DIR__ . '/../errorpage/overcapacity.php';
+            exit;
+        }
+    }
+}
 //通常のログイン処理
 function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "user") {
     //セッション,クッキー,IPアドレス,閲覧権限(userかadminかの二種類)を受け取る
@@ -117,12 +136,15 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                         $is_login = true;
                     }else{
                         $is_login = false;
+                        stopLoadAvg();
                     }
                 }else{
                     $is_login = true;
+                    stopLoadAvg();
                 }
             }else{
                 $is_login = false;
+                stopLoadAvg();
             }
         }else{
             if(isset($session['userid']) && isset($session['username'])){
@@ -132,12 +154,15 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                             $is_login = true;
                         }else{
                             $is_login = false;
+                            stopLoadAvg();
                         }
                     }else{
                         $is_login = true;
+                        stopLoadAvg();
                     }
                 }else{
                     $is_login = false;
+                    stopLoadAvg();
                 }
             }else if(isset($cookie['userid']) && isset($cookie['username'])){
                 if($cookie['userid'] === $loginResponse["userid"] && $cookie['username'] === $loginResponse["username"]){
@@ -146,15 +171,19 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                             $is_login = true;
                         }else{
                             $is_login = false;
+                            stopLoadAvg();
                         }
                     }else{
                         $is_login = true;
+                        stopLoadAvg();
                     }
                 }else{
                     $is_login = false;
+                    stopLoadAvg();
                 }
             }else{
                 $is_login = false;
+                stopLoadAvg();
             }
         }
 
@@ -208,6 +237,14 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                     }
                 }else{
                     actionLog($userid, "notice", "uwuzuUserLogin", null, "ユーザーのIPアドレスが不正な値でした！", 2);
+                }
+            }
+
+            //JobがあればJobを実行する---------------------------------------------------
+            $job = getJob($pdo, $userid);
+            if(!(empty($job))){
+                if($job["job"] == "deleteUser"){
+                    deleteUser($pdo, $job["userid"], $job["step"], $job["uniqid"]);
                 }
             }
 
@@ -387,6 +424,27 @@ function check_mime_video($tmp_name){
         return false;
     }
 }
+function convert_mime($mime_type){
+    $safe_img_mime = array(
+        "image/gif" => 'gif',
+        "image/jpeg" => 'jpg',
+        "image/png" => 'png',
+        "image/svg+xml" => 'svg',
+        "image/webp" => 'webp',
+        "image/bmp" => 'bmp',
+        "image/x-icon" => 'ico',
+        "image/tiff" => 'tiff',
+        "video/mpeg" => 'mpeg',
+        "video/mp4" => 'mp4',
+        "video/webm" => 'webm',
+        "video/x-msvideo" => 'avi',
+    );
+    if(isset($safe_img_mime[$mime_type])){
+        return $safe_img_mime[$mime_type];
+    }else{
+        return false;
+    }
+}
 //ファイル形式チェック(Base64の場合)
 function base64_mime($Base64,$userid){
     $Base64 = base64_decode($Base64);
@@ -516,6 +574,108 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
         // メモリの解放
         imagedestroy($originalImage);
         imagedestroy($resizedImage);
+    }
+}
+
+function uploadAmazonS3($tmp_name){
+    if(check_mime_video($tmp_name) == false){
+        $is_video = false;
+    }else{
+        $is_video = true;
+    }
+    $credentials = [
+        'key'    => AMS3_ACCESSKEY,
+        'secret' => AMS3_SECRETKEY,
+    ];
+
+    $bucket        = AMS3_BUCKET_NM;
+    $srcFilePath   = $tmp_name;
+    if($is_video == true){
+        $mime = check_mime_video($srcFilePath);
+        $extension = convert_mime($mime);
+    }else{
+        $mime = check_mime($srcFilePath);
+        $extension = convert_mime($mime);
+    }
+    $key           = AMS3_PREFIX_NM.'/'.createUniqId().'' . '.' . $extension;
+
+    if(AMS3_IS_S3FPS_ == 'true'){
+        $S3FPS = true;
+    }else{
+        $S3FPS = false;
+    }
+
+    try {
+        $s3Client = new Aws\S3\S3Client([
+            'endpoint'    => AMS3_ENDPOINTS,
+            'region'      => AMS3_REGION_NM,
+            'version'     => 'latest',
+            'credentials' => $credentials,
+            'use_path_style_endpoint' => $S3FPS,
+        ]);
+        $result = $s3Client->putObject([
+            'Bucket'     => $bucket,
+            'Key'        => $key,
+            'SourceFile' => $srcFilePath,
+            'ContentType'	=> $mime,
+        ]);
+        if($result){
+            $url = AMS3_BASE_URLS . '/' . $key;
+            return $url;
+        }else{
+            actionLog(null, "error", "uploadAmazonS3", null, "アップロードに失敗しました", 4); 
+            return false;
+        }
+    } catch (Aws\S3\Exception\S3Exception $e) {
+        actionLog(null, "error", "uploadAmazonS3", null, $e->getMessage(), 4); 
+        return false;
+    }
+}
+
+function deleteAmazonS3($url){
+    $key = explode("/", mb_substr(parse_url($url, PHP_URL_PATH), 1));
+    array_shift($key);//最初の一個を消す
+    $key = implode("/", $key);
+
+    $credentials = [
+        'key'    => AMS3_ACCESSKEY,
+        'secret' => AMS3_SECRETKEY,
+    ];
+
+    $bucket        = AMS3_BUCKET_NM;
+    if(AMS3_IS_S3FPS_ == 'true'){
+        $S3FPS = true;
+    }else{
+        $S3FPS = false;
+    }
+
+    try {
+        $s3Client = new Aws\S3\S3Client([
+            'endpoint'    => AMS3_ENDPOINTS,
+            'region'      => AMS3_REGION_NM,
+            'version'     => 'latest',
+            'credentials' => $credentials,
+            'use_path_style_endpoint' => $S3FPS,
+        ]);
+        $is_hasfile = $s3Client->doesObjectExistV2($bucket, $key, false, []);
+        if($is_hasfile == true){
+            $result = $s3Client->deleteObject([
+                'Bucket'     => $bucket,
+                'Key'        => $key
+            ]);
+            if($result){
+                return true;
+            }else{
+                actionLog(null, "error", "deleteAmazonS3", null, "削除に失敗しました", 4); 
+                return false;
+            }
+        }else{
+            actionLog(null, "error", "deleteAmazonS3", null, $key."が既に削除されていました", 1); 
+            return true;
+        }
+    } catch (Aws\S3\Exception\S3Exception $e) {
+        actionLog(null, "error", "deleteAmazonS3", null, $e->getMessage(), 4); 
+        return false;
     }
 }
 
@@ -800,6 +960,28 @@ function YouTube_and_nicovideo_Links($postText) {
     return $postText;
 }
 
+function to_null($value) {
+    $null_conditions = [
+        "ueuse"  => "",
+        "photo1" => "none",
+        "photo2" => "none",
+        "photo3" => "none",
+        "photo4" => "none",
+        "video1" => "none",
+        "rpuniqid" => "",
+        "ruuniqid" => "",
+        "abi" => "none",
+    ];
+    
+    foreach ($null_conditions as $key => $invalid_value) {
+        if (isset($value[$key]) && $value[$key] === $invalid_value) {
+            $value[$key] = null;
+        }
+    }
+
+    return $value;
+}
+
 function UserAgent_to_Device($useragent) {
     if(preg_match('/Windows\sNT\s10.0/', $useragent)) {
         $device = "Windows 10/11";
@@ -1029,9 +1211,27 @@ function send_notification($to,$from,$title,$message,$url,$category){
 }
 // ユーズするとき全部この関数
 function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw,$aibwm){
-    //AIBlockWaterMark--------------------------------------------
-    require('../settings_admin/plugin_settings/aiblockwatermark_settings.php');
+    // AIBlockWaterMark--------------------------------------------
+    require_once(__DIR__ . '/../settings_admin/plugin_settings/aiblockwatermark_settings.php');
     //------------------------------------------------------
+    if ($aibwm === true && !empty(AIBWM_CHK) && AIBWM_CHK == "true") {
+        if (file_exists(__DIR__ . '/../plugin/AIBlockWaterMark/aiblockwatermark.php')) {
+            require(__DIR__ . '/../plugin/AIBlockWaterMark/aiblockwatermark.php');
+        }
+    }
+    //------------------------------------------------------
+    if (file_exists(__DIR__ . '/../settings_admin/plugin_settings/amazons3_settings.php')) {
+        require_once(__DIR__ . '/../settings_admin/plugin_settings/amazons3_settings.php');
+        if (defined('AMS3_CHKS') && AMS3_CHKS == "true") {
+            if (file_exists(__DIR__ . '/../plugin/aws/aws-autoloader.php')) {
+                require_once(__DIR__ . '/../plugin/aws/aws-autoloader.php');
+            } else {
+                actionLog(null, "error", "uploadAmazonS3", null, "AWS SDK for PHPが見つかりませんでした！", 4);
+            }
+        }
+    } else {
+        actionLog(null, "error", "uploadAmazonS3", null, "amazons3_settings.phpが見つかりませんでした！", 3);
+    }
 
     $rpUniqid = safetext($rpUniqid);
     $ruUniqid = safetext($ruUniqid);
@@ -1040,12 +1240,16 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
     $nsfw = safetext($nsfw);
 
     $error_message = array();
-    $mojisizefile = "../server/textsize.txt";
+    $mojisizefile = __DIR__ . "/../server/textsize.txt";
 
     //投稿及び返信レート制限↓(分):デフォで60件/分まで
-    $max_ueuse_rate_limit = 60;
+    if(!((int)RATE_LM === -1)){
+        $max_ueuse_rate_limit = (int)RATE_LM;
+    }else{
+        $max_ueuse_rate_limit = PHP_INT_MAX;
+    }
 
-    $banurldomainfile = "../server/banurldomain.txt";
+    $banurldomainfile = __DIR__ . "/../server/banurldomain.txt";
     $banurl_info = file_get_contents($banurldomainfile);
     $banurl = array_filter(preg_split("/\r\n|\n|\r/", $banurl_info));
 
@@ -1059,7 +1263,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
         $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
     } catch(PDOException $e) {
         actionLog($userid, "error", "send_ueuse", null, $e, 4);
-        return false;
+        return [false, "DB_ERROR"];
     }
 
     if(!(empty($pdo))){		
@@ -1094,6 +1298,10 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 }
             }
             
+            // 改行ユーズ確認
+            if(preg_match('/^[\n\r]+$/', $ueuse) === 1){
+                $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
+            }
         }
 
         $old_datetime = date("Y-m-d H:i:00");
@@ -1115,28 +1323,41 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     if(!(empty($uploadedFile['tmp_name']))){
                         if(check_mime($uploadedFile['tmp_name'])){
                             // アップロードされたファイルの拡張子を取得
-                            $extension = strtolower(pathinfo($uploadedFile['name'], PATHINFO_EXTENSION));
-                            // 新しいファイル名を生成（uniqid + 拡張子）
-                            $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-                            // 保存先のパスを生成
-                            $uploadedPath = '../ueuseimages/' . $newFilename;
-                            // EXIF削除
+                            $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
                             delete_exif($extension, $uploadedFile['tmp_name']);
-                            // ファイルを移動
-                            $result = move_uploaded_file($uploadedFile['tmp_name'], $uploadedPath);
-                            
-                            if ($result) {
-                                $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
-                            } else {
-                                $errnum = $uploadedFile['error'];
-                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
+                            if($aibwm === true){
+                                AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
+                            }
+                            if(AMS3_CHKS == "true"){
+                                $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
+                            }else{
+                                // 新しいファイル名を生成（uniqid + 拡張子）
+                                $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
+                                // 保存先のパスを生成
+                                $uploadedPath = '../ueuseimages/' . $newFilename;
+                                // ファイルを移動
+                                $result = move_uploaded_file($uploadedFile['tmp_name'], __DIR__."/".$uploadedPath);
+                                
+                                if ($result) {
+                                    $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
+                                } else {
+                                    $errnum = $uploadedFile['error'];
+                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                    $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
+                                }
+                            }
+                            if(isset($s3result)){
+                                if($s3result == false){
+                                    $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                }else{
+                                    $save_photo1 = $s3result; // S3に保存されたファイルのパスを使用
+                                }
                             }
                         }else{
                             $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
@@ -1158,27 +1379,40 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     if(!(empty($uploadedFile2['tmp_name']))){
                         if(check_mime($uploadedFile2['tmp_name'])){
                             // アップロードされたファイルの拡張子を取得
-                            $extension2 = strtolower(pathinfo($uploadedFile2['name'], PATHINFO_EXTENSION));
-                            // 新しいファイル名を生成（uniqid + 拡張子）
-                            $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
-                            // 保存先のパスを生成
-                            $uploadedPath2 = '../ueuseimages/' . $newFilename2;
-                            // EXIF削除
+                            $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
                             delete_exif($extension2, $uploadedFile2['tmp_name']);
-                            // ファイルを移動
-                            $result2 = move_uploaded_file($uploadedFile2['tmp_name'], $uploadedPath2);
-                            if ($result2) {
-                                $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
-                            } else {
-                                $errnum = $uploadedFile2['error'];
-                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+                            if($aibwm === true){
+                                AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
+                            }
+                            if(AMS3_CHKS == "true"){
+                                $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
+                            }else{
+                                // 新しいファイル名を生成（uniqid + 拡張子）
+                                $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
+                                // 保存先のパスを生成
+                                $uploadedPath2 = '../ueuseimages/' . $newFilename2;
+                                // ファイルを移動
+                                $result2 = move_uploaded_file($uploadedFile2['tmp_name'], __DIR__."/".$uploadedPath2);
+                                if ($result2) {
+                                    $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
+                                } else {
+                                    $errnum = $uploadedFile2['error'];
+                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                    $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+                                }
+                            }
+                            if(isset($s3result)){
+                                if($s3result == false){
+                                    $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
+                                }else{
+                                    $save_photo2 = $s3result; // S3に保存されたファイルのパスを使用
+                                }
                             }
                         }else{
                             $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
@@ -1200,27 +1434,40 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     if(!(empty($uploadedFile3['tmp_name']))){
                         if(check_mime($uploadedFile3['tmp_name'])){
                             // アップロードされたファイルの拡張子を取得
-                            $extension3 = strtolower(pathinfo($uploadedFile3['name'], PATHINFO_EXTENSION));
-                            // 新しいファイル名を生成（uniqid + 拡張子）
-                            $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
-                            // 保存先のパスを生成
-                            $uploadedPath3 = '../ueuseimages/' . $newFilename3;
-                            // EXIF削除
+                            $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
                             delete_exif($extension3, $uploadedFile3['tmp_name']);
-                            // ファイルを移動
-                            $result3 = move_uploaded_file($uploadedFile3['tmp_name'], $uploadedPath3);
-                            if ($result3) {
-                                $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
-                            } else {
-                                $errnum = $uploadedFile3['error'];
-                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
+                            if($aibwm === true){
+                                AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
+                            }
+                            if(AMS3_CHKS == "true"){
+                                $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
+                            }else{
+                                // 新しいファイル名を生成（uniqid + 拡張子）
+                                $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
+                                // 保存先のパスを生成
+                                $uploadedPath3 = '../ueuseimages/' . $newFilename3;
+                                // ファイルを移動
+                                $result3 = move_uploaded_file($uploadedFile3['tmp_name'], __DIR__."/".$uploadedPath3);
+                                if ($result3) {
+                                    $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
+                                } else {
+                                    $errnum = $uploadedFile3['error'];
+                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                    $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
+                                }
+                            }
+                            if(isset($s3result)){
+                                if($s3result == false){
+                                    $error_message[] = 'アップロード失敗！(3)エラーコード： S3ERROR';
+                                }else{
+                                    $save_photo3 = $s3result; // S3に保存されたファイルのパスを使用
+                                }
                             }
                         }else{
                             $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
@@ -1241,27 +1488,40 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     if(!(empty($uploadedFile4['tmp_name']))){
                         if(check_mime($uploadedFile4['tmp_name'])){
                             // アップロードされたファイルの拡張子を取得
-                            $extension4 = strtolower(pathinfo($uploadedFile4['name'], PATHINFO_EXTENSION));
-                            // 新しいファイル名を生成（uniqid + 拡張子）
-                            $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
-                            // 保存先のパスを生成
-                            $uploadedPath4 = '../ueuseimages/' . $newFilename4;
-                            // EXIF削除
+                            $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
                             delete_exif($extension4, $uploadedFile4['tmp_name']);
-                            // ファイルを移動
-                            $result4 = move_uploaded_file($uploadedFile4['tmp_name'], $uploadedPath4);  
-                            if ($result4) {
-                                $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
-                            } else {
-                                $errnum = $uploadedFile4['error'];
-                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
+                            if($aibwm === true){
+                                AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
+                            }
+                            if(AMS3_CHKS == "true"){
+                                $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
+                            }else{
+                                // 新しいファイル名を生成（uniqid + 拡張子）
+                                $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
+                                // 保存先のパスを生成
+                                $uploadedPath4 = '../ueuseimages/' . $newFilename4;
+                                // ファイルを移動
+                                $result4 = move_uploaded_file($uploadedFile4['tmp_name'], __DIR__."/".$uploadedPath4);  
+                                if ($result4) {
+                                    $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
+                                } else {
+                                    $errnum = $uploadedFile4['error'];
+                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                    $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
+                                }
+                            }
+                            if(isset($s3result)){
+                                if($s3result == false){
+                                    $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                }else{
+                                    $save_photo4 = $s3result; // S3に保存されたファイルのパスを使用
+                                }
                             }
                         }else{
                             $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
@@ -1279,48 +1539,43 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
 
                     if(!(empty($uploadedVideo['tmp_name']))){
                         if(check_mime_video($uploadedVideo['tmp_name'])){
-                            // アップロードされたファイルの拡張子を取得
-                            $extensionVideo = strtolower(pathinfo($uploadedVideo['name'], PATHINFO_EXTENSION)); // 小文字に変換
-                            // 正しい拡張子の場合、新しいファイル名を生成
-                            $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
-                            // 保存先のパスを生成
-                            $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
-                            // ファイルを移動
-                            $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], $uploadedPathVideo);
-                            if ($resultVideo) {
-                                $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
-                            } else {
-                                $errnum = $uploadedVideo['error'];
-                                if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
+                            if(AMS3_CHKS == "true"){
+                                $s3result = uploadAmazonS3($uploadedVideo['tmp_name']);
+                            }else{
+                                // アップロードされたファイルの拡張子を取得
+                                $extensionVideo = convert_mime(check_mime_video($uploadedVideo['tmp_name']));
+                                // 正しい拡張子の場合、新しいファイル名を生成
+                                $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
+                                // 保存先のパスを生成
+                                $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
+                                // ファイルを移動
+                                $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], __DIR__."/".$uploadedPathVideo);
+                                if ($resultVideo) {
+                                    $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
+                                } else {
+                                    $errnum = $uploadedVideo['error'];
+                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                    $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
+                                }
+                            }
+                            if(isset($s3result)){
+                                if($s3result == false){
+                                    $error_message[] = 'アップロード失敗！(5)エラーコード： S3ERROR';
+                                }else{
+                                    $save_video1 = $s3result; // S3に保存されたファイルのパスを使用
+                                }
                             }
                         } else {
                             $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
                         }
                     }else{
                         $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                    }
-                }
-
-                if($aibwm === true && !empty(AIBWM_CHK && AIBWM_CHK == "true")){
-                    require('../plugin/AIBlockWaterMark/aiblockwatermark.php');
-                    if(!($save_photo1 == "none")){
-                        AIBlockWaterMark($save_photo1, $userid);
-                    }
-                    if(!($save_photo2 == "none")){
-                        AIBlockWaterMark($save_photo2, $userid);
-                    }
-                    if(!($save_photo3 == "none")){
-                        AIBlockWaterMark($save_photo3, $userid);
-                    }
-                    if(!($save_photo4 == "none")){
-                        AIBlockWaterMark($save_photo4, $userid);
                     }
                 }
 
@@ -1494,35 +1749,48 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         }
                     }else{
                         $error_message[] = '返信とリユーズを同時に行うことはできません。(ERROR)';
-                        return $error_message;
+                        return [false, $error_message];
                     }
 
                     if( $res ) {
-                        return null;
+                        return [true, $uniqid];
                     } else {
                         $error_message[] = "ユーズに失敗しました。(REGISTERED_DAME)";
-                        return $error_message;
+                        return [false, $error_message];
                     }
 
                     // プリペアドステートメントを削除
                     $stmt = null;
                 }else{
                     actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
-                    return $error_message;
+                    return [false, $error_message];
                 }
             }else{
                 actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
-                return $error_message;
+                return [false, $error_message];
             }
         }else{
             $error_message[] = "投稿回数のレート制限を超過しています。(OVER_RATE_LIMIT)";
             actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
-            return $error_message;
+            return [false, $error_message];
         }
     }
 }
 
 function delete_ueuse($uniqid, $userid, $account_id){
+    if(file_exists("../settings_admin/plugin_settings/amazons3_settings.php")){
+        require_once '../settings_admin/plugin_settings/amazons3_settings.php';
+        if(AMS3_CHKS == "true"){
+            if(file_exists("../plugin/aws/aws-autoloader.php")){
+                require_once '../plugin/aws/aws-autoloader.php';
+            }else{
+                actionLog(null, "error", "uploadAmazonS3", null, "AWS SDK for PHPが見つかりませんでした！", 4);
+            }
+        }
+    }else{
+        actionLog(null, "error", "uploadAmazonS3", null, "amazons3_settings.phpが見つかりませんでした！", 3);
+    }
+
     if (safetext(isset($uniqid)) && safetext(isset($userid)) && safetext(isset($account_id))){
         $postUserid = safetext($userid);
         $postUniqid = safetext($uniqid);
@@ -1558,42 +1826,72 @@ function delete_ueuse($uniqid, $userid, $account_id){
                     $photo_and_video = $photo_query->fetch();
                     
                     if(!($photo_and_video["photo1"] == "none")){
-                        $photoDelete1 = glob($photo_and_video["photo1"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete1 as $photo1) {
-                            if (is_file($photo1)) {
-                                unlink($photo1);
+                        if(filter_var($photo_and_video["photo1"], FILTER_VALIDATE_URL)){
+                            if(AMS3_CHKS == "true"){
+                                deleteAmazonS3($photo_and_video["photo1"]);
+                            }
+                        }else{
+                            $photoDelete1 = glob($photo_and_video["photo1"]); // 「-ユーザーID.拡張子」というパターンを検索
+                            foreach ($photoDelete1 as $photo1) {
+                                if (is_file($photo1)) {
+                                    unlink($photo1);
+                                }
                             }
                         }
                     }
                     if(!($photo_and_video["photo2"] == "none")){
-                        $photoDelete2 = glob($photo_and_video["photo2"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete2 as $photo2) {
-                            if (is_file($photo2)) {
-                                unlink($photo2);
+                        if(filter_var($photo_and_video["photo2"], FILTER_VALIDATE_URL)){
+                            if(AMS3_CHKS == "true"){
+                                deleteAmazonS3($photo_and_video["photo2"]);
+                            }
+                        }else{
+                            $photoDelete2 = glob($photo_and_video["photo2"]); // 「-ユーザーID.拡張子」というパターンを検索
+                            foreach ($photoDelete2 as $photo2) {
+                                if (is_file($photo2)) {
+                                    unlink($photo2);
+                                }
                             }
                         }
                     }
                     if(!($photo_and_video["photo3"] == "none")){
-                        $photoDelete3 = glob($photo_and_video["photo3"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete3 as $photo3) {
-                            if (is_file($photo3)) {
-                                unlink($photo3);
+                        if(filter_var($photo_and_video["photo3"], FILTER_VALIDATE_URL)){
+                            if(AMS3_CHKS == "true"){
+                                deleteAmazonS3($photo_and_video["photo3"]);
+                            }
+                        }else{
+                            $photoDelete3 = glob($photo_and_video["photo3"]); // 「-ユーザーID.拡張子」というパターンを検索
+                            foreach ($photoDelete3 as $photo3) {
+                                if (is_file($photo3)) {
+                                    unlink($photo3);
+                                }
                             }
                         }
                     }
                     if(!($photo_and_video["photo4"] == "none")){
-                        $photoDelete4 = glob($photo_and_video["photo4"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($photoDelete4 as $photo4) {
-                            if (is_file($photo4)) {
-                                unlink($photo4);
+                        if(filter_var($photo_and_video["photo4"], FILTER_VALIDATE_URL)){
+                            if(AMS3_CHKS == "true"){
+                                deleteAmazonS3($photo_and_video["photo4"]);
+                            }
+                        }else{
+                            $photoDelete4 = glob($photo_and_video["photo4"]); // 「-ユーザーID.拡張子」というパターンを検索
+                            foreach ($photoDelete4 as $photo4) {
+                                if (is_file($photo4)) {
+                                    unlink($photo4);
+                                }
                             }
                         }
                     }
                     if(!($photo_and_video["video1"] == "none")){
-                        $videoDelete1 = glob($photo_and_video["video1"]); // 「-ユーザーID.拡張子」というパターンを検索
-                        foreach ($videoDelete1 as $video1) {
-                            if (is_file($video1)) {
-                                unlink($video1);
+                        if(filter_var($photo_and_video["video1"], FILTER_VALIDATE_URL)){
+                            if(AMS3_CHKS == "true"){
+                                deleteAmazonS3($photo_and_video["video1"]);
+                            }
+                        }else{
+                            $videoDelete1 = glob($photo_and_video["video1"]); // 「-ユーザーID.拡張子」というパターンを検索
+                            foreach ($videoDelete1 as $video1) {
+                                if (is_file($video1)) {
+                                    unlink($video1);
+                                }
                             }
                         }
                     }
@@ -1603,6 +1901,8 @@ function delete_ueuse($uniqid, $userid, $account_id){
                     $result3 = $ruChkquery->fetch();
                     
                     if($result3 > 0){
+                        // トランザクション開始
+                        $pdo->beginTransaction();
                         try {
                             // 削除クエリを実行
                             $rudeleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE ruuniqid = :uniqid AND ueuse = ''");
@@ -1635,6 +1935,8 @@ function delete_ueuse($uniqid, $userid, $account_id){
                         changePopularity($pdo, $result["rpuniqid"], $userid, -3);
                     }
 
+                    // トランザクション開始
+                    $pdo->beginTransaction();
                     try {
                         // 削除クエリを実行
                         $deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE uniqid = :uniqid AND account = :userid");
@@ -1643,6 +1945,7 @@ function delete_ueuse($uniqid, $userid, $account_id){
                         $res = $deleteQuery->execute();
     
                         if ($res) {
+                            $pdo->commit(); 
                             return [true, "削除に成功しました！"];
                         } else {
                             $pdo->rollBack();
@@ -1912,6 +2215,272 @@ function unblock_user($pdo, $to_userid, $userid){
         return false;
     }
 }
+//--------------------アカウント削除--------------------
+function deleteUser($pdo, $userid, $step, $job_uniqid){
+    $userdata = getUserData($pdo, $userid);
+    if(empty($userdata)){
+        changeJob($pdo, $userid, $job_uniqid, "delete_account", "finished");
+        return false;
+    }else{
+        $userid = $userdata["userid"];
+        if($step == "stop_account"){
+            if(changeJob($pdo, $userid, $job_uniqid, "stop_account", "running")){
+                $newrole = "ice";
+                $newtoken = "ice";
+                $newadmin = "none";
+                // トランザクション開始
+                $pdo->beginTransaction();
+
+                try {
+                    $stmt = $pdo->prepare("UPDATE account SET role = :role,token = :newtoken,admin = :newadmin WHERE userid = :userid");
+
+                    $stmt->bindValue(':role', $newrole, PDO::PARAM_STR);
+                    $stmt->bindValue(':newtoken', $newtoken, PDO::PARAM_STR);
+                    $stmt->bindValue(':newadmin', $newadmin, PDO::PARAM_STR);
+
+                    $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+
+                    $res = $stmt->execute();
+
+                    if ($res) {
+                        $pdo->commit(); 
+
+                        send_notification($userid, "uwuzu-fromsys", "🗑️アカウントの削除が開始されました🗑️", "アカウントの削除が開始されました！\n今後、アカウントのデータは順次削除されます。\n削除には時間がかかります。\n\nログアウトしてお待ち下さい。\n\nアカウントの復旧はできません。", "/others", "system");
+                        if(changeJob($pdo, $userid, $job_uniqid, "delete_ueuse", "waiting")){
+                            return true;
+                        }else{
+                            actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをdelete_image-waitingに変更失敗", 3);
+                            return false;
+                        }
+                    } else {
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "deleteUser", $userid, "アカウントの削除前凍結に失敗しました", 4);
+                        if(changeJob($pdo, $userid, $job_uniqid, "stop_account", "waiting")){
+                            return true;
+                        }else{
+                            actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをstop_account-waitingに変更失敗", 3);
+                            return false;
+                        }
+                    }
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "deleteUser", $userid, "iceError: ".$e, 4);
+                    if(changeJob($pdo, $userid, $job_uniqid, "stop_account", "error")){
+                        return true;
+                    }else{
+                        actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをstop_account-errorに変更失敗", 3);
+                        return false;
+                    }
+                }
+            }
+
+        }
+
+        if($step == "delete_ueuse"){
+            if(changeJob($pdo, $userid, $job_uniqid, "delete_ueuse", "running")){
+                // ユーズを直近100件取得
+                $getUeuse_query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid ORDER BY datetime DESC LIMIT 50"); 				
+                $getUeuse_query->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $getUeuse_query->execute();
+                $getUeuse = $getUeuse_query->fetchAll();
+
+                foreach ($getUeuse as $ueuse) {
+                    delete_ueuse($ueuse["uniqid"], $userid, $userdata["loginid"]);
+                }
+
+                if(count($getUeuse) >= 50){
+                    if(changeJob($pdo, $userid, $job_uniqid, "delete_ueuse", "waiting")){
+                        return true;
+                    }else{
+                        actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをdelete_ueuse-waitingに変更失敗", 3);
+                        return false;
+                    }
+                }else{
+                    if(changeJob($pdo, $userid, $job_uniqid, "delete_image", "waiting")){
+                        return true;
+                    }else{
+                        actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをdelete_image-waitingに変更失敗", 3);
+                        return false;
+                    }
+                }
+            }
+        }
+
+        if($step == "delete_image"){
+            if(changeJob($pdo, $userid, $job_uniqid, "delete_image", "running")){
+                // ユーザーの画像を削除
+                $folderPath = "../ueuseimages/";
+                $filesToDelete = glob($folderPath . "*-$userid.*");
+                foreach ($filesToDelete as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                }
+                // ユーザーの動画を削除
+                $folderPath2 = "../ueusevideos/";
+                $filesToDelete2 = glob($folderPath2 . "*-$userid.*");
+                foreach ($filesToDelete2 as $file2) {
+                    if (is_file($file2)) {
+                        unlink($file2);
+                    }
+                }
+
+                if(changeJob($pdo, $userid, $job_uniqid, "delete_follow", "waiting")){
+                    return true;
+                }else{
+                    actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをdelete_follow-waitingに変更失敗", 3);
+                    return false;
+                }
+            }
+        }
+
+        if($step == "delete_follow"){
+            if(changeJob($pdo, $userid, $job_uniqid, "delete_follow", "running")){
+                // フォロー・フォロワー情報を削除したい全てのアカウントを取得
+                    $flw_query = $pdo->prepare("SELECT * 
+                    FROM account 
+                    WHERE FIND_IN_SET(:userid, follow) > 0
+                    OR FIND_IN_SET(:userid, follower) > 0;
+                "); 				
+                $flw_query->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $flw_query->execute();
+                $flw_accounts = $flw_query->fetchAll();
+
+                foreach ($flw_accounts as $account) {
+                    unfollow_user($pdo, $account['userid'], $userid);
+                    unfollow_user($pdo, $userid, $account['userid']);
+                }
+
+                // ユーザーIDを削除したい全てのアカウントを取得
+                $blk_query = $pdo->prepare("SELECT * 
+                    FROM account 
+                    WHERE FIND_IN_SET(:userid, blocklist) > 0;
+                "); 				
+                $blk_query->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $blk_query->execute();
+                $blk_accounts = $blk_query->fetchAll();
+
+                foreach ($blk_accounts as $account) {
+                    unblock_user($pdo, $userid, $account['userid']);
+                }
+
+                //いいねを外したいすべてのユーズを取得
+                $fav_ueuse_query = $pdo->prepare("SELECT * 
+                    FROM ueuse 
+                    WHERE FIND_IN_SET(:userid, favorite) > 0;
+                "); 				
+                $fav_ueuse_query->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $fav_ueuse_query->execute();
+                $fav_ueuse_ueuses = $fav_ueuse_query->fetchAll();
+                foreach ($fav_ueuse_ueuses as $ueuse) {
+                    addFavorite($pdo, $ueuse['uniqid'], $userid);
+                }
+
+                if(changeJob($pdo, $userid, $job_uniqid, "delete_account", "waiting")){
+                    return true;
+                }else{
+                    actionLog($userid, "error", "deleteAccount", null, "Job("+$job_uniqid+")のステータスをdelete_account-waitingに変更失敗", 3);
+                    return false;
+                }
+            }
+        }
+
+        if($step == "delete_account"){
+            if(file_exists("../settings_admin/plugin_settings/amazons3_settings.php")){
+                require_once '../settings_admin/plugin_settings/amazons3_settings.php';
+                if(AMS3_CHKS == "true"){
+                    if(file_exists("../plugin/aws/aws-autoloader.php")){
+                        require_once '../plugin/aws/aws-autoloader.php';
+                    }else{
+                        actionLog(null, "error", "uploadAmazonS3", null, "AWS SDK for PHPが見つかりませんでした！", 4);
+                    }
+                }
+            }else{
+                actionLog(null, "error", "uploadAmazonS3", null, "amazons3_settings.phpが見つかりませんでした！", 3);
+            }
+
+            if(changeJob($pdo, $userid, $job_uniqid, "delete_account", "running")){
+                $usericonurl = $userdata["iconname"];
+                if(filter_var($usericonurl, FILTER_VALIDATE_URL)){
+                    if(AMS3_CHKS == "true"){
+                        deleteAmazonS3($usericonurl);
+                    }
+                }else{
+                    $folderPath3 = "../usericons/";
+                    $filesToDelete3 = glob($folderPath3 . "*-$userid.*"); // 「-ユーザーID.拡張子」というパターンを検索
+                    // ファイルを順に削除
+                    foreach ($filesToDelete3 as $file3) {
+                        if (is_file($file3)) {
+                            unlink($file3); // ファイルを削除
+                        }
+                    }
+                }
+
+                $userheadurl = $userdata["headname"];
+                if(filter_var($userheadurl, FILTER_VALIDATE_URL)){
+                    if(AMS3_CHKS == "true"){
+                        deleteAmazonS3($userheadurl);
+                    }
+                }else{
+                    $folderPath4 = "../userheads/";
+                    $filesToDelete4 = glob($folderPath4 . "*-$userid.*"); // 「-ユーザーID.拡張子」というパターンを検索
+                    // ファイルを順に削除
+                    foreach ($filesToDelete4 as $file4) {
+                        if (is_file($file4)) {
+                            unlink($file4);
+                        }
+                    }
+                }
+
+                $pdo->beginTransaction(); 
+                try {
+                    // 投稿削除クエリを実行
+                    $deleteQuery = $pdo->prepare("DELETE FROM ueuse WHERE account = :userid");
+                    $deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
+        
+                    // 通知削除クエリを実行(自分宛ての通知)
+                    $deleteQuery = $pdo->prepare("DELETE FROM notification WHERE touserid = :touserid");
+                    $deleteQuery->bindValue(':touserid', $userid, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
+                    
+                    // 通知削除クエリを実行(自分からの通知)
+                    $deleteQuery = $pdo->prepare("DELETE FROM notification WHERE fromuserid = :fromuserid");
+                    $deleteQuery->bindValue(':fromuserid', $userid, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
+
+                    // アカウント削除クエリを実行
+                    $deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
+                    $deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
+        
+                    if($res) {
+                        // コミット
+                        $pdo->commit();
+                        changeJob($pdo, $userid, $job_uniqid, "delete_account", "finished");
+                        actionLog($userid, "success", "deleteAccount", null, "アカウント削除に成功", 1);
+
+                        return true;
+                    } else {
+                        // ロールバック
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "deleteAccount", null, "アカウント削除に失敗", 3);
+                        changeJob($pdo, $userid, $job_uniqid, "delete_account", "error");
+
+                        return false;
+                    }
+                } catch (Exception $e) {
+                    // エラーが発生した時はロールバック
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "deleteAccount", null, $e, 4);
+                    changeJob($pdo, $userid, $job_uniqid, "delete_account", "error");
+
+                    return false;
+                }
+            }
+        }
+    }
+}
 function changePopularity($pdo, $uniqid, $userid, $change_range){
     if (!(empty($pdo)) && !(empty($uniqid))){
         if(is_numeric($change_range)){
@@ -2038,6 +2607,42 @@ function getUserData($pdo, $userid) {
     $query->execute();
     return $query->fetch();
 }
+function getUeuseData($pdo, $uniqid) {
+    $query = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid");
+    $query->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+    $query->execute();
+    $ueuseDatas = $query->fetch();
+
+    if (empty($ueuseDatas)) {
+        return false;
+    }
+
+    //リプライ数取得
+    $rpQuery = $pdo->prepare("SELECT COUNT(*) as reply_count FROM ueuse WHERE rpuniqid = :rpuniqid");
+    $rpQuery->bindValue(':rpuniqid', $ueuseDatas['uniqid']);
+    $rpQuery->execute();
+    $rpData = $rpQuery->fetch(PDO::FETCH_ASSOC);
+    
+    if ($rpData){
+        $ueuseDatas['reply_count'] = $rpData['reply_count'];
+    }
+
+    //リユーズ数取得
+    $ruQuery = $pdo->prepare("SELECT COUNT(*) as reuse_count FROM ueuse WHERE ruuniqid = :ruuniqid");
+    $ruQuery->bindValue(':ruuniqid', $ueuseDatas['uniqid']);
+    $ruQuery->execute();
+    $ruData = $ruQuery->fetch(PDO::FETCH_ASSOC);
+    
+    if ($ruData){
+        $ueuseDatas['reuse_count'] = $ruData['reuse_count'];
+    }
+
+    $fav = $ueuseDatas['favorite'];
+    $favIds = explode(',', $fav);
+    $ueuseDatas["favorite_conut"] = count($favIds)-1;
+
+    return $ueuseDatas;
+}
 function actionLog($userid, $type, $place, $target, $content, $importance){
 
     if(empty($userid)){
@@ -2146,10 +2751,130 @@ function actionLog($userid, $type, $place, $target, $content, $importance){
         }
     }
 }
+
+function addJob($pdo, $userid, $job, $step){
+    $userid = getUserData($pdo, $userid)["userid"];
+    if(empty($userid)){
+        return false;
+    }
+    if(empty($job)){
+        return false;
+    }
+    if(empty($step)){
+        $step = "start";
+    }
+
+    if(!(empty($pdo))){
+        $uniqid = createUniqId();
+        $datetime = date('Y-m-d H:i:s');
+        $status = "waiting";
+
+        // トランザクション開始
+        $pdo->beginTransaction();
+
+        try {
+            // SQL作成
+            $stmt = $pdo->prepare("INSERT INTO jobs (uniqid, userid, job, step, status, datetime) VALUES (:uniqid, :userid, :job, :step, :status, :datetime)");
+
+            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+            $stmt->bindParam(':userid', $userid, PDO::PARAM_STR);
+            $stmt->bindParam(':job', $job, PDO::PARAM_STR);
+            $stmt->bindParam(':step', $step, PDO::PARAM_STR);
+            $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+            $res = $stmt->execute();
+            if($res){
+                $pdo->commit();
+                return true;
+            }else{
+                actionLog($userid, "error", "addJob", null, "Jobを追加できませんでした！", 3);
+                $pdo->rollBack();
+                return false;
+            }
+        } catch(Exception $e) {
+            actionLog($userid, "error", "addJob", null, $e, 4);
+            $pdo->rollBack();
+            return false;
+        }
+    }
+}
+
+function changeJob($pdo, $userid, $uniqid, $step, $status){
+    if(empty($uniqid)){
+        return false;
+    }
+    if(empty($step)){
+        $step = "start";
+    }
+    if(empty($status)){
+        $status = "waiting";
+    }
+    $status_list = ["waiting","running","finished","error"];
+    if(in_array($status, $status_list)){
+        if(!(empty($pdo))){
+            $pdo->beginTransaction();
+
+            try {
+                $updateQuery = $pdo->prepare("UPDATE jobs SET step = :step, status = :status WHERE uniqid = :uniqid");
+                $updateQuery->bindValue(':step', $step, PDO::PARAM_STR);
+                $updateQuery->bindValue(':status', $status, PDO::PARAM_STR);
+                $updateQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+                $res = $updateQuery->execute();
+
+                if($res){
+                    $pdo->commit();
+                    return true;
+                }else{
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "is_OtherSettings", null, "ジョブを編集できませんでした", 3);
+                    return false;
+                }
+            } catch(Exception $e) {
+                actionLog($userid, "error", "changeJob", null, $e, 4);
+                $pdo->rollBack();
+                return false;
+            }
+        }
+    }else{
+        actionLog($userid, "error", "changeJob", null, "不正なステータスです！", 3);
+        return false;
+    }
+}
+
+function getJob($pdo, $userid){
+    if(empty($userid)){
+        return false;
+    }
+
+    if(!(empty($pdo))){
+        $query = $pdo->prepare("SELECT * FROM jobs WHERE status = 'waiting' ORDER BY datetime ASC LIMIT 1");
+        $query->execute();
+        $job = $query->fetch(PDO::FETCH_ASSOC);
+
+        if($job){
+            return $job;
+        }else{
+            return false;
+        }
+    }
+}
+
 function safetext($text){
     // テキストの安全化
-    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8', false);
+    return htmlspecialchars(preg_replace('/[\x00-\x08\x0b\x0c\x0e-\x1f]/', '', $text), ENT_QUOTES, 'UTF-8', false);
 }
+
+function to_array_safetext($value) {
+    foreach ($value as $key => $val) {
+        if (is_array($val)) {
+            $value[$key] = to_array_safetext($val);
+        } else {
+            $value[$key] = safetext($val);
+        }
+    }
+    return $value;
+}
+
 function decode_yajirushi($postText){
     $postText = str_replace('&larr;', '←', $postText);
     $postText = str_replace('&darr;', '↓', $postText);

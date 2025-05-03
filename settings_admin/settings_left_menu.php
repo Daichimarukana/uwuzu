@@ -14,5 +14,6 @@
     <a href="update_admin" class="admin_leftbtn">アップデート</a>
     <a href="ipblock_admin" class="admin_leftbtn">IPブロック</a>
     <a href="actionlog_admin" class="admin_leftbtn">ログ</a>
+    <a href="jobs_admin" class="admin_leftbtn">ジョブ</a>
 </div>
 <?php ?>

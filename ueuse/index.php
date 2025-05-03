@@ -11,8 +11,6 @@ require('../function/function.php');
 
 $mojisizefile = "../server/textsize.txt";
 $mojisize = (int)safetext(file_get_contents($mojisizefile));
-//投稿及び返信レート制限↓(分):デフォで60件/分まで
-$max_ueuse_rate_limit = 60;
 
 $banurldomainfile = "../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
@@ -109,48 +107,6 @@ if(isset($_GET['text'])) {
     $ueuse = safetext($_COOKIE['ueuse']);
 }
 
-//-------------------------------------------
-
-if( !empty($_POST['btn_submit']) ) {
-	$settingsJsonQuery = $pdo->prepare("SELECT userid, other_settings FROM account WHERE userid = :userid");
-	$settingsJsonQuery->bindValue(':userid', $userid);
-	$settingsJsonQuery->execute();
-	$settingsJson = $settingsJsonQuery->fetch();
-	if(!(empty($settingsJson["other_settings"]))){
-		$isAIBWM = val_OtherSettings("isAIBlockWaterMark", $settingsJson["other_settings"]);
-	}else{
-		$isAIBWM = false;
-	}
-
-	$ueuse = safetext($_POST['ueuse']);
-
-	if(isset($_POST['nsfw_chk'])){
-		$nsfw_chk = safetext($_POST['nsfw_chk']);
-	}else{
-		$nsfw_chk = "false";
-	}
-
-	$photo1 = $_FILES['upload_images'];
-	$photo2 = $_FILES['upload_images2'];
-	$photo3 = $_FILES['upload_images3'];
-	$photo4 = $_FILES['upload_images4'];
-	$video1 = $_FILES['upload_videos1'];
-
-	$rpUniqid = $ueuseid;
-	$ruUniqid = "";
-	$ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk,$isAIBWM);
-
-	if($ueuse_result == null){
-		//一時保存していたユーズ内容の削除
-		setcookie("ueuse", "", time() - 3600, "/!".$ueuseid);
-		
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:".$url."");
-		exit;  
-	}else{
-		$error_message = $ueuse_result;
-	}
-}
 
 if( !empty($_POST['logout']) ) {
 	if (isset($_SERVER['HTTP_COOKIE'])) {
@@ -185,6 +141,7 @@ $pdo = null;
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
+<script src="../js/view_function.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -227,6 +184,9 @@ $pdo = null;
 			</div>
 				<?php if(!($role ==="ice")){?>
 				<form method="post" enctype="multipart/form-data">
+					<div class="send_progress">
+						<div class="per"></div>
+					</div>
 					<div class="sendbox">
 						<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo safetext($ueuse); } ?></textarea>
 
@@ -265,7 +225,7 @@ $pdo = null;
 
 							<div class="moji_cnt" id="moji_cnt"><?php echo safetext($mojisize); ?></div>
 
-							<input type="submit" class="ueusebtn" id='ueusebtn' name="btn_submit" value="ユーズする">
+							<input type="button" class="ueusebtn" id='ueusebtn' value="ユーズする">
 						</div>
 
 						<div class="harmful_notice" id="harmful_ueuse_warn" style="display:none;">
@@ -367,28 +327,29 @@ $pdo = null;
 $(document).ready(function() {
 	var userid = '<?php echo $userid; ?>';
 	var account_id = '<?php echo $loginid; ?>';
-	
-	loadPosts();
+	var ueuseid = "<?php echo safetext($ueuseid);?>";
+	view_ueuse_init(userid, account_id);
 
-    var pageNumber = 1;
+	var pageNumber = 1;
     var isLoading = false;
+	loadPosts();
 
     function loadPosts() {
         if (isLoading) return;
         isLoading = true;
-		var ueuseid = '<?php echo $ueuseid; ?>';
         $.ajax({
-            url: '../nextpage/ueusepage.php', // PHPファイルへのパス
-            method: 'GET',
-            data: { page: pageNumber, id: ueuseid ,userid: userid ,account_id: account_id},
-            dataType: 'html',
+			url: '../nextpage/ueusetimeline.php',
+			method: 'POST',
+			data: { page: pageNumber, userid: userid, account_id: account_id, uniqid: ueuseid},
+			dataType: 'json',
 			timeout: 300000,
-            success: function(response) {
-                $('#postContainer').append(response);
-                pageNumber++;
-                isLoading = false;
-            },
-			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+			success: function(response) {
+				renderUeuses(response, ueuseid);
+				pageNumber++;
+				isLoading = false;
+				$("#loading").hide();
+			},
+			error: function(xhr, textStatus, errorThrown) {
 				isLoading = false;
 				$("#loading").hide();
 				$("#error").show();
@@ -411,6 +372,79 @@ $(document).ready(function() {
 				return;
 			}
 		}
+	});
+
+	var isSending = false;
+	$('#ueusebtn').on('click', function() {
+		if (isSending) return;
+		isSending = true;
+
+		var percentComplete = 0;
+		var scaledPercent = 0;
+
+		var formData = new FormData();
+		formData.append('userid', userid); // ユーザーID
+		formData.append('account_id', account_id); // アカウントID
+
+		formData.append('ueuse', $("#ueuse").val());
+		formData.append('nsfw_chk', $("#nsfw_chk").is(':checked') ? "true" : "false");
+		formData.append('rpuniqid', ueuseid);
+
+		var photo1 = $('#upload_images').prop('files')[0];
+		var photo2 = $('#upload_images2').prop('files')[0];
+		var photo3 = $('#upload_images3').prop('files')[0];
+		var photo4 = $('#upload_images4').prop('files')[0];
+		var video1 = $('#upload_videos1').prop('files')[0];
+
+		if (photo1) formData.append('upload_images', photo1);
+		if (photo2) formData.append('upload_images2', photo2);
+		if (photo3) formData.append('upload_images3', photo3);
+		if (photo4) formData.append('upload_images4', photo4);
+		if (video1) formData.append('upload_videos1', video1);
+
+		$(".send_progress").show();
+		$.ajax({
+			url: '../function/ueuse.php',
+			type: 'POST',
+			data: formData,
+			dataType: 'json', 
+			processData: false,
+			contentType: false,
+			xhr: function() {
+				var myXhr = $.ajaxSettings.xhr();
+				if (myXhr.upload) {
+					myXhr.upload.addEventListener('progress', function(event) {
+						if (event.lengthComputable) {
+							percentComplete = (event.loaded / event.total) * 100;
+							scaledPercent = Math.min((percentComplete * 0.99), 99);
+							$(".send_progress").children(".per").css("width", scaledPercent + "%");
+						}
+					}, false);
+				}
+				return myXhr;
+			},
+			success: function(response) {
+				if(response.success == true){
+					scaledPercent = 100;
+					$(".send_progress").children(".per").css("width", scaledPercent + "%");
+
+					document.cookie = "ueuse=; Secure; SameSite=Lax; path=/!" + ueuseid + ";";
+					isSending = false;
+					window.location.href = "<?php echo $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];?>";
+				}else{
+					scaledPercent = 0;
+					$(".send_progress").children(".per").css("width", scaledPercent + "%");
+					view_notify(response.error);
+					isSending = false;
+				}
+			},
+			error: function(xhr, status, error) {
+				scaledPercent = 0;
+				$(".send_progress").children(".per").css("width", scaledPercent + "%");
+				view_notify("ユーズの送信に失敗しました。");
+				isSending = false;
+			}
+		});
 	});
 
 	$(document).on('click', '.favbtn, .favbtn_after', function(event) {
@@ -883,7 +917,6 @@ $(document).ready(function() {
 			$('#moji_cnt').html(mojicount);
 			$('#ueusebtn').prop('disabled', true);
 		}
-		var ueuseid = "<?php echo safetext($ueuseid);?>";
 		document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/!" + ueuseid + ";";
 	});
 	loadEmojis();

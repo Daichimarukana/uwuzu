@@ -85,7 +85,7 @@ if (!empty($pdo)) {
 	if (!empty($userData["userid"])) {
 
 
-		$roles = explode(',', $userData["role"]); // カンマで区切られたロールを配列に分割
+		$roles = array_filter(explode(',', $userData["role"])); // カンマで区切られたロールを配列に分割
 
 		$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings FROM account WHERE userid = :userid");
 
@@ -181,6 +181,17 @@ if (!empty($pdo)) {
 				}
 			}
 		}
+
+		if(filter_var($userdata['iconname'], FILTER_VALIDATE_URL)){
+			$userdata['iconname'] = $userdata['iconname'];
+		}else{
+			$userdata['iconname'] = "../" . $userdata['iconname'];
+		}
+		if(filter_var($userdata['headname'], FILTER_VALIDATE_URL)){
+			$userdata['headname'] = $userdata['headname'];
+		}else{
+			$userdata['headname'] = "../" . $userdata['headname'];
+		}
 	} else {
 		$userData["userid"] = "none";
 		$userData['username'] = "でふぉると";
@@ -252,6 +263,7 @@ $pdo = null;
 	<script src="../js/unsupported.js"></script>
 	<script src="../js/console_notice.js"></script>
 	<script src="../js/nsfw_event.js"></script>
+	<script src="../js/view_function.js"></script>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1">
 	<?php if($isAIBlock === true){?>
@@ -328,10 +340,10 @@ $pdo = null;
 		<!--ここまで！--->
 	<?php } else { ?>
 		<div class="hed">
-			<img src="<?php echo safetext('../' . $userdata['headname']); ?>">
+			<img src="<?php echo safetext($userdata['headname']); ?>">
 		</div>
 		<div class="icon">
-			<img src="<?php echo safetext('../' . $userdata['iconname']); ?>">
+			<img src="<?php echo safetext($userdata['iconname']); ?>">
 			<h2><?php echo replaceProfileEmojiImages(safetext($userData['username'])); ?></h2>
 			<p>@<?php echo safetext($userData['userid']); ?><!--<span>@<?php /*echo safetext($domain); */ ?></span>--></p>
 		</div>
@@ -340,12 +352,16 @@ $pdo = null;
 			<?php foreach ($roles as $roleId) : ?>
 				<?php $roleData = $roleDataArray[$roleId]; ?>
 				<?php
-					if (safetext($roleData["roleeffect"]) == '' || safetext($roleData["roleeffect"]) == 'none') {
-						$role_view_effect = "";
-					} elseif (safetext($roleData["roleeffect"]) == 'shine') {
-						$role_view_effect = "shine";
-					} elseif (safetext($roleData["roleeffect"]) == 'rainbow') {
-						$role_view_effect = "rainbow";
+					if(!(empty($roleData))){
+						if (safetext($roleData["roleeffect"]) == '' || safetext($roleData["roleeffect"]) == 'none') {
+							$role_view_effect = "";
+						} elseif (safetext($roleData["roleeffect"]) == 'shine') {
+							$role_view_effect = "shine";
+						} elseif (safetext($roleData["roleeffect"]) == 'rainbow') {
+							$role_view_effect = "rainbow";
+						} else {
+							$role_view_effect = "";
+						}
 					} else {
 						$role_view_effect = "";
 					}
@@ -648,14 +664,14 @@ $pdo = null;
 	$(document).ready(function() {
 		var userid = '<?php echo $userid; ?>';
 		var account_id = '<?php echo $loginid; ?>';
+		view_ueuse_init(userid, account_id);
 
-		loadPosts();
 
 		var pageNumber = 1;
-
 		var isLoading = false;
-
-		var mode = "";
+		var mode = "allueuse";
+		$('#all_ueuse_btn').addClass('btmline');
+		loadPosts();
 
 		function loadPosts() {
 			if (isLoading) return;
@@ -665,23 +681,18 @@ $pdo = null;
 			var uwuzuid = '<?php echo $uwuzuid; ?>';
 			if (mode == 'allueuse') {
 				$.ajax({
-					url: '../nextpage/userpage.php', // PHPファイルへのパス
-					method: 'GET',
-					data: {
-						page: pageNumber,
-						id: uwuzuid,
-						userid: userid,
-						account_id: account_id
-					},
-					dataType: 'html',
+					url: '../nextpage/usertimeline.php',
+					method: 'POST',
+					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid,},
+					dataType: 'json',
 					timeout: 300000,
 					success: function(response) {
-						$('#postContainer').append(response);
+						renderUeuses(response);
 						pageNumber++;
 						isLoading = false;
 						$("#loading").hide();
 					},
-					error: function(xhr, textStatus, errorThrown) { // エラーと判定された場合
+					error: function(xhr, textStatus, errorThrown) {
 						isLoading = false;
 						$("#loading").hide();
 						$("#error").show();
@@ -689,23 +700,18 @@ $pdo = null;
 				});
 			} else if (mode == 'mediaueuse') {
 				$.ajax({
-					url: '../nextpage/usermediapage.php', // PHPファイルへのパス
-					method: 'GET',
-					data: {
-						page: pageNumber,
-						id: uwuzuid,
-						userid: userid,
-						account_id: account_id
-					},
-					dataType: 'html',
+					url: '../nextpage/usermediatimeline.php',
+					method: 'POST',
+					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid,},
+					dataType: 'json',
 					timeout: 300000,
 					success: function(response) {
-						$('#postContainer').append(response);
+						renderUeuses(response);
 						pageNumber++;
 						isLoading = false;
 						$("#loading").hide();
 					},
-					error: function(xhr, textStatus, errorThrown) { // エラーと判定された場合
+					error: function(xhr, textStatus, errorThrown) {
 						isLoading = false;
 						$("#loading").hide();
 						$("#error").show();
@@ -713,48 +719,18 @@ $pdo = null;
 				});
 			} else if (mode == 'likeueuse') {
 				$.ajax({
-					url: '../nextpage/userlikepage.php', // PHPファイルへのパス
-					method: 'GET',
-					data: {
-						page: pageNumber,
-						id: uwuzuid,
-						userid: userid,
-						account_id: account_id
-					},
-					dataType: 'html',
+					url: '../nextpage/userliketimeline.php',
+					method: 'POST',
+					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid,},
+					dataType: 'json',
 					timeout: 300000,
 					success: function(response) {
-						$('#postContainer').append(response);
+						renderUeuses(response);
 						pageNumber++;
 						isLoading = false;
 						$("#loading").hide();
 					},
-					error: function(xhr, textStatus, errorThrown) { // エラーと判定された場合
-						isLoading = false;
-						$("#loading").hide();
-						$("#error").show();
-					},
-				});
-			} else {
-				$('#all_ueuse_btn').addClass('btmline');
-				$.ajax({
-					url: '../nextpage/userpage.php', // PHPファイルへのパス
-					method: 'GET',
-					data: {
-						page: pageNumber,
-						id: uwuzuid,
-						userid: userid,
-						account_id: account_id
-					},
-					dataType: 'html',
-					timeout: 300000,
-					success: function(response) {
-						$('#postContainer').append(response);
-						pageNumber++;
-						isLoading = false;
-						$("#loading").hide();
-					},
-					error: function(xhr, textStatus, errorThrown) { // エラーと判定された場合
+					error: function(xhr, textStatus, errorThrown) {
 						isLoading = false;
 						$("#loading").hide();
 						$("#error").show();

@@ -24,7 +24,11 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
         $error_message[] = $e->getMessage();
     }
 
-    $user = safetext($_GET['actor']);
+    if(isset($_GET['actor'])){
+        $user = safetext($_GET['actor']);
+    }else{
+        $user = null;
+    }
 
     $userid = str_replace('@','', str_replace('@'.$domain.'', '', $user));
     if( !empty($pdo) ) {

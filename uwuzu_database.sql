@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-01-26 07:32:55
+-- 生成日時: 2025-05-03 15:26:28
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -128,6 +128,22 @@ CREATE TABLE `ipblock` (
   `ipaddr` varchar(256) NOT NULL,
   `note` mediumtext NOT NULL,
   `adduserid` varchar(512) NOT NULL,
+  `datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `jobs`
+--
+
+CREATE TABLE `jobs` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
+  `userid` varchar(512) NOT NULL,
+  `job` varchar(1024) NOT NULL,
+  `step` varchar(256) NOT NULL,
+  `status` varchar(256) NOT NULL,
   `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -279,6 +295,12 @@ ALTER TABLE `ipblock`
   ADD PRIMARY KEY (`sysid`);
 
 --
+-- テーブルのインデックス `jobs`
+--
+ALTER TABLE `jobs`
+  ADD PRIMARY KEY (`sysid`);
+
+--
 -- テーブルのインデックス `migration`
 --
 ALTER TABLE `migration`
@@ -352,6 +374,12 @@ ALTER TABLE `invitation`
 -- テーブルの AUTO_INCREMENT `ipblock`
 --
 ALTER TABLE `ipblock`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `jobs`
+--
+ALTER TABLE `jobs`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

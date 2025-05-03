@@ -56,22 +56,20 @@ body{
 
     text-align: center;
     border-radius: 50px;
-    color:var(--background-color);
+    color:var(--dark-text-color);
     font-size: 18px;
     font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
     text-align: center;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
     transition: all 250ms ease-in-out;
 }
 .irobutton:hover{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    padding: 6px 24px;
+    padding: 6px 22px;
 }
 .irobutton:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    padding: 6px 8px;
+    background-color: color-mix(in srgb, var(--main-color) 90%, #000);
+    padding: 6px 12px;
 }
 
 .sirobutton{
@@ -86,24 +84,22 @@ body{
 
 
     text-align: center;
-    background-color: var(--sub-color);
+    background-color: var(--dark-subtext-color);
+    color: var(--dark-text-color);
 
     border-radius: 50px;
-    color:var(--main-color);
     font-size: 18px;
     font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
     transition: all 250ms ease-in-out;
+    border: transparent 1px solid;
 }
 .sirobutton:hover{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    padding: 6px 24px;
+    padding: 6px 22px;
 }
 .sirobutton:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    padding: 6px 8px;
+    padding: 6px 12px;
 }
 
 .inbox {
@@ -359,16 +355,13 @@ textarea{
 .userleftbox{
     border-radius: 17px;
     margin-top: 12px;
-    margin-left: 12px;
+    margin-left: 0px;
     margin-right: 12px;
     margin-bottom: 12px;
-    background-color: var(--tl-color);
     width: 240px;
     height: 100%;
     margin-left: 0px;
-    padding: 32px;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    border: 1px solid var(--main-color);
+    padding: 0px;
 }
 
 .userleftbox h1{
@@ -400,44 +393,6 @@ textarea{
     margin-bottom: -4px;
 }
 
-.leftbutton_on{
-    cursor: pointer;
-    border: none;
-    display: block;
-    width:80%;
-    margin: 16px;
-    padding: 8px auto;
-    margin-left: auto;
-    margin-right: auto;
-
-    padding-left: 16px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-
-
-    background-color: var(--sub-color);
-
-    border-radius: 50px;
-    color:var(--main-color);
-    font-size: 20px;
-    font-family: var(--Head-fonts), sans-serif;
-    font-weight: bold;
-    text-decoration:none;
-    text-align: left;
-    align-items: center;
-    transition: all 250ms ease-out;
-}
-.leftbutton_on:hover{
-    background-color: var(--main-color);
-    color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-    width:85%;
-}
-.leftbutton_on:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    width:78%;
-}
-
 .leftbutton{
 
     cursor: pointer;
@@ -453,8 +408,7 @@ textarea{
     padding-top: 8px;
     padding-bottom: 8px;
 
-
-    background-color: var(--background-color)FFF;
+    background-color: transparent;
 
     border-radius: 50px;
     color:var(--main-color);
@@ -548,8 +502,8 @@ main{
     margin-right: 12px;
     width: 60%;
     background-color: var(--tl-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    border: 1px solid var(--main-color);
+    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .025);
+    border: 1px solid var(--border-color);
 }
 
 main h1{
@@ -769,11 +723,9 @@ main h1{
 .fzone .follow .fbtn:hover{
     background-color: var(--main-color);
     color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
 .fzone .follow .fbtn:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:115px;
 }
 
@@ -811,11 +763,9 @@ main h1{
 .fzone .follow .fbtn_no:hover{
     background-color: var(--sub-color);
     color: var(--main-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
 .fzone .follow .fbtn_no:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:115px;
 }
 
@@ -852,11 +802,9 @@ main h1{
 .fzone .follow .fbtn_un:hover{
     background-color: var(--sub-color);
     color: var(--text-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
 .fzone .follow .fbtn_un:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:115px;
 }
 
@@ -893,11 +841,9 @@ main h1{
     background-color: color-mix(in srgb, var(--tl-color) 90%, var(--error));
     color: var(--error);
     border: 1px solid var(--error);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:32px;
 }
 .fzone .follow .report:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:22px;
 }
 .fzone .follow .report svg{
@@ -1032,20 +978,27 @@ main h1{
     width: 100%;
     height: auto;
     vertical-align:top;
+    transition: all 0.5s ease;
+}
+.ads a img:hover{
+    cursor: pointer;
+    filter: saturate(125%) brightness(110%);
 }
 .ueuse{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
-    margin: 12px;
-    border-radius: 10px;
+    margin: 0px;
+    border-radius: 0px;
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
     background-color: var(--ueuse-color);
-    border: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 -1px 0 var(--border-color);
     width: auto;
     overflow: hidden;
 }
+  
 @keyframes slideInY {
     0% {
       transform: translateY(24px);
@@ -1131,12 +1084,15 @@ main h1{
     font-size: 12px;
     color:var(--main-color);
 }
+.ueuse .content{
+    margin-left: 60px;
+}
 .ueuse p{
     line-height:20px;
     overflow-wrap:  break-word;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 60px;
+    margin-left: 0px;
     font-size: 16px;
     color:var(--text-color);
     text-decoration: none;
@@ -1147,6 +1103,24 @@ main h1{
     width: fit-content;
     margin-left: 4px;
     margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    background-color: #DDDDDD;
+    color: #323232;
+    border-radius: 5px;
+    font-size: calc(100% - 2px);
+    text-decoration: none;
+    font-family: var(--Mono-fonts), sans-serif;
+    font-weight: bold;
+    vertical-align: top;
+}
+
+.ueuse .codeblock{
+    width: calc(100% - 12px);
+    margin-left: 0px;
+    margin-right: 0px;
     padding-left: 6px;
     padding-right: 6px;
     padding-top: 3px;
@@ -1219,7 +1193,7 @@ main h1{
     overflow-wrap:  break-word;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 60px;
+    margin-left: 0px;
     font-size: 48px;
     color:var(--text-color);
     text-decoration: none;
@@ -1231,7 +1205,7 @@ main h1{
     overflow-wrap:  break-word;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 60px;
+    margin-left: 0px;
     font-size: 32px;
     color:var(--text-color);
     text-decoration: none;
@@ -1243,7 +1217,7 @@ main h1{
     overflow-wrap:  break-word;
     margin-top: auto;
     margin-bottom: auto;
-    margin-left: 60px;
+    margin-left: 0px;
     font-size: 24px;
     color:var(--text-color);
     text-decoration: none;
@@ -1376,12 +1350,16 @@ main h1{
 }
 
 .ueuse .photo1 a img{
+    background: linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%), linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: calc(100% - 2px);
     height: 350px;
     border: 1px solid var(--border-color);
     cursor: pointer;
@@ -1393,12 +1371,16 @@ main h1{
 }
 
 .ueuse .photo2 a img{
+    background: linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%), linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: calc(100% - 2px);
     height: 350px;
     border: 1px solid var(--border-color);
     cursor: pointer;
@@ -1414,23 +1396,31 @@ main h1{
     width: 100%;
 }
 .ueuse .photo3 a img{
+    background: linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%), linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: calc(100% - 2px);
     height: 200px;
     border: 1px solid var(--border-color);
     cursor: pointer;
 }
 .ueuse .photo3_btm a img{
+    background: linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%), linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    min-width: 100%;
+    min-width: calc(100% - 2px);
     height: 200px;
     border: 1px solid var(--border-color);
     cursor: pointer;
@@ -1441,12 +1431,16 @@ main h1{
     justify-content: space-between;
 }
 .ueuse .photo4 a img{
+    background: linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%), linear-gradient(45deg, #EEE 25%, transparent 25%, transparent 75%, #EEE 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
     object-fit: cover;
     border-radius: 10px;
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: calc(100% - 2px);
     height: 200px;
     border: 1px solid var(--border-color);
     cursor: pointer;
@@ -1457,7 +1451,7 @@ main h1{
     margin-top: 12px;
     margin-left: auto;
     margin-right: auto;
-    width: 100%;
+    width: calc(100% - 2px);
     height: 350px;
     border: 1px solid var(--border-color);
 }
@@ -1598,8 +1592,7 @@ main h1{
     padding-left: 12px;
     padding-right: 12px;
 
-
-    background-color: var(--sub-color);
+    background-color: transparent;
 
     border-radius: 50px;
     color:var(--main-color);
@@ -1610,7 +1603,25 @@ main h1{
     text-align: center;
     transition: all 250ms ease-out;
 }
+.ueuse .favbox .favbtn:hover{
+    cursor: pointer;
+    border: none;
+    display: block;
+    width:auto;
 
+    background-color: var(--main-color);
+
+    border-radius: 50px;
+    color: var(--sub-color);;
+    font-size: 16px;
+    font-family: var(--Head-fonts), sans-serif;
+    font-weight: normal;
+    text-decoration:none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
 .ueuse .favbox .favbtn_after{
     cursor: pointer;
     border: none;
@@ -1677,7 +1688,7 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: var(--sub-color);
+    background-color: transparent;
 
     border-radius: 50px;
     color:var(--main-color);
@@ -1688,7 +1699,6 @@ main h1{
     text-align: center;
     transition: all 250ms ease-out;
 }
-
 .ueuse .favbox .tuduki:hover{
     cursor: pointer;
     border: none;
@@ -1738,7 +1748,7 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: var(--sub-color);
+    background-color: transparent;
 
     border-radius: 50px;
     color:var(--main-color);
@@ -1780,7 +1790,7 @@ main h1{
     margin-top: 2px;
     margin-bottom: 2px;
 
-    background-color: var(--sub-color);
+    background-color: transparent;
     border-radius: 50px;
     color: var(--error);
     font-size: 16px;
@@ -1828,7 +1838,7 @@ main h1{
     margin-top: 2px;
     margin-bottom: 2px;
 
-    background-color: var(--sub-color);
+    background-color: transparent;
     border-radius: 50px;
     color: var(--main-color);
     font-size: 16px;
@@ -1874,7 +1884,7 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: var(--sub-color);
+    background-color: transparent;
 
     border-radius: 50px;
     color:var(--main-color);
@@ -2018,7 +2028,7 @@ main h1{
     padding-right: 12px;
 
 
-    background-color: var(--sub-color);
+    background-color: transparent;
 
     border-radius: 50px;
     color:var(--main-color);
@@ -2097,7 +2107,7 @@ main h1{
     border: 1px solid var(--border-color);
     background-color: var(--background-color);
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
 }
 .ueuse .nsfw .btnzone{
     display: block;
@@ -2154,7 +2164,6 @@ main h1{
     width: 100%;
     height: 74px;
     border-radius: 7px;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
 }
 .ueuse .flebox .user{
     margin-bottom: 12px;
@@ -2343,15 +2352,42 @@ main h1{
     font-weight: bold;
 }
 
+.send_progress{
+    display: none;
+    width: 100%;
+    height: 2px;
+    margin: 0px;
+    overflow: hidden;
+    box-shadow: 0 -1px 0 var(--border-color);
+    animation: progressView 250ms ease-out 1 forwards;
+}
+.send_progress .per{
+    width: 0px;
+    margin: 0px;
+    height: 2px;
+    background-color: var(--main-color);
+    transition: width 500ms ease-in;
+}
+@keyframes progressView {
+    0% {
+        height: 0px;
+        opacity: 0;
+    }
+    100% {
+        height: 2px;
+        opacity: 1;
+    }
+}
 .sendbox{
-    margin: 12px;
-    border-radius: 10px;
+    margin: 0px;
+    border-radius: 0px;
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 24px;
     padding-bottom: 24px;
     background-color: var(--ueuse-color);
-    border: 1px solid var(--border-color);
+    border-top: solid 1px var(--border-color);
+    box-shadow: 0 1px 0 var(--border-color);
     width: auto;
 }
 
@@ -2414,8 +2450,8 @@ main h1{
     height: 24px;
     padding: 6px 6px;
     
-    margin-left: 6px;
-    margin-right: 6px;
+    margin-left: 0px;
+    margin-right: 12px;
 
     padding-top: 6px;
     padding-bottom: 6px;
@@ -3005,11 +3041,9 @@ label>input {
 .imgbtn:hover{
     background-color: var(--main-color);
     color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     padding: 4px 22px;
 }
 .imgbtn:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     padding: 4px 12px;
 }
 
@@ -3039,11 +3073,9 @@ label>input {
 .imgbtn2:hover{
     background-color: var(--main-color);
     color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     padding: 4px 22px;
 }
 .imgebtn2:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     padding: 4px 12px;
 }
 
@@ -3166,11 +3198,9 @@ label>input {
 .modal-content .fbtn:hover{
     background-color: var(--main-color);
     color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
 .modal-content .fbtn:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:115px;
 }
 
@@ -3206,11 +3236,9 @@ label>input {
 .modal-content .fbtn_no:hover{
     background-color: var(--sub-color);
     color: var(--main-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:125px;
 }
 .modal-content .fbtn_no:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:115px;
 }
 
@@ -3349,36 +3377,39 @@ label>input {
     top: 0;
     left: 0;
     width: 100%;
-    height: 44px;
-    padding-top: 0.0%;
-    padding-bottom: 0.2%;
-    padding-left: 23%;
+    height: 47px;
     
     background-color: var(--main-color);
-    box-shadow: 0px 0px 30px rgba(0,0,0,0.1);
     font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
     font-size: 2em;
     text-align: left;
     color: var(--background-color);
-  
+    border-bottom: 1px solid color-mix(in srgb, var(--main-color) 95%, #000);
 }
-
+.topbox .logo{
+    width: 1080px;
+    max-width: 95%;
+    margin: 0px auto;
+}
 .topbox .logo img{
     margin-left: 0px;
     margin-right: auto;
-    margin-top: 2px;
-    height: 44px;
+    margin-top: 0px;
+    height: 47px;
 }
 
 .terms{
     overflow-wrap:  break-word;
     margin-left: auto;
     margin-right: auto;
-    width: 77%;
+    width: calc(1080px - 64px);
     margin-top: 64px;
     margin-bottom: 64px;
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
+    border: solid 1px var(--border-color);
+    padding: 32px;
+    border-radius: 15px;
 }
 
 .terms h1{
@@ -3623,6 +3654,7 @@ label>input {
     text-align: center;
     margin-left: auto;
     margin-right: auto;
+    background: transparent;
 }
 
 .terms .err404 h1{
@@ -3649,16 +3681,13 @@ label>input {
 
 .rightbox{
     position: relative;
-    border-radius: 17px;
+    border-radius: 0px;
     margin-top: 12px;
     margin-left: 12px;
     margin-right: 12px;
-    width: 260px;
+    width: 280px;
     height: 92.5dvh;
-    background-color: var(--tl-color);
-    padding: 12px;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-    border: 1px solid var(--main-color);
+    padding: 0px;
 }
 
 .rightbox h1{
@@ -3688,7 +3717,7 @@ label>input {
     margin-left: auto;
     margin-right: auto;
     width: auto;
-    background-color: var(--background-color);
+    background-color: var(--ueuse-color);
     border: 1px solid var(--border-color);
     width: auto;
     padding: 12px;
@@ -3904,8 +3933,8 @@ label>input {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 12px;
-    padding-top: 0px;
+    padding: 24px;
+    padding-top: 24px;
 }
 .emojizone .tokonone{
     width: calc(50% - 32px);
@@ -3921,15 +3950,16 @@ label>input {
     margin-bottom: 30px;
 }
 .emjtex{
-    width: calc(50% - 32px);
+    width: calc(50% - 36px);
     background-color: var(--ueuse-color);
     margin-top: 0px;
     margin-left: 0px;
     margin-right: 0px;
-    margin-bottom: 12px;
+    margin-bottom: 24px;
     padding: 12px;
     border-radius: 10px;
     border: 1px solid var(--border-color);
+    box-shadow: none;
     transition: all 250ms ease-out;
 }
 .emjtex:hover{
@@ -3982,16 +4012,35 @@ label>input {
     font-weight: bold;
 }
 
+.rp{
+    display: flex;
+    width: 100%;
+    height: fit-content;
+}
 .rp p{
     overflow-wrap:  break-word;
     margin-top: 0px;
     margin-bottom: 6px;
-    margin-left: 12px;
-    font-size: 16px;
+    margin-left: 6px;
+    font-size: 14px;
     color:var(--text-color);
     text-decoration: none;
     font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
+}
+.rp .here{
+    margin-right: 8px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--main-color);
+    border-radius: 50%;
+}
+.rp .totop{
+    width: 14px;
+    height: 8px;
+    border-left: 2px solid var(--text-color);
+    border-bottom: 2px solid var(--text-color);
+    border-bottom-left-radius: 6px;
 }
 .ru{
     display: flex;
@@ -4039,15 +4088,18 @@ label>input {
 }
 .notification{
     animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
-    margin: 12px;
-    border-radius: 10px;
+    margin: 0px;
+    border-radius: 0px;
     padding-left: 24px;
     padding-right: 24px;
     padding-top: 16px;
     padding-bottom: 16px;
-    background-color: var(--background-color);
-    border: 1px solid var(--border-color);
+    background-color: var(--ueuse-color);
+    border-bottom: 1px solid var(--border-color);
     width: auto;
+}
+.notification:first-child{
+    border-top: 1px solid var(--border-color);
 }
 @keyframes slideInY {
     0% {
@@ -4321,7 +4373,7 @@ label>input {
     margin-top: auto;
     margin-bottom: auto;
     margin-left: auto;
-    margin-right: 12px;
+    margin-right: 0px;
     text-align: right;
     font-size: 12px;
     color:var(--subtext-color);
@@ -4512,10 +4564,10 @@ hr{
 }
 
 .tlchange{
-    border-radius: 10px;
-    margin: 12px;
+    border-radius: 0px;
+    margin: 0px;
     background-color: var(--ueuse-color);
-    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 0 var(--border-color);
     width: auto;
     text-align: center;
     display: flex;
@@ -4538,6 +4590,8 @@ hr{
     display: inline-block;
     border: none;
     cursor: pointer;
+
+    padding: 0px;
 }
 .tlchange .on{
     color: var(--main-color);
@@ -4610,35 +4664,40 @@ hr{
     cursor: pointer;
 }  
 .switch_label {
-    width: 48px;
-    height: 24px;
-    background: var(--dark-subtext-color);
+    width: 50px;
+    height: 26px;
+    background: color-mix(in srgb, var(--background-color) 90%, #000);
     position: relative;
     display: inline-block;
     border-radius: 25px;
     transition: 0.4s;
     box-sizing: border-box;
+    border: solid 1px color-mix(in srgb, var(--background-color) 85%, #000);
 }
 .switch_label:after {
     content: "";
     position: absolute;
-    margin-top: 2px;
-    margin-left: 2px;
-    width: 20px;
-    height: 20px;
+    margin-top: 4px;
+    margin-left: 4px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     left: 0;
     top: 0;
     z-index: 2;
     background: var(--background-color);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
     transition: 0.2s;
 }
 .switch_input:checked + .switch_label {
     background-color: var(--main-color);
+    border: solid 1px var(--main-color);
 } 
 .switch_input:checked + .switch_label:after {
     left: 24px;
+    margin-top: 2px;
+    margin-left: 2px;
+    width: 20px;
+    height: 20px;
 }
 .switch_button {
     position: relative;
@@ -5155,7 +5214,7 @@ summary {
     width: 50%;
     background-color: var(--background-color);
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--border-color);
 }
 .overview_cnt_r{
@@ -5164,7 +5223,7 @@ summary {
     width: 50%;
     background-color: var(--background-color);
     padding: 12px;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--border-color);
 }
 .overview p{
@@ -5948,7 +6007,7 @@ noscript .noscript_modal .inner .center_text p{
     }
 
     main{
-        height: 100dvh;
+        height: 94dvh;
         overflow: auto;
         border-radius: 0px;
         margin-top: 0px;
@@ -6082,6 +6141,7 @@ noscript .noscript_modal .inner .center_text p{
         background-color: var(--tl-color);
         border-top: 1px solid var(--border-color);
         z-index: 9999;
+        height: 6dvh;
     }
 
     .botbox .lbtnzone{
@@ -6281,14 +6341,13 @@ noscript .noscript_modal .inner .center_text p{
     }
     .ueuse{
         animation: slideInY 0.5s cubic-bezier(0.25, 1, 0.5, 1) 1 forwards;
-        margin: 12px;
-        border-radius: 10px;
+        margin: 0px;
+        border-radius: 0px;
         padding-left: 12px;
         padding-right: 12px;
         padding-top: 12px;
         padding-bottom: 12px;
         background-color: var(--ueuse-color);
-        border: 1px solid var(--border-color);
         width: auto;
     }
 
@@ -6411,11 +6470,9 @@ noscript .noscript_modal .inner .center_text p{
     .imgbtn:hover{
         background-color: var(--main-color);
         color: var(--sub-color);
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:35%;
     }
     .imgebtn:active{
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         width:45%;
     }
 
@@ -6449,11 +6506,9 @@ noscript .noscript_modal .inner .center_text p{
     .imgbtn2:hover{
         background-color: var(--main-color);
         color: var(--sub-color);
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:19%;
     }
     .imgebtn2:active{
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         width:21%;
     }
  
@@ -6466,18 +6521,18 @@ noscript .noscript_modal .inner .center_text p{
         margin-left: 0px;
         margin-right: 0px;
         height: 44px;
-        padding-top: 0.0%;
-        padding-bottom: 0.2%;
-        padding-left: 0;
         margin-left: auto;
         margin-right: auto;
     }
 
+    .topbox .logo{
+        width: 92%;
+    }
     .topbox .logo img{
         margin-left: 0px;
         margin-right: auto;
-        margin-top: 2px;
-        width: 120px;
+        margin-top: 0px;
+        width: fit-content;
     }
 
     .terms{
@@ -6485,9 +6540,11 @@ noscript .noscript_modal .inner .center_text p{
         margin-left: auto;
         margin-right: auto;
         width: 90%;
+        padding: 0px;
         margin-top: 64px;
         margin-bottom: 64px;
-        background-color: var(--background-color);
+        border: none !important;
+        background-color: transparent !important;
     }
 
     .terms h1{
@@ -6857,7 +6914,8 @@ noscript .noscript_modal .inner .center_text p{
         overflow: scroll;
         padding: 24px;
         bottom: 0px;
-        left: 0;
+        left: 50%;
+        transform: translate(-50%, -50%);
         animation: SlideUp .5s ease-in-out forwards;
     }
 
@@ -6940,34 +6998,36 @@ noscript .noscript_modal .inner .center_text p{
     .modal-content.slideDown {
         animation: SlideDown .15s ease-in-out forwards;
     }
+    .modal-content .modal-follow-area{
+        max-height: 40dvh;
+    }
     /*下から上*/
     @keyframes SlideUp {
         0% {
-        opacity: 0;
-        transform: translateY(-1%);
+            opacity: 0;
+            transform: translate(-50%, -1%);
         }
         100% {
-        opacity: 1;
-        transform: translateY(-40%);
+            opacity: 1;
+            transform: translate(-50%, -40%);
         }
     }
     /*上から下*/
     @keyframes SlideDown {
         0% {
-        opacity: 1;
-        transform: translateY(-40%);
+            opacity: 1;
+            transform: translate(-50%, -40%);
         }
         100% {
-        opacity: 0;
-        transform: translateY(-1%);
+            opacity: 0;
+            transform: translate(-50%, -1%);
         }
     }
-    .modal-content .modal-follow-area{
-        max-height: 40dvh;
-    }
+
     .Image_modal{
         -moz-box-sizing: border-box;
         box-sizing: border-box;
+        height: 100dvh;
     }
     .Image_modal .modal-content {
         padding: 0px;
@@ -6977,10 +7037,10 @@ noscript .noscript_modal .inner .center_text p{
         max-width: 90%;
         max-height: 90dvh;
         position: absolute;
-        top: 45%;
-        right: 0;
-        bottom: 45%;
-        left: 0;
+        top: 50%;
+        left: 50%;
+        right: 0%;
+        transform: translate(-50%, -50%);
         margin: auto;
         margin-top: 0px;
         margin-bottom: 0px;
@@ -6999,10 +7059,39 @@ noscript .noscript_modal .inner .center_text p{
         vertical-align:top;
         object-fit: contain;
     }
+    .Image_modal .modal-content.slideUp {
+        animation: I-SlideUp .3s ease-out forwards;
+    }
+    .Image_modal .modal-content.slideDown {
+        animation: I-SlideDown .15s ease-in-out forwards;
+    }
+    /*下から上*/
+    @keyframes I-SlideUp {
+        0% {
+            opacity: 0;
+            transform: translate(-50%, -1%);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(-50%, calc(-50% - 6dvh));
+        }
+    }
+    /*上から下*/
+    @keyframes I-SlideDown {
+        0% {
+            opacity: 1;
+            transform: translate(-50%, calc(-50% - 6dvh));
+        }
+        100% {
+            opacity: 0;
+            transform: translate(-50%, -1%);
+        }
+    }
 
     .tlchange{
-        border-radius: 10px;
-        margin: 12px;
+        border-radius: 0px;
+        margin: 0px;
+        margin-top: 0px;
         margin-bottom: 0px;
         width: auto;
         text-align: center;
@@ -7016,7 +7105,6 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: 12px;
         margin-bottom: 12px;
-        font-size: 24px;
     }
     .tlchange .on{
         width: 30%;
@@ -7026,7 +7114,6 @@ noscript .noscript_modal .inner .center_text p{
         overflow-wrap:  break-word;
         margin-top: 12px;
         margin-bottom: 12px;
-        font-size: 24px;
     }
 
     .hny{
@@ -7113,7 +7200,7 @@ noscript .noscript_modal .inner .center_text p{
         cursor: pointer;
         border: none;
         display: block;
-        width:80%;
+        width: calc(100% - 48px);
         margin: 8px;
         padding: 8px auto;
         margin-left: auto;
@@ -7124,7 +7211,7 @@ noscript .noscript_modal .inner .center_text p{
         padding-bottom: 4px;
     
     
-        background-color: var(--background-color)FFF;
+        background-color: var(--background-color);
     
         border-radius: 50px;
         color:var(--main-color);
@@ -7141,11 +7228,11 @@ noscript .noscript_modal .inner .center_text p{
         background-color: var(--main-color);
         color: var(--sub-color);
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
-        width:85%;
+        width: calc(100% - 24px);
     }
     .admin_leftbtn:active{
         box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
-        width:75%;
+        width: calc(100% - 64px);
     }
 
     .bot_menu_area{
@@ -7266,9 +7353,15 @@ noscript .noscript_modal .inner .center_text p{
 
     .emojizone{
         display: block;
+        padding: 0px;
     }
     .emjtex{
         width: auto;
+        margin: 0px;
+        border: none;
+        border-top: var(--border-color) solid 1px;
+        box-shadow: 0 1px 0 var(--border-color);
+        border-radius: 0px;
     }
     .emjtex .fx{
         display: block;
@@ -7337,6 +7430,13 @@ noscript .noscript_modal .inner .center_text p{
     body{
         background-color: var(--dark-background-color);
     }
+        
+    .sirobutton{
+        background-color: var(--dark-background-color);
+        color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
+    }
+
     .errmsg{
         background-color: color-mix(in srgb, var(--dark-sub-color) 90%, var(--error));
         color:var(--error);
@@ -7348,12 +7448,12 @@ noscript .noscript_modal .inner .center_text p{
     }
 
     .userleftbox{
-        background-color: var(--dark-sub-color);
+        background-color: transparent;
         border: none;
     }
 
     .leftbutton{
-        background-color: var(--dark-sub-color);
+        background-color: transparent;
         color:var(--sub-color);
     }
     .leftbutton:hover{
@@ -7366,8 +7466,9 @@ noscript .noscript_modal .inner .center_text p{
     }
 
     main{
-        background-color: var(--dark-background-color);
-        border: none;
+        background-color: var(--dark-sub-color);
+        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .025);
+        border: 1px solid var(--dark-border-color);
     }
     
     main h1{
@@ -7379,7 +7480,8 @@ noscript .noscript_modal .inner .center_text p{
 
     .ueuse{
         background-color: var(--dark-sub-color);
-        border: none;
+        box-shadow: 0 -1px 0 var(--dark-border-color);
+        border-bottom: 1px solid var(--dark-border-color);
     }
     .ueuse .flebox a{
         color:var(--sub-color);
@@ -7452,21 +7554,29 @@ noscript .noscript_modal .inner .center_text p{
         color:var(--dark-subtext-color);
     }
     
-    .ueuse .photo1 img{
-        border: none;
+    .ueuse .photo1 a img{
+        border: 1px solid var(--dark-border-color);
     }
     
-    .ueuse .photo2 img{
-        border: none;
+    .ueuse .photo2 a img{
+        border: 1px solid var(--dark-border-color);
+    }
+
+    .ueuse .photo3 a img{
+        border: 1px solid var(--dark-border-color);
+    }
+
+    .ueuse .photo4 a img{
+        border: 1px solid var(--dark-border-color);
     }
     
     .ueuse .video1 video{
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
     
     .ueuse .abi{
         background-color: var(--dark-background-color);
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
 
     .ueuse .abi p{
@@ -7496,86 +7606,109 @@ noscript .noscript_modal .inner .center_text p{
     .ueuse .favbox .favbtn{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
+    }
+    .ueuse .favbox .favbtn:hover{
+        background-color: var(--main-color);
+        color:var(--sub-color);
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .favbtn_after{
         background-color: var(--main-color);
         color:var(--sub-color);
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .tuduki{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     .ueuse .favbox .tuduki:hover{
         background-color: var(--main-color);
         color:var(--sub-color);
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .reuse{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     .ueuse .favbox .reuse:hover{
         background-color: var(--main-color);
         color:var(--sub-color);
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .reuse_after{
         background-color: var(--main-color);
         color:var(--sub-color);
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .etcbtn{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     
     .ueuse .favbox .etcbtn:hover{
         background-color: var(--main-color);
         color: var(--sub-color);
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .delbtn{
         background-color: var(--dark-background-color);
         color:var(--error);
+        border: solid 1px var(--dark-border-color);
     }
     .ueuse .favbox .delbtn:hover{
         background-color: var(--error);
-        color: var(--background-color);;
+        color: var(--background-color);
+        border: solid 1px var(--error);
     }
     .ueuse .favbox .addabi{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     .ueuse .favbox .addabi:hover{
         background-color: var(--main-color);
         color: var(--sub-color);;
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .share{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     .ueuse .favbox .share:hover{
         background-color: var(--main-color);
         color: var(--sub-color);;
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .bookmark{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     .ueuse .favbox .bookmark:hover{
         background-color: var(--main-color);
         color: var(--sub-color);;
+        border: solid 1px var(--main-color);
     }
     .ueuse .favbox .bookmark_after{
         background-color: var(--main-color);
         color: var(--sub-color);
+        border: solid 1px var(--main-color);
     }
 
     .ueuse hr{
-        border-top: 1px solid var(--dark-subtext-color);
+        border-top: 1px solid var(--dark-border-color);
     }
     .ueuse .nsfw{
-        border: none;
+        border: 1px solid var(--dark-border-color);
         background-color: var(--dark-background-color);
     }
     .ueuse .nsfw_main{
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
 
     .ueuse .profilebox p{
@@ -7601,7 +7734,7 @@ noscript .noscript_modal .inner .center_text p{
 
     .ueuse .reuse_box{
         background-color: var(--dark-background-color);
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
     .ueuse .reuse_box .reuse_flebox a {
         color:var(--sub-color);
@@ -7613,6 +7746,9 @@ noscript .noscript_modal .inner .center_text p{
     .ueuse .reuse_box .nsfw{
         border: none;
         background-color: var(--dark-sub-color);
+    }
+    .ueuse .youtube_and_nicovideo_player iframe{
+        border: 1px solid var(--dark-border-color);
     }
 
     .userheader h2{
@@ -7687,11 +7823,9 @@ noscript .noscript_modal .inner .center_text p{
     .fzone .follow .fbtn_un:hover{
         background-color: var(--dark-sub-color);
         color: var(--dark-text-color);
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
         width:125px;
     }
     .fzone .follow .fbtn_un:active{
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
         width:115px;
     }
 
@@ -7772,9 +7906,14 @@ noscript .noscript_modal .inner .center_text p{
         color:var(--main-color);
     }
 
+    .send_progress{
+        box-shadow: 0 -1px 0 var(--dark-border-color);
+    }
+
     .sendbox{
+        border-top: solid 1px var(--dark-border-color);
         background-color: var(--dark-sub-color);
-        border:none;
+        box-shadow: 0 1px 0 var(--dark-border-color);
     }
     
     .sendbox p{
@@ -7791,7 +7930,7 @@ noscript .noscript_modal .inner .center_text p{
 
     .sendbox .emoji_picker{
         background-color: var(--dark-background-color);
-        border: none;
+        border: solid 1px var(--dark-border-color);
     }
     .sendbox .emoji_picker p{
         color: var(--dark-subtext-color);
@@ -7816,7 +7955,8 @@ noscript .noscript_modal .inner .center_text p{
 
     .emjtex{
         background-color: var(--dark-sub-color);
-        border: none;
+        border-color: var(--dark-border-color);
+        box-shadow: var(--dark-border-color);
     }
     .emjtex:hover{
         background-color: color-mix(in srgb, var(--dark-sub-color) 95%, #FFF);
@@ -7828,6 +7968,14 @@ noscript .noscript_modal .inner .center_text p{
     
     .emjtex p{
         color:var(--dark-subtext-color);
+    }
+
+    .rp .totop{
+        width: 14px;
+        height: 8px;
+        border-left: 2px solid var(--dark-text-color);
+        border-bottom: 2px solid var(--dark-text-color);
+        border-bottom-left-radius: 6px;
     }
 
     .formarea{
@@ -7904,7 +8052,7 @@ noscript .noscript_modal .inner .center_text p{
     .inbox {
         background: var(--dark-background-color);
         color: var(--background-color);
-        border: none;
+        border: 1px solid var(--dark-border-color);
       }
       
     .inbox::placeholder {
@@ -7944,7 +8092,7 @@ noscript .noscript_modal .inner .center_text p{
         
     .server_code{
         background-color: var(--dark-background-color);
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
     .server_code details{
         color: var(--dark-subtext-color);
@@ -7955,27 +8103,28 @@ noscript .noscript_modal .inner .center_text p{
 
 
     .terms{
-        background-color: var(--dark-background-color);
+        background-color: var(--dark-sub-color);
+        border: solid 1px var(--dark-border-color);
     }
     
     .terms h1{
-        color: var(--dark-subtext-color);
+        color: var(--dark-text-color);
     }
     
     .terms h2{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
     
     .terms h3{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
     
     .terms h4{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
     
     .terms p{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
     
     .terms .code{
@@ -7991,36 +8140,39 @@ noscript .noscript_modal .inner .center_text p{
     }
     
     .terms .p2c{
-        color: var(--dark-subtext-color);
+        color: var(--dark-text-color);
     }
     
     .terms .p3{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
     .terms .sp2c{
-        color: var(--dark-subtext-color);
+        color: var(--dark-text-color);
     }
     
     .terms .sp3{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
     
     .terms .err404 h1{
-        color: var(--dark-subtext-color);
+        color: var(--dark-text-color);
     }
     
     .terms .err404 p{
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .this{
         background-color: color-mix(in srgb, var(--link-color) 30%, var(--dark-background-color))!important;
-        border: none !important;
+        border-top: solid 1px var(--dark-border-color);
     }
 
     .notification{
         background-color: var(--dark-sub-color);
-        border: none;
+        border-bottom: solid 1px var(--dark-border-color);
+    }
+    .notification:first-child {
+        border-top: solid 1px var(--dark-border-color);
     }
 
     .notification .flebox a{
@@ -8128,11 +8280,11 @@ noscript .noscript_modal .inner .center_text p{
     }
         
     .tlchange{
-        background-color: var(--dark-background-color);
-        border: none;
+        background-color: var(--dark-sub-color);
+        box-shadow: 0 1px 0 var(--dark-border-color);
     }
     .tlchange .btn{
-        background: var(--dark-background-color);
+        background: var(--dark-sub-color);
         color: var(--background-color);
     }
     .tlchange .on{
@@ -8142,11 +8294,11 @@ noscript .noscript_modal .inner .center_text p{
 
 
     .select_utl{
-        background-color: var(--dark-background-color);
+        background-color: var(--dark-sub-color);
     }
 
     .select_utl .btn{
-        background: var(--dark-background-color);
+        background: var(--dark-sub-color);
         color: var(--border-color);
     }
     .select_utl .btmline{
@@ -8155,11 +8307,11 @@ noscript .noscript_modal .inner .center_text p{
     }
 
     .admin_settings .admin_left{
-        background-color: var(--dark-background-color);
-        border-right: none;
+        background-color: var(--dark-sub-color);
+        border-right: solid 1px var(--dark-border-color);
     }
     .admin_leftbtn{
-        background-color: var(--dark-background-color);
+        background-color: var(--dark-sub-color);
         color:var(--main-color);
     }
     .admin_leftbtn:hover{
@@ -8229,11 +8381,11 @@ noscript .noscript_modal .inner .center_text p{
     }
     .overview_cnt_l{
         background-color: var(--dark-background-color);
-        border: none;
+        border: solid 1px var(--dark-border-color);
     }
     .overview_cnt_r{
         background-color: var(--dark-background-color);
-        border: none;
+        border: solid 1px var(--dark-border-color);
     }
     .overview p{
         color: var(--dark-text-color);
@@ -8251,7 +8403,7 @@ noscript .noscript_modal .inner .center_text p{
         box-shadow:none;
     }
     .f_c_area{
-        background-color: var(--dark-background-color);
+        background-color: var(--dark-sub-color);
     }
     .f_c_area .fcnt p{
         color: var(--dark-text-color);
@@ -8353,7 +8505,7 @@ noscript .noscript_modal .inner .center_text p{
     
     .actionlog {
         background-color: var(--dark-background-color);
-        border: solid 1px var(--dark-background-color);
+        border: solid 1px var(--dark-border-color);
     }
     .actionlog details {
         color: var(--dark-text-color);
@@ -8375,5 +8527,9 @@ noscript .noscript_modal .inner .center_text p{
     }
     .actionlog p {
         color: var(--dark-text-color);
+    }
+    .switch_label {
+        background: var(--dark-background-color);
+        border: solid 1px var(--dark-border-color);
     }
 }

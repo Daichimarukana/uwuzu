@@ -248,7 +248,6 @@ if (!empty($pdo)) {
 				<input type="submit" class = "irobutton" name="ads_btn_submit" value="追加">
 			</form>
 			<div class="formarea">
-					<hr>
 					<h1>広告一覧</h1>
 					<?php if(!(empty($adss))){?>
 						<?php foreach ($adss as $value) {?>

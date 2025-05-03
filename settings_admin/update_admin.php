@@ -91,7 +91,7 @@ if (!empty($_POST['update_submit'])) {
 
 							copy($sourceFile, $destinationFile);
 						} else { 
-							$error_message[] = "アップデート元のzipファイルに本来予定されていたファイルがありませんでしたが、アップデート作業は完了しました。(UPDATE_FILE_NOT_FOUND)"; 
+							$error_message[] = "アップデート元のzipファイルに本来予定されていたファイルがありませんでしたが、アップデート作業は完了しました。(UPDATE_FILE_NOT_FOUND(".$sourceFile."))"; 
 						} 
 					} 
 				} 
@@ -103,7 +103,7 @@ if (!empty($_POST['update_submit'])) {
 						if (file_exists($deleteFile)) { 
 							unlink($deleteFile); 
 						} else { 
-							$error_message[] = "削除予定のファイルがありませんでしたが、アップデート作業は完了しました。(DELETE_FILE_NOT_FOUND)"; 
+							$error_message[] = "削除予定のファイルがありませんでしたが、アップデート作業は完了しました。(DELETE_FILE_NOT_FOUND(".$deleteFile."))"; 
 						} 
 					} 
 				}				 

@@ -1,5 +1,5 @@
 <?php
-require('../db.php');
+require('../../db.php');
 require("../../function/function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 $serversettings_file = "../../server/serversettings.ini";

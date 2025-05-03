@@ -4,7 +4,7 @@
     --sub-color: #FFFAE6;
     --background-color: #F5F5F5;
     --tl-color: #F7F7F7;
-    --ueuse-color:#f5f5f5;
+    --ueuse-color:#F9F9F9;
     --text-color: #252525;
     --subtext-color: #999;
     --link-color: #4e4428;
@@ -20,6 +20,7 @@
     --dark-background-color: #0c0c0c;
     --dark-subtext-color: #CCC;
     --dark-text-color: #FFF;
+    --dark-border-color: #252525;
     /*HeadingFonts*/
     --Head-fonts: "Zen Maru Gothic";
     /*TextFonts*/

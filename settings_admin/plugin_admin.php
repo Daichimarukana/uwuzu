@@ -41,6 +41,10 @@ require('plugin_settings/phpmailer_sender.php');
 require('plugin_settings/aiblockwatermark_settings.php');
 //------------------------------------------------------
 
+//AmazonS3--------------------------------------------
+require('plugin_settings/amazons3_settings.php');
+//------------------------------------------------------
+
 session_name('uwuzu_s_id');
 session_set_cookie_params([
     'lifetime' => 0,
@@ -133,6 +137,40 @@ if( !empty($_POST['btn_submit']) ) {
 	//設定上書き
 	$file = fopen('plugin_settings/aiblockwatermark_settings.php', 'w');
 	$data = $New_AIBWM_Settings;
+	fputs($file, $data);
+	fclose($file);
+
+	//----------------------------------------------------------------------
+
+	$N_AMS3_CHKS = safetext($_POST['ams3chk_onoff']);
+
+	$N_AMS3_BASE_URLS = safetext($_POST['N_AMS3_BASE_URLS']);
+	$N_AMS3_BUCKET_NM = safetext($_POST['N_AMS3_BUCKET_NM']);
+	$N_AMS3_PREFIX_NM = safetext($_POST['N_AMS3_PREFIX_NM']);
+	$N_AMS3_ENDPOINTS = safetext($_POST['N_AMS3_ENDPOINTS']);
+	$N_AMS3_REGION_NM = safetext($_POST['N_AMS3_REGION_NM']);
+	$N_AMS3_ACCESSKEY = safetext($_POST['N_AMS3_ACCESSKEY']);
+	$N_AMS3_SECRETKEY = safetext($_POST['N_AMS3_SECRETKEY']);
+	$N_AMS3_IS_S3FPS_ = safetext($_POST['N_AMS3_IS_S3FPS_']);
+
+	$New_AMS3_Settings = "
+	<?php // S3の設定
+	define('AMS3_CHKS', '".$N_AMS3_CHKS."'); // trueならオブジェクトストレージが有効
+
+	define('AMS3_BASE_URLS', '".$N_AMS3_BASE_URLS."');
+	define('AMS3_BUCKET_NM', '".$N_AMS3_BUCKET_NM."');
+	define('AMS3_PREFIX_NM', '".$N_AMS3_PREFIX_NM."');
+	define('AMS3_ENDPOINTS', '".$N_AMS3_ENDPOINTS."');
+	define('AMS3_REGION_NM', '".$N_AMS3_REGION_NM."');
+	define('AMS3_ACCESSKEY', '".$N_AMS3_ACCESSKEY."');
+	define('AMS3_SECRETKEY', '".$N_AMS3_SECRETKEY."');
+	define('AMS3_IS_S3FPS_', '".$N_AMS3_IS_S3FPS_."');
+	?>
+	";
+
+	//設定上書き
+	$file = fopen('plugin_settings/amazons3_settings.php', 'w');
+	$data = $New_AMS3_Settings;
 	fputs($file, $data);
 	fclose($file);
 
@@ -278,6 +316,45 @@ require('../logout/logout.php');
 								<label for="aibwmchk_onoff" class="switch_label"></label>
 							<?php }?>
 						</div>
+
+						<hr>
+
+						<p>オブジェクトストレージプラグイン</p>
+						<div class="p2">Amazon S3及びAmazon S3互換オブジェクトストレージが使用できるようになるプラグインです。<b>pluginフォルダに解凍済みのAWS SDK for PHPのファイル一式が入っていることが必須要件になります。</b><br>plugin/aws/README.MDなど一式</div>
+						<p>オブジェクトストレージのオンオフ</p>
+						<div class="switch_button">
+							<?php if(!empty(AMS3_CHKS && AMS3_CHKS == "true")){?>
+								<input id="ams3chk_onoff" class="switch_input" type='checkbox' name="ams3chk_onoff" value="true" checked/>
+								<label for="ams3chk_onoff" class="switch_label"></label>
+							<?php }else{?>
+								<input id="ams3chk_onoff" class="switch_input" type='checkbox' name="ams3chk_onoff" value="true" />
+								<label for="ams3chk_onoff" class="switch_label"></label>
+							<?php }?>
+						</div>
+						<div id="ams3_plugin">
+							<p>オブジェクトストレージ - 保存先設定</p>
+							<div class="p2">BaseURL</div>
+							<input id="ams3_plugin" placeholder="https://example.com" class="inbox" type="text" name="N_AMS3_BASE_URLS" value="<?php if( !empty(AMS3_BASE_URLS) ){ echo safetext(AMS3_BASE_URLS); } ?>">
+							<div class="p2">Bucket</div>
+							<input id="ams3_plugin" placeholder="uwuzu-bucket" class="inbox" type="text" name="N_AMS3_BUCKET_NM" value="<?php if( !empty(AMS3_BUCKET_NM) ){ echo safetext(AMS3_BUCKET_NM); } ?>">
+							<div class="p2">Prefix</div>
+							<input id="ams3_plugin" placeholder="files" class="inbox" type="text" name="N_AMS3_PREFIX_NM" value="<?php if( !empty(AMS3_PREFIX_NM) ){ echo safetext(AMS3_PREFIX_NM); } ?>">
+							<div class="p2">Endpoint</div>
+							<input id="ams3_plugin" placeholder="https://example.com" class="inbox" type="text" name="N_AMS3_ENDPOINTS" value="<?php if( !empty(AMS3_ENDPOINTS) ){ echo safetext(AMS3_ENDPOINTS); } ?>">
+							<div class="p2">Region</div>
+							<input id="ams3_plugin" placeholder="us-east-1" class="inbox" type="text" name="N_AMS3_REGION_NM" value="<?php if( !empty(AMS3_REGION_NM) ){ echo safetext(AMS3_REGION_NM); } ?>">
+							<div class="p2">Access Key</div>
+							<input id="ams3_plugin" placeholder="アクセスキー" class="inbox" type="text" name="N_AMS3_ACCESSKEY" value="<?php if( !empty(AMS3_ACCESSKEY) ){ echo safetext(AMS3_ACCESSKEY); } ?>">
+							<div class="p2">Secret Key</div>
+							<input id="ams3_plugin" placeholder="シークレットキー" class="inbox" type="text" name="N_AMS3_SECRETKEY" style="-webkit-text-security:disc;" value="<?php if( !empty(AMS3_SECRETKEY) ){ echo safetext(AMS3_SECRETKEY); } ?>">
+
+							<div class="p2">s3ForcePathStyle設定</div>
+							<div class="switch_button">
+								<input id="ams3_plugin" class="switch_input" type='checkbox' name="N_AMS3_IS_S3FPS_" value="true" <?php if(!empty(AMS3_IS_S3FPS_ && AMS3_IS_S3FPS_ == "true")){?>checked<?php }?>/>
+								<label for="N_AMS3_IS_S3FPS_" class="switch_label"></label>
+							</div>
+						</div>
+
 					</div>
 					<input type="submit" class = "irobutton" name="btn_submit" value="保存&更新">
 				</form>
@@ -323,5 +400,14 @@ require('../logout/logout.php');
 	$('#mailchks_onoff').change(function(){
 		$('#mail_plugin').toggle();
 		$('#mail_plugin_chk').toggle();
+	});
+
+	if ($("#ams3chk_onoff").prop("checked")) {
+		$('#ams3_plugin').show();
+	}else{
+		$('#ams3_plugin').hide();
+	}
+	$('#ams3chk_onoff').change(function(){
+		$('#ams3_plugin').toggle();
 	});
 </script>

@@ -317,6 +317,14 @@ require('../logout/logout.php');
 						<p>過去1分間のロードアベレージ : <?php echo $loadAve?></p>
 					<?php };?>
 					<hr>
+					<p>自動停止ロードアベレージ上限</p>
+					<div class="p2">uwuzuが自動停止するロードアベレージの上限です。<br>"-1"で無制限です。</div>
+					<p><?php echo safetext(STOP_LA);?></p>
+					<hr>
+					<p>ユーズのレートリミット</p>
+					<div class="p2">1分間にユーズできる上限です。<br>"-1"で無制限です。</div>
+					<p><?php echo safetext(RATE_LM);?> ueuse/min</p>
+					<hr>
 					<p>データベース</p>
 					<div class="p2">データベースの容量情報です。</div>
 					<table>

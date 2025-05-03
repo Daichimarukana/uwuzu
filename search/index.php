@@ -95,6 +95,7 @@ $pdo = null;
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
 <script src="../js/nsfw_event.js"></script>
+<script src="../js/view_function.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
@@ -230,7 +231,9 @@ $pdo = null;
 $(document).ready(function() {
 	var userid = '<?php echo $userid; ?>';
 	var account_id = '<?php echo $loginid; ?>';
+	view_ueuse_init(userid, account_id);
 	var pageNumber = 1;
+	var isLoading = false;
 
 	if(ueusetext.value){
 		$('#postContainer').empty();
@@ -252,8 +255,6 @@ $(document).ready(function() {
         }
     }
 
-	var isLoading = false;
-
 	function loadPosts() {
 		if (isLoading) return;
 		isLoading = true;
@@ -264,18 +265,18 @@ $(document).ready(function() {
 		
 		// 新しいキーワードで検索を実行
 		$.ajax({
-			url: '../nextpage/searchpage.php', // PHPファイルへのパス
-			method: 'GET',
-			data: {page: pageNumber, keyword: keyword, userid: userid , account_id: account_id},
-			dataType: 'html',
+			url: '../nextpage/searchtimeline.php',
+			method: 'POST',
+			data: { page: pageNumber, userid: userid, account_id: account_id, keyword: keyword },
+			dataType: 'json',
 			timeout: 300000,
 			success: function(response) {
-				$('#postContainer').append(response);
-				$("#loading").hide();
+				renderUeuses(response);
 				pageNumber++;
 				isLoading = false;
+				$("#loading").hide();
 			},
-			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
+			error: function(xhr, textStatus, errorThrown) {
 				isLoading = false;
 				$("#loading").hide();
 				$("#error").show();

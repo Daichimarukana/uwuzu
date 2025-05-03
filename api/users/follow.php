@@ -6,8 +6,6 @@ require('../../db.php');
 //- Base64_mime
 require('../../function/function.php');
 blockedIP($_SERVER['REMOTE_ADDR']);
-//投稿及び返信レート制限↓(分):デフォで60件/分まで
-$max_ueuse_rate_limit = 60;
 
 $mojisizefile = "../../server/textsize.txt";
 

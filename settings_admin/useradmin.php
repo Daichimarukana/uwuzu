@@ -215,8 +215,6 @@ if (!empty($pdo)) {
 				<div id="loading" class="loading" style="display: none;">
 					🤔
 				</div>
-
-				<hr>
 			</form>
 			<div class="formarea">
 				<h1>通報</h1>

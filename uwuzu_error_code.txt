@@ -28,7 +28,6 @@ migration_bad_success - アカウントの移行後に移行の完了処理が�
 already_been_completed - 処理が既に完了している場合に表示されます。
 you_cant_it_to_yourself - 自分に対して行えない処理を行おうとした際に表示されます。
 could_not_complete - 処理を完了できなかった場合に表示されます。
-this_API_is_ws_only - WebsocketAPIがWebsocket以外の方法でアクセスされた場合に表示されます。
 
 ----------(UWUZU ERR CODE)----------
 FILE_DEKASUGUI_PHP_INI_KAKUNIN - php.iniで設定されているファイルサイズ上限を上回っている時に表示されます。
@@ -145,7 +144,6 @@ DELETE_FILE_NOT_FOUND - アップデート作業時に、zipファイル内で�
 UPDATE_FILE_NOT_FOUND - アップデート作業時に、zipファイル内にあるはずの更新用のファイルが存在しなかった際に表示されます。
 
 BAD_REQUEST - 不正なリクエストが送信されてきた際に表示されます。
-AUTH_INVALID - アカウントの認証に失敗した際に表示されます。
 
 DON'T_TOUCH_SYSTEM_ROLE - システムロールをべたべた触ったり削除しようとしたりすると表示されます。
 

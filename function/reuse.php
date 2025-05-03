@@ -60,11 +60,11 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) &&
             }
             $ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$reusetext,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk,$AIBWM);
 
-            if($ueuse_result == null){
+            if($ueuse_result[0] == true){
                 echo json_encode(['success' => true]);
                 exit;
             }else{
-                echo json_encode(['success' => false, 'error' => $ueuse_result]);
+                echo json_encode(['success' => false, 'error' => $ueuse_result[1]]);
                 exit;
             }
         }else{

@@ -105,20 +105,22 @@ if(!(empty($_POST['btn_submit']))){
     }
 
     if(empty($error_message)){
-        $DB_Settings = "
-        <?php // データベースの接続情報
-        define( 'DB_HOST', '".$DataBase_Host."');
-        define( 'DB_USER', '".$DataBase_User."');
-        define( 'DB_PASS', '".$DataBase_Pass."');
-        define( 'DB_NAME', '".$DataBase_Name."');
+$DB_Settings = "<?php // データベースの接続情報
+define( 'DB_HOST', '".$DataBase_Host."');
+define( 'DB_USER', '".$DataBase_User."');
+define( 'DB_PASS', '".$DataBase_Pass."');
+define( 'DB_NAME', '".$DataBase_Name."');
 
-        // ENC_KEYは操作しないでください。ユーザーデータを使用できなくなるおそれがあります。
-        define( 'ENC_KEY', '".$Encryption_KEY."');
+// ENC_KEYは操作しないでください。ユーザーデータを使用できなくなるおそれがあります。
+define( 'ENC_KEY', '".$Encryption_KEY."');
 
-        // タイムゾーン設定
-        date_default_timezone_set('Asia/Tokyo');
-        ?>
-        ";
+define( 'RATE_LM', '60'); // レートリミット(ユーズ/分)
+define( 'STOP_LA', '4'); // 自動停止ロードアベレージ上限
+
+// タイムゾーン設定
+date_default_timezone_set('Asia/Tokyo');
+?>
+";
 
         //設定上書き
         $file = fopen('../db.php', 'w');

@@ -101,6 +101,18 @@ if( !empty($pdo) ) {
 	}else{
 		$notification_settings_list = explode(',', $userData["notification_settings"]);
 	}
+
+	if(filter_var($userData['iconname'], FILTER_VALIDATE_URL)){
+		$userData['iconname'] = $userData['iconname'];
+	}else{
+		$userData['iconname'] = "../" . $userData['iconname'];
+	}
+
+	if(filter_var($userData['headname'], FILTER_VALIDATE_URL)){
+		$userData['headname'] = $userData['headname'];
+	}else{
+		$userData['headname'] = "../" . $userData['headname'];
+	}
 }
 
 
@@ -347,207 +359,6 @@ if( !empty($_POST['pass_submit']) ) {
     }
 }
 
-
-if( !empty($_POST['logout']) ) {
-	if (isset($_SERVER['HTTP_COOKIE'])) {
-		$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-		foreach($cookies as $cookie) {
-			$parts = explode('=', $cookie);
-			$name = trim($parts[0]);
-			setcookie($name, '', time()-1000);
-			setcookie($name, '', time()-1000, '/');
-		}
-	}
-	// リダイレクト先のURLへ転送する
-    $url = '../index.php';
-    header('Location: ' . $url, true, 303);
-
-    // すべての出力を終了
-    exit;
-}
-
-if( !empty($_POST['img1btn_submit']) ) {
-
-    if (!empty($_FILES['image2s']['name'])) {
-        // アップロードされたファイル情報
-		$uploadedFile = $_FILES['image2s'];
-
-		if(check_mime($uploadedFile['tmp_name'])){
-			// アップロードされたファイルの拡張子を取得
-			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-
-			// EXIF削除
-			delete_exif($extension, $uploadedFile['tmp_name']);
-			// リサイズ
-			resizeImage($uploadedFile['tmp_name'], 2048, 1024);
-
-			if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
-				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = createUniqId() . '-'.$userid.'.webp';
-			}else{
-				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-			}
-			// 保存先のパスを生成
-			$uploadedPath = 'userheads/' . $newFilename;
-
-			// ファイルを移動
-			$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
-			
-			if ($result) {
-				$headName = $uploadedPath; // 保存されたファイルのパスを使用
-			} else {
-				$errnum = $uploadedFile['error'];
-				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-			}
-		}else{
-			$error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
-		}
-    }else{
-		$error_message[] = 'ヘッダー画像を選択してください(PHOTO_SELECT_PLEASE)';
-    }
-	
-
-    if( empty($error_message) ) {
-    // トランザクション開始
-    $pdo->beginTransaction();
-
-    try {
-
-				// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET headname = :headname WHERE userid = :userid");
-
-		// ヘッダー画像のバインド
-		$stmt->bindValue(':headname', $headName, PDO::PARAM_STR);
-
-		// ユーザーIDのバインド（WHERE句に必要）
-		$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-
-		// SQLクエリの実行
-		$res = $stmt->execute();
-
-		// コミット
-		$res = $pdo->commit();
-
-
-    } catch (Exception $e) {
-
-        // エラーが発生した時はロールバック
-        $pdo->rollBack();
-    }
-
-    if ($res) {
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:".$url."");
-		exit; 
-    } else {
-        $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-    }
-
-    // プリペアドステートメントを削除
-    $stmt = null;
-    }
-}
-
-
-if( !empty($_POST['img2btn_submit']) ) {
-
-    if (!empty($_FILES['image']['name'])) {
-        // アップロードされたファイル情報
-		$uploadedFile = $_FILES['image'];
-
-		if(check_mime($uploadedFile['tmp_name'])){
-			// アップロードされたファイルの拡張子を取得
-			$extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
-
-			// EXIF削除
-			delete_exif($extension, $uploadedFile['tmp_name']);
-			// リサイズ
-			resizeImage($uploadedFile['tmp_name'], 512, 512);
-
-			if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
-				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = createUniqId() . '-'.$userid.'.webp';
-			}else{
-				// 新しいファイル名を生成（uniqid + 拡張子）
-				$newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-			}
-			// 保存先のパスを生成
-			$uploadedPath = 'usericons/' . $newFilename;
-
-			// ファイルを移動
-			$result = move_uploaded_file($uploadedFile['tmp_name'], '../'.$uploadedPath);
-			
-			if ($result) {
-				$iconName = $uploadedPath; // 保存されたファイルのパスを使用
-			} else {
-				$errnum = $uploadedFile['error'];
-				if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-				if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-				if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-				if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-				if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-				if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-				if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-				$error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-			}
-		}else{
-			$error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
-		}
-    }else{
-		$error_message[] = 'アイコン画像を選択してください(PHOTO_SELECT_PLEASE)';
-    }
-
-    if( empty($error_message) ) {
-    // トランザクション開始
-    $pdo->beginTransaction();
-
-    try {
-
-				// SQL作成
-		$stmt = $pdo->prepare("UPDATE account SET iconname = :iconname WHERE userid = :userid");
-
-		// アイコン画像のバインド
-		$stmt->bindValue(':iconname', $iconName, PDO::PARAM_STR);
-
-		// ユーザーIDのバインド（WHERE句に必要）
-		$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-
-		// SQLクエリの実行
-		$res = $stmt->execute();
-
-		// コミット
-		$res = $pdo->commit();
-
-
-    } catch (Exception $e) {
-
-        // エラーが発生した時はロールバック
-        $pdo->rollBack();
-    }
-
-    if ($res) {
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:".$url."");
-		exit; 
-    } else {
-        $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-    }
-
-    // プリペアドステートメントを削除
-    $stmt = null;
-    }
-}
-
-require('../logout/logout.php');
-
 if( !empty($_POST['auth_on_submit']) ) {
 	$_SESSION['userid'] = $userid;
     // リダイレクト先のURLへ転送する
@@ -704,11 +515,11 @@ $pdo = null;
 			<div>
 			<h1>プロフィール</h1>
 				<div class="hed">
-					<img src="<?php echo safetext('../'.$userData['headname']); ?>">
+					<img src="<?php echo safetext($userData['headname']); ?>">
 				</div>
 
 				<div class="iconimg">
-					<img src="<?php echo safetext('../'.$userData['iconname']); ?>">
+					<img src="<?php echo safetext($userData['iconname']); ?>">
 				</div>
 				<?php if($role === "ice"){?>
 					<p>お使いのアカウントは凍結されているため設定を変更できません</p>
@@ -721,11 +532,6 @@ $pdo = null;
 					<label class="imgbtn2" for="file_upload2">ヘッダー選択
 					<input type="file" id="file_upload2" name="image2s" accept="image/*">
 					</label>
-					
-					<div class="sub">
-						<input type="submit" class = "imgbtn" name="img1btn_submit" value="ヘッダー画像更新">
-						<input type="submit" class = "imgbtn" name="img2btn_submit" value="アイコン画像更新">
-					</div>
 
 					<!--ユーザーネーム関係-->
 					<div>
@@ -798,7 +604,7 @@ $pdo = null;
 						</div>
 					<?php }?>
 								
-					<input type="submit" class = "irobutton" name="btn_submit" value="情報更新">
+					<input type="submit" class = "irobutton" name="btn_submit" value="保存">
 
 				<?php }?>
 			</div>
@@ -872,7 +678,7 @@ $pdo = null;
 				<label for="notification_follow" class="switch_label"></label>
 			</div>
 
-			<input type="submit" class = "irobutton" name="notification_submit" value="通知の設定&更新">
+			<input type="submit" class = "irobutton" name="notification_submit" value="保存">
 
         </form>
 	</main>
@@ -884,6 +690,10 @@ $pdo = null;
 </html>
 <script>
 window.addEventListener('DOMContentLoaded', function(){
+	var userid = '<?php echo $userid; ?>';
+	var account_id = '<?php echo $loginid; ?>';
+	var is_loading = false;
+
 	$("#passview").click(function () {
 		if ($("#passview").prop("checked") == true) {
 			$('#password').get(0).type = 'text';
@@ -917,21 +727,90 @@ window.addEventListener('DOMContentLoaded', function(){
 		}
 	});
 
-    $('#file_upload').change(function(e) {
-        var file_reader = new FileReader();
-        file_reader.addEventListener('load', function(e) {
-            $('.iconimg').children('img').attr('src', file_reader.result);
-        });
-        file_reader.readAsDataURL(e.target.files[0]);
-    });
+    $('#file_upload').change(function(e) { 
+		var fileInput = $("#file_upload").prop('files')[0]; // ファイルを取得 
+		if (!fileInput || is_loading) return;
 
-	$('#file_upload2').change(function(e) {
-        var file_reader = new FileReader();
-        file_reader.addEventListener('load', function(e) {
-            $('.hed').children('img').attr('src', file_reader.result);
-        });
-        file_reader.readAsDataURL(e.target.files[0]);
-    });
+		var settings_type = "icon"; 
+		var formData = new FormData();
+		formData.append('userid', userid); // ユーザーID
+		formData.append('account_id', account_id); // アカウントID
+		formData.append('settings_type', settings_type); // 設定タイプ
+		formData.append('data', fileInput); // 画像ファイルを追加
+
+		// FileReaderでプレビュー画像を表示
+		var fileReader = new FileReader();
+		fileReader.onload = function(e) {
+			$('.iconimg').children('img').attr('src', e.target.result); // プレビューを表示
+		};
+		fileReader.readAsDataURL(fileInput);
+
+		is_loading = true;
+		$.ajax({
+			url: '../function/settings.php', 
+			method: 'POST', 
+			data: formData, 
+			dataType: 'json', 
+			processData: false,  // データを自動的に処理しない
+			contentType: false,  // コンテンツタイプを自動で設定しない
+			success: function(response) { 
+				if (response.success) { 
+					is_loading = false;
+					console.log("アイコンが更新されました");
+				} else { 
+					is_loading = false;
+					console.log("更新に失敗しました");
+				}
+			}, 
+			error: function(xhr, status, error) { 
+				is_loading = false;
+				console.log("エラーが発生しました");
+			} 
+		}); 
+	});
+
+	$('#file_upload2').change(function(e) { 
+		var fileInput = $("#file_upload2").prop('files')[0]; // ファイルを取得 
+		if (!fileInput || is_loading) return;
+
+		var settings_type = "header"; 
+		var formData = new FormData();
+		formData.append('userid', userid); // ユーザーID
+		formData.append('account_id', account_id); // アカウントID
+		formData.append('settings_type', settings_type); // 設定タイプ
+		formData.append('data', fileInput); // 画像ファイルを追加
+
+		// FileReaderでプレビュー画像を表示
+		var fileReader = new FileReader();
+		fileReader.onload = function(e) {
+			$('.hed').children('img').attr('src', e.target.result);
+		};
+		fileReader.readAsDataURL(fileInput);
+
+		is_loading = true;
+		$.ajax({
+			url: '../function/settings.php', 
+			method: 'POST', 
+			data: formData, 
+			dataType: 'json', 
+			processData: false,  // データを自動的に処理しない
+			contentType: false,  // コンテンツタイプを自動で設定しない
+			success: function(response) { 
+				if (response.success) { 
+					is_loading = false;
+					console.log("ヘッダーが更新されました");
+				} else { 
+					is_loading = false;
+					console.log("更新に失敗しました");
+				}
+			}, 
+			error: function(xhr, status, error) { 
+				is_loading = false;
+				console.log("エラーが発生しました");
+			} 
+		}); 
+	});
+
 
 });
 </script>

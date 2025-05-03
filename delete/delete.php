@@ -16,6 +16,7 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
         exit;
     }
 
+    
     $result = delete_ueuse($postUniqid, $postUserid, $loginid);
     if($result[0] === true){
         echo json_encode(['success' => true]);

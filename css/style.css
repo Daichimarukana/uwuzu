@@ -195,16 +195,18 @@ body{
     display: flex;
     width: 100%;
     padding: 0px;
+    justify-content: space-between;
 }
 
 .textbox .cntzone .usercnt{
     margin-top: 24px;
-    margin-left: 12px;
-    margin-right: 12px;
-    width: 43%;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: calc(50% - 52px);
     height: 5dvh;
     border-radius: 15px;
     background-color: var(--sub-color);
+    border: solid 1px var(--border-color);
     padding: 18px;
 }
 
@@ -243,8 +245,7 @@ body{
     object-fit: cover;
     width: 100%;
     height: 180px;
-    border-radius: 10px;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
+    border-radius: 15px;
     margin: 0px;
 }
 
@@ -307,7 +308,6 @@ body{
     text-align: center;
     margin-left: auto;
     margin-right: auto;
-
 }
 
 label > input {
@@ -334,15 +334,12 @@ label > input {
     font-weight: normal;
     text-decoration:none;
     text-align: center;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
     transition: all 250ms ease-in-out;
 }
 .irobutton:hover{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     padding: 8px 22%;
 }
 .irobutton:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     padding: 8px 18%;
 }
 
@@ -358,23 +355,20 @@ label > input {
 
 
     text-align: center;
-    background-color: var(--sub-color);
+    background-color: var(--dark-subtext-color);
+    color: var(--dark-text-color);
 
     border-radius: 50px;
-    color:var(--main-color);
     font-size: 22px;
     font-family: var(--Head-fonts), sans-serif;
     font-weight: normal;
     text-decoration:none;
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .15);
     transition: all 250ms ease-in-out;
 }
 .sirobutton:hover{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     padding: 8px 22%;
 }
 .sirobutton:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     padding: 8px 18%;
 }
 
@@ -464,7 +458,7 @@ label > input {
 }
 
 .inbox {
-    width: calc(100% - 24px);
+    width: calc(100% - 20px);
     padding: 8px 10px;
     border: none;
     border-radius: 10px;
@@ -474,7 +468,6 @@ label > input {
     font-size: 16px;
     line-height: 1.5;
     white-space: nowrap;
-    box-shadow: 0px 0px 25px rgba(0,0,0,0.03);
     overflow-x: scroll; 
     overflow-y : scroll ;
     transition: border 350ms ease-in-out;
@@ -846,11 +839,9 @@ main h1{
 .fbtn:hover{
     background-color: var(--main-color);
     color: var(--sub-color);
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .2);
     width:55%;
 }
 .fbtn:active{
-    box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05);
     width:45%;
 }
 .textbox .authzone{
@@ -994,13 +985,9 @@ p img{
     }
 
     .formarea{
-        padding-top: 0px;
-        padding-bottom: 0px;
-        padding-left: 0px;
-        padding-right: 0px;
+        padding: 12px;
         border-radius: 15px;
         background-color: none;
-        border: none;
         margin-top: 32px;
     }
 
@@ -1073,7 +1060,6 @@ p img{
         padding-right: 12px;
         border-radius: 15px;
         background-color: var(--background-color);
-        box-shadow:0 0px 48px 0 rgba(0, 0, 0, .05) inset;
         margin-top: 32px;
         text-align: center;
         margin-left: auto;
@@ -1239,6 +1225,7 @@ p img{
     }
     .textbox .cntzone .usercnt{
         background-color: var(--dark-sub-color);
+        border: solid 1px var(--dark-border-color);
     }
     
     .textbox .cntzone .usercnt .p1{
@@ -1251,7 +1238,7 @@ p img{
     
     .btnbox{
         background-color: var(--dark-sub-color);
-        border: none;
+        border: solid 1px var(--dark-border-color);
     }
     .irobutton{
         background-color: var(--main-color);
@@ -1260,11 +1247,12 @@ p img{
     .sirobutton{
         background-color: var(--dark-background-color);
         color:var(--main-color);
+        border: solid 1px var(--dark-border-color);
     }
     
     .formarea{
         background-color: var(--dark-sub-color);
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
     .formarea label{
         color:var(--dark-text-color);
@@ -1284,7 +1272,7 @@ p img{
     .inbox {
         background: var(--dark-background-color);
         color: var(--dark-text-color);
-        border: none;
+        border: 1px solid var(--dark-border-color);
     }
     
     .flexbtn .irobutton{
