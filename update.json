@@ -1,18 +1,12 @@
 {
     "software": "uwuzu",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "release_date": "2025/05/04",
-    "release_notes": "このアップデートではタイムラインが正常に表示されない問題やオブジェクトストレージプラグイン有効時に特定の条件下で正常に使用できない問題など、いくつかのバグ修正が行われています。詳細はリリースノートをご覧ください。",
+    "release_notes": "このアップデートではユーズのMarkdown解析が正常に行われないバグの修正が行われています。詳細はリリースノートをご覧ください。",
     "notices": "アップデート前にデータのバックアップを行うことをおすすめします！",
     "files": {
         "overwrite": [
-            "/admin/addadmin.php",
-            "/admin/index.php",
-            "/admin/setup_db_php.php",
-            "/admin/setup_uwuzu_db.php",
-            "/admin/success.php",
             "/js/view_function.js",
-            "/new.php",
 
             "/server/uwuzuabout.txt",
             "/server/uwuzuinfo.txt",

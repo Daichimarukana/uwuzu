@@ -141,21 +141,21 @@ function formatMarkdown(text) {
 
     // 複数行インラインコード（バッククォート3つ）を検出して、<pre><code>で囲む
     text = text.replace(/```([\s\S]+?)```/g, (match, code) => {
-        const key = `PLACEHOLDER_${placeholderIndex++}`;
+        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
         placeholders[key] = `<pre class="codeblock"><code>${code.replace(/^\s*\n/, '')}</code></pre>`;
         return key;
     });
 
     // コードブロックの退避
     text = text.replace(/`([^`\n]+)`/g, (_, code) => {
-        const key = `PLACEHOLDER_${placeholderIndex++}`;
+        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
         placeholders[key] = `<span class="inline">${code}</span>`;
         return key;
     });
 
     // コロンで囲まれた絵文字をプレースホルダーに退避
     text = text.replace(/:([a-zA-Z0-9_]+):/g, (match) => {
-        const key = `PLACEHOLDER_${placeholderIndex++}`;
+        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
         placeholders[key] = match; // 元の文字列を保存
         return key;
     });
@@ -192,8 +192,9 @@ function formatMarkdown(text) {
     // プレースホルダーを戻す
     let final = lines.join('');
     for (const key in placeholders) {
-        final = final.replace(key, placeholders[key]);
-    }
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        final = final.replace(new RegExp(escapedKey, 'g'), placeholders[key]);
+    }  
 
     return final;
 }
