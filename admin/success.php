@@ -88,7 +88,7 @@ session_destroy();
 <title>管理者アカウント登録完了!!! - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
 </head>
 
-<script src="back.js"></script>
+<script src="../js/back.js"></script>
 <body>
 
 

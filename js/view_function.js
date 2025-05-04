@@ -119,7 +119,7 @@ function a_link(text){
     text = text.replace(/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一ー-龠々\w\-\/?=&%.]+)/g, function(url) {
         const escapedUrl = url;
         const no_https_link = escapedUrl.replace("https://", "");
-        if(no_https_link > 48) {
+        if(no_https_link.length > 48) {
             const truncatedLink = no_https_link.substring(0, 48) + '...';
             return `<a href="${escapedUrl}" target="_blank" rel="noopener">${truncatedLink}</a>`;
         } else {
@@ -153,6 +153,13 @@ function formatMarkdown(text) {
         return key;
     });
 
+    // コロンで囲まれた絵文字をプレースホルダーに退避
+    text = text.replace(/:([a-zA-Z0-9_]+):/g, (match) => {
+        const key = `PLACEHOLDER_${placeholderIndex++}`;
+        placeholders[key] = match; // 元の文字列を保存
+        return key;
+    });
+
     // 独自構文などの装飾
     text = text.replace(/\[\[buruburu (.+?)\]\]/g, '<span class="buruburu">$1</span>');
     text = text.replace(/\[\[time (\d+)\]\]/g, (_, ts) => {
@@ -179,8 +186,7 @@ function formatMarkdown(text) {
     // 行ごとに <p> タグで囲む
     const lines = text.split('\n').map(line => {
         line = line.trim();
-        if (line === '') return '';
-        return `<p>${line}</p>`;
+        return line === '' ? '<br>' : `<p>${line}</p>`;
     });
 
     // プレースホルダーを戻す
@@ -340,7 +346,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     if(ueuse["type"] == "Reuse"){
         if(ueuse["ueuse"].length > 0){
             reuse = ``;
-            if(ueuse["reuse"]){
+            if(!(ueuse["reuse"] == null)){
                 inyo = `<div class="reuse_box" data-uniqid="`+ueuse["reuse"]["uniqid"]+`" id="quote_reuse">
                             <div class="reuse_flebox">
                                 <a href="/!`+ueuse["reuse"]["uniqid"]+`">
@@ -394,7 +400,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             abi = ueuse["abi"]["abi_text"];
             abi_date = ueuse["abi"]["abi_date"];
         }else{
-            if(ueuse["reuse"]){
+            if(!(ueuse["reuse"] == null)){
                 reuse = `<div class="ru">
                             <a href="/@`+ueuse["userdata"]["userid"]+`">
                                 <img src="`+ueuse["userdata"]["iconurl"]+`">

@@ -171,7 +171,7 @@ $pdo = null;
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
-        <script src="back.js"></script>
+        <script src="../js/back.js"></script>
 
         <p>db.phpのセットアップを行います。<br>
             db.phpはuwuzuがデータベースへ接続するための設定ファイルです。<br>
