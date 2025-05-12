@@ -66,6 +66,31 @@ if(!($is_login === false)){
 }
 //-------------------------------------------------------------
 
+$serversettings_file = "server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
+
+
+//------------------------
+
+$serverinfofile = 'server/info.txt';
+$serverinfo = file_get_contents($serverinfofile);
+
+//-------------------------------------
+
+//-------------------------
+$softwarefile = "server/uwuzuinfo.txt";
+$softwaredata = file_get_contents($softwarefile);
+
+$softwaredata = explode( "\n", $softwaredata );
+$cnt = count( $softwaredata );
+for( $i=0;$i<$cnt;$i++ ){
+    $uwuzuinfo[$i] = ($softwaredata[$i]);
+}
+//-------------------------
+
+$domain = $_SERVER['HTTP_HOST'];
+
+//------------------------
 //パスワード試行回数制限-------------------------------------------
 if (!isset($_SESSION['login_passtry'])) {
     $_SESSION['login_passtry'] = 0;
@@ -232,11 +257,12 @@ $pdo = null;
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="ログイン - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?>"/>
-<meta name="twitter:description" content="<?php echo safetext($serverinfo);?>"/>
+<meta name="twitter:description" content="<?php echo safetext(preg_replace('/\r\n|\r|\n/', '', $serverinfo));?>"/>
 <!--OGPここまで-->
 <link rel="stylesheet" href="css/style.css">
 <script src="js/jquery-min.js"></script>
 <script src="js/unsupported.js"></script>
+<script src="js/back.js"></script>
 <?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
 <?php }?>
@@ -249,7 +275,6 @@ $pdo = null;
 <title>ログイン - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
 </head>
 
-<script src="js/back.js"></script>
 <body>
 
 <div class="leftbox">

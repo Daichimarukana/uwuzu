@@ -1913,6 +1913,8 @@ function delete_ueuse($uniqid, $userid, $account_id){
                                 $pdo->rollBack();
                                 $error_message[] = "リユーズの削除ができませんでした。";
                                 actionLog($userid, "error", "delete_ueuse", null, $error_message, 3);
+                            }else{
+                                $pdo->commit();
                             }
                         } catch(PDOException $e) {
                             $pdo->rollBack();

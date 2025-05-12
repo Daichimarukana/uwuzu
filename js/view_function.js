@@ -116,6 +116,15 @@ async function replaceCustomEmojis(text) {
 }
 
 function a_link(text){
+    const placeholders = {};
+    let placeholderIndex = 0;
+
+    text = text.replace(/&#039;/g, (match) => {
+        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
+        placeholders[key] = match; // 元の文字列を保存
+        return key;
+    });
+
     text = text.replace(/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一ー-龠々\w\-\/?=&%.]+)/g, function(url) {
         const escapedUrl = url;
         const no_https_link = escapedUrl.replace("https://", "");
@@ -131,6 +140,11 @@ function a_link(text){
         const encodedTag = encodeURIComponent("#"+tag);
         return `${before}<a href="/search?q=${encodedTag}" class="hashtags">#${tag}</a>`;
     });
+
+    for (const key in placeholders) {
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        text = text.replace(new RegExp(escapedKey, 'g'), placeholders[key]);
+    }  
 
     return text;
 }
@@ -155,6 +169,13 @@ function formatMarkdown(text) {
 
     // コロンで囲まれた絵文字をプレースホルダーに退避
     text = text.replace(/:([a-zA-Z0-9_]+):/g, (match) => {
+        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
+        placeholders[key] = match; // 元の文字列を保存
+        return key;
+    });
+
+    // ユーザーIDをプレースホルダーに退避
+    text = text.replace(/@([a-zA-Z0-9_]+)/g, (match) => {
         const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
         placeholders[key] = match; // 元の文字列を保存
         return key;
@@ -348,6 +369,11 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         if(ueuse["ueuse"].length > 0){
             reuse = ``;
             if(!(ueuse["reuse"] == null)){
+                // カスタム絵文字を非同期に差し替え
+                var inyoreuseHtml = formatMarkdown(a_link(ueuse["reuse"]["ueuse"]));
+                inyoreuseHtml = await replaceMentions(inyoreuseHtml);
+                inyoreuseHtml = await replaceCustomEmojis(inyoreuseHtml);
+
                 inyo = `<div class="reuse_box" data-uniqid="`+ueuse["reuse"]["uniqid"]+`" id="quote_reuse">
                             <div class="reuse_flebox">
                                 <a href="/!`+ueuse["reuse"]["uniqid"]+`">
@@ -366,7 +392,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                             </div>
 
                             <p>
-                                `+formatMarkdown(a_link(ueuse["reuse"]["ueuse"]))+`
+                                `+inyoreuseHtml+`
                             </p>
                         </div>`;
             }else{

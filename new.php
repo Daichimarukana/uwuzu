@@ -492,6 +492,7 @@ $pdo = null;
 <link rel="stylesheet" href="css/style.css">
 <script src="js/jquery-min.js"></script>
 <script src="js/unsupported.js"></script>
+<script src="js/back.js"></script>
 <script src="js/zxcvbn.js"></script>
 <?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
     <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
@@ -505,8 +506,6 @@ $pdo = null;
 <title>アカウント登録 - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
 </head>
 
-
-<script src="js/back.js"></script>
 <body>
 
 

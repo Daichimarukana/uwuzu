@@ -1,12 +1,22 @@
 {
     "software": "uwuzu",
-    "version": "1.5.2",
-    "release_date": "2025/05/04",
-    "release_notes": "このアップデートではユーズのMarkdown解析が正常に行われないバグの修正が行われています。詳細はリリースノートをご覧ください。",
-    "notices": "アップデート前にデータのバックアップを行うことをおすすめします！",
+    "version": "1.5.3",
+    "release_date": "2025/05/12",
+    "release_notes": "このアップデートにはアカウント削除に失敗する問題の修正や、ユーズのMarkdownの解析に失敗する問題の修正が含まれます！詳細はリリースノートをご覧ください。",
+    "notices": "アップデート前にデータのバックアップを行うことをおすすめします！\nまた、アップデート後はキャッシュクリアをお忘れなく！",
     "files": {
         "overwrite": [
             "/js/view_function.js",
+            "/function/function.php",
+            "/addauthcode.php",
+            "/authcodechk.php",
+            "/authlogin.php",
+            "/check.php",
+            "/index.php",
+            "/login.php",
+            "/new_select.php",
+            "/new.php",
+            "/success.php",
 
             "/server/uwuzuabout.txt",
             "/server/uwuzuinfo.txt",
