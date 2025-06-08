@@ -77,13 +77,13 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
             "icon" => array(
                 "type" => "Image",
                 "mediaType" => "image/".$icon_kakucho_ci."",
-                "url" => "https://".$domain."/".$userData["iconname"]."",
+                "url" => localcloudURLtoAPI(localcloudURL($userData["iconname"])),
             ),
 
             "image" => array(
                 "type" => "Image",
                 "mediaType" => "image/".$icon_kakucho_ci."",
-                "url" => "https://".$domain."/".$userData["headname"]."",
+                "url" => localcloudURLtoAPI(localcloudURL($userData["headname"])),
             ),
 
             /*"publicKey" => array(

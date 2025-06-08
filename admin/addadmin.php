@@ -3,7 +3,6 @@ require('../db.php');
 //関数呼び出し
 //- EXIF
 require('../function/function.php');
-blockedIP($_SERVER['REMOTE_ADDR']);
 if(file_exists("../settings_admin/plugin_settings/amazons3_settings.php")){
     require_once '../settings_admin/plugin_settings/amazons3_settings.php';
     if(AMS3_CHKS == "true"){
@@ -57,6 +56,24 @@ try {
 
     // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
+}
+if(empty($error_message)){
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM information_schema.tables 
+        WHERE table_schema = :schema AND table_name = :table
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':schema' => DB_NAME,
+        ':table' => "ipblock",
+    ]);
+
+    $exists = $stmt->fetchColumn() > 0;
+
+    if ($exists) {
+        blockedIP($_SERVER['REMOTE_ADDR']);
+    }
 }
 
 $aduser = "yes";

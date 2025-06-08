@@ -12,8 +12,6 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
 
     $domain = $_SERVER['HTTP_HOST'];
 
-    require('../../db.php');
-
     // データベースに接続
     try {
         $option = array(

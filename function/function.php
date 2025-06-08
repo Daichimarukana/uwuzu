@@ -634,7 +634,9 @@ function uploadAmazonS3($tmp_name){
 
 function deleteAmazonS3($url){
     $key = explode("/", mb_substr(parse_url($url, PHP_URL_PATH), 1));
-    array_shift($key);//最初の一個を消す
+    if ($key[0] == AMS3_BUCKET_NM) {
+        array_shift($key);
+    }
     $key = implode("/", $key);
 
     $credentials = [
@@ -1778,17 +1780,17 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
 }
 
 function delete_ueuse($uniqid, $userid, $account_id){
-    if(file_exists("../settings_admin/plugin_settings/amazons3_settings.php")){
-        require_once '../settings_admin/plugin_settings/amazons3_settings.php';
+    if(file_exists(__DIR__ . "/../settings_admin/plugin_settings/amazons3_settings.php")){
+        require_once __DIR__ . '/../settings_admin/plugin_settings/amazons3_settings.php';
         if(AMS3_CHKS == "true"){
-            if(file_exists("../plugin/aws/aws-autoloader.php")){
-                require_once '../plugin/aws/aws-autoloader.php';
+            if(file_exists(__DIR__ . "/../plugin/aws/aws-autoloader.php")){
+                require_once __DIR__ . '/../plugin/aws/aws-autoloader.php';
             }else{
-                actionLog(null, "error", "uploadAmazonS3", null, "AWS SDK for PHPが見つかりませんでした！", 4);
+                actionLog(null, "error", "delete_ueuse", null, "AWS SDK for PHPが見つかりませんでした！", 4);
             }
         }
     }else{
-        actionLog(null, "error", "uploadAmazonS3", null, "amazons3_settings.phpが見つかりませんでした！", 3);
+        actionLog(null, "error", "delete_ueuse", null, "amazons3_settings.phpが見つかりませんでした！", 3);
     }
 
     if (safetext(isset($uniqid)) && safetext(isset($userid)) && safetext(isset($account_id))){
@@ -2388,11 +2390,11 @@ function deleteUser($pdo, $userid, $step, $job_uniqid){
         }
 
         if($step == "delete_account"){
-            if(file_exists("../settings_admin/plugin_settings/amazons3_settings.php")){
-                require_once '../settings_admin/plugin_settings/amazons3_settings.php';
+            if(file_exists(__DIR__ . "/../settings_admin/plugin_settings/amazons3_settings.php")){
+                require_once __DIR__ . '/../settings_admin/plugin_settings/amazons3_settings.php';
                 if(AMS3_CHKS == "true"){
-                    if(file_exists("../plugin/aws/aws-autoloader.php")){
-                        require_once '../plugin/aws/aws-autoloader.php';
+                    if(file_exists(__DIR__ . "/../plugin/aws/aws-autoloader.php")){
+                        require_once __DIR__ . '/../plugin/aws/aws-autoloader.php';
                     }else{
                         actionLog(null, "error", "uploadAmazonS3", null, "AWS SDK for PHPが見つかりませんでした！", 4);
                     }
@@ -2858,6 +2860,31 @@ function getJob($pdo, $userid){
         }else{
             return false;
         }
+    }
+}
+
+function localcloudURL($url){
+    if(!($url == null || $url == "" || $url == "none")){
+        if(filter_var($url, FILTER_VALIDATE_URL)){
+            return $url;
+        }else{
+            return "../" . $url;
+        }
+    }else{
+        return null;
+    }
+}
+
+function localcloudURLtoAPI($text){
+    if(!($text == null || $text == "" || $text == "none")){
+        $domain = $_SERVER['HTTP_HOST'];
+        $address = localcloudURL($text);
+        if(strpos($address, '../') !== false){
+            $address = "https://".$domain."/".str_replace('../', '', $address);
+        }
+        return $address;
+    }else{
+        return null;
     }
 }
 

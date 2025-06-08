@@ -12,8 +12,24 @@ const mentionCache = {};
 const fetchingMentions = false;
 
 async function replaceMentions(text) {
+    const placeholders = [];
+    let index = 0;
+
+    text = text.replace(/<a\b[^>]*>.*?<\/a>/gi, (match) => {
+        const placeholder = `\u2063{{PLACEHOLDER${index}}}\u2063`;
+        placeholders.push(match);
+        index++;
+        return placeholder;
+    });
+
     const mentionMatches = [...text.matchAll(/@([a-zA-Z0-9_]+)/g)];
-    if (mentionMatches.length === 0) return text;
+    if (mentionMatches.length === 0) {
+        placeholders.forEach((original, i) => {
+            text = text.replace(`\u2063{{PLACEHOLDER${i}}}\u2063`, original);
+        });
+        return text;
+    }
+
     const uniqueMentions = [...new Set(mentionMatches.map(match => match[1]))];
     const mentionsToFetch = uniqueMentions.filter(userID => !mentionCache[userID]);
 
@@ -42,7 +58,6 @@ async function replaceMentions(text) {
                     resolve();
                 },
                 error: function() {
-                    // すべて失敗扱いでそのまま
                     for (const name of mentionsToFetch) {
                         mentionCache[name] = `@${name}`;
                     }
@@ -52,17 +67,48 @@ async function replaceMentions(text) {
         });
     }
 
-    // 実際の置換
     text = text.replace(/@([a-zA-Z0-9_]+)/g, (_, id) => mentionCache[id] || `@${id}`);
+
+    placeholders.forEach((original, i) => {
+        text = text.replace(`\u2063{{PLACEHOLDER${i}}}\u2063`, original);
+    });
+
     return text;
 }
 
-const emojiCache = {}; // 絵文字キャッシュ
-const fetchingEmojis = {}; // 同時問い合わせ防止（Promiseキャッシュ）
+const CACHE_KEY = 'emojiCache';
+const CACHE_EXPIRY_KEY = 'emojiCacheExpiry';
+const CACHE_LIFETIME_MS = 24 * 60 * 60 * 1000; // 24時間
+
+let emojiCache = {};
+let fetchingEmojis = {};
+
+(function loadEmojiCache() {
+    const savedCache = localStorage.getItem(CACHE_KEY);
+    const savedExpiry = localStorage.getItem(CACHE_EXPIRY_KEY);
+
+    if (savedCache && savedExpiry && Date.now() < Number(savedExpiry)) {
+        try {
+            emojiCache = JSON.parse(savedCache);
+        } catch (e) {
+            localStorage.removeItem(CACHE_KEY);
+            localStorage.removeItem(CACHE_EXPIRY_KEY);
+        }
+    } else {
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_EXPIRY_KEY);
+    }
+})();
+
+function saveEmojiCache() {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(emojiCache));
+    localStorage.setItem(CACHE_EXPIRY_KEY, (Date.now() + CACHE_LIFETIME_MS).toString());
+}
 
 async function replaceCustomEmojis(text) {
     const emojiMatches = [...text.matchAll(/:([a-zA-Z0-9_]+):/g)];
     if (emojiMatches.length === 0) return text;
+
     const uniqueEmojis = [...new Set(emojiMatches.map(match => match[1]))];
     const emojisToFetch = uniqueEmojis.filter(name => !emojiCache[name] && !fetchingEmojis[name]);
 
@@ -72,46 +118,61 @@ async function replaceCustomEmojis(text) {
                 url: '../function/get_customemoji.php',
                 method: 'POST',
                 data: {
-                    emoji: emojisToFetch.join(','), // カンマ区切りで送信
+                    emoji: emojisToFetch.join(','),
                     userid: global_userid,
                     account_id: global_account_id
                 },
                 dataType: 'json',
                 timeout: 30000,
-                success: function(response) {
+                success: function (response) {
                     if (response.success && response.emojis) {
                         for (const name of emojisToFetch) {
-                            if (response.emojis[name]) {
-                                const emoji = response.emojis[name];
-                                emojiCache[name] = `<img src="${emoji.emojipath}" alt=":${emoji.emojiname}:" class="custom-emoji">`;
-                            } else {
-                                emojiCache[name] = `:${name}:`; // 存在しない場合は元のまま
+                            if (response.success && response.emojis) {
+                                for (const name of emojisToFetch) {
+                                    if (response.emojis[name]) {
+                                        const emoji = response.emojis[name];
+                                        emojiCache[name] = emoji.emojipath;
+                                    } else {
+                                        emojiCache[name] = null;
+                                    }
+                                }
                             }
                         }
                     } else {
                         for (const name of emojisToFetch) {
-                            emojiCache[name] = `:${name}:`;
+                            emojiCache[name] = null;
                         }
                     }
+                    saveEmojiCache();
                     resolve();
                 },
-                error: function() {
+                error: function () {
                     for (const name of emojisToFetch) {
-                        emojiCache[name] = `:${name}:`;
+                        emojiCache[name] = null;
                     }
+                    saveEmojiCache();
                     resolve();
                 }
             });
         });
+
         emojisToFetch.forEach(name => {
             fetchingEmojis[name] = fetchPromise;
         });
 
         await fetchPromise;
     }
+
     await Promise.all(uniqueEmojis.map(name => fetchingEmojis[name]));
 
-    text = text.replace(/:([a-zA-Z0-9_]+):/g, (_, name) => emojiCache[name] || `:${name}:`);
+    text = text.replace(/:([a-zA-Z0-9_]+):/g, (_, name) => {
+        const url = emojiCache[name];
+        if (url === undefined) return `:${name}:`; // 未取得
+        if (url === null) return `:${name}:`;       // 存在しない
+
+        return `<img src="${url}" alt=":${name}:">`; // ここで生成
+    });
+
     return text;
 }
 
@@ -152,6 +213,13 @@ function a_link(text){
 function formatMarkdown(text) {
     const placeholders = {};
     let placeholderIndex = 0;
+
+    // URLをプレースホルダーに退避
+    text = text.replace(/<a\b[^>]*>[\s\S]*?<\/a>/g, (match) => {
+        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
+        placeholders[key] = match; // 元の文字列を保存
+        return key;
+    });
 
     // 複数行インラインコード（バッククォート3つ）を検出して、<pre><code>で囲む
     text = text.replace(/```([\s\S]+?)```/g, (match, code) => {

@@ -146,8 +146,8 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         $now_userdata = array(
                             "username" => decode_yajirushi(htmlspecialchars_decode($userData['username'])),
                             "userid" => decode_yajirushi(htmlspecialchars_decode($userData['userid'])),
-                            "user_icon" => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userData['iconname'])),
-                            "user_head" => decode_yajirushi(htmlspecialchars_decode("https://".$domain."/".$userData['headname'])),
+                            "user_icon" => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($userData['iconname'])))),
+                            "user_head" => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($userData['headname'])))),
                         );
                     }
 
@@ -162,11 +162,11 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         'replyid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["rpuniqid"])),
                         'text' => decode_yajirushi(htmlspecialchars_decode($ueusedata["ueuse"])),
                         'account' => $now_userdata,
-                        'photo1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo1"]))),
-                        'photo2' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo2"]))),
-                        'photo3' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo3"]))),
-                        'photo4' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["photo4"]))),
-                        'video1' => decode_yajirushi(htmlspecialchars_decode(str_replace('../', 'https://' . $_SERVER['HTTP_HOST'] . '/', $ueusedata["video1"]))),
+                        'photo1' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["photo1"])))),
+                        'photo2' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["photo2"])))),
+                        'photo3' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["photo3"])))),
+                        'photo4' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["photo4"])))),
+                        'video1' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["video1"])))),
                         'favorite' => $favorite,
                         'favorite_cnt' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite_cnt"])),
                         'datetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["datetime"])),
