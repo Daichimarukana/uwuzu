@@ -32,32 +32,29 @@ if (safetext(isset($_POST['get_account'])) && safetext(isset($_POST['userid'])) 
     if (!empty($pdo)) {
         // カンマ区切りまたは1つのユーザーID文字列を処理
         $usernames = array_unique(array_filter(explode(',', $get_account)));
+        $lower_usernames = array_map('mb_strtolower', $usernames);
 
         $results = [];
 
-        if (count($usernames) > 0) {
-            // プレースホルダを作成
-            $placeholders = implode(',', array_fill(0, count($usernames), '?'));
-            $stmt = $pdo->prepare("SELECT userid, username FROM account WHERE userid IN ($placeholders)");
-            $stmt->execute($usernames);
+        if (count($lower_usernames) > 0) {
+            $placeholders = implode(',', array_fill(0, count($lower_usernames), '?'));
+            $stmt = $pdo->prepare("SELECT userid, username FROM account WHERE LOWER(userid) IN ($placeholders)");
+            $stmt->execute($lower_usernames);
 
             $fetched = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $fetched[$row['userid']] = [
+                $fetched[mb_strtolower($row['userid'])] = [
                     'userid' => $row['userid'],
                     'username' => $row['username']
                 ];
             }
 
             foreach ($usernames as $name) {
-                if (isset($fetched[$name])) {
-                    $results[$name] = $fetched[$name];
-                } else {
-                    $results[$name] = null;
-                }
+                $lower = mb_strtolower($name);
+                $results[$name] = $fetched[$lower] ?? null;
             }
         }
-
+        
         echo json_encode([
             "success" => true,
             "users" => $results

@@ -171,11 +171,8 @@ if( !empty($_POST['btn_submit']) ) {
 
 
     $result = $dbh->prepare("SELECT userid, password, loginid, authcode FROM account WHERE userid = :userid");
-
     $result->bindValue(':userid', $userid);
-    // SQL実行
     $result->execute();
-
 
 	if( empty($userid) ) {
 		$error_message[] = 'ユーザーIDを入力してください。(USERID_INPUT_PLEASE)';
@@ -198,7 +195,7 @@ if( !empty($_POST['btn_submit']) ) {
             if($result->rowCount() > 0) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
 
-                if($row["userid"] == $userid){
+                if(strtolower($row["userid"]) == strtolower($userid)){
                     if(uwuzu_password_verify($password,$row["password"])){
                         if(empty($row["authcode"])){
                             $_SESSION['userid'] = $userid;

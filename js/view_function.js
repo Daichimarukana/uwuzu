@@ -32,7 +32,7 @@ async function replaceMentions(text) {
     }
 
     // ユーザーIDを小文字に正規化
-    const uniqueMentions = [...new Set(mentionMatches.map(match => match[1].toLowerCase()))];
+    const uniqueMentions = [...new Set(mentionMatches.map(match => match[1]))];
     const mentionsToFetch = uniqueMentions.filter(userID => !mentionCache[userID]);
 
     if (mentionsToFetch.length > 0) {
@@ -51,9 +51,9 @@ async function replaceMentions(text) {
                     if (response.success && response.users) {
                         for (const [name, userInfo] of Object.entries(response.users)) {
                             if (userInfo && userInfo.userid && userInfo.username) {
-                                mentionCache[name.toLowerCase()] = `<a href="/@${userInfo.userid}" class="mta">@${userInfo.username}</a>`;
+                                mentionCache[name] = `<a href="/@${userInfo.userid}" class="mta">@${userInfo.username}</a>`;
                             } else {
-                                mentionCache[name.toLowerCase()] = `@${name}`;
+                                mentionCache[name] = `@${name}`;
                             }
                         }
                     }
@@ -61,7 +61,7 @@ async function replaceMentions(text) {
                 },
                 error: function () {
                     for (const name of mentionsToFetch) {
-                        mentionCache[name.toLowerCase()] = `@${name}`;
+                        mentionCache[name] = `@${name}`;
                     }
                     resolve();
                 }
@@ -71,7 +71,7 @@ async function replaceMentions(text) {
 
     // 元のtextに適用（小文字で照合）
     text = text.replace(/@([a-zA-Z0-9_]+)/g, (_, id) => {
-        const lower = id.toLowerCase();
+        const lower = id;
         return mentionCache[lower] || `@${id}`; // 表示は元の大文字小文字を保持
     });
 
