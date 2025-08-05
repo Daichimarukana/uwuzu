@@ -222,37 +222,8 @@ if( !empty($_POST['btn_submit']) ) {
                 $checkResult = $chkauthcode->verifyCode($tousercode, $userauthcode, $discrepancy);
                 if ($checkResult) {
 
-                    $pdo->beginTransaction();
-                    try {
-                        $touserid = $userid;
-                        $datetime = date("Y-m-d H:i:s");
-                        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更し、二段階認証を再設定してください。\n\nログインした端末 : ".$device;
-                        $title = '🚪ログイン通知🚪';
-                        $url = '/settings';
-                        $userchk = 'none';
-                        // 通知用SQL作成
-                        $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-                
-                        $stmt->bindParam(':fromuserid', safetext("uwuzu-fromsys"), PDO::PARAM_STR);
-                        $stmt->bindParam(':touserid', safetext($touserid), PDO::PARAM_STR);
-                        $stmt->bindParam(':msg', safetext($msg), PDO::PARAM_STR);
-                        $stmt->bindParam(':url', safetext($url), PDO::PARAM_STR);
-                        $stmt->bindParam(':userchk', safetext($userchk), PDO::PARAM_STR);
-                        $stmt->bindParam(':title', safetext($title), PDO::PARAM_STR);
-
-                        $stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
-                
-                        // SQLクエリの実行
-                        $res = $stmt->execute();
-                
-                        // コミット
-                        $res = $pdo->commit();
-                
-                    } catch(Exception $e) {
-                
-                        // エラーが発生した時はロールバック
-                        $pdo->rollBack();
-                    }
+                    $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更し、二段階認証を再設定してください。\n\nログインした端末 : ".$device;
+                    send_notification($userid,"uwuzu-fromsys","🚪ログイン通知🚪",$msg,"/settings", "login");
 
                     clearstatcache();
                                         

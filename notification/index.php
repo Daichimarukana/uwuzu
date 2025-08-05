@@ -79,6 +79,7 @@ $pdo = null;
 <script src="../js/jquery-min.js"></script>
 <script src="../js/unsupported.js"></script>
 <script src="../js/console_notice.js"></script>
+<script src="../js/view_function.js"></script>
 <link rel="stylesheet" href="../css/home.css">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
@@ -130,29 +131,34 @@ $pdo = null;
 
 <script>
 $(document).ready(function() {
-	loadPosts();
-
-    var pageNumber = 1;
+	var userid = '<?php echo $userid; ?>';
+	var loginid = '<?php echo $loginid; ?>';
+	var pageNumber = 1;
     var isLoading = false;
+	
+	view_ueuse_init(userid, loginid);
+	loadPosts();
 
     function loadPosts() {
         if (isLoading) return;
         isLoading = true;
 		$("#loading").show();
-		var userid = '<?php echo $userid; ?>';
-		var account_id = '<?php echo $loginid; ?>';
         $.ajax({
             url: '../nextpage/notification.php', // PHPファイルへのパス
-            method: 'GET',
-            data: { page: pageNumber, userid: userid , account_id: account_id },
-            dataType: 'html',
+			method: 'POST',
+			data: { page: pageNumber, userid: userid, account_id: loginid },
+            dataType: 'json',
 			timeout: 300000,
             success: function(response) {
-                $('#postContainer').append(response);
-                pageNumber++;
-                isLoading = false;
-				$("#loading").hide();
-				$("#error").hide();
+                if(renderNotifications(response)){
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				}else{
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				}
             },
 			error: function (xhr, textStatus, errorThrown) {  // エラーと判定された場合
 				isLoading = false;

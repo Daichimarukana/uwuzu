@@ -1,15 +1,15 @@
 <?php
 
 $domain = $_SERVER['HTTP_HOST'];
-require('../../db.php');
+require(__DIR__ . '/../../db.php');
 //関数呼び出し
 //- Base64_mime
-require('../../function/function.php');
+require(__DIR__ . '/../../function/function.php');
 blockedIP($_SERVER['REMOTE_ADDR']);
 
-$mojisizefile = "../../server/textsize.txt";
+$mojisizefile = __DIR__ . "/../../server/textsize.txt";
 
-$banurldomainfile = "../../server/banurldomain.txt";
+$banurldomainfile = __DIR__ . "/../../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
 $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 
@@ -44,6 +44,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             $err = "input_not_found";
             $response = array(
                 'error_code' => $err,
+                'success' => false
             );
             echo json_encode($response, JSON_UNESCAPED_UNICODE);
             exit;
@@ -53,6 +54,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         $err = "input_not_found";
         $response = array(
             'error_code' => $err,
+            'success' => false
         );
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
@@ -61,27 +63,9 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
     session_start();
 
     if( !empty($pdo) ) {
-        $userQuery = $pdo->prepare("SELECT username, userid, role, follow, follower FROM account WHERE token = :token");
-        $userQuery->bindValue(':token', $token);
-        $userQuery->execute();
-        $userData = $userQuery->fetch();
-
-        if(empty($userData["userid"])){
-            $err = "token_invalid";
-            $response = array(
-                'error_code' => $err,
-            );
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }elseif($userData["role"] === "ice"){
-            $err = "this_account_has_been_frozen";
-            $response = array(
-                'error_code' => $err,
-            );
-            
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }else{
+        $AuthData = APIAuth($pdo, $token, "write:follow");
+        if($AuthData[0] === true){
+            $userData = $AuthData[2];
             //本文取得
             if(!(empty($_GET['userid']))){
                 $follow_userid = safetext($_GET['userid']);
@@ -111,6 +95,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                             $err = "could_not_complete";
                             $response = array(
                                 'error_code' => $err,
+                                'success' => false
                             );
                             echo json_encode($response, JSON_UNESCAPED_UNICODE);
                         }
@@ -118,6 +103,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         $err = "you_cant_it_to_yourself";
                         $response = array(
                             'error_code' => $err,
+                            'success' => false
                         );
                         echo json_encode($response, JSON_UNESCAPED_UNICODE);
                     }
@@ -125,6 +111,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     $err = "critical_error_userdata_not_found";
                     $response = array(
                         'error_code' => $err,
+                        'success' => false
                     );
                     echo json_encode($response, JSON_UNESCAPED_UNICODE);
                 }
@@ -132,16 +119,26 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 $err = "input_not_found";
                 $response = array(
                     'error_code' => $err,
+                    'success' => false
                 );
                  
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);
             }
+        }else{
+            $err = $AuthData[1];
+            $response = array(
+                'error_code' => $err,
+                'success' => false
+            );
+            
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
         }
     }
 }else{
     $err = "input_not_found";
     $response = array(
         'error_code' => $err,
+        'success' => false
     );
      
     echo json_encode($response, JSON_UNESCAPED_UNICODE);

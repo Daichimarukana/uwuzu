@@ -1,4 +1,5 @@
 <?php 
+$domain = $_SERVER['HTTP_HOST'];
 $serversettings_file = "../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
@@ -27,11 +28,6 @@ $pdo = null;
 $stmt = null;
 $res = null;
 $option = null;
-
-
-$userid = safetext($_SESSION['userid']);
-$token = safetext($_SESSION['token']);
-
 
 try {
 
@@ -63,6 +59,30 @@ if($is_login === false){
 	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
+
+if(isset($_GET["session"])){
+    $session_id = safetext($_GET["session"]);
+    $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . "/api/token/get?session=" . $session_id;
+    $options = array(
+        'http' => array(
+            'method'=> 'GET',
+            'header'=> 'Content-type: application/json; charset=UTF-8'
+        )
+    );
+
+    $context = stream_context_create($options);
+
+    $get_data = json_decode(file_get_contents($url, false,$context), true);
+    if(isset($get_data["token"])){
+        $API_token = $get_data["token"];
+    } else {
+        $API_token = "";
+        $error_message[] = "アクセストークンの取得に失敗しました。";
+    }
+} else {
+    $session_id = "";
+}
+
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
 $notiQuery->bindValue(':userid', $userid);
 $notiQuery->execute();
@@ -85,7 +105,7 @@ require('../logout/logout.php');
 <script src="../js/console_notice.js"></script>
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>アクセストークン発行完了 - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
+<title>アクセストークンの発行 - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
 
 </head>
 
@@ -102,21 +122,17 @@ require('../logout/logout.php');
 	<?php endif; ?>
 
     <div class="emojibox">
-    <h1>アクセストークン発行完了</h1>
-            <?php if( !empty($error_message) ): ?>
-                <ul class="errmsg">
-                    <?php foreach( $error_message as $value ): ?>
-                        <p>・ <?php echo $value; ?></p>
-                    <?php endforeach; ?>
-                </ul>
-            <?php endif; ?>
+    <h1>アクセストークンの発行</h1>
 		<div class="formarea">
-        <p>発行完了！以下のアクセストークンでこのアカウント(<?php echo $userid?>)に投稿を行えます！</p>
-		<p>アクセストークンは以下のものです！</p>
-		<ul class="errmsg">
-			<p>以下のアクセストークンは絶対に他人に知られないように大切に保管してください！</p>
-		</ul>
-		<p><?php echo safetext($token);?></p>
+            <?php if($session_id == ""){ ?>
+                <p>アクセストークンを取得リクエストがされていません。</p>
+            <?php } else { ?>
+                <ul class="errmsg">
+                    <p>以下のアクセストークンは絶対に他人に知られないように大切に保管してください！</p>
+                </ul>
+                <p><?php echo safetext($API_token);?></p>
+            <?php }?>
+            
 		</div>
         
         <a href="index" class="irobutton">戻る</a>

@@ -72,126 +72,167 @@ $notificationcount = $notiData['notification_count'];
 
 
 if (!empty($pdo)) {
-	$uwuzuid2 = safetext(str_replace('@', '', $_GET['uwuzuid']));
+	$uwuzuid = safetext(str_replace('@', '', $_GET['userid']));
+	$is_local = true;
 
-	$uwuzuid = safetext(str_replace('@' . $domain, '', $uwuzuid2));
+	if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
+		if(isset($_GET['domain'])){
+			$activity_domain = safetext(str_replace('@', '', $_GET['domain']));
 
-	$userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower, blocklist FROM account WHERE userid = :userid");
-	$userQuery->bindValue(':userid', $uwuzuid);
-	$userQuery->execute();
-	$userData = $userQuery->fetch();
+			if(!($activity_domain == $domain)){
+				$domain_response = GetActivityPubUser($uwuzuid, $activity_domain);
+                if (empty($domain_response) || array_key_exists("error", $domain_response)) {
+                    $userData = null;
+                } else {
+                    $userData = $domain_response;
+                }
+                //var_dump($domain_response);
+                $is_local = false;
+			}else{
+				$activity_domain = $domain;
+				$is_local = true;
+			}
+		}else{
+			$activity_domain = $domain;
+		}
+	}else{
+		$activity_domain = $domain;
+		$is_local = true;
+	}
 
-
+	if($is_local == true){
+		$userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower, blocklist FROM account WHERE userid = :userid");
+		$userQuery->bindValue(':userid', $uwuzuid);
+		$userQuery->execute();
+		$userData = $userQuery->fetch();
+	}
+	
 	if (!empty($userData["userid"])) {
+		if($is_local == true){
+			$roles = array_filter(explode(',', $userData["role"])); // カンマで区切られたロールを配列に分割
 
+			$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings FROM account WHERE userid = :userid");
 
-		$roles = array_filter(explode(',', $userData["role"])); // カンマで区切られたロールを配列に分割
-
-		$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings FROM account WHERE userid = :userid");
-
-		$rerole->bindValue(':userid', $uwuzuid);
-		// SQL実行
-		$rerole->execute();
-
-		$userdata = $rerole->fetch();
-
-		$roleDataArray = array();
-
-		foreach ($roles as $roleId) {
-			$rerole = $pdo->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
-			$rerole->bindValue(':role', $roleId);
+			$rerole->bindValue(':userid', $uwuzuid);
+			// SQL実行
 			$rerole->execute();
-			$roleDataArray[$roleId] = $rerole->fetch();
-		}
 
-		$isAIBlock = val_OtherSettings("isAIBlock", $userdata["other_settings"]);
+			$userdata = $rerole->fetch();
 
-		//-------フォロー数---------
-		$follow = $userdata['follow']; // コンマで区切られたユーザーIDを含む変数
+			$roleDataArray = array();
 
-		// コンマで区切って配列に分割し、要素数を数える
-		$followIds = array_reverse(array_values(array_filter(explode(',', $follow))));
-		$followCount = count($followIds);
-
-		$follow_on_me = array_search($userid, $followIds);
-
-		if ($follow_on_me !== false) {
-			$follow_yes = "フォローされています"; // worldを含む:6
-		} else {
-			$follow_yes = ""; // worldを含む:6
-		}
-
-		//-------フォロワー数---------
-		$follower = $userdata['follower']; // コンマで区切られたユーザーIDを含む変数
-
-		// コンマで区切って配列に分割し、要素数を数える
-		$followerIds = array_reverse(array_values(array_filter(explode(',', $follower))));
-		$followerCount = count($followerIds);
-
-		$profileText = safetext($userData['profile']);
-
-
-		$allueuse = $pdo->prepare("SELECT account FROM ueuse WHERE account = :userid");
-		$allueuse->bindValue(':userid', $uwuzuid);
-		$allueuse->execute();
-		$ueuse_cnt = $allueuse->rowCount();
-
-		//-------フォロワー取得---------
-
-		$follower_userdata = array();
-		if(!(empty($followerIds))){
-			// フォロワーのユーザーIDを $follower_userids 配列に追加
-			foreach ($followerIds as $follower_userid) {
-				$follower_userids[] = $follower_userid;
+			foreach ($roles as $roleId) {
+				$rerole = $pdo->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
+				$rerole->bindValue(':role', $roleId);
+				$rerole->execute();
+				$roleDataArray[$roleId] = $rerole->fetch();
 			}
 
-			// フォロワーのユーザー情報を取得
+			$isAIBlock = val_OtherSettings("isAIBlock", $userdata["other_settings"]);
 
-			foreach ($follower_userids as $follower_userid) {
-				$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-				$follower_userQuery->bindValue(':userid', $follower_userid);
-				$follower_userQuery->execute();
-				$follower_userinfo = $follower_userQuery->fetch();
+			//-------フォロー数---------
+			$follow = $userdata['follow']; // コンマで区切られたユーザーIDを含む変数
 
-				if ($follower_userinfo) {
-					// フォロワーのユーザー情報を $follower_userdata 配列に追加
-					$follower_userdata[] = $follower_userinfo;
+			// コンマで区切って配列に分割し、要素数を数える
+			$followIds = array_reverse(array_values(array_filter(explode(',', $follow))));
+			$followCount = count($followIds);
+
+			$follow_on_me = array_search($userid, $followIds);
+
+			if ($follow_on_me !== false) {
+				$follow_yes = "フォローされています"; // worldを含む:6
+			} else {
+				$follow_yes = ""; // worldを含む:6
+			}
+
+			//-------フォロワー数---------
+			$follower = $userdata['follower']; // コンマで区切られたユーザーIDを含む変数
+
+			// コンマで区切って配列に分割し、要素数を数える
+			$followerIds = array_reverse(array_values(array_filter(explode(',', $follower))));
+			$followerCount = count($followerIds);
+
+			$profileText = safetext($userData['profile']);
+
+
+			$allueuse = $pdo->prepare("SELECT account FROM ueuse WHERE account = :userid");
+			$allueuse->bindValue(':userid', $uwuzuid);
+			$allueuse->execute();
+			$ueuse_cnt = $allueuse->rowCount();
+
+			//-------フォロワー取得---------
+
+			$follower_userdata = array();
+			if(!(empty($followerIds))){
+				// フォロワーのユーザーIDを $follower_userids 配列に追加
+				foreach ($followerIds as $follower_userid) {
+					$follower_userids[] = $follower_userid;
+				}
+
+				// フォロワーのユーザー情報を取得
+
+				foreach ($follower_userids as $follower_userid) {
+					$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+					$follower_userQuery->bindValue(':userid', $follower_userid);
+					$follower_userQuery->execute();
+					$follower_userinfo = $follower_userQuery->fetch();
+
+					if ($follower_userinfo) {
+						// フォロワーのユーザー情報を $follower_userdata 配列に追加
+						$follower_userdata[] = $follower_userinfo;
+					}
 				}
 			}
-		}
 
-		//-------フォロー取得---------
+			//-------フォロー取得---------
 
-		$follow_userdata = array();
+			$follow_userdata = array();
 
-		if(!(empty($followIds))){
-			foreach ($followIds as $follow_userid) {
-				$follow_userids[] = $follow_userid;
-			}
+			if(!(empty($followIds))){
+				foreach ($followIds as $follow_userid) {
+					$follow_userids[] = $follow_userid;
+				}
 
-			foreach ($follow_userids as $follow_userid) {
-				$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-				$follow_userQuery->bindValue(':userid', $follow_userid);
-				$follow_userQuery->execute();
-				$follow_userinfo = $follow_userQuery->fetch();
+				foreach ($follow_userids as $follow_userid) {
+					$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+					$follow_userQuery->bindValue(':userid', $follow_userid);
+					$follow_userQuery->execute();
+					$follow_userinfo = $follow_userQuery->fetch();
 
-				if ($follow_userinfo) {
-					// フォロワーのユーザー情報を $follower_userdata 配列に追加
-					$follow_userdata[] = $follow_userinfo;
+					if ($follow_userinfo) {
+						// フォロワーのユーザー情報を $follower_userdata 配列に追加
+						$follow_userdata[] = $follow_userinfo;
+					}
 				}
 			}
-		}
 
-		if(filter_var($userdata['iconname'], FILTER_VALIDATE_URL)){
-			$userdata['iconname'] = $userdata['iconname'];
-		}else{
-			$userdata['iconname'] = "../" . $userdata['iconname'];
+			if(filter_var($userdata['iconname'], FILTER_VALIDATE_URL)){
+				$userdata['iconname'] = $userdata['iconname'];
+			}else{
+				$userdata['iconname'] = "../" . $userdata['iconname'];
+			}
+			if(filter_var($userdata['headname'], FILTER_VALIDATE_URL)){
+				$userdata['headname'] = $userdata['headname'];
+			}else{
+				$userdata['headname'] = "../" . $userdata['headname'];
+			}
+		}elseif($userData != null){
+			$userdata = $userData;
+			$roles = array("user");
+			foreach ($roles as $roleId) {
+				$rerole = $pdo->prepare("SELECT rolename, roleauth, rolecolor, roleeffect FROM role WHERE roleidname = :role");
+				$rerole->bindValue(':role', $roleId);
+				$rerole->execute();
+				$roleDataArray[$roleId] = $rerole->fetch();
+			}
+			$isAIBlock = false;
+			$profileText = $userData["profile"];
+			
+			$ueuse_cnt = "zero";
+			$followCount = "zero";
+			$followerCount = "zero";
 		}
-		if(filter_var($userdata['headname'], FILTER_VALIDATE_URL)){
-			$userdata['headname'] = $userdata['headname'];
-		}else{
-			$userdata['headname'] = "../" . $userdata['headname'];
-		}
+		
 	} else {
 		$userData["userid"] = "none";
 		$userData['username'] = "でふぉると";
@@ -345,7 +386,7 @@ $pdo = null;
 		<div class="icon">
 			<img src="<?php echo safetext($userdata['iconname']); ?>">
 			<h2><?php echo replaceProfileEmojiImages(safetext($userData['username'])); ?></h2>
-			<p>@<?php echo safetext($userData['userid']); ?><!--<span>@<?php /*echo safetext($domain); */ ?></span>--></p>
+			<p>@<?php echo safetext($userData['userid']); ?><?php if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){echo "<span>@".safetext($activity_domain)."</span>";} ?></p>
 		</div>
 
 		<div class="roleboxes">
@@ -389,6 +430,7 @@ $pdo = null;
 		<?php } ?>
 
 		</div>
+		<?php if($is_local == true){?>
 		<div class="fzone">
 			<div class="time">
 				<p><?php echo date('Y年m月d日 H:i', strtotime($userdata['datetime'])); ?>からuwuzuを利用しています。</p>
@@ -430,7 +472,7 @@ $pdo = null;
 				</div>
 			<?php } else { ?>
 
-				<?php if (!(in_array(safetext($userData['userid']), explode(",", $myblocklist)))) { ?>
+				<?php if (!(in_array(safetext($userData['userid']), explode(",", $myblocklist)))) {?>
 					<form method="post">
 						<div class="follow">
 							<?php
@@ -440,8 +482,10 @@ $pdo = null;
 									// フォロー済みの場合はフォロー解除ボタンを表示
 									echo '<input type="button" id="openModalButton" class="fbtn_un" name="unfollow" value="フォロー解除">';
 								} else {
-									// 未フォローの場合はフォローボタンを表示
-									echo '<input type="submit" class="fbtn" name="follow" value="フォロー">';
+									if (!(safetext($userdata['role']) === "ice")) { 
+										// 未フォローの場合はフォローボタンを表示
+										echo '<input type="submit" class="fbtn" name="follow" value="フォロー">';
+									}
 								}
 							}
 							?>
@@ -459,6 +503,8 @@ $pdo = null;
 					}; ?></p>
 			</div>
 		</div>
+
+		<?php } ?>
 	<?php } ?>
 
 		<?php if (!($role === "ice")) { ?>
@@ -679,18 +725,24 @@ $pdo = null;
 			$("#loading").show();
 			$("#error").hide();
 			var uwuzuid = '<?php echo $uwuzuid; ?>';
+			var activity_domain = '<?php echo $activity_domain; ?>';
 			if (mode == 'allueuse') {
 				$.ajax({
 					url: '../nextpage/usertimeline.php',
 					method: 'POST',
-					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid,},
+					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid, activity_domain: activity_domain},
 					dataType: 'json',
 					timeout: 300000,
 					success: function(response) {
-						renderUeuses(response);
-						pageNumber++;
-						isLoading = false;
-						$("#loading").hide();
+						if(renderUeuses(response)){
+							pageNumber++;
+							isLoading = false;
+							$("#loading").hide();
+						}else{
+							isLoading = false;
+							$("#loading").hide();
+							$("#error").show();
+						}
 					},
 					error: function(xhr, textStatus, errorThrown) {
 						isLoading = false;
@@ -702,14 +754,19 @@ $pdo = null;
 				$.ajax({
 					url: '../nextpage/usermediatimeline.php',
 					method: 'POST',
-					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid,},
+					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid, activity_domain: activity_domain},
 					dataType: 'json',
 					timeout: 300000,
 					success: function(response) {
-						renderUeuses(response);
-						pageNumber++;
-						isLoading = false;
-						$("#loading").hide();
+						if(renderUeuses(response)){
+							pageNumber++;
+							isLoading = false;
+							$("#loading").hide();
+						}else{
+							isLoading = false;
+							$("#loading").hide();
+							$("#error").show();
+						}
 					},
 					error: function(xhr, textStatus, errorThrown) {
 						isLoading = false;
@@ -721,14 +778,19 @@ $pdo = null;
 				$.ajax({
 					url: '../nextpage/userliketimeline.php',
 					method: 'POST',
-					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid,},
+					data: { page: pageNumber, userid: userid, account_id: account_id, id: uwuzuid, activity_domain: activity_domain},
 					dataType: 'json',
 					timeout: 300000,
 					success: function(response) {
-						renderUeuses(response);
-						pageNumber++;
-						isLoading = false;
-						$("#loading").hide();
+						if(renderUeuses(response)){
+							pageNumber++;
+							isLoading = false;
+							$("#loading").hide();
+						}else{
+							isLoading = false;
+							$("#loading").hide();
+							$("#error").show();
+						}
 					},
 					error: function(xhr, textStatus, errorThrown) {
 						isLoading = false;

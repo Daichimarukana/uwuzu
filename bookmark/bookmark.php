@@ -43,8 +43,6 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
         if($result2["loginid"] === $loginid){
 
             try {
-                $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS);
-
                 // Bookmark情報を取得
                 $stmt = $pdo->prepare("SELECT bookmark FROM account WHERE userid = :userid");
                 $stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
@@ -52,33 +50,41 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
                 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($post) {
-                    $bookmarkList = explode(',', $post['bookmark']);
-                    $index = array_search($postUniqid, $bookmarkList);
+                    // ユーズ情報を取得
+                    $ueusestmt = $pdo->prepare("SELECT uniqid FROM ueuse WHERE uniqid = :uniqid LIMIT 1");
+                    $ueusestmt->bindValue(':uniqid', $postUniqid, PDO::PARAM_STR);
+                    $ueusestmt->execute();
+                    $ueuse = $ueusestmt->fetch(PDO::FETCH_ASSOC);
+                    if(!(empty($ueuse))){
+                        $bookmarkList = explode(',', $post['bookmark']);
+                        $index = array_search($postUniqid, $bookmarkList);
 
-                    if ($index === false) {
-                        // UniqIDを追加
-                        $bookmarkList[] = $postUniqid;
+                        if ($index === false) {
+                            // UniqIDを追加
+                            $bookmarkList[] = $postUniqid;
+                        } else {
+                            // UniqIDを削除
+                            array_splice($bookmarkList, $index, 1);
+                        }
+
+                        // 新しいいいね情報を更新
+                        $newbookmark = implode(',', $bookmarkList);
+                        $updateQuery = $pdo->prepare("UPDATE account SET bookmark = :bookmark WHERE userid = :userid");
+                        $updateQuery->bindValue(':bookmark', $newbookmark, PDO::PARAM_STR);
+                        $updateQuery->bindValue(':userid', $userId, PDO::PARAM_STR);
+                        $res = $updateQuery->execute();
+
+                        if ($res) {
+                            echo json_encode(['success' => true, 'newbookmark' => 'success']);
+                            exit;
+                        } else {
+                            echo json_encode(['success' => false, 'error' => 'ブックマークの更新に失敗しました。']);
+                            exit;
+                        }
                     } else {
-                        // UniqIDを削除
-                        array_splice($bookmarkList, $index, 1);
-                    }
-
-                    // 新しいいいね情報を更新
-                    $newbookmark = implode(',', $bookmarkList);
-                    $updateQuery = $pdo->prepare("UPDATE account SET bookmark = :bookmark WHERE userid = :userid");
-                    $updateQuery->bindValue(':bookmark', $newbookmark, PDO::PARAM_STR);
-                    $updateQuery->bindValue(':userid', $userId, PDO::PARAM_STR);
-                    $res = $updateQuery->execute();
-
-                    if ($res) {
-                        echo json_encode(['success' => true, 'newbookmark' => 'success']);
-                        exit;
-                    } else {
-                        echo json_encode(['success' => false, 'error' => 'ブックマークの更新に失敗しました。']);
+                        echo json_encode(['success' => false, 'error' => 'ユーズが見つかりません。']);
                         exit;
                     }
-
-
                 } else {
                     echo json_encode(['success' => false, 'error' => 'アカウントが見つかりません。']);
                     exit;

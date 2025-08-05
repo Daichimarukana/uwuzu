@@ -42,8 +42,9 @@ daichimarukanaと一緒に開発したいよ～って人は私のHPからメー�
 (uwuzuはv1.3.0よりAGPLからUPULに変更されました。)
 
 ## 8. ロゴは誰が作ったのですか？
-ロゴはまだない。
-ロゴは下記のリンクよりuwuzuに関連しているコンテンツのみDLしてご利用いただけます。(uwuzuへ飛ぶリンクボタンなどはOK)
+ロゴはともき(@tomoki3192)さんよりいただいたものを使用しています！
+改めまして、この場を借りてご応募いただいた皆様に感謝申し上げます。
+ロゴはUPULのもとご利用いただけます。
 
 ### 色付き
 #img ../img/uwuzucolorlogo.svg
@@ -97,4 +98,4 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ## 更新情報
 編集者 : daichimarukana
-最終更新日 : 2024/11/06 21:54
+最終更新日 : 2025/08/05 0:45

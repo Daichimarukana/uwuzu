@@ -1,12 +1,13 @@
 <?php
 
 $domain = $_SERVER['HTTP_HOST'];
-require(__DIR__ . '/../../db.php');
-require(__DIR__ . "/../../function/function.php");
+require(__DIR__ . '/../../../db.php');
+require(__DIR__ . "/../../../function/function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
+
 
 
 
@@ -50,37 +51,66 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
     }
-
-    if(!(empty($_GET['uniqid']))){
-        $ueuseid = $_GET['uniqid'];
-    }elseif(!(empty($post_json["uniqid"]))){
-        $ueuseid = $post_json["uniqid"];
+    
+    if(!(empty($_GET['limit']))){
+        $limit = (int)$_GET['limit'];
+    }elseif(!(empty($post_json["limit"]))){
+        $limit = (int)$post_json["limit"];
     }else{
-        $err = "input_not_found";
-        $response = array(
-            'error_code' => $err,
-            'success' => false
-        );
-        
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
-        exit;
+        $limit = 25;
     }
+    if($limit > 100){
+        $limit = 100;
+    }
+
+    if(!(empty($_GET['page']))){
+        $page = (int)$_GET['page'];
+    }elseif(!(empty($post_json["page"]))){
+        $page = (int)$post_json["page"];
+    }else{
+        $page = 1;
+    }
+    $offset = ($page - 1) * $limit;
     
     session_start();
 
     if( !empty($pdo) ) {
-        $AuthData = APIAuth($pdo, $token, "read:ueuse");
+        $AuthData = APIAuth($pdo, $token, "read:bookmark");
         if($AuthData[0] === true){
             $userData = $AuthData[2];
-            $sql = "SELECT * FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1";
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindValue(':ueuseid', $ueuseid, PDO::PARAM_STR);
-            $stmt->execute();
-            $message_array = $stmt;
-        
-            while ($row = $message_array->fetch(PDO::FETCH_ASSOC)) {
-        
-                $messages[] = $row;
+            $messages = array();
+
+            $allBookmarks = explode(',', $userData['bookmark'] ?? '');
+            $reversedBookmarks = array_reverse($allBookmarks);
+            $bookmarkList = array_chunk($reversedBookmarks, $limit);
+
+            $list_Page = max(0, (int)$page - 1);
+
+            if (!empty($bookmarkList[$list_Page])) {
+                $currentPageUniqIds = $bookmarkList[$list_Page];
+
+                // 名前付きプレースホルダ作成
+                $placeholders = [];
+                $params = [];
+                foreach ($currentPageUniqIds as $i => $uniqid) {
+                    $key = ":uniqid$i";
+                    $placeholders[] = $key;
+                    $params[$key] = $uniqid;
+                }
+                $placeholderStr = implode(',', $placeholders);
+
+                $sql = "SELECT ueuse.*
+                        FROM ueuse
+                        LEFT JOIN account ON ueuse.account = account.userid
+                        WHERE ueuse.uniqid IN ($placeholderStr) AND account.role != 'ice'
+                        ORDER BY FIELD(ueuse.uniqid, $placeholderStr)";
+
+                $stmt = $pdo->prepare($sql);
+                foreach ($params as $key => $val) {
+                    $stmt->bindValue($key, $val, PDO::PARAM_STR);
+                }
+                $stmt->execute();
+                $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         
             if (!empty($messages)) {

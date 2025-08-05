@@ -1,13 +1,12 @@
 <?php 
-require('db.php');
-require("function/function.php");
+require_once("function/function.php");
 
-$serversettings_file = "server/serversettings.ini";
+$serversettings_file = __DIR__."/server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
 //------------------------
 
-$serverinfofile = 'server/info.txt';
+$serverinfofile = __DIR__.'/server/info.txt';
 $serverinfo = file_get_contents($serverinfofile);
 
 //-------------------------------------
@@ -16,7 +15,7 @@ $domain = $_SERVER['HTTP_HOST'];
 
 //------------------------
 
-$softwarefile = "server/uwuzuinfo.txt";
+$softwarefile = __DIR__."/server/uwuzuinfo.txt";
 $softwaredata = file_get_contents($softwarefile);
 
 $softwaredata = explode( "\n", $softwaredata );
@@ -40,6 +39,9 @@ if(isset($_GET['errcode']) || isset($_GET['browser']) || isset($_GET['os']) || i
     $ssl = "NULL";
     $block = "NULL";
 }
+if(isset($fron_uwuzu_errcode)){
+    $errcode = $fron_uwuzu_errcode;
+}
 
 if($errcode == "UNSUPPORTED_BROWSER"){
     $errabout = "対応していないブラウザです。";
@@ -62,7 +64,7 @@ if($errcode == "UNSUPPORTED_BROWSER"){
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="css/unsupported.css">
+<link rel="stylesheet" href="/css/unsupported.css">
 <link rel="apple-touch-icon" type="image/png" href="favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="favicon/icon-192x192.png">
 <meta name="viewport" content="width=device-width,initial-scale=1">

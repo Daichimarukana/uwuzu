@@ -79,37 +79,8 @@ if( !empty($_POST['btn_submit']) ) {
     $useragent = safetext($_SERVER['HTTP_USER_AGENT']);
     $device = UserAgent_to_Device($useragent);
 
-    $pdo->beginTransaction();
-    try {
-        $touserid = $userid;
-        $datetime = date("Y-m-d H:i:s");
-        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更してください。\n\nログインした端末 : ".$device;
-        $title = '🚪ログイン通知🚪';
-        $url = '/settings';
-        $userchk = 'none';
-        // 通知用SQL作成
-        $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-
-        $stmt->bindParam(':fromuserid', safetext("uwuzu-fromsys"), PDO::PARAM_STR);
-        $stmt->bindParam(':touserid', safetext($touserid), PDO::PARAM_STR);
-        $stmt->bindParam(':msg', safetext($msg), PDO::PARAM_STR);
-        $stmt->bindParam(':url', safetext($url), PDO::PARAM_STR);
-        $stmt->bindParam(':userchk', safetext($userchk), PDO::PARAM_STR);
-        $stmt->bindParam(':title', safetext($title), PDO::PARAM_STR);
-
-        $stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
-
-        // SQLクエリの実行
-        $res = $stmt->execute();
-
-        // コミット
-        $res = $pdo->commit();
-
-    } catch(Exception $e) {
-
-        // エラーが発生した時はロールバック
-        $pdo->rollBack();
-    }
+    $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更してください。\n\nログインした端末 : ".$device;
+    send_notification($userid,"uwuzu-fromsys","🚪ログイン通知🚪",$msg,"/settings", "login");
 
     clearstatcache();
 
@@ -222,14 +193,16 @@ $pdo = null;
                     <?php foreach ($roles as $roleId): ?>
                         <?php $roleData = $roleDataArray[$roleId]; ?>
                         <?php 
-                            if(safetext($roleData["roleeffect"]) == '' || safetext($roleData["roleeffect"]) == 'none'){
-                                $role_view_effect = "";
-                            }elseif(safetext($roleData["roleeffect"]) == 'shine'){
-                                $role_view_effect = "shine";
-                            }elseif(safetext($roleData["roleeffect"]) == 'rainbow'){
-                                $role_view_effect = "rainbow";
-                            }else{
-                                $role_view_effect = "";
+                            if(!(empty($roleData))){
+                                if(safetext($roleData["roleeffect"]) == '' || safetext($roleData["roleeffect"]) == 'none'){
+                                    $role_view_effect = "";
+                                }elseif(safetext($roleData["roleeffect"]) == 'shine'){
+                                    $role_view_effect = "shine";
+                                }elseif(safetext($roleData["roleeffect"]) == 'rainbow'){
+                                    $role_view_effect = "rainbow";
+                                }else{
+                                    $role_view_effect = "";
+                                }
                             }
                         ?>
                         <div class="rolebox <?php echo safetext($role_view_effect); ?>" style="border: 1px solid <?php echo '#' . safetext($roleData["rolecolor"]); ?>;">

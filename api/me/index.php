@@ -1,8 +1,8 @@
 <?php
 
 $domain = $_SERVER['HTTP_HOST'];
-require('../../db.php');
-require("../../function/function.php");
+require(__DIR__ . '/../../db.php');
+require(__DIR__ . "/../../function/function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 
 header("Content-Type: application/json; charset=utf-8");
@@ -35,6 +35,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             $err = "input_not_found";
             $response = array(
                 'error_code' => $err,
+                'success' => false
             );
             echo json_encode($response, JSON_UNESCAPED_UNICODE);
             exit;
@@ -44,6 +45,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         $err = "input_not_found";
         $response = array(
             'error_code' => $err,
+            'success' => false
         );
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
@@ -52,31 +54,9 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
     session_start();
 
     if( !empty($pdo) ) {
-        $userQuery = $pdo->prepare("SELECT username, userid, role FROM account WHERE token = :token");
-        $userQuery->bindValue(':token', $token);
-        $userQuery->execute();
-        $userData = $userQuery->fetch();
-
-        if(empty($userData["userid"])){
-            $err = "token_invalid";
-            $response = array(
-                'error_code' => $err,
-            );
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }elseif($userData["role"] === "ice"){
-            $err = "this_account_has_been_frozen";
-            $response = array(
-                'error_code' => $err,
-            );
-            
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }else{
-            $DataQuery = $pdo->prepare("SELECT username,userid,profile,datetime,follow,follower,iconname,headname,role,sacinfo,admin FROM account WHERE userid = :userid");
-            $DataQuery->bindValue(':userid', $userData["userid"]);
-            $DataQuery->execute();
-            $userdata = $DataQuery->fetch();
+        $AuthData = APIAuth($pdo, $token, "read:me");
+        if($AuthData[0] === true){
+            $userdata = $AuthData[2];
             
             if (empty($userdata)){
                 $response = array(
@@ -158,6 +138,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 $All_ueuse = $allueuse->rowCount(); 
 
                 $response = array(
+                    'success' => true,
                     'username' => decode_yajirushi(htmlspecialchars_decode($userdata["username"])),
                     'userid' => decode_yajirushi(htmlspecialchars_decode($userdata["userid"])),
                     'profile' => decode_yajirushi(htmlspecialchars_decode($userdata["profile"])),
@@ -176,12 +157,21 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 );
             }
             echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        }else{
+            $err = $AuthData[1];
+            $response = array(
+                'error_code' => $err,
+                'success' => false
+            );
+            
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
         }
     }
 }else{
     $err = "input_not_found";
     $response = array(
         'error_code' => $err,
+        'success' => false
     );
      
     echo json_encode($response, JSON_UNESCAPED_UNICODE);

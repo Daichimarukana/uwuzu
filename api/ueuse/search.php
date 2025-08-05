@@ -1,8 +1,8 @@
 <?php
 
 $domain = $_SERVER['HTTP_HOST'];
-require('../../db.php');
-require("../../function/function.php");
+require(__DIR__ . '/../../db.php');
+require(__DIR__ . "/../../function/function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 
 header("Content-Type: application/json; charset=utf-8");
@@ -36,6 +36,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             $err = "input_not_found";
             $response = array(
                 'error_code' => $err,
+                'success' => false
             );
             echo json_encode($response, JSON_UNESCAPED_UNICODE);
             exit;
@@ -45,6 +46,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         $err = "input_not_found";
         $response = array(
             'error_code' => $err,
+            'success' => false
         );
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
@@ -58,6 +60,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         $err = "input_not_found";
         $response = array(
             'error_code' => $err,
+            'success' => false
         );
         
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
@@ -87,27 +90,9 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
     session_start();
 
     if( !empty($pdo) ) {
-        $userQuery = $pdo->prepare("SELECT username, userid, role FROM account WHERE token = :token");
-        $userQuery->bindValue(':token', $token);
-        $userQuery->execute();
-        $userData = $userQuery->fetch();
-
-        if(empty($userData["userid"])){
-            $err = "token_invalid";
-            $response = array(
-                'error_code' => $err,
-            );
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }elseif($userData["role"] === "ice"){
-            $err = "this_account_has_been_frozen";
-            $response = array(
-                'error_code' => $err,
-            );
-            
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }else{
+        $AuthData = APIAuth($pdo, $token, "read:ueuse");
+        if($AuthData[0] === true){
+            $userData = $AuthData[2];
             $Userid = $userData["userid"];
 
             $sql = "SELECT * FROM ueuse WHERE ueuse LIKE :keyword OR abi LIKE :keyword ORDER BY datetime DESC LIMIT :offset, :itemsPerPage";
@@ -125,7 +110,9 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             }
         
             if (!empty($messages)) {
-                $response = array(); // ループ外で $response を初期化
+                $response = array(
+                    'success' => true,
+                ); // ループ外で $response を初期化
             
                 foreach ($messages as $ueusedata) {
                     if(!(empty($ueusedata["favorite"]))){
@@ -137,17 +124,15 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     $favcnts = explode(',', $ueusedata["favorite"]);
                     $ueusedata["favorite_cnt"] = count($favcnts) - 1;
 
-                    $userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, role FROM account WHERE userid = :userid");
-                    $userQuery->bindValue(':userid', $ueusedata["account"]);
-                    $userQuery->execute();
-                    $userData = $userQuery->fetch();
+                    $userData = getUserData($pdo, $ueusedata["account"]);
             
                     if ($userData) {
                         $now_userdata = array(
                             "username" => decode_yajirushi(htmlspecialchars_decode($userData['username'])),
                             "userid" => decode_yajirushi(htmlspecialchars_decode($userData['userid'])),
                             "user_icon" => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($userData['iconname'])))),
-                            "user_head" => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($userData['headname'])))),
+                            "user_header" => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($userData['headname'])))),
+                            "is_bot" => $userData['sacinfo'] == 'bot' ? true : false,
                         );
                     }
 
@@ -156,10 +141,35 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     }else{
                         $nsfw = false;
                     }
+
+                    if($ueusedata["abi"] == "none"){
+                        $ueusedata["abi"] = "";
+                    }
+
+                    //リプライ数取得
+                    $rpQuery = $pdo->prepare("SELECT COUNT(*) as reply_count FROM ueuse WHERE rpuniqid = :rpuniqid");
+                    $rpQuery->bindValue(':rpuniqid', $ueusedata['uniqid']);
+                    $rpQuery->execute();
+                    $rpData = $rpQuery->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($rpData){
+                        $ueusedata['reply_count'] = $rpData['reply_count'];
+                    }
+
+                    //リユーズ数取得
+                    $ruQuery = $pdo->prepare("SELECT COUNT(*) as reuse_count FROM ueuse WHERE ruuniqid = :ruuniqid");
+                    $ruQuery->bindValue(':ruuniqid', $ueusedata['uniqid']);
+                    $ruQuery->execute();
+                    $ruData = $ruQuery->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($ruData){
+                        $ueusedata['reuse_count'] = $ruData['reuse_count'];
+                    }
             
                     $item = [
                         'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["uniqid"])),
                         'replyid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["rpuniqid"])),
+                        'reuseid' => decode_yajirushi(htmlspecialchars_decode($ueusedata["ruuniqid"])),
                         'text' => decode_yajirushi(htmlspecialchars_decode($ueusedata["ueuse"])),
                         'account' => $now_userdata,
                         'photo1' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["photo1"])))),
@@ -168,7 +178,9 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         'photo4' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["photo4"])))),
                         'video1' => decode_yajirushi(htmlspecialchars_decode(localcloudURLtoAPI(localcloudURL($ueusedata["video1"])))),
                         'favorite' => $favorite,
-                        'favorite_cnt' => decode_yajirushi(htmlspecialchars_decode($ueusedata["favorite_cnt"])),
+                        'favorite_cnt' => $ueusedata["favorite_cnt"],
+                        'reply_cnt' => $ueusedata["reply_count"],
+                        'reuse_cnt' => $ueusedata["reuse_count"],
                         'datetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["datetime"])),
                         'abi' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abi"])),
                         'abidatetime' => decode_yajirushi(htmlspecialchars_decode($ueusedata["abidate"])),
@@ -183,16 +195,26 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 $err = "ueuse_not_found";
                 $response = array(
                     'error_code' => $err,
+                    'success' => false
                 );
             
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);
             }
+        }else{
+            $err = $AuthData[1];
+            $response = array(
+                'error_code' => $err,
+                'success' => false
+            );
+            
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
         }
     }
 }else{
     $err = "input_not_found";
     $response = array(
         'error_code' => $err,
+        'success' => false
     );
      
     echo json_encode($response, JSON_UNESCAPED_UNICODE);

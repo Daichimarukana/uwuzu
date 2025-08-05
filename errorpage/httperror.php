@@ -100,13 +100,13 @@ switch ($error_code) {
     <div class="err404">
         <?php 
         if($error_code === 404){
-            if(!(empty($custom404file))){
+            if(!(empty(file_get_contents($custom404file)))){
         ?>
             <img src="<?php echo file_get_contents($custom404file);?>">
         <?php 
             }
         }elseif($error_code === 503){
-            if(!(empty($custom503file))){?>
+            if(!(empty(file_get_contents($custom503file)))){?>
             <img src="<?php echo file_get_contents($custom503file);?>">
             <?php
             }

@@ -2,7 +2,7 @@
 var global_userid;
 var account_id;
 
-function view_ueuse_init(user_id, loginid){
+function view_ueuse_init(user_id, loginid) {
     global_userid = user_id;
     global_account_id = loginid;
     return true;
@@ -15,6 +15,7 @@ async function replaceMentions(text) {
     const placeholders = [];
     let index = 0;
 
+    // aタグの一時置き換え
     text = text.replace(/<a\b[^>]*>.*?<\/a>/gi, (match) => {
         const placeholder = `\u2063{{PLACEHOLDER${index}}}\u2063`;
         placeholders.push(match);
@@ -30,7 +31,8 @@ async function replaceMentions(text) {
         return text;
     }
 
-    const uniqueMentions = [...new Set(mentionMatches.map(match => match[1]))];
+    // ユーザーIDを小文字に正規化
+    const uniqueMentions = [...new Set(mentionMatches.map(match => match[1].toLowerCase()))];
     const mentionsToFetch = uniqueMentions.filter(userID => !mentionCache[userID]);
 
     if (mentionsToFetch.length > 0) {
@@ -45,21 +47,21 @@ async function replaceMentions(text) {
                 },
                 dataType: 'json',
                 timeout: 300000,
-                success: function(response) {
+                success: function (response) {
                     if (response.success && response.users) {
                         for (const [name, userInfo] of Object.entries(response.users)) {
                             if (userInfo && userInfo.userid && userInfo.username) {
-                                mentionCache[name] = `<a href="/@${userInfo.userid}" class="mta">@${userInfo.username}</a>`;
+                                mentionCache[name.toLowerCase()] = `<a href="/@${userInfo.userid}" class="mta">@${userInfo.username}</a>`;
                             } else {
-                                mentionCache[name] = `@${name}`;
+                                mentionCache[name.toLowerCase()] = `@${name}`;
                             }
                         }
                     }
                     resolve();
                 },
-                error: function() {
+                error: function () {
                     for (const name of mentionsToFetch) {
-                        mentionCache[name] = `@${name}`;
+                        mentionCache[name.toLowerCase()] = `@${name}`;
                     }
                     resolve();
                 }
@@ -67,8 +69,13 @@ async function replaceMentions(text) {
         });
     }
 
-    text = text.replace(/@([a-zA-Z0-9_]+)/g, (_, id) => mentionCache[id] || `@${id}`);
+    // 元のtextに適用（小文字で照合）
+    text = text.replace(/@([a-zA-Z0-9_]+)/g, (_, id) => {
+        const lower = id.toLowerCase();
+        return mentionCache[lower] || `@${id}`; // 表示は元の大文字小文字を保持
+    });
 
+    // aタグ戻す
     placeholders.forEach((original, i) => {
         text = text.replace(`\u2063{{PLACEHOLDER${i}}}\u2063`, original);
     });
@@ -176,7 +183,7 @@ async function replaceCustomEmojis(text) {
     return text;
 }
 
-function a_link(text){
+function a_link(text) {
     const placeholders = {};
     let placeholderIndex = 0;
 
@@ -186,10 +193,10 @@ function a_link(text){
         return key;
     });
 
-    text = text.replace(/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一ー-龠々\w\-\/?=&%.]+)/g, function(url) {
+    text = text.replace(/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一ー-龠々\w\-\/?=&%.]+)/g, function (url) {
         const escapedUrl = url;
         const no_https_link = escapedUrl.replace("https://", "");
-        if(no_https_link.length > 48) {
+        if (no_https_link.length > 48) {
             const truncatedLink = no_https_link.substring(0, 48) + '...';
             return `<a href="${escapedUrl}" target="_blank" rel="noopener">${truncatedLink}</a>`;
         } else {
@@ -197,15 +204,15 @@ function a_link(text){
         }
     });
 
-    text = text.replace(/(^|[^a-zA-Z0-9_])#([a-zA-Z0-9ぁ-んァ-ン一-龥ー_]+)/gu, function(match, before, tag) {
-        const encodedTag = encodeURIComponent("#"+tag);
+    text = text.replace(/(^|[^a-zA-Z0-9_])#([a-zA-Z0-9ぁ-んァ-ン一-龥ー_]+)/gu, function (match, before, tag) {
+        const encodedTag = encodeURIComponent("#" + tag);
         return `${before}<a href="/search?q=${encodedTag}" class="hashtags">#${tag}</a>`;
     });
 
     for (const key in placeholders) {
         const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         text = text.replace(new RegExp(escapedKey, 'g'), placeholders[key]);
-    }  
+    }
 
     return text;
 }
@@ -257,19 +264,19 @@ function formatMarkdown(text) {
     });
 
     // マークダウン風装飾
-    text = text 
-        .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>') 
-        .replace(/___(.+?)___/g, '<b><i>$1</i></b>') 
-        .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') 
-        .replace(/__(.+?)__/g, '<b>$1</b>') 
-        .replace(/\*(.+?)\*/g, '<i>$1</i>') 
-        .replace(/_(.+?)_/g, '<i>$1</i>') 
-        .replace(/~~(.+?)~~/g, '<s>$1</s>') 
+    text = text
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
+        .replace(/___(.+?)___/g, '<b><i>$1</i></b>')
+        .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+        .replace(/__(.+?)__/g, '<b>$1</b>')
+        .replace(/\*(.+?)\*/g, '<i>$1</i>')
+        .replace(/_(.+?)_/g, '<i>$1</i>')
+        .replace(/~~(.+?)~~/g, '<s>$1</s>')
         .replace(/^&gt;&gt;&gt; ?(.*)$/gm, '<span class="quote">$1</span>')  // ここを修正
-        .replace(/\|\|(.+?)\|\|/g, '<span class="blur">$1</span>') 
-        .replace(/^# (.+)/gm, '<h1>$1</h1>') 
-        .replace(/^## (.+)/gm, '<h2>$1</h2>') 
-        .replace(/^### (.+)/gm, '<h3>$1</h3>') 
+        .replace(/\|\|(.+?)\|\|/g, '<span class="blur">$1</span>')
+        .replace(/^# (.+)/gm, '<h1>$1</h1>')
+        .replace(/^## (.+)/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)/gm, '<h3>$1</h3>')
         .replace(/^- (.+)/gm, '・ $1');
 
     // 行ごとに <p> タグで囲む
@@ -283,7 +290,7 @@ function formatMarkdown(text) {
     for (const key in placeholders) {
         const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         final = final.replace(new RegExp(escapedKey, 'g'), placeholders[key]);
-    }  
+    }
 
     return final;
 }
@@ -347,7 +354,7 @@ function YouTube_and_nicovideo_Links(postText) {
                     embedCode = `<div class="youtube_and_nicovideo_player"><iframe src="https://embed.nicovideo.jp/watch/${videoId}?from=${videoTime}" frameborder="0" allowfullscreen></iframe></div>`;
                     embeddedOnce = true;
                 }
-            }else{ 
+            } else {
                 embedCode = null
             }
         } catch (e) {
@@ -393,9 +400,24 @@ function formatSmartDate(datetimeStr) {
     return `${y}/${pad(m + 1)}/${pad(d)} ${hhmm}`;
 }
 
+function getCheckIcon(userdata) {
+    if (userdata["role"] && userdata["role"].includes("official")) {
+        return `<div class="checkicon"><div class="check"></div></div>`;
+    }
+    return "";
+}
+
+function getBotIcon(userdata) {
+    if (userdata["is_bot"] && userdata["is_bot"] == true) {
+        return `<div class="bot">Bot</div>`;
+    }
+    return "";
+}
+
 async function createUeuseHtml(ueuse, selectedUniqid = null) {
     let html = "";
     let check = "";
+    let bot = "";
     var reuse = "";
     let contentHtml = "";
 
@@ -426,51 +448,49 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     var nsfw_start_html = "";
     var nsfw_end_html = "";
 
-    if (ueuse["userdata"]["role"].includes("official")) {
-        check = `
-            <div class="checkicon">
-                <div class="check"></div>
-            </div>`;
-    }
+    if (ueuse["type"] == "Reuse") {
+        if (ueuse["reuse"]) {
+            check = getCheckIcon(ueuse["reuse"]["userdata"]);
+            bot = getBotIcon(ueuse["reuse"]["userdata"]);
+        }
 
-    if(ueuse["type"] == "Reuse"){
-        if(ueuse["ueuse"].length > 0){
+        if (ueuse["ueuse"].length > 0) {
             reuse = ``;
-            if(!(ueuse["reuse"] == null)){
+            if (!(ueuse["reuse"] == null)) {
                 // カスタム絵文字を非同期に差し替え
                 var inyoreuseHtml = formatMarkdown(a_link(ueuse["reuse"]["ueuse"]));
                 inyoreuseHtml = await replaceMentions(inyoreuseHtml);
                 inyoreuseHtml = await replaceCustomEmojis(inyoreuseHtml);
 
-                inyo = `<div class="reuse_box" data-uniqid="`+ueuse["reuse"]["uniqid"]+`" id="quote_reuse">
+                inyo = `<div class="reuse_box" data-uniqid="` + ueuse["reuse"]["uniqid"] + `" id="quote_reuse">
                             <div class="reuse_flebox">
-                                <a href="/!`+ueuse["reuse"]["uniqid"]+`">
-                                    <img src="`+ueuse["reuse"]["userdata"]["iconurl"]+`">
+                                <a href="/!`+ ueuse["reuse"]["uniqid"] + `">
+                                    <img src="`+ ueuse["reuse"]["userdata"]["iconurl"] + `">
                                 </a>
-                                <a href="/!`+ueuse["reuse"]["uniqid"]+`">
+                                <a href="/!`+ ueuse["reuse"]["uniqid"] + `">
                                     <div class="u_name">
-                                        `+await replaceCustomEmojis(ueuse["reuse"]["userdata"]["username"])+`
+                                        `+ await replaceCustomEmojis(ueuse["reuse"]["userdata"]["username"]) + `
                                     </div>
                                 </a>
                                 <div class="idbox">
-                                    <a href="/@`+ueuse["reuse"]["userdata"]["userid"]+`">
-                                        @`+ueuse["reuse"]["userdata"]["userid"]+`
+                                    <a href="/@`+ ueuse["reuse"]["userdata"]["userid"] + `">
+                                        @`+ ueuse["reuse"]["userdata"]["userid"] + `
                                     </a>
                                 </div>
                             </div>
 
                             <p>
-                                `+inyoreuseHtml+`
+                                `+ inyoreuseHtml + `
                             </p>
                         </div>`;
-            }else{
+            } else {
                 inyo = `<div class="reuse_box" id="quote_reuse">
                             <p>
                                 リユーズ元のユーズは削除されました。
                             </p>
                         </div>`;
             }
-            
+
             contentHtml = formatMarkdown(a_link(ueuse["ueuse"]));
 
             uniqid = ueuse["uniqid"];
@@ -494,12 +514,12 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
 
             abi = ueuse["abi"]["abi_text"];
             abi_date = ueuse["abi"]["abi_date"];
-        }else{
-            if(!(ueuse["reuse"] == null)){
+        } else {
+            if (!(ueuse["reuse"] == null)) {
                 reuse = `<div class="ru">
-                            <a href="/@`+ueuse["userdata"]["userid"]+`">
-                                <img src="`+ueuse["userdata"]["iconurl"]+`">
-                                <p>`+await replaceCustomEmojis(ueuse["userdata"]["username"])+`さんがリユーズ</p>
+                            <a href="/@`+ ueuse["userdata"]["userid"] + `">
+                                <img src="`+ ueuse["userdata"]["iconurl"] + `">
+                                <p>`+ await replaceCustomEmojis(ueuse["userdata"]["username"]) + `さんがリユーズ</p>
                             </a>
                         </div>`;
                 inyo = ``;
@@ -526,11 +546,11 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
 
                 abi = ueuse["reuse"]["abi"]["abi_text"];
                 abi_date = ueuse["reuse"]["abi"]["abi_date"];
-            }else{
+            } else {
                 reuse = `<div class="ru">
-                            <a href="/@`+ueuse["userdata"]["userid"]+`">
-                                <img src="`+ueuse["userdata"]["iconurl"]+`">
-                                <p>`+await replaceCustomEmojis(ueuse["userdata"]["username"])+`さんがリユーズ</p>
+                            <a href="/@`+ ueuse["userdata"]["userid"] + `">
+                                <img src="`+ ueuse["userdata"]["iconurl"] + `">
+                                <p>`+ await replaceCustomEmojis(ueuse["userdata"]["username"]) + `さんがリユーズ</p>
                             </a>
                         </div>`;
                 inyo = ``;
@@ -559,14 +579,17 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                 abi_date = ueuse["abi"]["abi_date"];
             }
         }
-        
-    }else if(ueuse["type"] == "Reply"){
-        if(selectedUniqid != null && selectedUniqid == ueuse["uniqid"]){
+
+    } else if (ueuse["type"] == "Reply") {
+        check = getCheckIcon(ueuse["userdata"]);
+        bot = getBotIcon(ueuse["userdata"]);
+
+        if (selectedUniqid != null && selectedUniqid == ueuse["uniqid"]) {
             reuse = `<div class="rp"><div class="here"></div><div class="totop"></div><p>一番上のユーズに返信</p></div>`;
-        }else{
+        } else {
             reuse = `<div class="rp"><div class="totop"></div><p>一番上のユーズに返信</p></div>`;
         }
-        
+
         inyo = ``;
         contentHtml = formatMarkdown(a_link(ueuse["ueuse"]));
 
@@ -591,37 +614,40 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
 
         abi = ueuse["abi"]["abi_text"];
         abi_date = ueuse["abi"]["abi_date"];
-    }else if(ueuse["type"] == "User"){
+    } else if (ueuse["type"] == "User") {
         html = `
             <div class="ueuse">
                 <div class="headbox">
-                    <a href="/@`+ueuse["userdata"]["userid"]+`">
-                        <img src="`+ueuse["userdata"]["headurl"]+`">
+                    <a href="/@`+ ueuse["userdata"]["userid"] + `">
+                        <img src="`+ ueuse["userdata"]["headurl"] + `">
                     </a>
                 </div>
                 <div class="flebox">
                     <div class="user">
-                        <a href="/@`+ueuse["userdata"]["userid"]+`">
-                            <img src="`+ueuse["userdata"]["iconurl"]+`">
+                        <a href="/@`+ ueuse["userdata"]["userid"] + `">
+                            <img src="`+ ueuse["userdata"]["iconurl"] + `">
                         </a>
                         <div class="u_name">
-                            <a href="/@`+ueuse["userdata"]["userid"]+`">`+ueuse["userdata"]["username"]+`</a>
+                            <a href="/@`+ ueuse["userdata"]["userid"] + `">` + ueuse["userdata"]["username"] + `</a>
                         </div>
                         <div class="idbox">
-                            <a href="/@`+ueuse["userdata"]["userid"]+`">@`+ueuse["userdata"]["userid"]+`</a>
+                            <a href="/@`+ ueuse["userdata"]["userid"] + `">@` + ueuse["userdata"]["userid"] + `</a>
                         </div>
                     </div>
                 </div>
                 
                 <div class="profilebox">
                     <p>
-                    `+ueuse["userdata"]["profile"]+`
+                    `+ ueuse["userdata"]["profile"] + `
                     </p>
                 </div>
             </div>
         `;
         return html;
-    }else{
+    } else {
+        check = getCheckIcon(ueuse["userdata"]);
+        bot = getBotIcon(ueuse["userdata"]);
+
         reuse = ``;
         inyo = ``;
         contentHtml = formatMarkdown(a_link(ueuse["ueuse"]));
@@ -649,23 +675,23 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         abi_date = ueuse["abi"]["abi_date"];
     }
 
-    if(abi != "" && typeof abi === "string") {
+    if (abi != "" && typeof abi === "string") {
         abi = formatMarkdown(a_link(abi));
         abi = await replaceMentions(abi);
         abi = await replaceCustomEmojis(abi);
-        
+
         abi_html = `<div class="abi">
                         <div class="back">
-                        <h1>`+await replaceCustomEmojis(username)+`さんが追記しました</h1>
-                        </div><p>`+abi+`</p>
-                        <div class="h3s">`+formatSmartDate(abi_date)+`</div>
+                        <h1>`+ await replaceCustomEmojis(username) + `さんが追記しました</h1>
+                        </div><p>`+ abi + `</p>
+                        <div class="h3s">`+ formatSmartDate(abi_date) + `</div>
                     </div>`;
         addabi = ``;
-    }else{
+    } else {
         abi_html = ``;
-        if(global_userid == userid){
-            addabi = `<button name="addabi" id="addabi" data-uniqid2="`+uniqid+`" class="addabi"><svg><use xlink:href="../img/sysimage/addabi_1.svg#addabi_1"></use></svg></button>`;
-        }else{
+        if (global_userid == userid) {
+            addabi = `<button name="addabi" id="addabi" data-uniqid2="` + uniqid + `" class="addabi"><svg><use xlink:href="../img/sysimage/addabi_1.svg#addabi_1"></use></svg></button>`;
+        } else {
             addabi = ``;
         }
     }
@@ -684,8 +710,8 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     let is_reu = {
         "class": "reuse"
     };
-    if(ueuse["type"] == "Reuse"){
-        if(!(ueuse["ueuse"].length > 0)){
+    if (ueuse["type"] == "Reuse") {
+        if (!(ueuse["ueuse"].length > 0)) {
             if (global_userid == ueuse["userdata"]["userid"]) {
                 is_reu = {
                     "class": "reuse reuse_after"
@@ -705,74 +731,74 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         };
     }
 
-    if(is_nsfw == true){
-        nsfw_html = `<div class="nsfw" data-uniqid="`+uniqid+`" id="nsfw">
+    if (is_nsfw == true) {
+        nsfw_html = `<div class="nsfw" data-uniqid="` + uniqid + `" id="nsfw">
                         <p>NSFW指定がされている投稿です！<br>職場や公共の場での表示には適さない場合があります。<br>表示ボタンを押すと表示されます。</p>
                         <div class="btnzone">
                             <input type="button" id="nsfw_view" class="mini_irobtn" value="表示">
                         </div>
                     </div>`
-        nsfw_start_html = `<div class="nsfw_main" data-uniqid="`+uniqid+`"><div class="block">`
+        nsfw_start_html = `<div class="nsfw_main" data-uniqid="` + uniqid + `"><div class="block">`
         nsfw_end_html = `</div></div>`
     }
 
-    if(img1.length > 0){
-        if(img2.length > 0){
-            if(img3.length > 0){
-                if(img4.length > 0){
+    if (img1.length > 0) {
+        if (img2.length > 0) {
+            if (img3.length > 0) {
+                if (img4.length > 0) {
                     img_html = `<div class="photo4">
                         <a>
-                            <img src="`+img1+`" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                         <a>
-                            <img src="`+img2+`" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                         <a>
-                            <img src="`+img3+`" alt="画像3" title="画像3" data-id="3" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img3 + `" alt="画像3" title="画像3" data-id="3" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                         <a>
-                            <img src="`+img4+`" alt="画像4" title="画像4" data-id="4" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img4 + `" alt="画像4" title="画像4" data-id="4" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                     </div>`;
-                }else{
+                } else {
                     img_html = `<div class="photo3">
                                     <a>
-                                        <img src="`+img1+`" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                        <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                     </a>
                                     <a>
-                                        <img src="`+img2+`" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                        <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                     </a>
                                     <div class="photo3_btm">
                                         <a>
-                                            <img src="`+img3+`" alt="画像3" title="画像3" data-id="3" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                            <img src="`+ img3 + `" alt="画像3" title="画像3" data-id="3" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                         </a>
                                     </div>
                                 </div>`;
                 }
-            }else{
+            } else {
                 img_html = `<div class="photo2">
                                 <a>
-                                    <img src="`+img1+`" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                    <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                 </a>
                                 <a>
-                                    <img src="`+img2+`" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                    <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                 </a>
                             </div>`;
             }
-        }else{
+        } else {
             img_html = `<div class="photo1">
                             <a>
-                                <img src="`+img1+`" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                             </a>
                         </div>`;
         }
-    }else{
+    } else {
         img_html = ``;
     }
 
-    if(vid1.length > 0){
+    if (vid1.length > 0) {
         vid_html = `<div class="video1">
-                        <video controls="" src="`+vid1+`"></video>
+                        <video controls="" src="`+ vid1 + `"></video>
                     </div>`;
     }
 
@@ -780,66 +806,74 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     contentHtml = await replaceMentions(contentHtml);
     contentHtml = await replaceCustomEmojis(contentHtml);
 
-    if(ueuse["type"] == "Reuse"){
-        if(ueuse["ueuse"].length > 0){
-            if(YouTube_and_nicovideo_Links(ueuse["ueuse"])){
-                contentHtml = contentHtml+YouTube_and_nicovideo_Links(ueuse["ueuse"]);
+    if (ueuse["type"] == "Reuse") {
+        if (ueuse["ueuse"].length > 0) {
+            if (YouTube_and_nicovideo_Links(ueuse["ueuse"])) {
+                contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["ueuse"]);
             }
-        }else{
-            if(YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"])){
-                contentHtml = contentHtml+YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"]);
+        } else {
+            if (YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"])) {
+                contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"]);
             }
         }
-        
-    }else{
-        if(YouTube_and_nicovideo_Links(ueuse["ueuse"])){
-            contentHtml = contentHtml+YouTube_and_nicovideo_Links(ueuse["ueuse"]);
+
+    } else {
+        if (YouTube_and_nicovideo_Links(ueuse["ueuse"])) {
+            contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["ueuse"]);
         }
+    }
+    var favbox = `
+        <hr>
+        <div class="favbox">
+            <button class="`+ is_fav["class"] + `" id="favbtn" data-uniqid="` + uniqid + `" data-userid2="` + userid + `"><svg><use xlink:href="` + is_fav["icon"] + `" alt="いいね"></use></svg><span class="like-count">` + favoritecount + `</span></button>
+            <button name="reusebtn" id="reusebtn" class="`+ is_reu["class"] + `" data-uniqid="` + ueuse["uniqid"] + `" data-userid="` + userid + `"><svg><use xlink:href="../img/sysimage/reuse_1.svg#reuse_1"></use></svg><span class="like-count">` + reusecount + `</span></button>
+            <a href="/!`+ uniqid + `" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>` + replycount + `</a>
+            
+            <button name="bookmark" id="bookmark" class="`+ is_bok["class"] + `" data-uniqid="` + uniqid + `" data-userid="` + userid + `"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>
+            `+ addabi + `
+            <button name="popup" id="popup" class="etcbtn" data-uniqid="`+ uniqid + `" data-userid="` + userid + `"><svg><use xlink:href="../img/sysimage/etc_1.svg#etc_1"></use></svg></button>
+        </div>
+        `
+
+    if (ueuse["is_activitypub"] == true) {
+        favbox = "";
     }
 
     html = `
-        <div class="ueuse" id="ueuse-`+ueuse["uniqid"]+`">
-            `+reuse+`
+        <div class="ueuse" id="ueuse-`+ ueuse["uniqid"] + `">
+            `+ reuse + `
             <div class="flebox">
-                <a href="/@`+userid+`"><img src="`+iconurl+`"></a>
-                <a href="/@`+userid+`"><div class="u_name">`+await replaceCustomEmojis(username)+`</div></a>
+                <a href="/@`+ userid + `"><img src="` + iconurl + `"></a>
+                <a href="/@`+ userid + `"><div class="u_name">` + await replaceCustomEmojis(username) + `</div></a>
                 <div class="idbox">
-                    <a href="/@`+userid+`">@`+userid+`</a>
+                    <a href="/@`+ userid + `">@` + userid + `</a>
                 </div>
-                `+ check +`
-                <div class="time">`+formatSmartDate(datetime)+`</div>
+                `+ bot + `
+                `+ check + `
+                <div class="time">`+ formatSmartDate(datetime) + `</div>
             </div>
-            `+nsfw_html+`
-            `+nsfw_start_html+`
-            <div class="content">`+contentHtml+`</div>
-            `+img_html+`
-            `+vid_html+`
-            `+inyo+`
-            `+abi_html+`
-            `+nsfw_end_html+`
-            <hr>
-            <div class="favbox">
-                <button class="`+is_fav["class"]+`" id="favbtn" data-uniqid="`+uniqid+`" data-userid2="`+userid+`"><svg><use xlink:href="`+is_fav["icon"]+`" alt="いいね"></use></svg><span class="like-count">`+favoritecount+`</span></button>
-                <button name="reusebtn" id="reusebtn" class="`+is_reu["class"]+`" data-uniqid="`+ueuse["uniqid"]+`" data-userid="`+userid+`"><svg><use xlink:href="../img/sysimage/reuse_1.svg#reuse_1"></use></svg><span class="like-count">`+reusecount+`</span></button>
-                <a href="/!`+uniqid+`" class="tuduki"><svg><use xlink:href="../img/sysimage/reply_1.svg#reply_1"></use></svg>`+replycount+`</a>
-                
-                <button name="bookmark" id="bookmark" class="`+is_bok["class"]+`" data-uniqid="`+uniqid+`" data-userid="`+userid+`"><svg><use xlink:href="../img/sysimage/bookmark_1.svg#bookmark_1"></use></svg></button>
-                `+addabi+`
-                <button name="popup" id="popup" class="etcbtn" data-uniqid="`+uniqid+`" data-userid="`+userid+`"><svg><use xlink:href="../img/sysimage/etc_1.svg#etc_1"></use></svg></button>
-            </div>
+            `+ nsfw_html + `
+            `+ nsfw_start_html + `
+            <div class="content">`+ contentHtml + `</div>
+            `+ img_html + `
+            `+ vid_html + `
+            `+ inyo + `
+            `+ abi_html + `
+            `+ nsfw_end_html + `
+            `+ favbox + `
         </div>
     `;
     return html;
 }
 function createAdsHtml(ads) {
-    if(!(ads == null || ads == "")){
+    if (!(ads == null || ads == "")) {
         var ads_html = `<div class="ads">
-                            <a href="`+ads["url"]+`" target="_blank">
-                                <img src="`+ads["imgurl"]+`" title="`+ads["memo"]+`">
+                            <a href="`+ ads["url"] + `" target="_blank">
+                                <img src="`+ ads["imgurl"] + `" title="` + ads["memo"] + `">
                             </a>
                         </div>`;
         return ads_html;
-    }else{
+    } else {
         var ads_html = ``;
         return ads_html;
     }
@@ -847,15 +881,16 @@ function createAdsHtml(ads) {
 
 // 投稿一覧を非同期で全部HTML化 → そのあと順番通りにappend
 async function renderUeuses(ueuseData, selectedUniqid = null) {
-    if(ueuseData["success"] == false){
+    if (ueuseData["success"] == false) {
         var errmsg;
-        if(ueuseData["error"] == "no_ueuse"){
+        if (ueuseData["error"] == "no_ueuse") {
             errmsg = "ユーズがありません";
-        }else if(ueuseData["error"] == "bad_request"){
+        } else if (ueuseData["error"] == "bad_request") {
             errmsg = "不正なリクエストが検出されました";
         }
-        $("#postContainer").append(`<div class="tokonone" id="noueuse"><p>`+errmsg+`</p></div>`);
-    }else{
+        $("#postContainer").append(`<div class="tokonone" id="noueuse"><p>` + errmsg + `</p></div>`);
+        return true;
+    } else {
         var htmlList = [];
         var ueuseList = ueuseData["ueuses"];
         for (const ueuse of ueuseList) {
@@ -871,5 +906,75 @@ async function renderUeuses(ueuseData, selectedUniqid = null) {
         for (const html of htmlList) {
             $("#postContainer").append(html);
         }
+        return true;
+    }
+}
+
+
+async function createNotificationHtml(notification) {
+    let html = "";
+    let is_readclass = "";
+    let datetime = notification["datetime"];
+    let userid = notification["userdata"]["userid"];
+    let username = notification["userdata"]["username"];
+    let iconurl = notification["userdata"]["iconurl"];
+    let title = notification["title"];
+    let content = formatMarkdown(a_link(notification["message"]));
+    content = await replaceMentions(content);
+    content = await replaceCustomEmojis(content);
+
+    let url = notification["url"];
+
+    if(notification["is_read"] == false) {
+        is_readclass = "this";
+    }
+
+    html = `
+        <div class="notification `+is_readclass+`">
+            <div class="flebox">
+                <div class="time">`+formatSmartDate(datetime)+`</div>
+            </div>
+            <div class="flebox">
+                <div class="icon">
+                    <a href="/@`+userid+`">
+                        <img src="`+iconurl+`">
+                    </a>
+                </div>
+                <div class="username">
+                    <a href="/@`+userid+`">`+await replaceCustomEmojis(username)+`</a>
+                </div>
+            </div>
+            <h3>`+await replaceCustomEmojis(title)+`</h3>
+            <p>`+content+`</p>
+            <a href="`+url+`">詳細をみる</a>
+        </div>
+    `;
+    return html;
+}
+
+async function renderNotifications(notificationData) {
+    if (notificationData["success"] == false) {
+        var errmsg;
+        if (notificationData["error"] == "no_notification") {
+            errmsg = "通知がありません";
+        } else if (notificationData["error"] == "bad_request") {
+            errmsg = "不正なリクエストが検出されました";
+        }
+        $("#postContainer").append(`<div class="tokonone" id="noueuse"><p>` + errmsg + `</p></div>`);
+        return true;
+    } else {
+        var htmlList = [];
+        var notificationList = notificationData["notifications"];
+
+        for (const notification of notificationList) {
+            const html = await createNotificationHtml(notification);
+            htmlList.push(html);
+        }
+
+        // 投稿順を保ったままDOMへ追加
+        for (const html of htmlList) {
+            $("#postContainer").append(html);
+        }
+        return true;
     }
 }

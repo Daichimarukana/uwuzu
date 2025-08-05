@@ -1,22 +1,25 @@
-RewriteEngine on
+RewriteEngine On
+RewriteBase /
+
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteCond %{REQUEST_FILENAME}.php -f
 RewriteRule ^(.*)$ $1.php [L]
+
+# --- アクセス制限ルール ---
 RewriteRule ^\.htaccess$ - [F]
 RewriteRule ^db\.php$ - [F]
 RewriteRule ^settings_admin/CloudflareTurnstile_settings/ - [F]
 RewriteRule ^settings_admin/hCaptcha_settings/ - [F]
 RewriteRule ^settings_admin/plugin_settings/ - [F]
 
-RewriteBase /
-
-RewriteRule ^(@\w+)$ /user/index.php?uwuzuid=$1 [QSA,L]
-
+# --- その他の独自ルーティング ---
+RewriteRule ^(@\w+)$ /user/index.php?userid=$1 [QSA,L]
+RewriteRule ^@([^@]+)@([^/]+)$ /user/index.php?userid=$1&domain=$2 [QSA,L]
 RewriteRule ^!(\w+)~(\w+)$ /ueuse/index.php?ueuseid=$1&touser=$2 [QSA,L]
-
 RewriteRule ^!(\w+)$ /ueuse/index.php?ueuseid=$1 [QSA,L]
 
+# --- エラーハンドリング ---
 ErrorDocument 400 /errorpage/httperror.php
 ErrorDocument 401 /errorpage/httperror.php
 ErrorDocument 403 /errorpage/httperror.php
@@ -25,4 +28,5 @@ ErrorDocument 413 /errorpage/httperror.php
 ErrorDocument 500 /errorpage/httperror.php
 ErrorDocument 503 /errorpage/httperror.php
 
+# --- セキュリティヘッダ ---
 Header set X-FRAME-OPTIONS "DENY"

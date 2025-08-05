@@ -1,28 +1,28 @@
 <?php
-require('../../db.php');
-require("../../function/function.php");
+require(__DIR__ . '/../../db.php');
+require(__DIR__ . "/../../function/function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
-$serversettings_file = "../../server/serversettings.ini";
+$serversettings_file = __DIR__ . "/../../server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
 if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
     header("Content-Type: application/json; charset=utf-8");
     header("Access-Control-Allow-Origin: *");
 
-    $mojisizefile = "../../server/textsize.txt";
+    $mojisizefile = __DIR__ . "/../../server/textsize.txt";
 
     $adminfile = safetext($serversettings["serverinfo"]["server_admin"]);
 
     $servernamefile = safetext($serversettings["serverinfo"]["server_name"]);
 
-    $serverinfofile = '../../server/info.txt';
+    $serverinfofile = __DIR__ . '/../../server/info.txt';
     $serverinfo = safetext(file_get_contents($serverinfofile));
 
     $contactfile = safetext($serversettings["serverinfo"]["server_admin_mailadds"]);
 
     $domain = $_SERVER['HTTP_HOST'];
 
-    $softwarefile = "../../server/uwuzuinfo.txt";
+    $softwarefile = __DIR__ . "/../../server/uwuzuinfo.txt";
     $softwaredata = safetext(file_get_contents($softwarefile));
 
     $onlyuser = safetext($serversettings["serverinfo"]["server_invitation"]);

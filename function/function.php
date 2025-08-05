@@ -61,8 +61,11 @@ function blockedIP($ip_addr) {
 
     foreach ($blocked_ips as $blocked_ip) {
         if (isIpInCIDR($ip_addr, $blocked_ip)) {
-            $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . "/unsupported.php?errcode=IP_BANNED";
+            $fron_uwuzu_errcode = "IP_BANNED";
+            $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . "/unsupported.php?errcode=" . $fron_uwuzu_errcode;
             header("Location: " . $url);
+
+            require(__DIR__ . '/../unsupported.php');
             exit;
         }
     }
@@ -259,8 +262,6 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
 //APIなどのログイン処理(loginidとloginkeyが有効かを確かめる)
 function uwuzuUserLoginCheck($loginid, $loginkey, $operation_permission = "user") {
     //セッション,クッキー,IPアドレス,閲覧権限(userかadminかの二種類)を受け取る
-    $serversettings_file = $_SERVER['DOCUMENT_ROOT']."/server/serversettings.ini";
-    $serversettings = parse_ini_file($serversettings_file, true);
     // データベースに接続
     try {
         $option = array(
@@ -317,13 +318,26 @@ function uwuzuUserLoginCheck($loginid, $loginkey, $operation_permission = "user"
     }
 }
 //---------UNIQID-MAKER---------
-function createUniqId(){
-    list($msec, $sec) = explode(" ", microtime());
-    $hashCreateTime = $sec.floor($msec*1000000);
-    
-    $hashCreateTime = strrev($hashCreateTime);
-
-    return base_convert($hashCreateTime,10,36);
+function Legacy_createUniqId(){ 
+    list($msec, $sec) = explode(" ", microtime()); 
+    $hashCreateTime = $sec.floor($msec*1000000); 
+     
+    $hashCreateTime = strrev($hashCreateTime); 
+ 
+    return base_convert($hashCreateTime,10,36); 
+}
+function createUniqId($randDigits = 6) {
+    $msec_time = (int)(microtime(true) * 1000);
+    $randMax = pow(10, $randDigits) - 1;
+    $rand_num = str_pad(random_int(0, $randMax), $randDigits, '0', STR_PAD_LEFT);
+    $combined = $msec_time . $rand_num;
+    return base_convert(strrev($combined), 10, 36);
+}
+function parseUniqId($id, $randDigits = 6) {
+    $reversed_num_str = base_convert($id, 36, 10);
+    $combined_num_str = strrev($reversed_num_str);
+    $msec_time_str = substr($combined_num_str, 0, -$randDigits);
+    return date("Y-m-d H:i:s.v", (int)($msec_time_str / 1000));
 }
 //----------EXIF_Delete----------
 //EXIFを削除するやつです。
@@ -1123,11 +1137,15 @@ function get_mentions_userid($postText) {
         $mention_userData = $mention_userQuery->fetch();   
         
         if (!empty($mention_userData)) {
-            $mentionedUsers[] = $mention_username;
+            $mentionedUsers[] = strtolower($mention_username);
         }
     }, $postText);
 
     return $mentionedUsers;
+}
+function GenNotificationId($to, $from, $title, $message, $url, $category) {
+    $data = "" . $to . ":" . $from . ":" . $title . ":" . $message . ":" . $url . ":" . $category;
+    return hash('sha3-512', $data);
 }
 
 function send_notification($to,$from,$title,$message,$url,$category){
@@ -1143,10 +1161,10 @@ function send_notification($to,$from,$title,$message,$url,$category){
         return false;
     }
 
-    if(!($to == $from) || $category === "system" || $category === "other"){
+    if(!(strtolower($to) == strtolower($from)) || $category === "system" || $category === "other"){
         $to_result = getUserData($pdo, $to);
 
-        $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other"];
+        $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other", "login"];
         if(in_array($category, $category_list)){
             if(in_array($category, explode(',', $to_result["notification_settings"])) || empty($to_result["notification_settings"]) || $category === "system" || $category === "other"){
                 //ブロックされてたら送らない
@@ -1162,9 +1180,10 @@ function send_notification($to,$from,$title,$message,$url,$category){
                             $url = safetext($url);
                             $userchk = 'none';
                             $notification_category = safetext($category);
+                            $notification_id = GenNotificationId($touserid, $fromuserid, $title, $msg, $url, $notification_category);
                     
                             // 通知用SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category)");
+                            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category, notificationid) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category, :notificationid)");
                     
                             $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
                             $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
@@ -1173,6 +1192,7 @@ function send_notification($to,$from,$title,$message,$url,$category){
                             $stmt->bindParam(':userchk', $userchk, PDO::PARAM_STR);
                             $stmt->bindParam(':title', $title, PDO::PARAM_STR);
                             $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
+                            $stmt->bindParam(':notificationid', $notification_id, PDO::PARAM_STR);
                     
                             $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
                     
@@ -1198,6 +1218,69 @@ function send_notification($to,$from,$title,$message,$url,$category){
                     }
                 }else{
                     return true;
+                }
+            }else{
+                // 受信しない設定なのでtrue
+                return true;
+            }
+        }else{
+            return false;
+        }
+    }else{
+        // 送信元と送信先が同じなら送信しない
+        return true;
+    }
+}
+
+function delete_notification($to,$from,$title,$message,$url,$category){
+    // データベースに接続
+    try {
+        $option = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+        );
+        $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+    } catch(PDOException $e) {
+        actionLog($from, "error", "send_notification", $to, $e, 4);
+        return false;
+    }
+
+    if(!(strtolower($to) == strtolower($from)) || $category === "system" || $category === "other"){
+        $to_result = getUserData($pdo, $to);
+
+        $category_list = ["system","favorite","reply","reuse","ueuse","follow","mention","other", "login"];
+        if(in_array($category, $category_list)){
+            if(in_array($category, explode(',', $to_result["notification_settings"])) || empty($to_result["notification_settings"]) || $category === "system" || $category === "other"){
+                if(!(empty($pdo))){		
+                    $fromuserid = safetext($from);
+                    $touserid = safetext($to);
+                    $msg = safetext($message);
+                    $title = safetext($title);
+                    $url = safetext($url);
+                    $notification_category = safetext($category);
+                    $notification_id = GenNotificationId($touserid, $fromuserid, $title, $msg, $url, $notification_category);
+                    $pdo->beginTransaction();
+                    try {
+                        // 削除クエリを実行
+                        $deleteQuery = $pdo->prepare("DELETE FROM notification WHERE notificationid = :notificationid");
+                        $deleteQuery->bindValue(':notificationid', $notification_id, PDO::PARAM_STR);
+                        $res = $deleteQuery->execute();
+                        
+                        if ($res) {
+                            $res = $pdo->commit();
+                            return true;
+                        } else {
+                            $pdo->rollBack();
+                            actionLog($from, "error", "delete_notification", $to, "通知の削除に失敗しました(rollBack)", 3);
+                            return false;
+                        }
+                    } catch(PDOException $e) {
+                        $pdo->rollBack();
+                        actionLog($from, "error", "delete_notification", $to, $e, 4);
+                        return false;
+                    }
+                }else{
+                    return false;
                 }
             }else{
                 // 受信しない設定なのでtrue
@@ -1269,511 +1352,518 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
     }
 
     if(!(empty($pdo))){		
-        $userData = getUserData($pdo, $userid);
-        $username = safetext($userData["username"]);
-        $userRoleList = explode(',', safetext($userData["role"]));
-        if(in_array("ice", $userRoleList)){
-            $error_message[] = 'アカウントが凍結されています。(ACCOUNT_HAS_BEEN_FROZEN)';
-        }
-        $ueuse = safetext($ueuse);
-        if(safetext($nsfw) === "true"){
-            $save_nsfw = "true";
-        }else{
-            $save_nsfw = "false";
-        }
-        if(empty($ueuse) && empty($ruUniqid)) {
-            $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
-        } else {
-            // 文字数を確認
-            if((int)safetext(file_get_contents($mojisizefile)) < mb_strlen($ueuse, 'UTF-8')) {
-                $error_message[] = '内容は'.safetext(file_get_contents($mojisizefile)).'文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
-            }
+        $uniqid = createUniqId();//最初に決めちゃう
+        if(empty(getUeuseData($pdo, $uniqid))){
 
-            // 禁止url確認
-            if(!(empty($banurl))){
-                for($i = 0; $i < count($banurl); $i++) {
-                    if(!($banurl[$i] == "")){
-                        if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
-                            $error_message[] = '投稿が禁止されているURLが含まれています。(INPUT_CONTAINS_PROHIBITED_URL)';
-                        }
-                    }
-                }
+            $userData = getUserData($pdo, $userid);
+            $username = safetext($userData["username"]);
+            $userRoleList = explode(',', safetext($userData["role"]));
+            if(in_array("ice", $userRoleList)){
+                $error_message[] = 'アカウントが凍結されています。(ACCOUNT_HAS_BEEN_FROZEN)';
             }
-            
-            // 改行ユーズ確認
-            if(preg_match('/^[\n\r]+$/', $ueuse) === 1){
+            $ueuse = safetext($ueuse);
+            if(safetext($nsfw) === "true"){
+                $save_nsfw = "true";
+            }else{
+                $save_nsfw = "false";
+            }
+            if(empty($ueuse) && empty($ruUniqid)) {
                 $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
+            } else {
+                // 文字数を確認
+                if((int)safetext(file_get_contents($mojisizefile)) < mb_strlen($ueuse, 'UTF-8')) {
+                    $error_message[] = '内容は'.safetext(file_get_contents($mojisizefile)).'文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
+                }
+
+                // 禁止url確認
+                if(!(empty($banurl))){
+                    for($i = 0; $i < count($banurl); $i++) {
+                        if(!($banurl[$i] == "")){
+                            if (false !== strpos($ueuse, 'https://'.$banurl[$i])) {
+                                $error_message[] = '投稿が禁止されているURLが含まれています。(INPUT_CONTAINS_PROHIBITED_URL)';
+                            }
+                        }
+                    }
+                }
+                
+                // 改行ユーズ確認
+                if(preg_match('/^[\n\r]+$/', $ueuse) === 1){
+                    $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
+                }
             }
-        }
 
-        $old_datetime = date("Y-m-d H:i:00");
-        $now_datetime = date("Y-m-d H:i:00",strtotime("+1 minute"));
-        $rate_Query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND TIME(datetime) BETWEEN :old_datetime AND :now_datetime");
-        $rate_Query->bindValue(':userid', $userid);
-        $rate_Query->bindValue(':old_datetime', $old_datetime);
-        $rate_Query->bindValue(':now_datetime', $now_datetime);
-        $rate_Query->execute();
-        $rate_count = $rate_Query->rowCount();
-        if(!($rate_count > $max_ueuse_rate_limit-1)){
-            if(empty($error_message)) {   
-                if (empty($photo1['name'])) {
-                    $save_photo1 = "none";
-                } else {
-                    // アップロードされたファイル情報
-                    $uploadedFile = $photo1;
-
-                    if(!(empty($uploadedFile['tmp_name']))){
-                        if(check_mime($uploadedFile['tmp_name'])){
-                            // アップロードされたファイルの拡張子を取得
-                            $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
-                            delete_exif($extension, $uploadedFile['tmp_name']);
-                            if($aibwm === true){
-                                AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
-                            }
-                            if(AMS3_CHKS == "true"){
-                                $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
-                            }else{
-                                // 新しいファイル名を生成（uniqid + 拡張子）
-                                $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-                                // 保存先のパスを生成
-                                $uploadedPath = '../ueuseimages/' . $newFilename;
-                                // ファイルを移動
-                                $result = move_uploaded_file($uploadedFile['tmp_name'], __DIR__."/".$uploadedPath);
-                                
-                                if ($result) {
-                                    $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
-                                } else {
-                                    $errnum = $uploadedFile['error'];
-                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                    $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
-                                }
-                            }
-                            if(isset($s3result)){
-                                if($s3result == false){
-                                    $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
-                                }else{
-                                    $save_photo1 = $s3result; // S3に保存されたファイルのパスを使用
-                                }
-                            }
-                        }else{
-                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                        }
-                    }else{
-                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                    }
-                }
-
-                if (empty($photo2['name'])) {
-                    $save_photo2 = "none";
-                } else {
-                    if (empty($photo1['name'])){
-                        $error_message[] = '画像1から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                    }
-                    // アップロードされたファイル情報
-                    $uploadedFile2 = $photo2;
-
-                    if(!(empty($uploadedFile2['tmp_name']))){
-                        if(check_mime($uploadedFile2['tmp_name'])){
-                            // アップロードされたファイルの拡張子を取得
-                            $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
-                            delete_exif($extension2, $uploadedFile2['tmp_name']);
-                            if($aibwm === true){
-                                AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
-                            }
-                            if(AMS3_CHKS == "true"){
-                                $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
-                            }else{
-                                // 新しいファイル名を生成（uniqid + 拡張子）
-                                $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
-                                // 保存先のパスを生成
-                                $uploadedPath2 = '../ueuseimages/' . $newFilename2;
-                                // ファイルを移動
-                                $result2 = move_uploaded_file($uploadedFile2['tmp_name'], __DIR__."/".$uploadedPath2);
-                                if ($result2) {
-                                    $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
-                                } else {
-                                    $errnum = $uploadedFile2['error'];
-                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                    $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-                                }
-                            }
-                            if(isset($s3result)){
-                                if($s3result == false){
-                                    $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
-                                }else{
-                                    $save_photo2 = $s3result; // S3に保存されたファイルのパスを使用
-                                }
-                            }
-                        }else{
-                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                        }
-                    }else{
-                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                    }
-                }
-
-                if (empty($photo3['name'])) {
-                    $save_photo3 = "none";
-                } else {
-                    if (empty($photo2['name'])){
-                        $error_message[] = '画像2から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                    }
-                    // アップロードされたファイル情報
-                    $uploadedFile3 = $photo3;
-
-                    if(!(empty($uploadedFile3['tmp_name']))){
-                        if(check_mime($uploadedFile3['tmp_name'])){
-                            // アップロードされたファイルの拡張子を取得
-                            $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
-                            delete_exif($extension3, $uploadedFile3['tmp_name']);
-                            if($aibwm === true){
-                                AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
-                            }
-                            if(AMS3_CHKS == "true"){
-                                $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
-                            }else{
-                                // 新しいファイル名を生成（uniqid + 拡張子）
-                                $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
-                                // 保存先のパスを生成
-                                $uploadedPath3 = '../ueuseimages/' . $newFilename3;
-                                // ファイルを移動
-                                $result3 = move_uploaded_file($uploadedFile3['tmp_name'], __DIR__."/".$uploadedPath3);
-                                if ($result3) {
-                                    $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
-                                } else {
-                                    $errnum = $uploadedFile3['error'];
-                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                    $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
-                                }
-                            }
-                            if(isset($s3result)){
-                                if($s3result == false){
-                                    $error_message[] = 'アップロード失敗！(3)エラーコード： S3ERROR';
-                                }else{
-                                    $save_photo3 = $s3result; // S3に保存されたファイルのパスを使用
-                                }
-                            }
-                        }else{
-                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                        }
-                    }else{
-                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                    }
-                }
-
-                if (empty($photo4['name'])) {
-                    $save_photo4 = "none";
-                } else {
-                    if (empty($photo3['name'])){
-                        $error_message[] = '画像3から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                    }
-                    // アップロードされたファイル情報
-                    $uploadedFile4 = $photo4;
-                    if(!(empty($uploadedFile4['tmp_name']))){
-                        if(check_mime($uploadedFile4['tmp_name'])){
-                            // アップロードされたファイルの拡張子を取得
-                            $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
-                            delete_exif($extension4, $uploadedFile4['tmp_name']);
-                            if($aibwm === true){
-                                AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
-                            }
-                            if(AMS3_CHKS == "true"){
-                                $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
-                            }else{
-                                // 新しいファイル名を生成（uniqid + 拡張子）
-                                $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
-                                // 保存先のパスを生成
-                                $uploadedPath4 = '../ueuseimages/' . $newFilename4;
-                                // ファイルを移動
-                                $result4 = move_uploaded_file($uploadedFile4['tmp_name'], __DIR__."/".$uploadedPath4);  
-                                if ($result4) {
-                                    $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
-                                } else {
-                                    $errnum = $uploadedFile4['error'];
-                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                    $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
-                                }
-                            }
-                            if(isset($s3result)){
-                                if($s3result == false){
-                                    $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
-                                }else{
-                                    $save_photo4 = $s3result; // S3に保存されたファイルのパスを使用
-                                }
-                            }
-                        }else{
-                            $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                        }
-                    }else{
-                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                    }
-                }
-
-                if (empty($video1['name'])) {
-                    $save_video1 = "none";
-                } else {
-                    // アップロードされたファイル情報
-                    $uploadedVideo = $video1;
-
-                    if(!(empty($uploadedVideo['tmp_name']))){
-                        if(check_mime_video($uploadedVideo['tmp_name'])){
-                            if(AMS3_CHKS == "true"){
-                                $s3result = uploadAmazonS3($uploadedVideo['tmp_name']);
-                            }else{
-                                // アップロードされたファイルの拡張子を取得
-                                $extensionVideo = convert_mime(check_mime_video($uploadedVideo['tmp_name']));
-                                // 正しい拡張子の場合、新しいファイル名を生成
-                                $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
-                                // 保存先のパスを生成
-                                $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
-                                // ファイルを移動
-                                $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], __DIR__."/".$uploadedPathVideo);
-                                if ($resultVideo) {
-                                    $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
-                                } else {
-                                    $errnum = $uploadedVideo['error'];
-                                    if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                    if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                    if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                    if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                    if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                    if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                    if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                    $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
-                                }
-                            }
-                            if(isset($s3result)){
-                                if($s3result == false){
-                                    $error_message[] = 'アップロード失敗！(5)エラーコード： S3ERROR';
-                                }else{
-                                    $save_video1 = $s3result; // S3に保存されたファイルのパスを使用
-                                }
-                            }
-                        } else {
-                            $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
-                        }
-                    }else{
-                        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                    }
-                }
-
-                if(empty($error_message)) {                
-                    // 書き込み日時を取得
-                    $datetime = date("Y-m-d H:i:s");
-                    $uniqid = createUniqId();
-                    $abi = "none";
-                    $popularity = 0;
-
-                    if(empty($rpUniqid) && empty($ruUniqid)){
-                        //-----------通常ユーズ-----------
-                        // トランザクション開始
-                        $pdo->beginTransaction();
-
-                        try {
-
-                            // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
-                    
-                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
-                            $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
-                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
-                            $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
-
-                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-
-                            // SQLクエリの実行
-                            $res = $stmt->execute();
-
-                            // コミット
-                            $res = $pdo->commit();
-
-                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
-
-                            foreach ($mentionedUsers as $mentionedUser) {
-                                send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
-                            }
-
-                        } catch(Exception $e) {
-                            // エラーが発生した時はロールバック
-                            $pdo->rollBack();
-                            actionLog($userid, "error", "send_ueuse", null, $e, 4);
-                        }
-                    }elseif((!empty($rpUniqid)) && empty($ruUniqid)){
-                        //-----------リプライ-----------
-                        $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
-                        $toUserIdQuery->bindValue(':ueuseid', $rpUniqid, PDO::PARAM_STR);
-                        $toUserIdQuery->execute();
-                        $toUserId_res = $toUserIdQuery->fetch();    
-
-                        if(!(empty($toUserId_res))){
-                            $touserid = $toUserId_res["account"];
-                        }else{
-                            $touserid = null;
-                        }
-
-                        changePopularity($pdo, $rpUniqid, $userid, 3);
-                        // トランザクション開始
-                        $pdo->beginTransaction();
-                        
-                        try {
-                            // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
-
-                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':rpuniqid', $rpUniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
-                            $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
-                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-                            $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
-
-                            // SQLクエリの実行
-                            $res = $stmt->execute();
-
-                            // コミット
-                            $res = $pdo->commit();
-
-                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
-
-                            foreach ($mentionedUsers as $mentionedUser) {
-                                send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
-                            }
-
-                            send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply");
-                        } catch(Exception $e) {
-                            // エラーが発生した時はロールバック
-                            $pdo->rollBack();
-                            actionLog($userid, "error", "send_ueuse", null, $e, 4);
-                        }
-                    }elseif(empty($rpUniqid) && (!empty($ruUniqid))){
-                        //-----------リユーズ-----------
-                        $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
-                        $toUserIdQuery->bindValue(':ueuseid', $ruUniqid, PDO::PARAM_STR);
-                        $toUserIdQuery->execute();
-                        $toUserId_res = $toUserIdQuery->fetch();
-
-                        if(!(empty($toUserId_res))){
-                            $touserid = $toUserId_res["account"];
-                        }else{
-                            $touserid = null;
-                        }
-
-                        changePopularity($pdo, $ruUniqid, $userid, 2);
-
-                        // トランザクション開始
-                        $pdo->beginTransaction();
-
-                        try {
-                            // SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ruuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity) VALUES (:username, :account, :uniqid, :ruuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity)");
-
-                            $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-                            $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
-                            $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':ruuniqid', $ruUniqid, PDO::PARAM_STR);
-                            $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
-                            $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
-                            $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
-                            $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
-
-                            $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
-                            $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
-
-
-                            // SQLクエリの実行
-                            $res = $stmt->execute();
-
-                            // コミット
-                            $res = $pdo->commit();
-
-                            $mentionedUsers = array_unique(get_mentions_userid($ueuse));
-
-                            foreach ($mentionedUsers as $mentionedUser) {
-                                send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
-                            }
-
-                            send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse");
-
-                        } catch(Exception $e) {
-                            // エラーが発生した時はロールバック
-                            $pdo->rollBack();
-                            actionLog($userid, "error", "send_ueuse", null, $e, 4);
-                        }
-                    }else{
-                        $error_message[] = '返信とリユーズを同時に行うことはできません。(ERROR)';
-                        return [false, $error_message];
-                    }
-
-                    if( $res ) {
-                        return [true, $uniqid];
+            $old_datetime = date("Y-m-d H:i:00");
+            $now_datetime = date("Y-m-d H:i:00",strtotime("+1 minute"));
+            $rate_Query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND TIME(datetime) BETWEEN :old_datetime AND :now_datetime");
+            $rate_Query->bindValue(':userid', $userid);
+            $rate_Query->bindValue(':old_datetime', $old_datetime);
+            $rate_Query->bindValue(':now_datetime', $now_datetime);
+            $rate_Query->execute();
+            $rate_count = $rate_Query->rowCount();
+            if(!($rate_count > $max_ueuse_rate_limit-1)){
+                if(empty($error_message)) {   
+                    if (empty($photo1['name'])) {
+                        $save_photo1 = "none";
                     } else {
-                        $error_message[] = "ユーズに失敗しました。(REGISTERED_DAME)";
-                        return [false, $error_message];
+                        // アップロードされたファイル情報
+                        $uploadedFile = $photo1;
+
+                        if(!(empty($uploadedFile['tmp_name']))){
+                            if(check_mime($uploadedFile['tmp_name'])){
+                                // アップロードされたファイルの拡張子を取得
+                                $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
+                                delete_exif($extension, $uploadedFile['tmp_name']);
+                                if($aibwm === true){
+                                    AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
+                                }
+                                if(AMS3_CHKS == "true"){
+                                    $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
+                                }else{
+                                    // 新しいファイル名を生成（uniqid + 拡張子）
+                                    $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
+                                    // 保存先のパスを生成
+                                    $uploadedPath = '../ueuseimages/' . $newFilename;
+                                    // ファイルを移動
+                                    $result = move_uploaded_file($uploadedFile['tmp_name'], __DIR__."/".$uploadedPath);
+                                    
+                                    if ($result) {
+                                        $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
+                                    } else {
+                                        $errnum = $uploadedFile['error'];
+                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                        $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
+                                    }
+                                }
+                                if(isset($s3result)){
+                                    if($s3result == false){
+                                        $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                    }else{
+                                        $save_photo1 = $s3result; // S3に保存されたファイルのパスを使用
+                                    }
+                                }
+                            }else{
+                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                            }
+                        }else{
+                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                        }
                     }
 
-                    // プリペアドステートメントを削除
-                    $stmt = null;
+                    if (empty($photo2['name'])) {
+                        $save_photo2 = "none";
+                    } else {
+                        if (empty($photo1['name'])){
+                            $error_message[] = '画像1から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+                        }
+                        // アップロードされたファイル情報
+                        $uploadedFile2 = $photo2;
+
+                        if(!(empty($uploadedFile2['tmp_name']))){
+                            if(check_mime($uploadedFile2['tmp_name'])){
+                                // アップロードされたファイルの拡張子を取得
+                                $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
+                                delete_exif($extension2, $uploadedFile2['tmp_name']);
+                                if($aibwm === true){
+                                    AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
+                                }
+                                if(AMS3_CHKS == "true"){
+                                    $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
+                                }else{
+                                    // 新しいファイル名を生成（uniqid + 拡張子）
+                                    $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
+                                    // 保存先のパスを生成
+                                    $uploadedPath2 = '../ueuseimages/' . $newFilename2;
+                                    // ファイルを移動
+                                    $result2 = move_uploaded_file($uploadedFile2['tmp_name'], __DIR__."/".$uploadedPath2);
+                                    if ($result2) {
+                                        $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
+                                    } else {
+                                        $errnum = $uploadedFile2['error'];
+                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                        $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
+                                    }
+                                }
+                                if(isset($s3result)){
+                                    if($s3result == false){
+                                        $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
+                                    }else{
+                                        $save_photo2 = $s3result; // S3に保存されたファイルのパスを使用
+                                    }
+                                }
+                            }else{
+                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                            }
+                        }else{
+                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                        }
+                    }
+
+                    if (empty($photo3['name'])) {
+                        $save_photo3 = "none";
+                    } else {
+                        if (empty($photo2['name'])){
+                            $error_message[] = '画像2から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+                        }
+                        // アップロードされたファイル情報
+                        $uploadedFile3 = $photo3;
+
+                        if(!(empty($uploadedFile3['tmp_name']))){
+                            if(check_mime($uploadedFile3['tmp_name'])){
+                                // アップロードされたファイルの拡張子を取得
+                                $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
+                                delete_exif($extension3, $uploadedFile3['tmp_name']);
+                                if($aibwm === true){
+                                    AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
+                                }
+                                if(AMS3_CHKS == "true"){
+                                    $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
+                                }else{
+                                    // 新しいファイル名を生成（uniqid + 拡張子）
+                                    $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
+                                    // 保存先のパスを生成
+                                    $uploadedPath3 = '../ueuseimages/' . $newFilename3;
+                                    // ファイルを移動
+                                    $result3 = move_uploaded_file($uploadedFile3['tmp_name'], __DIR__."/".$uploadedPath3);
+                                    if ($result3) {
+                                        $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
+                                    } else {
+                                        $errnum = $uploadedFile3['error'];
+                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                        $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
+                                    }
+                                }
+                                if(isset($s3result)){
+                                    if($s3result == false){
+                                        $error_message[] = 'アップロード失敗！(3)エラーコード： S3ERROR';
+                                    }else{
+                                        $save_photo3 = $s3result; // S3に保存されたファイルのパスを使用
+                                    }
+                                }
+                            }else{
+                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                            }
+                        }else{
+                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                        }
+                    }
+
+                    if (empty($photo4['name'])) {
+                        $save_photo4 = "none";
+                    } else {
+                        if (empty($photo3['name'])){
+                            $error_message[] = '画像3から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
+                        }
+                        // アップロードされたファイル情報
+                        $uploadedFile4 = $photo4;
+                        if(!(empty($uploadedFile4['tmp_name']))){
+                            if(check_mime($uploadedFile4['tmp_name'])){
+                                // アップロードされたファイルの拡張子を取得
+                                $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
+                                delete_exif($extension4, $uploadedFile4['tmp_name']);
+                                if($aibwm === true){
+                                    AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
+                                }
+                                if(AMS3_CHKS == "true"){
+                                    $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
+                                }else{
+                                    // 新しいファイル名を生成（uniqid + 拡張子）
+                                    $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
+                                    // 保存先のパスを生成
+                                    $uploadedPath4 = '../ueuseimages/' . $newFilename4;
+                                    // ファイルを移動
+                                    $result4 = move_uploaded_file($uploadedFile4['tmp_name'], __DIR__."/".$uploadedPath4);  
+                                    if ($result4) {
+                                        $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
+                                    } else {
+                                        $errnum = $uploadedFile4['error'];
+                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                        $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
+                                    }
+                                }
+                                if(isset($s3result)){
+                                    if($s3result == false){
+                                        $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                    }else{
+                                        $save_photo4 = $s3result; // S3に保存されたファイルのパスを使用
+                                    }
+                                }
+                            }else{
+                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                            }
+                        }else{
+                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                        }
+                    }
+
+                    if (empty($video1['name'])) {
+                        $save_video1 = "none";
+                    } else {
+                        // アップロードされたファイル情報
+                        $uploadedVideo = $video1;
+
+                        if(!(empty($uploadedVideo['tmp_name']))){
+                            if(check_mime_video($uploadedVideo['tmp_name'])){
+                                if(AMS3_CHKS == "true"){
+                                    $s3result = uploadAmazonS3($uploadedVideo['tmp_name']);
+                                }else{
+                                    // アップロードされたファイルの拡張子を取得
+                                    $extensionVideo = convert_mime(check_mime_video($uploadedVideo['tmp_name']));
+                                    // 正しい拡張子の場合、新しいファイル名を生成
+                                    $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
+                                    // 保存先のパスを生成
+                                    $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
+                                    // ファイルを移動
+                                    $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], __DIR__."/".$uploadedPathVideo);
+                                    if ($resultVideo) {
+                                        $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
+                                    } else {
+                                        $errnum = $uploadedVideo['error'];
+                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                        $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
+                                    }
+                                }
+                                if(isset($s3result)){
+                                    if($s3result == false){
+                                        $error_message[] = 'アップロード失敗！(5)エラーコード： S3ERROR';
+                                    }else{
+                                        $save_video1 = $s3result; // S3に保存されたファイルのパスを使用
+                                    }
+                                }
+                            } else {
+                                $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
+                            }
+                        }else{
+                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                        }
+                    }
+
+                    if(empty($error_message)) {                
+                        // 書き込み日時を取得
+                        $datetime = date("Y-m-d H:i:s");
+                        $abi = "none";
+                        $popularity = 0;
+                        $mentionedUsers = array_unique(get_mentions_userid($ueuse));
+                        $mentions = implode(",", $mentionedUsers);
+
+                        if(empty($rpUniqid) && empty($ruUniqid)){
+                            //-----------通常ユーズ-----------
+                            // トランザクション開始
+                            $pdo->beginTransaction();
+
+                            try {
+
+                                // SQL作成
+                                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity, mentions) VALUES (:username, :account, :uniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity, :mentions)");
+                        
+                                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                                $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                                $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
+                                $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
+                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+                                $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
+
+                                $stmt->bindParam(':mentions', $mentions, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+
+                                // SQLクエリの実行
+                                $res = $stmt->execute();
+
+                                // コミット
+                                $res = $pdo->commit();
+
+                                foreach ($mentionedUsers as $mentionedUser) {
+                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                                }
+
+                            } catch(Exception $e) {
+                                // エラーが発生した時はロールバック
+                                $pdo->rollBack();
+                                actionLog($userid, "error", "send_ueuse", null, $e, 4);
+                            }
+                        }elseif((!empty($rpUniqid)) && empty($ruUniqid)){
+                            //-----------リプライ-----------
+                            $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
+                            $toUserIdQuery->bindValue(':ueuseid', $rpUniqid, PDO::PARAM_STR);
+                            $toUserIdQuery->execute();
+                            $toUserId_res = $toUserIdQuery->fetch();    
+
+                            if(!(empty($toUserId_res))){
+                                $touserid = $toUserId_res["account"];
+                            }else{
+                                $touserid = null;
+                            }
+
+                            changePopularity($pdo, $rpUniqid, $userid, 3);
+                            // トランザクション開始
+                            $pdo->beginTransaction();
+                            
+                            try {
+                                // SQL作成
+                                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, rpuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity, mentions) VALUES (:username, :account, :uniqid, :rpuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity, :mentions)");
+
+                                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                                $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                                $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':rpuniqid', $rpUniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
+                                $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
+                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+                                $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
+                                $stmt->bindParam(':mentions', $mentions, PDO::PARAM_STR);
+
+                                // SQLクエリの実行
+                                $res = $stmt->execute();
+
+                                // コミット
+                                $res = $pdo->commit();
+
+                                foreach ($mentionedUsers as $mentionedUser) {
+                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                                }
+
+                                send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply");
+                            } catch(Exception $e) {
+                                // エラーが発生した時はロールバック
+                                $pdo->rollBack();
+                                actionLog($userid, "error", "send_ueuse", null, $e, 4);
+                            }
+                        }elseif(empty($rpUniqid) && (!empty($ruUniqid))){
+                            //-----------リユーズ-----------
+                            $toUserIdQuery = $pdo->prepare("SELECT account FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT 1");
+                            $toUserIdQuery->bindValue(':ueuseid', $ruUniqid, PDO::PARAM_STR);
+                            $toUserIdQuery->execute();
+                            $toUserId_res = $toUserIdQuery->fetch();
+
+                            if(!(empty($toUserId_res))){
+                                $touserid = $toUserId_res["account"];
+                            }else{
+                                $touserid = null;
+                            }
+
+                            changePopularity($pdo, $ruUniqid, $userid, 2);
+
+                            // トランザクション開始
+                            $pdo->beginTransaction();
+
+                            try {
+                                // SQL作成
+                                $stmt = $pdo->prepare("INSERT INTO ueuse (username, account, uniqid, ruuniqid, ueuse, photo1, photo2, photo3, photo4, video1, datetime, abi, nsfw, popularity, mentions) VALUES (:username, :account, :uniqid, :ruuniqid, :ueuse, :photo1, :photo2, :photo3, :photo4, :video1, :datetime, :abi, :nsfw, :popularity, :mentions)");
+
+                                $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+                                $stmt->bindParam(':account', $userid, PDO::PARAM_STR);
+                                $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':ruuniqid', $ruUniqid, PDO::PARAM_STR);
+                                $stmt->bindParam(':ueuse', $ueuse, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':photo1', $save_photo1, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo2', $save_photo2, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo3', $save_photo3, PDO::PARAM_STR);
+                                $stmt->bindParam(':photo4', $save_photo4, PDO::PARAM_STR);
+                                $stmt->bindParam(':video1', $save_video1, PDO::PARAM_STR);
+                                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':nsfw', $save_nsfw, PDO::PARAM_STR);
+
+                                $stmt->bindParam(':abi', $abi, PDO::PARAM_STR);
+                                $stmt->bindParam(':popularity', $popularity, PDO::PARAM_INT);
+                                $stmt->bindParam(':mentions', $mentions, PDO::PARAM_STR);
+
+
+                                // SQLクエリの実行
+                                $res = $stmt->execute();
+
+                                // コミット
+                                $res = $pdo->commit();
+
+                                foreach ($mentionedUsers as $mentionedUser) {
+                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                                }
+
+                                send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse");
+
+                            } catch(Exception $e) {
+                                // エラーが発生した時はロールバック
+                                $pdo->rollBack();
+                                actionLog($userid, "error", "send_ueuse", null, $e, 4);
+                            }
+                        }else{
+                            $error_message[] = '返信とリユーズを同時に行うことはできません。(ERROR)';
+                            return [false, $error_message];
+                        }
+
+                        if( $res ) {
+                            return [true, $uniqid];
+                        } else {
+                            $error_message[] = "ユーズに失敗しました。(REGISTERED_DAME)";
+                            return [false, $error_message];
+                        }
+
+                        // プリペアドステートメントを削除
+                        $stmt = null;
+                    }else{
+                        actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
+                        return [false, $error_message];
+                    }
                 }else{
                     actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
                     return [false, $error_message];
                 }
             }else{
+                $error_message[] = "投稿回数のレート制限を超過しています。(OVER_RATE_LIMIT)";
                 actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
                 return [false, $error_message];
             }
         }else{
-            $error_message[] = "投稿回数のレート制限を超過しています。(OVER_RATE_LIMIT)";
-            actionLog($userid, "error", "send_ueuse", null, $error_message, 0);
+            $error_message[] = "ユーズのIDに問題が発生しました。(ERROR)";
+            actionLog($userid, "error", "send_ueuse", null, $error_message, 4);
             return [false, $error_message];
         }
     }
@@ -1981,6 +2071,15 @@ function follow_user($pdo, $to_userid, $userid){
             return false;
         }
 
+        if ($myData["userid"] == $userData["userid"]) {
+            return false;
+        }
+
+        if($myData["role"] == "ice" || $userData["role"] == "ice"){
+            actionLog($userid, "error", "follow_user", $to_userid, "凍結されているユーザーはフォローできません。", 3);
+            return false;
+        }
+
         $other_settings_me = is_OtherSettings($pdo, $userid);
         $other_settings_user = is_OtherSettings($pdo, $to_userid);
         if($other_settings_me === true && $other_settings_user === true){
@@ -2042,10 +2141,6 @@ function unfollow_user($pdo, $to_userid, $userid){
     if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
         $myData = getUserData($pdo, $userid);
         $userData = getUserData($pdo, $to_userid);
-
-        if (empty($myData) || empty($userData)) {
-            return false;
-        }
 
         $other_settings_me = is_OtherSettings($pdo, $userid);
         $other_settings_user = is_OtherSettings($pdo, $to_userid);
@@ -2111,6 +2206,10 @@ function block_user($pdo, $to_userid, $userid){
         $userData = getUserData($pdo, $to_userid);
 
         if (empty($myData) || empty($userData)) {
+            return false;
+        }
+
+        if ($myData["userid"] == $userData["userid"]) {
             return false;
         }
 
@@ -2453,6 +2552,11 @@ function deleteUser($pdo, $userid, $step, $job_uniqid){
                     $deleteQuery->bindValue(':fromuserid', $userid, PDO::PARAM_STR);
                     $res = $deleteQuery->execute();
 
+                    // APIキー削除クエリを実行
+                    $deleteQuery = $pdo->prepare("DELETE FROM api WHERE userid = :userid");
+                    $deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
+
                     // アカウント削除クエリを実行
                     $deleteQuery = $pdo->prepare("DELETE FROM account WHERE userid = :userid");
                     $deleteQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
@@ -2555,6 +2659,8 @@ function addFavorite($pdo, $uniqid, $userid){
                 
                 //1いいね解除でスコアが1減る
                 changePopularity($pdo, $uniqid, $userid, -1);
+
+                delete_notification(safetext($post['account']),$userid,"".$userid."さんがいいねしました！",safetext($post['ueuse']),"/!".$uniqid."","favorite");
             }
 
             $pdo->beginTransaction();
@@ -2579,7 +2685,6 @@ function addFavorite($pdo, $uniqid, $userid){
                 return [false, "データベースエラー", null];
             }
         } else {
-            $pdo->rollBack();
             return [false, "投稿が見つかりませんでした", null];
         }
     }
@@ -2611,6 +2716,13 @@ function getUserData($pdo, $userid) {
     $query->execute();
     return $query->fetch();
 }
+function getUserDataForUpdate($pdo, $userid) {
+    $query = $pdo->prepare("SELECT * FROM account WHERE userid = :userid FOR UPDATE");
+    $query->bindValue(':userid', $userid, PDO::PARAM_STR);
+    $query->execute();
+    return $query->fetch();
+}
+
 function getUeuseData($pdo, $uniqid) {
     $query = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid");
     $query->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
@@ -3075,4 +3187,398 @@ function is_OtherSettings($pdo, $userid, $add = true){
         return true;
     }
 }
+
+function GetActivityPubJson($url) {
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,         // リダイレクトを追跡
+        CURLOPT_MAXREDIRS => 10,                // 最大リダイレクト回数
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_USERAGENT => 'uwuzu-ActivityPubClient/1.0',
+        CURLOPT_HTTPHEADER => [
+            'Accept: application/activity+json, application/ld+json, application/json'
+        ]
+    ]);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    $err = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false || $httpCode >= 400) {
+        return null;
+    }
+
+    $json = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        return null;
+    }
+
+    return $json;
+}
+
+function GetActivityPubUser($userid, $domain) {
+    $webfingerUrl = "https://$domain/.well-known/webfinger?resource=acct:$userid@$domain";
+
+    $webfingerJson = GetActivityPubJson($webfingerUrl);
+
+    if (!$webfingerJson || empty($webfingerJson['links'])) {
+        return ['error' => 'Failed to fetch WebFinger'];
+    }
+
+    $actorUrl = null;
+    foreach ($webfingerJson['links'] as $link) {
+        if ($link['rel'] === 'self' && $link['type'] === 'application/activity+json') {
+            $actorUrl = $link['href'];
+            break;
+        }
+    }
+
+    if (!$actorUrl) {
+        return ['error' => 'Actor URL not found'];
+    }
+
+    $actorJson = GetActivityPubJson($actorUrl);
+    if (!$actorJson) {
+        return ['error' => 'Failed to fetch actor'];
+    }
+
+    $summaryHtml = $actorJson['summary'] ?? '';
+    $withNewlines = preg_replace('/<br\s*\/?>/i', "\n", $summaryHtml);
+    $plainText = strip_tags($withNewlines);
+
+
+    return [
+        'userid' => $actorJson['preferredUsername'] ?? null,
+        'username' => $actorJson['name'] ?? null,
+        'profile' => $plainText ?? null,
+        'id' => $actorJson['id'] ?? null,
+        'inbox' => $actorJson['inbox'] ?? null,
+        'outbox' => $actorJson['outbox'] ?? null,
+        'followers' => $actorJson['followers'] ?? null,
+        'iconname' => $actorJson['icon']['url'] ?? "../img/deficon/icon.png",
+        'headname' => $actorJson['image']['url'] ?? "../img/defhead/head.png",
+        'datetime' => $actorJson['published'] ?? null,
+        'role' => 'user',
+        'other_settings' => '{}',
+        'follow' => '',
+        'follower' => '',
+        'raw' => $actorJson
+    ];
+}
+
+function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, $pdo, string $userId): ?array {
+    if (in_array(safetext($value['account']), explode(",", $myblocklist))) return null;
+    if ($value["role"] === "ice") return null;
+
+    $value['iconname'] = filter_var($value['iconname'], FILTER_VALIDATE_URL)
+        ? $value['iconname']
+        : "../" . $value['iconname'];
+
+    $value = to_null($value);
+    $value = to_array_safetext($value);
+    $value["role"] = explode(',', $value["role"]);
+
+    if(isset($value["activitypub"]) && $value["activitypub"] == true) {
+        $value["activitypub"] = true;
+    } else {
+        $value["activitypub"] = false;
+    }
+
+    if(isset($value["sacinfo"]) && $value["sacinfo"] == "bot") {
+        $value["is_bot"] = true;
+    } else {
+        $value["is_bot"] = false;
+    }
+
+    if (!empty($value['rpuniqid'])) {
+        $value["type"] = "Reply";
+    } elseif (!empty($value['ruuniqid'])) {
+        $value["type"] = "Reuse";
+
+        $reused = getUeuseData($pdo, $value['ruuniqid']);
+        if ($reused) {
+            $reusedUserData = getUserData($pdo, $reused['account']);
+            $reusedUserData["role"] = explode(',', $reusedUserData["role"]);
+
+            $reused = to_null($reused);
+            $reused = to_array_safetext($reused);
+
+            if(isset($reusedUserData["sacinfo"]) && $reusedUserData["sacinfo"] == "bot") {
+                $reusedUserData["is_bot"] = true;
+            } else {
+                $reusedUserData["is_bot"] = false;
+            }
+
+            $value["reuse"] = [
+                "type" => "Reuse",
+                "uniqid" => $reused["uniqid"],
+                "datetime" => $reused["datetime"],
+                "userid" => $reused["account"],
+                "userdata" => [
+                    "userid" => $reusedUserData["userid"],
+                    "username" => $reusedUserData["username"],
+                    "iconurl" => filter_var($reusedUserData['iconname'], FILTER_VALIDATE_URL)
+                        ? $reusedUserData['iconname']
+                        : "../" . $reusedUserData['iconname'],
+                    "role" => $reusedUserData["role"],
+                    "is_bot" => $reusedUserData["is_bot"],
+                ],
+                "ueuse" => $reused["ueuse"],
+                "photo1" => $reused["photo1"],
+                "photo2" => $reused["photo2"],
+                "photo3" => $reused["photo3"],
+                "photo4" => $reused["photo4"],
+                "video1" => $reused["video1"],
+                "rpuniqid" => $reused["rpuniqid"],
+                "ruuniqid" => $reused["ruuniqid"],
+                "nsfw" => filter_var($reused["nsfw"], FILTER_VALIDATE_BOOLEAN),
+                "favoritecount" => $reused["favorite_conut"],
+                "replycount" => $reused["reply_count"],
+                "reusecount" => $reused["reuse_count"],
+                "is_favorite" => in_array($userId, explode(',', $reused['favorite'])),
+                "is_bookmark" => in_array($reused["uniqid"], explode(',', $mybookmark)),
+                "abi" => [
+                    "abi_text" => $reused["abi"],
+                    "abi_date" => $reused["abidate"],
+                ],
+                "is_activitypub" => $value["activitypub"],
+            ];
+        } else {
+            $value["reuse"] = null;
+        }
+    } else {
+        $value["type"] = "Ueuse";
+    }
+
+    $ueuse = [
+        "type" => $value["type"],
+        "uniqid" => $value["uniqid"],
+        "datetime" => $value["datetime"],
+        "userid" => $value["account"],
+        "userdata" => [
+            "userid" => $value["account"],
+            "username" => $value["username"],
+            "iconurl" => $value['iconname'],
+            "role" => $value["role"],
+            "is_bot" => $value["is_bot"],
+        ],
+        "ueuse" => $value["ueuse"],
+        "photo1" => $value["photo1"],
+        "photo2" => $value["photo2"],
+        "photo3" => $value["photo3"],
+        "photo4" => $value["photo4"],
+        "video1" => $value["video1"],
+        "rpuniqid" => $value["rpuniqid"],
+        "ruuniqid" => $value["ruuniqid"],
+        "nsfw" => filter_var($value["nsfw"], FILTER_VALIDATE_BOOLEAN),
+        "favoritecount" => $value["favorite_conut"],
+        "replycount" => $value["reply_count"],
+        "reusecount" => $value["reuse_count"],
+        "is_favorite" => in_array($userId, explode(',', $value['favorite'])),
+        "is_bookmark" => in_array($value["uniqid"], explode(',', $mybookmark)),
+        "abi" => [
+            "abi_text" => $value["abi"],
+            "abi_date" => $value["abidate"],
+        ],
+        "is_activitypub" => $value["activitypub"],
+    ];
+
+    if ($value["type"] === "Reuse") {
+        $ueuse["reuse"] = $value["reuse"];
+    }
+
+    return $ueuse;
+}
+
+function GetAPIScopes($scope){
+    $scopelist = [
+        "read:me" => "重要な情報以外の自分のアカウントの情報を見る",
+        "write:me" => "重要な情報以外の自分のアカウントの情報を変更する",
+        "read:users" => "他のユーザーのアカウント情報を見る",
+        "read:ueuse" => "ユーズを見る",
+        "write:ueuse" => "ユーズの作成・削除をする",
+        "write:follow" => "フォロー・フォロー解除をする",
+        "write:favorite" => "いいねをする・解除をする",
+        "read:notifications" => "通知を見る",
+        "write:notifications" => "通知を既読にする",
+        "write:bookmark" => "ブックマークにユーズを追加・削除する",
+        "read:bookmark" => "ブックマークを見る"
+    ];
+    if(empty($scope)){
+        return $scopelist;
+    }else{
+        if(array_key_exists($scope, $scopelist)){
+            return $scopelist[$scope];
+        }else{
+            return false;
+        }
+    }
+}
+
+function MinimumHash($text) {
+    $hash = hash('sha3-512', $text);
+
+    for ($i = 0; $i < 5; $i++) {
+        $parts = str_split($hash, 2);
+        $new = [];
+        foreach ($parts as $index => $part) {
+            $new[] = ($index % 2 === 0) ? substr($part, 0, -1) : substr($part, 1);
+        }
+        $hash = implode('', $new);
+    }
+
+    $baseChars = preg_replace('/[^a-zA-Z0-9]/', '', $text);
+    if ($baseChars === '') {
+        $baseChars = 'fallback';
+    }
+    $baseChars = str_split($baseChars);
+
+    $alphabet = array_merge(range('a', 'z'), range('0', '9'));
+    $map = [];
+    foreach ($alphabet as $i => $char) {
+        $map[$char] = $baseChars[$i % count($baseChars)];
+    }
+
+    $encoded = '';
+    foreach (str_split($hash) as $char) {
+        if ($char === '.') continue; // ドット除外
+        if (isset($map[$char])) {
+            $encoded .= $map[$char];
+            if (strlen($encoded) === 4) break;
+        }
+    }
+
+    return (strlen($encoded) === 4) ? $encoded : null;
+}
+
+function GenAPIToken(int $totalLength = 64){
+    $prefix = strtoupper(MinimumHash($_SERVER['HTTP_HOST']));
+    $length = $totalLength - strlen($prefix);
+
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    $charLen = strlen($chars);
+
+    $token = '';
+    while (strlen($token) < $length) {
+        $byte = random_bytes(1);
+        $val = ord($byte);
+        if ($val < 62 * floor(256 / 62)) {
+            $token .= $chars[$val % $charLen];
+        }
+    }
+
+    return $prefix . $token;
+}
+function DelAPIToken($pdo, $uniqid){
+    if(!(empty($uniqid))){
+        $tokenQuery = $pdo->prepare("SELECT token FROM api WHERE uniqid = :uniqid");
+        $tokenQuery->bindValue(':uniqid', $uniqid);
+        $tokenQuery->execute();
+        $tokenData = $tokenQuery->fetch();
+        if(!(empty($tokenData["token"]))){
+            $pdo->beginTransaction();
+            try {
+                // 削除クエリを実行
+                $deleteQuery = $pdo->prepare("DELETE FROM api WHERE uniqid = :uniqid");
+                $deleteQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+                $res = $deleteQuery->execute();
+                
+                if ($res) {
+                    $res = $pdo->commit();
+                    return true;
+                } else {
+                    $pdo->rollBack();
+                    actionLog($uniqid, "error", "delete_api_token", null, "APIトークンの削除に失敗しました(rollBack)", 3);
+                    return false;
+                }
+            } catch(PDOException $e) {
+                $pdo->rollBack();
+                actionLog($uniqid, "error", "delete_api_token", null, $e, 4);
+                return false;
+            }
+        }else{
+            actionLog($uniqid, "error", "delete_api_token", null, "カラムは存在しますがAPIトークンが存在しません", 3);
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+function DelSessionidAPIToken($pdo, $session){
+    $tokenQuery = $pdo->prepare("SELECT uniqid, userid, token FROM api WHERE sessionid = :sessionid");
+    $tokenQuery->bindValue(':sessionid', $session);
+    $tokenQuery->execute();
+    $tokenData = $tokenQuery->fetch();
+
+    $none = "";
+    if(!(empty($tokenData["userid"]))){
+        $pdo->beginTransaction();
+        try {
+            $updateQuery = $pdo->prepare("UPDATE api SET sessionid = :sessionid WHERE uniqid = :uniqid");
+            $updateQuery->bindValue(':sessionid', $none, PDO::PARAM_STR);
+            $updateQuery->bindValue(':uniqid', $tokenData["uniqid"], PDO::PARAM_STR);
+            $res = $updateQuery->execute();
+
+            if($res){
+                $pdo->commit();
+                return true;
+            }else{
+                // ロールバック
+                $pdo->rollBack();
+                actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], "セッションIDの無効化に失敗しました！", 3);
+                return false;
+            }
+        } catch (Exception $e) {
+            // ロールバック
+            $pdo->rollBack();
+            actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], $e, 4);
+            return false;
+        }   
+    }else{
+        actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], "セッションIDが存在しません。", 3);
+        return false;
+    }
+}
+function APIAuth($pdo, $token, $scope){
+    $tokenQuery = $pdo->prepare("SELECT userid, scope FROM api WHERE token = :token");
+    $tokenQuery->bindValue(':token', $token);
+    $tokenQuery->execute();
+    $tokenData = $tokenQuery->fetch();
+
+    if(!(empty($tokenData["userid"]))){
+        $allow_scope = array_unique(array_map('trim', explode(",", $tokenData["scope"])));
+        if(in_array($scope, $allow_scope)){
+            $userdata = getUserData($pdo, $tokenData["userid"]);
+            if(!(empty($userdata))){
+                if($userdata["role"] === "ice"){
+                    return [false, "this_account_has_been_frozen", null];
+                }else{
+                    return [true, "success", $userdata];
+                }
+            }else{
+                return [false, "token_invalid", null];
+            }
+        }else{
+            return [false, "not_allow_scope", null];
+        }
+    }else{
+        $userQuery = $pdo->prepare("SELECT * FROM account WHERE token = :token");
+        $userQuery->bindValue(':token', $token);
+        $userQuery->execute();
+        $userData = $userQuery->fetch();
+
+        if(empty($userData["userid"])){
+            return [false, "token_invalid", null];
+        }elseif($userData["role"] === "ice"){
+            return [false, "this_account_has_been_frozen", null];
+        }else{
+            return [true, "success", $userData];
+        }
+    }
+}
+
 ?>

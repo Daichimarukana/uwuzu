@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-05-03 15:26:28
+-- 生成日時: 2025-08-05 05:53:23
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -88,6 +88,23 @@ CREATE TABLE `ads` (
   `start_date` datetime NOT NULL,
   `limit_date` datetime NOT NULL,
   `datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `api`
+--
+
+CREATE TABLE `api` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
+  `userid` varchar(512) NOT NULL,
+  `token` varchar(1024) NOT NULL,
+  `scope` mediumtext NOT NULL,
+  `datetime` datetime NOT NULL,
+  `clientname` mediumtext NOT NULL,
+  `sessionid` varchar(512) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -193,7 +210,8 @@ CREATE TABLE `notification` (
   `datetime` datetime NOT NULL,
   `userchk` varchar(32) NOT NULL,
   `title` varchar(1024) NOT NULL,
-  `category` varchar(256) NOT NULL
+  `category` varchar(256) NOT NULL,
+  `notificationid` varchar(512) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -251,7 +269,8 @@ CREATE TABLE `ueuse` (
   `abi` mediumtext NOT NULL,
   `abidate` datetime NOT NULL,
   `nsfw` varchar(32) NOT NULL,
-  `popularity` int(11) NOT NULL
+  `popularity` int(11) NOT NULL,
+  `mentions` mediumtext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -274,6 +293,12 @@ ALTER TABLE `actionlog`
 -- テーブルのインデックス `ads`
 --
 ALTER TABLE `ads`
+  ADD PRIMARY KEY (`sysid`);
+
+--
+-- テーブルのインデックス `api`
+--
+ALTER TABLE `api`
   ADD PRIMARY KEY (`sysid`);
 
 --
@@ -356,6 +381,12 @@ ALTER TABLE `actionlog`
 -- テーブルの AUTO_INCREMENT `ads`
 --
 ALTER TABLE `ads`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `api`
+--
+ALTER TABLE `api`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

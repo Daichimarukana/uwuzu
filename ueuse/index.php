@@ -344,10 +344,15 @@ $(document).ready(function() {
 			dataType: 'json',
 			timeout: 300000,
 			success: function(response) {
-				renderUeuses(response, ueuseid);
-				pageNumber++;
-				isLoading = false;
-				$("#loading").hide();
+				if(renderUeuses(response)){
+					pageNumber++;
+					isLoading = false;
+					$("#loading").hide();
+				}else{
+					isLoading = false;
+					$("#loading").hide();
+					$("#error").show();
+				}
 			},
 			error: function(xhr, textStatus, errorThrown) {
 				isLoading = false;

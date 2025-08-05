@@ -1,15 +1,15 @@
 <?php
 
 $domain = $_SERVER['HTTP_HOST'];
-require('../../db.php');
+require(__DIR__ . '/../../db.php');
 //関数呼び出し
 //- Base64_mime
-require('../../function/function.php');
+require(__DIR__ . '/../../function/function.php');
 blockedIP($_SERVER['REMOTE_ADDR']);
 
-$mojisizefile = "../../server/textsize.txt";
+$mojisizefile = __DIR__ . "/../../server/textsize.txt";
 
-$banurldomainfile = "../../server/banurldomain.txt";
+$banurldomainfile = __DIR__ . "/../../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
 $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 
@@ -43,6 +43,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             $err = "input_not_found";
             $response = array(
                 'error_code' => $err,
+                'success' => false
             );
             echo json_encode($response, JSON_UNESCAPED_UNICODE);
             exit;
@@ -52,6 +53,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         $err = "input_not_found";
         $response = array(
             'error_code' => $err,
+            'success' => false
         );
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit;
@@ -60,27 +62,9 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
     session_start();
 
     if( !empty($pdo) ) {
-        $userQuery = $pdo->prepare("SELECT username, userid, role FROM account WHERE token = :token");
-        $userQuery->bindValue(':token', $token);
-        $userQuery->execute();
-        $userData = $userQuery->fetch();
-
-        if(empty($userData["userid"])){
-            $err = "token_invalid";
-            $response = array(
-                'error_code' => $err,
-            );
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }elseif($userData["role"] === "ice"){
-            $err = "this_account_has_been_frozen";
-            $response = array(
-                'error_code' => $err,
-            );
-            
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
-            exit;
-        }else{
+        $AuthData = APIAuth($pdo, $token, "write:ueuse");
+        if($AuthData[0] === true){
+            $userData = $AuthData[2];
             //本文取得
             if(!(empty($_GET['text']))){
                 $ueuse = safetext($_GET['text']);
@@ -90,6 +74,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 $err = "input_not_found";
                 $response = array(
                     'error_code' => $err,
+                    'success' => false
                 );
                 
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);
@@ -213,6 +198,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
 
             if($ueuse_result[0] == true){
                 $response = array(
+                    'success' => true,
                     'uniqid' => decode_yajirushi(htmlspecialchars_decode($ueuse_result[1])),
                     'userid' => decode_yajirushi(htmlspecialchars_decode($userData["userid"])),
                 );
@@ -282,16 +268,26 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
 
                 $response = array(
                     'error_code' => $err,
+                    'success' => false
                 );
                 
                 echo json_encode($response, JSON_UNESCAPED_UNICODE);
             }
+        }else{
+            $err = $AuthData[1];
+            $response = array(
+                'error_code' => $err,
+                'success' => false
+            );
+            
+            echo json_encode($response, JSON_UNESCAPED_UNICODE);
         }
     }
 }else{
     $err = "input_not_found";
     $response = array(
         'error_code' => $err,
+        'success' => false
     );
      
     echo json_encode($response, JSON_UNESCAPED_UNICODE);

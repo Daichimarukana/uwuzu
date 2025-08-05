@@ -3,6 +3,9 @@ header('Content-Type: application/json');
 require('../db.php');
 require('../function/function.php');
 blockedIP($_SERVER['REMOTE_ADDR']);
+$domain = $_SERVER['HTTP_HOST'];
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey'])) && safetext(isset($_POST['id']))) {
     $page = safetext($_POST['page']);
@@ -10,6 +13,36 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
     $uwuzuid = safetext($_POST['id']) ? safetext($_POST['id']) : '';
     $loginid = safetext($_POST['account_id']);
     $loginkey = safetext($_COOKIE['loginkey']);
+
+    if (safetext($serversettings["serverinfo"]["server_activitypub"]) === "true") {
+        if (isset($_POST['activity_domain'])) {
+            $activity_domain = safetext($_POST['activity_domain']) ? safetext($_POST['activity_domain']) : '';
+
+            if (!($activity_domain == $domain)) {
+                $domain_response = GetActivityPubUser($uwuzuid, $activity_domain);
+                if (empty($domain_response) || array_key_exists("error", $domain_response)) {
+                    $userData = null;
+                } else {
+                    $userData = $domain_response;
+                }
+                //var_dump($domain_response);
+                $is_local = false;
+                $item = array(
+                    "success" => false,
+                    "ueuses" => null,
+                    "ads" => null,
+                    "error" => "no_ueuse",
+                );
+                echo json_encode($item, JSON_UNESCAPED_UNICODE);
+                exit;
+            } else {
+                $is_local = true;
+            }
+        }
+    } else {
+        $activity_domain = $domain;
+        $is_local = true;
+    }
 
     $is_login = uwuzuUserLoginCheck($loginid, $loginkey, "user");
     if ($is_login === false) {
@@ -130,109 +163,9 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $ueuseItems = array();
         if(!empty($messages)){
             foreach ($messages as $value) {
-                if (!(in_array(safetext($value['account']), explode(",", $myblocklist)))){
-                    if(!($value["role"] === "ice")){
-                        if(filter_var($value['iconname'], FILTER_VALIDATE_URL)){
-                            $value['iconname'] = $value['iconname'];
-                        }else{
-                            $value['iconname'] = "../" . $value['iconname'];
-                        }
-
-                        // ""や"none"をnullに変換
-                        $value = to_null($value);
-                        $value = to_array_safetext($value);
-
-                        $value["role"] = explode(',', $value["role"]);
-
-                        if(!empty($value['rpuniqid'])){
-                            $value["type"] = "Reply";
-                            //リユーズどうするから始める
-                        }elseif(!empty($value['ruuniqid'])){
-                            $value["type"] = "Reuse";
-                            $reused = getUeuseData($pdo, $value['ruuniqid']); // 例：ruuniqidから元投稿を取得する関数
-                            if ($reused) {
-                                $reusedUserData = getUserData($pdo, $reused['account']); // 例：元投稿のユーザー情報を取得する関数
-                                $reusedUserData["role"] = explode(',', $reusedUserData["role"]);
-                                // ""や"none"をnullに変換
-                                $reused = to_null($reused);
-                                $reused = to_array_safetext($reused);
-                                // Reusedataを作成
-                                $value["reuse"] = array(
-                                    "type" => "Reuse",
-                                    "uniqid" => $reused["uniqid"],
-                                    "datetime" => $reused["datetime"],
-                                    "userid" => $reused["account"],
-                                    "userdata" => array(
-                                        "userid" => $reusedUserData["userid"],
-                                        "username" => $reusedUserData["username"],
-                                        "iconurl" => filter_var($reusedUserData['iconname'], FILTER_VALIDATE_URL) 
-                                            ? $reusedUserData['iconname'] 
-                                            : "../" . $reusedUserData['iconname'],
-                                        "role" => $reusedUserData["role"],
-                                    ),
-                                    "ueuse" => $reused["ueuse"],
-                                    "photo1" => $reused["photo1"],
-                                    "photo2" => $reused["photo2"],
-                                    "photo3" => $reused["photo3"],
-                                    "photo4" => $reused["photo4"],
-                                    "video1" => $reused["video1"],
-                                    "rpuniqid" => $reused["rpuniqid"],
-                                    "ruuniqid" => $reused["ruuniqid"],
-                                    "nsfw" => filter_var($reused["nsfw"], FILTER_VALIDATE_BOOLEAN),
-                                    "favoritecount" => $reused["favorite_conut"],
-                                    "replycount" => $reused["reply_count"],
-                                    "reusecount" => $reused["reuse_count"],
-                                    "is_favorite" => in_array($userId, explode(',', $reused['favorite'])),
-                                    "is_bookmark" => in_array($reused["uniqid"], explode(',', $mybookmark)),
-                                    "abi" => array(
-                                        "abi_text" => $reused["abi"],
-                                        "abi_date" => $reused["abidate"],
-                                    ),
-                                );
-                            }else{
-                                $value["reuse"] = null;
-                            }
-                        }else{
-                            $value["type"] = "Ueuse";
-                        }
-
-                        $ueuse = array(
-                            "type" => $value["type"],
-                            "uniqid" => $value["uniqid"],
-                            "datetime" => $value["datetime"],
-                            "userid" => $value["account"],
-                            "userdata" => array(
-                                "userid" => $value["account"],
-                                "username" => $value["username"],
-                                "iconurl" => $value['iconname'],
-                                "role" => $value["role"],
-                            ),
-                            "ueuse" => $value["ueuse"],
-                            "photo1" => $value["photo1"],
-                            "photo2" => $value["photo2"],
-                            "photo3" => $value["photo3"],
-                            "photo4" => $value["photo4"],
-                            "video1" => $value["video1"],
-                            "rpuniqid" => $value["rpuniqid"],
-                            "ruuniqid" => $value["ruuniqid"],
-                            "nsfw" => filter_var($value["nsfw"], FILTER_VALIDATE_BOOLEAN),
-                            "favoritecount" => $value["favorite_conut"],
-                            "replycount" => $value["reply_count"],
-                            "reusecount" => $value["reuse_count"],
-                            "is_favorite" => in_array($userId, explode(',', $value['favorite'])),
-                            "is_bookmark" => in_array($value["uniqid"], explode(',', $mybookmark)),
-                            "abi" => array(
-                                "abi_text" => $value["abi"],
-                                "abi_date" => $value["abidate"],
-                            ),
-                        );
-
-                        if ($value["type"] === "Reuse") {
-                            $ueuse["reuse"] = $value["reuse"];
-                        }
-            
-                        $ueuseItems[] = $ueuse;
-                    }
+                $formatted = FormatUeuseItem($value, $myblocklist, $mybookmark, $pdo, $userId);
+                if ($formatted !== null) {
+                    $ueuseItems[] = $formatted;
                 }
             }
 

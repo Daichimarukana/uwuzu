@@ -3,6 +3,9 @@ header('Content-Type: application/json');
 require('../db.php');
 require('../function/function.php');
 blockedIP($_SERVER['REMOTE_ADDR']);
+$domain = $_SERVER['HTTP_HOST'];
+$serversettings_file = "../server/serversettings.ini";
+$serversettings = parse_ini_file($serversettings_file, true);
 
 if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey'])) && safetext(isset($_POST['id']))) {
     $page = safetext($_POST['page']);
@@ -10,6 +13,29 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
     $uwuzuid = safetext($_POST['id']) ? safetext($_POST['id']) : '';
     $loginid = safetext($_POST['account_id']);
     $loginkey = safetext($_COOKIE['loginkey']);
+
+    if (safetext($serversettings["serverinfo"]["server_activitypub"]) === "true") {
+        if (isset($_POST['activity_domain'])) {
+            $activity_domain = safetext($_POST['activity_domain']) ? safetext($_POST['activity_domain']) : '';
+
+            if (!($activity_domain == $domain)) {
+                $domain_response = GetActivityPubUser($uwuzuid, $activity_domain);
+                if (empty($domain_response) || array_key_exists("error", $domain_response)) {
+                    $userData = null;
+                } else {
+                    $userData = $domain_response;
+                }
+                //var_dump($domain_response);
+                $is_local = false;
+            } else {
+                $is_local = true;
+            }
+        }
+    } else {
+        $activity_domain = $domain;
+        $is_local = true;
+    }
+
 
     $is_login = uwuzuUserLoginCheck($loginid, $loginkey, "user");
     if ($is_login === false) {
@@ -36,69 +62,167 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
 
         $itemsPerPage = 15; // 1ページあたりのユーズ数
         $pageNumber = $page;
-        if($pageNumber <= 0 || (!(is_numeric($pageNumber)))){
+        if ($pageNumber <= 0 || (!(is_numeric($pageNumber)))) {
             $pageNumber = 1;
         }
         $offset = ($pageNumber - 1) * $itemsPerPage;
 
         $messages = array();
-        
-        $userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower FROM account WHERE userid = :userid");
-        $userQuery->bindValue(':userid', $uwuzuid);
-        $userQuery->execute();
-        $userData = $userQuery->fetch();    
-        
-        $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = ''ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
-        $messageQuery->bindValue(':userid', $uwuzuid);
-        $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-        $messageQuery->execute();
-        $message_array = $messageQuery->fetchAll();
-        
-        $messages = array();
-        foreach ($message_array as $row) {
-            $messages[] = $row;
-        }
 
-        // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
-        foreach ($messages as &$message) {
-            $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-            $userQuery->bindValue(':userid', $message["account"]);
+        if ($is_local === true) {
+            $userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower FROM account WHERE userid = :userid");
+            $userQuery->bindValue(':userid', $uwuzuid);
             $userQuery->execute();
             $userData = $userQuery->fetch();
 
-            if ($userData) {
-                $message['iconname'] = $userData['iconname'];
-                $message['headname'] = $userData['headname'];
-                $message['username'] = $userData['username'];
-                $message['sacinfo'] = $userData['sacinfo'];
-                $message['role'] = $userData['role'];
+            $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = ''ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
+            $messageQuery->bindValue(':userid', $uwuzuid);
+            $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+            $messageQuery->execute();
+            $message_array = $messageQuery->fetchAll();
+
+            foreach ($message_array as $row) {
+                $messages[] = $row;
             }
 
-            //リプライ数取得
-            $rpQuery = $pdo->prepare("SELECT COUNT(*) as reply_count FROM ueuse WHERE rpuniqid = :rpuniqid");
-            $rpQuery->bindValue(':rpuniqid', $message['uniqid']);
-            $rpQuery->execute();
-            $rpData = $rpQuery->fetch(PDO::FETCH_ASSOC);
-            
-            if ($rpData){
-                $message['reply_count'] = $rpData['reply_count'];
-            }
+            // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
+            foreach ($messages as &$message) {
+                $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");
+                $userQuery->bindValue(':userid', $message["account"]);
+                $userQuery->execute();
+                $userData = $userQuery->fetch();
 
-            //リユーズ数取得
-            $ruQuery = $pdo->prepare("SELECT COUNT(*) as reuse_count FROM ueuse WHERE ruuniqid = :ruuniqid");
-            $ruQuery->bindValue(':ruuniqid', $message['uniqid']);
-            $ruQuery->execute();
-            $ruData = $ruQuery->fetch(PDO::FETCH_ASSOC);
-            
-            if ($ruData){
-                $message['reuse_count'] = $ruData['reuse_count'];
-            }
+                if ($userData) {
+                    $message['iconname'] = $userData['iconname'];
+                    $message['headname'] = $userData['headname'];
+                    $message['username'] = $userData['username'];
+                    $message['sacinfo'] = $userData['sacinfo'];
+                    $message['role'] = $userData['role'];
+                }
 
-            $fav = $message['favorite'];
-            $favIds = explode(',', $fav);
-            $message["favorite_conut"] = count($favIds)-1;
+                //リプライ数取得
+                $rpQuery = $pdo->prepare("SELECT COUNT(*) as reply_count FROM ueuse WHERE rpuniqid = :rpuniqid");
+                $rpQuery->bindValue(':rpuniqid', $message['uniqid']);
+                $rpQuery->execute();
+                $rpData = $rpQuery->fetch(PDO::FETCH_ASSOC);
+
+                if ($rpData) {
+                    $message['reply_count'] = $rpData['reply_count'];
+                }
+
+                //リユーズ数取得
+                $ruQuery = $pdo->prepare("SELECT COUNT(*) as reuse_count FROM ueuse WHERE ruuniqid = :ruuniqid");
+                $ruQuery->bindValue(':ruuniqid', $message['uniqid']);
+                $ruQuery->execute();
+                $ruData = $ruQuery->fetch(PDO::FETCH_ASSOC);
+
+                if ($ruData) {
+                    $message['reuse_count'] = $ruData['reuse_count'];
+                }
+
+                $fav = $message['favorite'];
+                $favIds = explode(',', $fav);
+                $message["favorite_conut"] = count($favIds) - 1;
+            }
+        } elseif($userData != null) {
+            $activity_base = GetActivityPubJson($userData['outbox']);
+            $pageUrl = $activity_base['first'] ?? null;
+
+            $pageNumber = max(1, (int)$page); // 1ページ目以上に固定
+            $currentPageData = null;
+
+            for ($i = 1; $i <= $pageNumber; $i++) {
+                if (!$pageUrl) break;
+
+                $currentPageData = GetActivityPubJson($pageUrl);
+
+                // 目的のページに達していなければ next をたどる
+                if ($i < $pageNumber) {
+                    $pageUrl = $currentPageData['next'] ?? null;
+                }
+            }
+            $orderedItems = $currentPageData['orderedItems'] ?? [];
+
+            $createItems = array_filter($orderedItems, function ($item) {
+                return isset($item['type']) && $item['type'] === 'Create';
+            });
+            $createItems = array_values($createItems);
+
+            foreach ($createItems as $item) {
+                // object がURLなら取得
+                $object = $item['object'] ?? null;
+                if (is_string($object)) {
+                    $object = GetActivityPubJson($object);
+                }
+
+                // nullや不正なobjectはスキップ
+                if (!is_array($object)) continue;
+
+                $contentHtml = $object['content'] ?? '';
+                $withNewlines = preg_replace('/<br\s*\/?>/i', "\n", $contentHtml);
+                $plainContent = strip_tags($withNewlines);
+
+                $photos = [];
+                $video = null;
+
+                if (!empty($object['attachment'])) {
+                    $attachments = is_array($object['attachment']) ? $object['attachment'] : [$object['attachment']];
+
+                    foreach ($attachments as $att) {
+                        if (!is_array($att)) continue;
+
+                        $mediaType = $att['mediaType'] ?? '';
+                        $url = $att['url'] ?? ($att['href'] ?? null);
+
+                        if (!$url) continue;
+
+                        // 画像（mediaTypeで判定）
+                        if (str_starts_with($mediaType, 'image/')) {
+                            if (count($photos) < 4) {
+                                $photos[] = $url;
+                            }
+                        }
+
+                        // 動画（mediaTypeで判定）
+                        if (str_starts_with($mediaType, 'video/') && !$video) {
+                            $video = $url;
+                        }
+                    }
+                }
+
+                $messages[] = [
+                    "rpuniqid" => "",
+                    "ruuniqid" => "",
+                    "uniqid" => "",
+                    "datetime" => date("Y-m-d H:i:s", strtotime($object["published"] ?? "now")),
+                    "account" => $userData["userid"] . "@" . $activity_domain,
+                    "username" => $userData["username"],
+                    "iconname" => $userData["iconname"],
+                    "headname" => $userData["headname"] ?? null,
+                    "role" => $userData["role"] ?? "user",
+                    "sacinfo" => "",
+                    "ueuse" => $plainContent,
+                    "photo1" => $photos[0] ?? null,
+                    "photo2" => $photos[1] ?? null,
+                    "photo3" => $photos[2] ?? null,
+                    "photo4" => $photos[3] ?? null,
+                    "video1" => $video,
+                    "nsfw" => $object["sensitive"] ?? false,
+                    "favorite" => "",
+                    "favorite_conut" => 0,
+                    "reply_count" => 0,
+                    "reuse_count" => 0,
+                    "abi" => "",
+                    "abidate" => null,
+                    "activitypub" => true,
+                ];
+            }
+        }else{
+            $message = array();
         }
+
+
         //adsystem------------------
 
         $message['ads'] = "false";
@@ -109,7 +233,7 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $adsQuery->bindValue(':today', $today);
         $adsQuery->execute();
         $adsresult = $adsQuery->fetch();
-        if(!(empty($adsresult))){
+        if (!(empty($adsresult))) {
             $message['ads'] = "true";
             $message['ads_url'] = $adsresult["url"];
             $message['ads_img_url'] = $adsresult["image_url"];
@@ -118,122 +242,22 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         //--------------------------
 
         $ueuseItems = array();
-        if(!empty($messages)){
+        if (!empty($messages)) {
             foreach ($messages as $value) {
-                if (!(in_array(safetext($value['account']), explode(",", $myblocklist)))){
-                    if(!($value["role"] === "ice")){
-                        if(filter_var($value['iconname'], FILTER_VALIDATE_URL)){
-                            $value['iconname'] = $value['iconname'];
-                        }else{
-                            $value['iconname'] = "../" . $value['iconname'];
-                        }
-
-                        // ""や"none"をnullに変換
-                        $value = to_null($value);
-                        $value = to_array_safetext($value);
-
-                        $value["role"] = explode(',', $value["role"]);
-
-                        if(!empty($value['rpuniqid'])){
-                            $value["type"] = "Reply";
-                            //リユーズどうするから始める
-                        }elseif(!empty($value['ruuniqid'])){
-                            $value["type"] = "Reuse";
-                            $reused = getUeuseData($pdo, $value['ruuniqid']); // 例：ruuniqidから元投稿を取得する関数
-                            if ($reused) {
-                                $reusedUserData = getUserData($pdo, $reused['account']); // 例：元投稿のユーザー情報を取得する関数
-                                $reusedUserData["role"] = explode(',', $reusedUserData["role"]);
-                                // ""や"none"をnullに変換
-                                $reused = to_null($reused);
-                                $reused = to_array_safetext($reused);
-                                // Reusedataを作成
-                                $value["reuse"] = array(
-                                    "type" => "Reuse",
-                                    "uniqid" => $reused["uniqid"],
-                                    "datetime" => $reused["datetime"],
-                                    "userid" => $reused["account"],
-                                    "userdata" => array(
-                                        "userid" => $reusedUserData["userid"],
-                                        "username" => $reusedUserData["username"],
-                                        "iconurl" => filter_var($reusedUserData['iconname'], FILTER_VALIDATE_URL) 
-                                            ? $reusedUserData['iconname'] 
-                                            : "../" . $reusedUserData['iconname'],
-                                        "role" => $reusedUserData["role"],
-                                    ),
-                                    "ueuse" => $reused["ueuse"],
-                                    "photo1" => $reused["photo1"],
-                                    "photo2" => $reused["photo2"],
-                                    "photo3" => $reused["photo3"],
-                                    "photo4" => $reused["photo4"],
-                                    "video1" => $reused["video1"],
-                                    "rpuniqid" => $reused["rpuniqid"],
-                                    "ruuniqid" => $reused["ruuniqid"],
-                                    "nsfw" => filter_var($reused["nsfw"], FILTER_VALIDATE_BOOLEAN),
-                                    "favoritecount" => $reused["favorite_conut"],
-                                    "replycount" => $reused["reply_count"],
-                                    "reusecount" => $reused["reuse_count"],
-                                    "is_favorite" => in_array($userId, explode(',', $reused['favorite'])),
-                                    "is_bookmark" => in_array($reused["uniqid"], explode(',', $mybookmark)),
-                                    "abi" => array(
-                                        "abi_text" => $reused["abi"],
-                                        "abi_date" => $reused["abidate"],
-                                    ),
-                                );
-                            }else{
-                                $value["reuse"] = null;
-                            }
-                        }else{
-                            $value["type"] = "Ueuse";
-                        }
-
-                        $ueuse = array(
-                            "type" => $value["type"],
-                            "uniqid" => $value["uniqid"],
-                            "datetime" => $value["datetime"],
-                            "userid" => $value["account"],
-                            "userdata" => array(
-                                "userid" => $value["account"],
-                                "username" => $value["username"],
-                                "iconurl" => $value['iconname'],
-                                "role" => $value["role"],
-                            ),
-                            "ueuse" => $value["ueuse"],
-                            "photo1" => $value["photo1"],
-                            "photo2" => $value["photo2"],
-                            "photo3" => $value["photo3"],
-                            "photo4" => $value["photo4"],
-                            "video1" => $value["video1"],
-                            "rpuniqid" => $value["rpuniqid"],
-                            "ruuniqid" => $value["ruuniqid"],
-                            "nsfw" => filter_var($value["nsfw"], FILTER_VALIDATE_BOOLEAN),
-                            "favoritecount" => $value["favorite_conut"],
-                            "replycount" => $value["reply_count"],
-                            "reusecount" => $value["reuse_count"],
-                            "is_favorite" => in_array($userId, explode(',', $value['favorite'])),
-                            "is_bookmark" => in_array($value["uniqid"], explode(',', $mybookmark)),
-                            "abi" => array(
-                                "abi_text" => $value["abi"],
-                                "abi_date" => $value["abidate"],
-                            ),
-                        );
-
-                        if ($value["type"] === "Reuse") {
-                            $ueuse["reuse"] = $value["reuse"];
-                        }
-            
-                        $ueuseItems[] = $ueuse;
-                    }
+                $formatted = FormatUeuseItem($value, $myblocklist, $mybookmark, $pdo, $userId);
+                if ($formatted !== null) {
+                    $ueuseItems[] = $formatted;
                 }
             }
 
-            if($message['ads'] === "true"){
+            if ($message['ads'] === "true") {
                 $adsystem = array(
                     "type" => "Ads",
                     "url" => $message['ads_url'],
                     "imgurl" => $message['ads_img_url'],
                     "memo" => $message['ads_memo'],
                 );
-            }else{
+            } else {
                 $adsystem = null;
             }
 
@@ -242,9 +266,9 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
                 "ueuses" => $ueuseItems,
                 "ads" => $adsystem,
             );
-    
+
             echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        }else{
+        } else {
             $item = array(
                 "success" => false,
                 "ueuses" => null,
@@ -253,10 +277,10 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
             );
             echo json_encode($item, JSON_UNESCAPED_UNICODE);
         }
-        
+
         $pdo = null;
     }
-}else{
+} else {
     $item = array(
         "success" => false,
         "ueuses" => null,
@@ -265,4 +289,3 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
     );
     echo json_encode($item, JSON_UNESCAPED_UNICODE);
 }
-?>

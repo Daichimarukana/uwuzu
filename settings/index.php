@@ -113,6 +113,16 @@ if( !empty($pdo) ) {
 	}else{
 		$userData['headname'] = "../" . $userData['headname'];
 	}
+
+	$apitokenQuery = $pdo->prepare("SELECT 1 FROM api WHERE userid = :userid LIMIT 1");
+	$apitokenQuery->bindValue(':userid', $userid);
+	$apitokenQuery->execute();
+
+	if ($apitokenQuery->fetch()) {
+		$is_allow_bot = true;
+	} else {
+		$is_allow_bot = false;
+	}
 }
 
 
@@ -548,7 +558,7 @@ $pdo = null;
 						<textarea id="profile" type="text" placeholder="" class="inbox" name="profile" value=""><?php if( !empty($userData['profile']) ){ echo safetext( $userData['profile']); } ?></textarea>
 					</div>
 
-					<?php if(!empty($userData['token'])){?>
+					<?php if(!empty($userData['token']) || $is_allow_bot === true){?>
 
 						<p>このアカウントがBotであることを公開する</p>
 						<div class="switch_button">

@@ -23,7 +23,12 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) == "true"){
         $error_message[] = $e->getMessage();
     }
 
-    $ueuse = safetext($_GET['ueuse']);
+    if(isset($_GET['id']) && !empty($_GET['id'])){
+        $ueuse = safetext($_GET['id']);
+    } else {
+        header("HTTP/1.1 400 Bad Request");
+        exit;
+    }
 
     if( !empty($pdo) ) {
             
@@ -54,32 +59,21 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) == "true"){
                 $value["sensitive"] = false;
             }
             $orderedItem = array(
+                "type" => "Note",
                 "@context" => "https://www.w3.org/ns/activitystreams",
-                "id" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
-                "actor" => "https://" . $domain . "/actor/?actor=@" . $value["account"],
-                "type" => "Create",
+                "id" => "https://" . $domain . "/ueuse/activity/?id=" . $value["uniqid"],
+                "url" => "https://" . $domain . "/ueuse/activity/?id=" . $value["uniqid"],
                 "published" => date(DATE_ATOM, strtotime($value["datetime"])),
                 "to" => [
                     "https://" . $domain . "/followers",
                     "https://www.w3.org/ns/activitystreams#Public",
                 ],
-                "object" => array(
-                    "type" => "Note",
-                    "@context" => "https://www.w3.org/ns/activitystreams",
-                    "id" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
-                    "url" => "https://" . $domain . "/ueuse/activity/?ueuse=" . $value["uniqid"],
-                    "published" => date(DATE_ATOM, strtotime($value["datetime"])),
-                    "to" => [
-                        "https://" . $domain . "/followers",
-                        "https://www.w3.org/ns/activitystreams#Public",
-                    ],
-                    "attributedTo" => "https://" . $domain . "/@" . $value["account"],
-                    "content" => nl2br($value["ueuse"]),
-                    "inReplyTo" => null,
-                    "attachment" => [],
-                    "sensitive" => $value["sensitive"],
-                    "tag" => [],
-                ),
+                "attributedTo" => "https://" . $domain . "/@" . $value["account"],
+                "content" => nl2br($value["ueuse"]),
+                "inReplyTo" => null,
+                "attachment" => [],
+                "sensitive" => $value["sensitive"],
+                "tag" => [],
             );
     
             $orderedItems[] = $orderedItem;

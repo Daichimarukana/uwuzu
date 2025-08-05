@@ -1,4 +1,4 @@
 uwuzu
-1.5.4
-2025/06/08
+1.6.0
+2025/08/05
 daichimarukana,putonfps
