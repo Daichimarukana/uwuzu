@@ -8958,7 +8958,7 @@ noscript .noscript_modal .inner .center_text p {
 
     .notification .blur {
         background-color: #F5F5F5;
-        color: #F5F5F5;
+        color: transparent;
     }
 
     .notification .blur:hover {

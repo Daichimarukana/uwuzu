@@ -450,8 +450,8 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
 
     if (ueuse["type"] == "Reuse") {
         if (ueuse["reuse"]) {
-            check = getCheckIcon(ueuse["reuse"]["userdata"]);
-            bot = getBotIcon(ueuse["reuse"]["userdata"]);
+            check = getCheckIcon(ueuse["userdata"]);
+            bot = getBotIcon(ueuse["userdata"]);
         }
 
         if (ueuse["ueuse"].length > 0) {

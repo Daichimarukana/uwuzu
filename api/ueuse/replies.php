@@ -101,8 +101,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             $stmt->execute();
             $message_array = $stmt;
         
-            while ($row = $message_array->fetchAll(PDO::FETCH_ASSOC)) {
-        
+            while ($row = $message_array->fetch(PDO::FETCH_ASSOC)) {
                 $messages[] = $row;
             }
         
@@ -120,8 +119,6 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     }
                     $favcnts = explode(',', $ueusedata["favorite"]);
                     $ueusedata["favorite_cnt"] = count($favcnts) - 1;
-
-                    $userData = getUserData($pdo, $ueusedata["account"]);
             
                     if ($userData) {
                         $now_userdata = array(
