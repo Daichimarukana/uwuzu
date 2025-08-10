@@ -1148,7 +1148,7 @@ function GenNotificationId($to, $from, $title, $message, $url, $category) {
     return hash('sha3-512', $data);
 }
 
-function send_notification($to,$from,$title,$message,$url,$category){
+function send_notification($to,$from,$title,$message,$url,$category,$valueid = null){
     // データベースに接続
     try {
         $option = array(
@@ -1169,6 +1169,15 @@ function send_notification($to,$from,$title,$message,$url,$category){
             if(in_array($category, explode(',', $to_result["notification_settings"])) || empty($to_result["notification_settings"]) || $category === "system" || $category === "other"){
                 //ブロックされてたら送らない
                 if(!(in_array($from, explode(',', $to_result["blocklist"])))){
+                    if(!(empty($valueid))){
+                        if(mb_strlen($valueid) > 256){
+                            $save_valueid = "";
+                        }else{
+                            $save_valueid = $valueid;
+                        }
+                    }else{
+                        $save_valueid = "";
+                    }
                     if(!(empty($pdo))){		
                         $pdo->beginTransaction();
                         try {
@@ -1183,7 +1192,7 @@ function send_notification($to,$from,$title,$message,$url,$category){
                             $notification_id = GenNotificationId($touserid, $fromuserid, $title, $msg, $url, $notification_category);
                     
                             // 通知用SQL作成
-                            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category, notificationid) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category, :notificationid)");
+                            $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title, category, notificationid, valueid) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title, :category, :notificationid, :valueid)");
                     
                             $stmt->bindParam(':fromuserid', $fromuserid, PDO::PARAM_STR);
                             $stmt->bindParam(':touserid', $touserid, PDO::PARAM_STR);
@@ -1193,6 +1202,8 @@ function send_notification($to,$from,$title,$message,$url,$category){
                             $stmt->bindParam(':title', $title, PDO::PARAM_STR);
                             $stmt->bindParam(':category', $notification_category, PDO::PARAM_STR);
                             $stmt->bindParam(':notificationid', $notification_id, PDO::PARAM_STR);
+
+                            $stmt->bindParam(':valueid', $save_valueid, PDO::PARAM_STR);
                     
                             $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
                     
@@ -1367,7 +1378,8 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
             }else{
                 $save_nsfw = "false";
             }
-            if(empty($ueuse) && empty($ruUniqid)) {
+
+            if (($ueuse === '' || $ueuse === null) && empty($ruUniqid)) {
                 $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
             } else {
                 // 文字数を確認
@@ -1387,11 +1399,11 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 }
                 
                 // 改行ユーズ確認
-                if(preg_match('/^[\n\r]+$/', $ueuse) === 1){
+                if(preg_match('/^\s+$/u', $ueuse) === 1){
                     $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
                 }
             }
-
+            
             $old_datetime = date("Y-m-d H:i:00");
             $now_datetime = date("Y-m-d H:i:00",strtotime("+1 minute"));
             $rate_Query = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND TIME(datetime) BETWEEN :old_datetime AND :now_datetime");
@@ -1711,7 +1723,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 $res = $pdo->commit();
 
                                 foreach ($mentionedUsers as $mentionedUser) {
-                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention", $uniqid);
                                 }
 
                             } catch(Exception $e) {
@@ -1766,10 +1778,10 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 $res = $pdo->commit();
 
                                 foreach ($mentionedUsers as $mentionedUser) {
-                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention", $uniqid);
                                 }
 
-                                send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply");
+                                send_notification($touserid,$userid,"".$userid."さんが返信しました！",$ueuse,"/!".$uniqid."", "reply", $uniqid);
                             } catch(Exception $e) {
                                 // エラーが発生した時はロールバック
                                 $pdo->rollBack();
@@ -1824,10 +1836,10 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 $res = $pdo->commit();
 
                                 foreach ($mentionedUsers as $mentionedUser) {
-                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention");
+                                    send_notification($mentionedUser,$userid,"".$userid."さんにメンションされました！",$ueuse,"/!".$uniqid."", "mention", $uniqid);
                                 }
 
-                                send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse");
+                                send_notification($touserid,$userid,"".$userid."さんがリユーズしました！",$ueuse,"/!".$uniqid."", "reuse", $uniqid);
 
                             } catch(Exception $e) {
                                 // エラーが発生した時はロールバック
@@ -2111,7 +2123,7 @@ function follow_user($pdo, $to_userid, $userid){
                     $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
                     $res_follow = $updateQuery->execute();
 
-                    send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow");
+                    send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow", $userid);
 
                     if ($res && $res_follow) {
                         $pdo->commit();
@@ -2348,7 +2360,7 @@ function deleteUser($pdo, $userid, $step, $job_uniqid){
                     if ($res) {
                         $pdo->commit(); 
 
-                        send_notification($userid, "uwuzu-fromsys", "🗑️アカウントの削除が開始されました🗑️", "アカウントの削除が開始されました！\n今後、アカウントのデータは順次削除されます。\n削除には時間がかかります。\n\nログアウトしてお待ち下さい。\n\nアカウントの復旧はできません。", "/others", "system");
+                        send_notification($userid, "uwuzu-fromsys", "🗑️アカウントの削除が開始されました🗑️", "アカウントの削除が開始されました！\n今後、アカウントのデータは順次削除されます。\n削除には時間がかかります。\n\nログアウトしてお待ち下さい。\n\nアカウントの復旧はできません。", "/others", "system", $userid);
                         if(changeJob($pdo, $userid, $job_uniqid, "delete_ueuse", "waiting")){
                             return true;
                         }else{
@@ -2649,7 +2661,7 @@ function addFavorite($pdo, $uniqid, $userid){
                 // ユーザーIDを追加
                 $favoriteList[] = $userid;
 
-                send_notification(safetext($post['account']),$userid,"".$userid."さんがいいねしました！",safetext($post['ueuse']),"/!".$uniqid."","favorite");
+                send_notification(safetext($post['account']),$userid,"".$userid."さんがいいねしました！",safetext($post['ueuse']),"/!".$uniqid."","favorite", $uniqid);
                 
                 //1いいねでスコアが1増加
                 changePopularity($pdo, $uniqid, $userid, 1);
@@ -2755,7 +2767,7 @@ function getUeuseData($pdo, $uniqid) {
 
     $fav = $ueuseDatas['favorite'];
     $favIds = explode(',', $fav);
-    $ueuseDatas["favorite_conut"] = count($favIds)-1;
+    $ueuseDatas["favorite_count"] = count($favIds)-1;
 
     return $ueuseDatas;
 }
@@ -3336,7 +3348,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
                 "rpuniqid" => $reused["rpuniqid"],
                 "ruuniqid" => $reused["ruuniqid"],
                 "nsfw" => filter_var($reused["nsfw"], FILTER_VALIDATE_BOOLEAN),
-                "favoritecount" => $reused["favorite_conut"],
+                "favoritecount" => $reused["favorite_count"],
                 "replycount" => $reused["reply_count"],
                 "reusecount" => $reused["reuse_count"],
                 "is_favorite" => in_array($userId, explode(',', $reused['favorite'])),
@@ -3375,7 +3387,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
         "rpuniqid" => $value["rpuniqid"],
         "ruuniqid" => $value["ruuniqid"],
         "nsfw" => filter_var($value["nsfw"], FILTER_VALIDATE_BOOLEAN),
-        "favoritecount" => $value["favorite_conut"],
+        "favoritecount" => $value["favorite_count"],
         "replycount" => $value["reply_count"],
         "reusecount" => $value["reuse_count"],
         "is_favorite" => in_array($userId, explode(',', $value['favorite'])),
@@ -3579,6 +3591,78 @@ function APIAuth($pdo, $token, $scope){
             return [true, "success", $userData];
         }
     }
+}
+
+function getDatasUeuse(PDO $pdo, array $messages): array {
+    if (empty($messages)) return [];
+
+    // --- userId / uniqid を安全に抽出 ---
+    $userIds = array_values(array_unique(array_filter(array_column($messages, 'account'), fn($v) => $v !== null && $v !== '')));
+    $uniqids = array_values(array_unique(array_filter(array_column($messages, 'uniqid'), fn($v) => $v !== null && $v !== '')));
+
+    $users = [];
+    if (!empty($userIds)) {
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $stmt = $pdo->prepare("SELECT userid, username, profile, role, iconname, headname, sacinfo FROM account WHERE userid IN ($placeholders)");
+        $stmt->execute($userIds);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $users[$row['userid']] = $row;
+        }
+    }
+
+    $replyCounts = [];
+    $reuseCounts = [];
+    if (!empty($uniqids)) {
+        $placeholders = implode(',', array_fill(0, count($uniqids), '?'));
+
+        $stmt = $pdo->prepare("SELECT rpuniqid, COUNT(*) AS reply_count FROM ueuse WHERE rpuniqid IN ($placeholders) GROUP BY rpuniqid");
+        $stmt->execute($uniqids);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $replyCounts[$row['rpuniqid']] = (int)$row['reply_count'];
+        }
+
+        $stmt = $pdo->prepare("SELECT ruuniqid, COUNT(*) AS reuse_count FROM ueuse WHERE ruuniqid IN ($placeholders) GROUP BY ruuniqid");
+        $stmt->execute($uniqids);
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $reuseCounts[$row['ruuniqid']] = (int)$row['reuse_count'];
+        }
+    }
+
+    // --- messages に反映（ループ内でDBを叩かない）---
+    foreach ($messages as &$message) {
+        // account のユーザー情報をマージ（存在すれば上書き）
+        $acc = $message['account'] ?? null;
+        if ($acc !== null && isset($users[$acc])) {
+            $userRow = $users[$acc];
+            $message['username'] = $userRow['username'] ?? ($message['username'] ?? null);
+            $message['profile']  = $userRow['profile']  ?? ($message['profile']  ?? null);
+            $message['role']     = $userRow['role']     ?? ($message['role']     ?? null);
+            $message['iconname'] = $userRow['iconname'] ?? ($message['iconname'] ?? null);
+            $message['headname'] = $userRow['headname'] ?? ($message['headname'] ?? null);
+            $message['sacinfo']  = $userRow['sacinfo']  ?? ($message['sacinfo']  ?? null);
+        }
+
+        // reply / reuse
+        $uniq = $message['uniqid'] ?? '';
+        $message['reply_count'] = $replyCounts[$uniq] ?? 0;
+        $message['reuse_count'] = $reuseCounts[$uniq] ?? 0;
+
+        // --- favorite_count を安全に計算 ---
+        // 1) 値を文字列として扱い、2) explode して trim、3) 空文字を除去、4) count
+        $favStr = isset($message['favorite']) ? (string)$message['favorite'] : '';
+        if ($favStr === '') {
+            $favCount = 0;
+        } else {
+            $parts = array_map('trim', explode(',', $favStr));
+            $parts = array_filter($parts, fn($v) => $v !== '');
+            $favCount = count($parts);
+        }
+        
+        $message['favorite_count'] = $favCount;
+    }
+    unset($message);
+
+    return $messages;
 }
 
 ?>

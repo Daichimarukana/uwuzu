@@ -626,7 +626,7 @@ $pdo = null;
             </div>
 			<div>
                 <p>新しいパスワード</p>
-                <input id="password" type="password" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="">
+                <input id="password" type="password" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="" autocomplete="new-password">
 				<div id="password_zxcvbn" class="p2" style="display: none;"></div>
 				<p>パスワードを表示する</p>
 				<div class="switch_button">

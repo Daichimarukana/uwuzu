@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-08-05 05:53:23
+-- 生成日時: 2025-08-10 11:10:28
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -211,7 +211,8 @@ CREATE TABLE `notification` (
   `userchk` varchar(32) NOT NULL,
   `title` varchar(1024) NOT NULL,
   `category` varchar(256) NOT NULL,
-  `notificationid` varchar(512) NOT NULL
+  `notificationid` varchar(512) NOT NULL,
+  `valueid` varchar(256) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

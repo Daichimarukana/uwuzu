@@ -60,44 +60,9 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         }
 
         // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
-        foreach ($messages as &$message) {
-            $userQuery = $pdo->prepare("SELECT username, userid, profile, role, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-            $userQuery->bindValue(':userid', $message["account"]);
-            $userQuery->execute();
-            $userData = $userQuery->fetch();
 
-            if ($userData) {
-                $message['iconname'] = $userData['iconname'];
-                $message['headname'] = $userData['headname'];
-                $message['username'] = $userData['username'];
-                $message['sacinfo'] = $userData['sacinfo'];
-                $message['role'] = $userData['role'];
-            }
+        $messages = getDatasUeuse($pdo, $messages);
 
-            //リプライ数取得
-            $rpQuery = $pdo->prepare("SELECT COUNT(*) as reply_count FROM ueuse WHERE rpuniqid = :rpuniqid");
-            $rpQuery->bindValue(':rpuniqid', $message['uniqid']);
-            $rpQuery->execute();
-            $rpData = $rpQuery->fetch(PDO::FETCH_ASSOC);
-            
-            if ($rpData){
-                $message['reply_count'] = $rpData['reply_count'];
-            }
-
-            //リユーズ数取得
-            $ruQuery = $pdo->prepare("SELECT COUNT(*) as reuse_count FROM ueuse WHERE ruuniqid = :ruuniqid");
-            $ruQuery->bindValue(':ruuniqid', $message['uniqid']);
-            $ruQuery->execute();
-            $ruData = $ruQuery->fetch(PDO::FETCH_ASSOC);
-            
-            if ($ruData){
-                $message['reuse_count'] = $ruData['reuse_count'];
-            }
-
-            $fav = $message['favorite'];
-            $favIds = explode(',', $fav);
-            $message["favorite_conut"] = count($favIds)-1;
-        }
         //adsystem------------------
 
         $message['ads'] = "false";

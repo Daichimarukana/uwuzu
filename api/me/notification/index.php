@@ -79,7 +79,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
         if($AuthData[0] === true){
             $userData = $AuthData[2];
 
-            $messageQuery = $pdo->prepare("SELECT fromuserid,title,msg,url,datetime,userchk,category FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
+            $messageQuery = $pdo->prepare("SELECT fromuserid,title,msg,url,datetime,userchk,category,valueid FROM notification WHERE touserid = :userid ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
             $messageQuery->bindValue(':userid', $userData["userid"], PDO::PARAM_STR);
             $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
             $messageQuery->bindValue(':itemsPerPage', $limit, PDO::PARAM_INT);
@@ -126,6 +126,12 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     }else{
                         $userchk = false;
                     }
+
+                    if(!(empty($notificationdata["valueid"]))){
+                        $valueid = decode_yajirushi(htmlspecialchars_decode($notificationdata["valueid"]));
+                    }else{
+                        $valueid = null;
+                    }
             
                     $item = [
                         'from' => $now_userdata,
@@ -133,6 +139,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         'title' => decode_yajirushi(htmlspecialchars_decode($notificationdata["title"])),
                         'text' => decode_yajirushi(htmlspecialchars_decode($notificationdata["msg"])),
                         'datetime' => decode_yajirushi(htmlspecialchars_decode($notificationdata["datetime"])),
+                        'valueid' => $valueid,
                         'is_checked' => $userchk,
                     ];
             

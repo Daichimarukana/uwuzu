@@ -314,6 +314,7 @@ $pdo = null;
                     </div>
                     <p>パスワードを表示する</p>
                 </div>
+                <div class="p2">パスワードに絵文字や日本語を使用している場合はパスワードの表示をオンにして入力してください。</div>
 
                 <?php if(!empty(H_CAPTCHA_ONOFF && H_CAPTCHA_ONOFF == "true")){?>
                     <div class="captcha_zone">
