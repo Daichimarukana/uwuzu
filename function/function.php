@@ -410,11 +410,8 @@ function check_mime($tmp_name){
 		"image/gif",
 		"image/jpeg",
 		"image/png",
-		"image/svg+xml",
 		"image/webp",
         "image/bmp",
-        "image/x-icon",
-        "image/tiff"
 	);
 	if(in_array($tmp_ext,$safe_img_mime)){
         return $tmp_ext;
@@ -443,11 +440,8 @@ function convert_mime($mime_type){
         "image/gif" => 'gif',
         "image/jpeg" => 'jpg',
         "image/png" => 'png',
-        "image/svg+xml" => 'svg',
         "image/webp" => 'webp',
         "image/bmp" => 'bmp',
-        "image/x-icon" => 'ico',
-        "image/tiff" => 'tiff',
         "video/mpeg" => 'mpeg',
         "video/mp4" => 'mp4',
         "video/webm" => 'webm',
@@ -469,11 +463,8 @@ function base64_mime($Base64,$userid){
 		"image/gif" => 'gif',
 		"image/jpeg" => 'jpg',
 		"image/png" => 'png',
-		"image/svg+xml" => 'svg',
 		"image/webp" => 'webp',
         "image/bmp" => 'bmp',
-        "image/x-icon" => 'ico',
-        "image/tiff" => 'tiff'
 	];
 
     if(isset($safe_img_mime[$mime_type])){
@@ -482,6 +473,11 @@ function base64_mime($Base64,$userid){
         file_put_contents($temp_file, $Base64);
 
         delete_exif($extension, $temp_file);
+        resizeImage($temp_file, 8192, 8192);
+
+        if(check_mime($temp_file) == "image/webp"){
+            $extension = 'webp';
+        }
 
         $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
         $uploadedPath = '../ueuseimages/' . $newFilename;
@@ -514,11 +510,8 @@ function base64_to_files($Base64, $userid) {
         "image/gif" => 'gif', 
         "image/jpeg" => 'jpg', 
         "image/png" => 'png', 
-        "image/svg+xml" => 'svg', 
         "image/webp" => 'webp', 
         "image/bmp" => 'bmp', 
-        "image/x-icon" => 'ico', 
-        "image/tiff" => 'tiff' 
     ]; 
  
     if (!(isset($safe_img_mime[$mime_type]))) { 
@@ -533,6 +526,11 @@ function base64_to_files($Base64, $userid) {
 
     // 必要に応じてEXIFデータを削除
     delete_exif($extension, $temp_file);
+    resizeImage($temp_file, 8192, 8192);
+
+    if(check_mime($temp_file) == "image/webp"){
+        $extension = 'webp';
+    }
 
     // ファイル名とアップロードパスを生成
     $newFilename = createUniqId() . '-' . $userid . '.' . $extension; 
@@ -561,11 +559,17 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
         } elseif($imageType == "image/bmp") {
             $originalImage = imagecreatefrombmp($filePath);
         } else {
-            return;
+            return true;
         }
 
         // 元の画像のサイズを取得
         list($originalWidth, $originalHeight) = getimagesize($filePath);
+
+        if ($originalWidth <= $maxWidth && $originalHeight <= $maxHeight) {
+            imagewebp($originalImage, $filePath, 90); 
+            imagedestroy($originalImage);
+            return true;
+        }
 
         // 縦横比を計算
         $aspectRatio = $originalWidth / $originalHeight;
@@ -588,6 +592,8 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
         // メモリの解放
         imagedestroy($originalImage);
         imagedestroy($resizedImage);
+
+        return true;
     }
 }
 
@@ -1425,12 +1431,17 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 // アップロードされたファイルの拡張子を取得
                                 $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
                                 delete_exif($extension, $uploadedFile['tmp_name']);
+                                resizeImage($uploadedFile['tmp_name'], 8192, 8192);
+
                                 if($aibwm === true){
                                     AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
                                 }
                                 if(AMS3_CHKS == "true"){
                                     $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
                                 }else{
+                                    if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
+                                        $extension = 'webp';
+                                    }
                                     // 新しいファイル名を生成（uniqid + 拡張子）
                                     $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
                                     // 保存先のパスを生成
@@ -1481,12 +1492,16 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 // アップロードされたファイルの拡張子を取得
                                 $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
                                 delete_exif($extension2, $uploadedFile2['tmp_name']);
+                                resizeImage($uploadedFile2['tmp_name'], 8192, 8192);
                                 if($aibwm === true){
                                     AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
                                 }
                                 if(AMS3_CHKS == "true"){
                                     $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
                                 }else{
+                                    if(check_mime($uploadedFile2['tmp_name']) == "image/webp"){
+                                        $extension2 = 'webp';
+                                    }
                                     // 新しいファイル名を生成（uniqid + 拡張子）
                                     $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
                                     // 保存先のパスを生成
@@ -1536,12 +1551,16 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 // アップロードされたファイルの拡張子を取得
                                 $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
                                 delete_exif($extension3, $uploadedFile3['tmp_name']);
+                                resizeImage($uploadedFile3['tmp_name'], 8192, 8192);
                                 if($aibwm === true){
                                     AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
                                 }
                                 if(AMS3_CHKS == "true"){
                                     $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
                                 }else{
+                                    if(check_mime($uploadedFile3['tmp_name']) == "image/webp"){
+                                        $extension3 = 'webp';
+                                    }
                                     // 新しいファイル名を生成（uniqid + 拡張子）
                                     $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
                                     // 保存先のパスを生成
@@ -1590,12 +1609,16 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                                 // アップロードされたファイルの拡張子を取得
                                 $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
                                 delete_exif($extension4, $uploadedFile4['tmp_name']);
+                                resizeImage($uploadedFile4['tmp_name'], 8192, 8192);
                                 if($aibwm === true){
                                     AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
                                 }
                                 if(AMS3_CHKS == "true"){
                                     $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
                                 }else{
+                                    if(check_mime($uploadedFile4['tmp_name']) == "image/webp"){
+                                        $extension4 = 'webp';
+                                    }
                                     // 新しいファイル名を生成（uniqid + 拡張子）
                                     $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
                                     // 保存先のパスを生成

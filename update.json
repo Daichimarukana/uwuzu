@@ -1,24 +1,12 @@
 {
     "software": "uwuzu",
-    "version": "1.6.3",
-    "release_date": "2025/08/10",
-    "release_notes": "このアップデートでは、「0」のみのユーズが行えない問題の修正や、タイムラインの大幅高速化などの改善が含まれています！\nアップデートの前にDBの構造の更新が必要です。リリースノートに従って更新をしてください！\n詳細はリリースノートをご確認ください。",
+    "version": "1.6.4",
+    "release_date": "2025/08/20",
+    "release_notes": "このアップデートでは、ユーズの添付画像に関する重大な脆弱性の修正が含まれます。\n早急なアップデートを強く推奨します！！！！！\n詳細はリリースノートをご確認ください。",
     "notices": "アップデート前にデータのバックアップを行うことをおすすめします！",
     "files": {
         "overwrite": [
-            "/api/me/notification/index.php",
             "/function/function.php",
-            "/nextpage/bookmarktimeline.php",
-            "/nextpage/followtimeline.php",
-            "/nextpage/foryoutimeline.php",
-            "/nextpage/localtimeline.php",
-            "/nextpage/searchtimeline.php",
-            "/nextpage/ueusetimeline.php",
-            "/nextpage/userliketimeline.php",
-            "/nextpage/usermediatimeline.php",
-            "/nextpage/usertimeline.php",
-            "/settings/index.php",
-            "/login.php",
             "/server/uwuzuabout.txt",
             "/server/uwuzuinfo.txt",
             "/server/uwuzurelease.txt"
