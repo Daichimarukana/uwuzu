@@ -135,13 +135,8 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
             $userItems = array();
             if(!empty($users)){
                 foreach ($users as $value) {
-                    $follower = $value['follower'];
-                    $followerIds = array_reverse(array_values(array_filter(explode(',', $follower))));
-                    $followerCount = count($followerIds);
-
-                    $follow = $value['follow'];
-                    $followIds = array_reverse(array_values(array_filter(explode(',', $follow))));
-                    $followCount = count($followIds);
+                    $followerCount = count(getFollowerList($pdo, $value["userid"]));
+                    $followCount = count(getFolloweeList($pdo, $value["userid"]));
 
                     $user = array(
                         "type" => "User",

@@ -73,7 +73,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 
@@ -100,6 +99,8 @@ if(!empty($pdo)){
 	//bot
 	$result4 = $mysqli->query("SELECT userid FROM account WHERE sacinfo = 'bot'");
 	$count4 = $result4->num_rows;
+
+	$migrationUserFollow = checkFollowMigrationProgress($pdo);
 
 	//DB_Data
 	try {
@@ -316,6 +317,10 @@ require('../logout/logout.php');
 					<?php }else{?>
 						<p>過去1分間のロードアベレージ : <?php echo $loadAve?></p>
 					<?php };?>
+					<hr>
+					<p>ユーザーのフォロー情報の移行進捗</p>
+					<div class="p2">uwuzu v1.6.5にて行われたユーザーのフォロー情報の保持方法の改良における進捗の表示です。</div>
+					<p>進捗: <?php echo safetext($migrationUserFollow['progress']);?>% (<?php echo safetext($migrationUserFollow['migrated']);?> / <?php echo safetext($migrationUserFollow['total']);?>)</p>
 					<hr>
 					<p>自動停止ロードアベレージ上限</p>
 					<div class="p2">uwuzuが自動停止するロードアベレージの上限です。<br>"-1"で無制限です。</div>

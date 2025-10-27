@@ -60,7 +60,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 
@@ -107,11 +106,9 @@ if (!empty($pdo)) {
 		$roleDataArray[$roleId] = $rerole->fetch();
 	}
 
-	$followIds = explode(',', $userdata['follow']);
-	$followCount = count($followIds)-1;
+	$followCount = count(getFolloweeList($pdo, $userdata['userid']));
 
-	$followerIds = explode(',', $userdata['follower']);
-	$followerCount = count($followerIds)-1;
+	$followerCount = count(getFollowerList($pdo, $userdata['userid']));
 
 	$result = $pdo->prepare("SELECT ueuse FROM ueuse WHERE account = :userid ORDER BY datetime");
 	$result->bindValue(':userid', $userdata["userid"]);

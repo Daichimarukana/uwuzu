@@ -119,6 +119,8 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     }
                     $favcnts = explode(',', $ueusedata["favorite"]);
                     $ueusedata["favorite_cnt"] = count($favcnts) - 1;
+
+                    $userData = getUserData($pdo, $ueusedata["account"]);
             
                     if ($userData) {
                         $now_userdata = array(

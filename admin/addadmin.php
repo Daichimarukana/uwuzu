@@ -421,6 +421,7 @@ if( !empty($_POST['btn_submit']) ) {
         // リダイレクト先のURLへ転送する
         $_SESSION['form_data'] = array();
         $_SESSION['userid'] = $userid;
+        $_SESSION['is_register_account'] = true;
         $url = 'success';
         header('Location: ' . $url, true, 303);
 
@@ -506,13 +507,13 @@ $pdo = null;
             <div>
                 <p>パスワード *</p>
                 <div class="p2">ログイン時に必要となります。<br>最大256文字まで使用可能です。<br>※サービス管理者が確認できません。</div>
-                <input placeholder="" class="inbox" id="password" type="text" name="password" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
+                <input placeholder="" class="inbox" id="password" type="password" maxlength="256" minlength="4" autocomplete="new-password" name="password" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
                 <div class="p2" id="password_zxcvbn" style="display: none;"></div>
             </div>
 
             <div>
                 <p>パスワード再確認 *</p>
-                <input placeholder="" class="inbox" oncopy="return false" onpaste="return false" oncontextmenu="return false" id="chkpass" type="text" style="-webkit-text-security:disc;" name="chkpass" value="<?php if( !empty($_SESSION['form_data']['chkpass']) ){ echo safetext($_SESSION['form_data']['chkpass']); } ?>">
+                <input placeholder="" class="inbox" id="chkpass" type="password" maxlength="256" minlength="4" autocomplete="new-password" name="chkpass" value="<?php if( !empty($_SESSION['form_data']['chkpass']) ){ echo safetext($_SESSION['form_data']['chkpass']); } ?>">
             </div>
 
             <div>

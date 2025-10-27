@@ -32,15 +32,6 @@ $stmt = null;
 $res = null;
 $option = null;
 
-
-if( !empty($_SESSION['userid']) ) {
-    $userid = $_SESSION['userid'];
-}else{
-    header("Location: login.php");
-	exit;
-}
-
-
 try {
 
     $option = array(
@@ -55,133 +46,139 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-//ログイン認証---------------------------------------------------
-blockedIP($_SERVER['REMOTE_ADDR']);
-$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
-if(!($is_login === false)){
-	header("Location: /home/");
-	exit;
-}
-//-------------------------------------------------------------
-
-require_once 'authcode/GoogleAuthenticator.php';
-
-if(empty($_SESSION['secretcode'])){
-    $authcode = new PHPGangsta_GoogleAuthenticator();
-    $secret = $authcode->createSecret();
-    $_SESSION['secretcode'] = $secret;
-}else{
-    $authcode = new PHPGangsta_GoogleAuthenticator();
-    $secret = $_SESSION['secretcode'];
-}
-
-if(!(empty($pdo))){
-	// ユーザーデータ取得
-	$userQuery = $pdo->prepare("SELECT * FROM account WHERE userid = :userid");
-	$userQuery->bindValue(':userid', $userid);
-	$userQuery->execute();
-	$userData = $userQuery->fetch();
-}
-
-if( !empty($_POST['btn_submit']) ) {
-    $chkauthcode = new PHPGangsta_GoogleAuthenticator();
-    //二段階認証の確認
-    $userauthcode = $_POST['usercode'];
-
-    $discrepancy = 2;
-
-    $checkResult = $chkauthcode->verifyCode($secret, $userauthcode, $discrepancy);
-    if ($checkResult) {
-        if( empty($error_message) ) {
-            $backupcode = random();
-            $hashbackupcode = uwuzu_password_hash($backupcode);
-            $secret = $_SESSION['secretcode'];
-
-            if(!(empty($userData["encryption_ivkey"]))){
-				$userEnckey = GenUserEnckey($userData["datetime"]);
-				$enc_seacret = EncryptionUseEncrKey($secret, $userEnckey, $userData["encryption_ivkey"]);
-			}else{
-				$ivLength = openssl_cipher_iv_length('aes-256-cbc');
-				$randomBytes = random_bytes($ivLength);
-				$randomhash = hash('sha3-512', $randomBytes);
-				$iv = substr($randomhash, 0, $ivLength);
-				// トランザクション開始
-				$pdo->beginTransaction();
-				try {
-					// SQL作成
-					$stmt = $pdo->prepare("UPDATE account SET encryption_ivkey = :encryption_ivkey WHERE userid = :userid;");
-					$stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
-					$stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-					$res = $stmt->execute();
-					$res = $pdo->commit();
-				} catch (Exception $e) {
-					$pdo->rollBack();
-				}
-				if (!($res)) {
-					$error_message[] = "アカウント操作に失敗しました(ERROR)";
-				}
-				$stmt = null;
-
-				$userEnckey = GenUserEnckey($userData["datetime"]);
-				$enc_seacret = EncryptionUseEncrKey($secret, $userEnckey, $iv);
-			}
-
-            // トランザクション開始
-            $pdo->beginTransaction();
-        
-            try {
-        
-                        // SQL作成
-                $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode,backupcode = :backupcode WHERE userid = :userid");
-        
-                $stmt->bindValue(':authcode', $enc_seacret, PDO::PARAM_STR);
-                $stmt->bindValue(':backupcode', $hashbackupcode, PDO::PARAM_STR);
-        
-                // ユーザーIDのバインド（WHERE句に必要）
-                $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
-        
-                // SQLクエリの実行
-                $res = $stmt->execute();
-        
-                // コミット
-                $res = $pdo->commit();
-        
-        
-            } catch (Exception $e) {
-        
-                // エラーが発生した時はロールバック
-                $pdo->rollBack();
-            }
-        
-            if ($res) {
-                if (isset($_SERVER['HTTP_COOKIE'])) {
-                    $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-                    foreach($cookies as $cookie) {
-                        $parts = explode('=', $cookie);
-                        $name = trim($parts[0]);
-                        setcookie($name, '', time()-1000);
-                        setcookie($name, '', time()-1000, '/');
-                    }
-                }
-                $userid = "";
-                $_SESSION['backupcode'] = $backupcode;
-                // リダイレクト先のURLへ転送する
-                $url = 'success.php';
-                header('Location: ' . $url, true, 303);
-                exit; 
-            } else {
-                $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-            }
-        
-            // プリペアドステートメントを削除
-            $stmt = null;
+if( !empty($pdo) ) {
+    $userData = getUserData($pdo, $_SESSION['userid']);
+    if(!(empty($userData))){
+        if($_SESSION['is_register_account'] === true){
+            $userid = $userData["userid"];
+        }else{
+            header("Location: login.php");
+            exit;
         }
-    } else {
-        $error_message[] = "二段階認証が出来ませんでした。再度お試しください。(AUTHCODE_CHECK_DAME)";
+    }else{
+        $_SESSION = array();
+        header("Location: index.php");
+        exit;
+    }
+
+    //ログイン認証---------------------------------------------------
+    blockedIP($_SERVER['REMOTE_ADDR']);
+    $is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+    if(!($is_login === false)){
+        header("Location: /home/");
+        exit;
+    }
+    //-------------------------------------------------------------
+
+    require_once 'authcode/GoogleAuthenticator.php';
+
+    if(empty($_SESSION['secretcode'])){
+        $authcode = new PHPGangsta_GoogleAuthenticator();
+        $secret = $authcode->createSecret();
+        $_SESSION['secretcode'] = $secret;
+    }else{
+        $authcode = new PHPGangsta_GoogleAuthenticator();
+        $secret = $_SESSION['secretcode'];
+    }
+
+    if(!(empty($pdo))){
+        // ユーザーデータ取得
+        $userQuery = $pdo->prepare("SELECT * FROM account WHERE userid = :userid");
+        $userQuery->bindValue(':userid', $userid);
+        $userQuery->execute();
+        $userData = $userQuery->fetch();
+    }
+
+    if( !empty($_POST['btn_submit']) ) {
+        $chkauthcode = new PHPGangsta_GoogleAuthenticator();
+        //二段階認証の確認
+        $userauthcode = $_POST['usercode'];
+
+        $discrepancy = 2;
+
+        $checkResult = $chkauthcode->verifyCode($secret, $userauthcode, $discrepancy);
+        if ($checkResult) {
+            if( empty($error_message) ) {
+                $backupcode = random();
+                $hashbackupcode = uwuzu_password_hash($backupcode);
+                $secret = $_SESSION['secretcode'];
+
+                if(!(empty($userData["encryption_ivkey"]))){
+                    $userEnckey = GenUserEnckey($userData["datetime"]);
+                    $enc_seacret = EncryptionUseEncrKey($secret, $userEnckey, $userData["encryption_ivkey"]);
+                }else{
+                    $ivLength = openssl_cipher_iv_length('aes-256-cbc');
+                    $randomBytes = random_bytes($ivLength);
+                    $randomhash = hash('sha3-512', $randomBytes);
+                    $iv = substr($randomhash, 0, $ivLength);
+                    // トランザクション開始
+                    $pdo->beginTransaction();
+                    try {
+                        // SQL作成
+                        $stmt = $pdo->prepare("UPDATE account SET encryption_ivkey = :encryption_ivkey WHERE userid = :userid;");
+                        $stmt->bindParam(':encryption_ivkey', $iv, PDO::PARAM_STR);
+                        $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+                        $res = $stmt->execute();
+                        $res = $pdo->commit();
+                    } catch (Exception $e) {
+                        $pdo->rollBack();
+                    }
+                    if (!($res)) {
+                        $error_message[] = "アカウント操作に失敗しました(ERROR)";
+                    }
+                    $stmt = null;
+
+                    $userEnckey = GenUserEnckey($userData["datetime"]);
+                    $enc_seacret = EncryptionUseEncrKey($secret, $userEnckey, $iv);
+                }
+
+                // トランザクション開始
+                $pdo->beginTransaction();
+            
+                try {
+            
+                            // SQL作成
+                    $stmt = $pdo->prepare("UPDATE account SET authcode = :authcode,backupcode = :backupcode WHERE userid = :userid");
+            
+                    $stmt->bindValue(':authcode', $enc_seacret, PDO::PARAM_STR);
+                    $stmt->bindValue(':backupcode', $hashbackupcode, PDO::PARAM_STR);
+            
+                    // ユーザーIDのバインド（WHERE句に必要）
+                    $stmt->bindValue(':userid', $userid, PDO::PARAM_STR);
+            
+                    // SQLクエリの実行
+                    $res = $stmt->execute();
+            
+                    // コミット
+                    $res = $pdo->commit();
+            
+            
+                } catch (Exception $e) {
+            
+                    // エラーが発生した時はロールバック
+                    $pdo->rollBack();
+                }
+            
+                if ($res) {
+                    $_SESSION["userid"] = $userid;
+                    $_SESSION['backupcode'] = $backupcode;
+                    $_SESSION['is_register_account'] = true;
+                    // リダイレクト先のURLへ転送する
+                    $url = 'success.php';
+                    header('Location: ' . $url, true, 303);
+                    exit; 
+                } else {
+                    $error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+                }
+            
+                // プリペアドステートメントを削除
+                $stmt = null;
+            }
+        } else {
+            $error_message[] = "二段階認証が出来ませんでした。再度お試しください。(AUTHCODE_CHECK_DAME)";
+        }
     }
 }
-
-
 
 // データベースの接続を閉じる
 $pdo = null;
@@ -216,7 +213,7 @@ $pdo = null;
     <div class="textbox">
         <h1>二段階認証</h1>
 
-        <p>以下の二次元コードより二段階認証をセットアップしてください。</p>
+        <p id="setup_text">以下の二次元コードを読み込むか、二次元コードの下の秘密鍵を認証アプリに入力して二段階認証をセットアップしてください。</p>
         <p>セットアップが完了したら入力ボックスにコードを入力して「次へ」ボタンを押してください！<br>注意:まだ二段階認証の設定は終わっていません。次へを押すと設定が完了します。</p>
 
             <?php if( !empty($error_message) ): ?>
@@ -236,7 +233,8 @@ $pdo = null;
         $qrCodeUrl = $authcode->getQRCodeUrl($name, $secret, $title);
         ?>
         <div class="authzone">
-            <img src="qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>">
+            <a href="<?php echo safetext(urldecode($qrCodeUrl));?>"><img src="../qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>"></a>
+            <div class="p2"><?php echo safetext($secret);?></div>
         </div>
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
@@ -250,36 +248,11 @@ $pdo = null;
         
     </div>
 </div>
-
-
-<script type="text/javascript">
-
-function checkForm(inputElement) {
-    var str = inputElement.value;
-    while (str.match(/[^A-Za-z\d_]/)) {
-        str = str.replace(/[^A-Za-z\d_]/, "");
-    }
-    inputElement.value = str;
+<script>
+//unsupported.jsでuaは取得済み↓
+if (user_agent_os == "Android" || user_agent_os == "iOS_6_Over" || user_agent_os == "iPad") {
+    $("#setup_text").text("以下の二次元コードをタップするか、二次元コードを読み込んで二段階認証をセットアップしてください。");
 }
-
-window.addEventListener('DOMContentLoaded', function(){
-
-// ファイルが選択されたら実行
-document.getElementById("file_upload").addEventListener('change', function(e){
-
-  var file_reader = new FileReader();
-
-  // ファイルの読み込みを行ったら実行
-  file_reader.addEventListener('load', function(e) {
-    console.log(e.target.result);
-        const element = document.querySelector('#wrap');
-        const createElement = '<p>画像を選択しました。</p>';
-        element.insertAdjacentHTML('afterend', createElement);
-  });
-
-  file_reader.readAsText(e.target.files[0]);
-});
-});
 </script>
 
 

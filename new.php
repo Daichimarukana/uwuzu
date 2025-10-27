@@ -2,7 +2,7 @@
 
 $banuseridfile = "server/banuserid.txt";
 $banuserid_info = file_get_contents($banuseridfile);
-$banuserid = preg_split("/\r\n|\n|\r/", $banuserid_info);
+$banuserid = array_map('strtolower', preg_split("/\r\n|\n|\r/", $banuserid_info));
 
 $badpassfile = "server/badpass.txt";
 $badpass_info = file_get_contents($badpassfile);
@@ -328,7 +328,7 @@ if( !empty($_POST['btn_submit']) ) {
 			$error_message[] = 'IDは20文字以内で入力してください。(USERID_OVER_MAX_COUNT)';
 		}
 
-        if(in_array($userid, $banuserid) === true ){
+        if(in_array(strtolower($userid), $banuserid) === true ){
             $error_message[] = 'そのIDは登録禁止になっています。(USERID_CONTAINS_PROHIBITED)';
         }
 
@@ -453,6 +453,7 @@ if( !empty($_POST['btn_submit']) ) {
         if ($res) {
             // リダイレクト先のURLへ転送する
             $_SESSION['userid'] = $userid;
+            $_SESSION['is_register_account'] = true;
 
             $_SESSION['form_data'] = array();//フォーム初期化
             $url = 'authcodechk';
@@ -561,13 +562,13 @@ $pdo = null;
             <div>
                 <p>パスワード *</p>
                 <div class="p2">ログイン時に必要となります。<br>最大256文字まで使用可能です。<br>※サービス管理者が確認できません。</div>
-                <input placeholder="" class="inbox" id="password" type="text" name="password" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
+                <input placeholder="" class="inbox" id="password" type="password" maxlength="256" minlength="4" autocomplete="new-password" name="password" value="<?php if( !empty($_SESSION['form_data']['password']) ){ echo safetext($_SESSION['form_data']['password']); } ?>">
                 <div class="p2" id="password_zxcvbn" style="display: none;"></div>
             </div>
 
             <div>
                 <p>パスワード再確認 *</p>
-                <input placeholder="" class="inbox" oncopy="return false" onpaste="return false" oncontextmenu="return false" id="chkpass" type="text" style="-webkit-text-security:disc;" name="chkpass" value="<?php if( !empty($_SESSION['form_data']['chkpass']) ){ echo safetext($_SESSION['form_data']['chkpass']); } ?>">
+                <input placeholder="" class="inbox" id="chkpass" type="password" maxlength="256" minlength="4" autocomplete="new-password" name="chkpass" value="<?php if( !empty($_SESSION['form_data']['chkpass']) ){ echo safetext($_SESSION['form_data']['chkpass']); } ?>">
             </div>
 
             <div>

@@ -35,21 +35,44 @@ session_regenerate_id(true);
 
 // データベースに接続
 try {
-
     $option = array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
     );
     $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+} catch(PDOException $e) {
 
+    // 接続エラーのときエラー内容を取得する
+    $error_message[] = $e->getMessage();
+}
+
+
+if( !empty($pdo) ) {
     if( !empty($_SESSION['userid']) ) {
-        $userid = $_SESSION['userid'];
+        if($_SESSION['auth_status'] === "authenticated"){
+            $userData = getUserData($pdo, $_SESSION['userid']);
+            if(!(empty($userData))){
+                $userid = $userData["userid"];
+            }else{
+                $_SESSION = array();
+                header("Location: login.php");
+                exit;
+            }
+        }elseif($_SESSION['auth_status'] === "2fa_required"){
+            header("Location: authlogin.php");
+            exit;
+        }else{
+            $_SESSION = array();
+            header("Location: login.php");
+            exit;
+        }
     }else{
+        $_SESSION = array();
         header("Location: login.php");
         exit;
     }
 
-	$userData = getUserData($pdo, $userid);
+    $userData = getUserData($pdo, $userid);
 	$roles = explode(',', $userData["role"]); // カンマで区切られたロールを配列に分割
 	
 	$roleDataArray = array();
@@ -60,87 +83,85 @@ try {
 		$rerole->execute();
 		$roleDataArray[$roleId] = $rerole->fetch();
 	}
-} catch(PDOException $e) {
 
-    // 接続エラーのときエラー内容を取得する
-    $error_message[] = $e->getMessage();
-}
+    //ログイン認証---------------------------------------------------
+    blockedIP($_SERVER['REMOTE_ADDR']);
+    $is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+    if(!($is_login === false)){
+        header("Location: /home/");
+        exit;
+    }
+    //-------------------------------------------------------------
 
-//ログイン認証---------------------------------------------------
-blockedIP($_SERVER['REMOTE_ADDR']);
-$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
-if(!($is_login === false)){
-	header("Location: /home/");
-	exit;
-}
-//-------------------------------------------------------------
+    if( !empty($_POST['btn_submit']) ) {
+        $useragent = safetext($_SERVER['HTTP_USER_AGENT']);
+        $device = UserAgent_to_Device($useragent);
 
-if( !empty($_POST['btn_submit']) ) {
-    $useragent = safetext($_SERVER['HTTP_USER_AGENT']);
-    $device = UserAgent_to_Device($useragent);
+        $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更してください。\n\nログインした端末 : ".$device;
+        send_notification($userid,"uwuzu-fromsys","🚪ログイン通知🚪",$msg,"/settings", "login");
 
-    $msg = "アカウントにログインがありました。\nもしログインした覚えがない場合は「その他」よりセッショントークンを再生成し、パスワードを変更してください。\n\nログインした端末 : ".$device;
-    send_notification($userid,"uwuzu-fromsys","🚪ログイン通知🚪",$msg,"/settings", "login");
+        clearstatcache();
 
-    clearstatcache();
-
-    if (isset($_SERVER['HTTP_COOKIE'])) {
-        $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-        foreach($cookies as $cookie) {
-            $parts = explode('=', $cookie);
-            $name = trim($parts[0]);
-            setcookie($name, '', time()-1000);
+        if (isset($_SERVER['HTTP_COOKIE'])) {
+            $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+            foreach($cookies as $cookie) {
+                $parts = explode('=', $cookie);
+                $name = trim($parts[0]);
+                setcookie($name, '', time()-1000);
+            }
         }
+
+        setcookie('loginid', $userData["loginid"],[
+            'expires' => time() + 60 * 60 * 24 * 28,
+            'path' => '/',
+            'samesite' => 'lax',
+            'secure' => true,
+            'httponly' => true,
+        ]);
+
+        $userEncKey = GenUserEnckey($userData["datetime"]);
+        $userLoginKey = hash_hmac('sha256', $userData["loginid"], $userEncKey);
+        setcookie('loginkey', $userLoginKey,[
+            'expires' => time() + 60 * 60 * 24 * 28,
+            'path' => '/',
+            'samesite' => 'lax',
+            'secure' => true,
+            'httponly' => true,
+        ]);
+
+        $_SESSION['userid'] = $userid;
+        $_SESSION['loginid'] = $userData["loginid"];
+        $_SESSION['loginkey'] = $userLoginKey;
+
+        $_SESSION['username'] = $username;
+        $_SESSION['password'] = null;
+
+        //ログイン失敗履歴のお掃除
+        cleanupOldLoginLogs($pdo);
+
+        // リダイレクト先のURLへ転送する
+        $url = '/home';
+        header('Location: ' . $url, true, 303);
+
+        // すべての出力を終了
+        exit;
     }
 
-    setcookie('loginid', $userData["loginid"],[
-        'expires' => time() + 60 * 60 * 24 * 28,
-        'path' => '/',
-        'samesite' => 'lax',
-        'secure' => true,
-        'httponly' => true,
-    ]);
+    if( !empty($_POST['btn_submit2']) ) {
 
-    $userEncKey = GenUserEnckey($userData["datetime"]);
-    $userLoginKey = hash_hmac('sha256', $userData["loginid"], $userEncKey);
-    setcookie('loginkey', $userLoginKey,[
-        'expires' => time() + 60 * 60 * 24 * 28,
-        'path' => '/',
-        'samesite' => 'lax',
-        'secure' => true,
-        'httponly' => true,
-    ]);
+        $_SESSION['admin_login'] = false;
+        $_SESSION['userid'] = "";
 
-    $_SESSION['userid'] = $userid;
-    $_SESSION['loginid'] = $userData["loginid"];
-    $_SESSION['loginkey'] = $userLoginKey;
+        $_SESSION['username'] = "";
 
-    $_SESSION['username'] = $username;
-    $_SESSION['password'] = null;
+        // リダイレクト先のURLへ転送する
+        $url = 'index.php';
+        header('Location: ' . $url, true, 303);
 
-    // リダイレクト先のURLへ転送する
-    $url = '/home';
-    header('Location: ' . $url, true, 303);
-
-    // すべての出力を終了
-    exit;
+        // すべての出力を終了
+        exit;
+    }
 }
-
-if( !empty($_POST['btn_submit2']) ) {
-
-    $_SESSION['admin_login'] = false;
-    $_SESSION['userid'] = "";
-
-    $_SESSION['username'] = "";
-
-    // リダイレクト先のURLへ転送する
-    $url = 'index.php';
-    header('Location: ' . $url, true, 303);
-
-    // すべての出力を終了
-    exit;
-}
-
 // データベースの接続を閉じる
 $pdo = null;
 

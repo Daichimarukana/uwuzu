@@ -113,24 +113,18 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 }else{
                     $isAdmin = false;
                 }
-                if(!(empty($userdata["follow"]))){
-                    $followee = preg_split("/,/", decode_yajirushi(htmlspecialchars_decode($userdata["follow"])));
-                    array_shift($followee);
-                }else{
+
+                $followee = getFolloweeList($pdo, $userdata["userid"]);
+                if($followee === false){
                     $followee = array();
                 }
-                if(!(empty($userdata["follower"]))){
-                    $follower = preg_split("/,/", decode_yajirushi(htmlspecialchars_decode($userdata["follower"])));
-                    array_shift($follower);
-                }else{
+                $follower = getFollowerList($pdo, $userdata["userid"]);
+                if($follower === false){
                     $follower = array();
                 }
                 
-                $followcnts = explode(',', $userdata["follow"]);
-                $userdata["follow_cnt"] = (int)count($followcnts)-1;
-
-                $followercnts = explode(',', $userdata["follower"]);
-                $userdata["follower_cnt"] = (int)count($followercnts)-1;
+                $userdata["follow_cnt"] = (int)count($followee);
+                $userdata["follower_cnt"] = (int)count($follower);
 
                 $allueuse = $pdo->prepare("SELECT account FROM ueuse WHERE account = :userid");
                 $allueuse->bindValue(':userid', $userdata["userid"]);

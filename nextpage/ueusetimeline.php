@@ -17,6 +17,11 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         exit;
     }
 
+    if(empty($uniqid)){
+        echo json_encode(['success' => false, 'error' => 'no_ueuse']);
+        exit;
+    }
+
     // データベースに接続
     try {
         $option = array(
@@ -42,8 +47,12 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $offset = ($pageNumber - 1) * $itemsPerPage;
 
         $messages = array();
+        $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
         
-        $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid OR rpuniqid = :rpueuseid ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
+        $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE (uniqid = :ueuseid OR rpuniqid = :rpueuseid) {$blocked_accounts['sql']} ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
+        foreach ($blocked_accounts['params'] as $ph => $val) {
+            $messageQuery->bindValue($ph, $val, PDO::PARAM_STR);
+        }
         $messageQuery->bindValue(':ueuseid', $uniqid, PDO::PARAM_STR);
         $messageQuery->bindValue(':rpueuseid', $uniqid, PDO::PARAM_STR);
         $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
@@ -56,7 +65,10 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         foreach ($message_array as $row) {
             if(!(empty($row["rpuniqid"]))){
                 if(!($row["rpuniqid"] == $uniqid)){
-                    $up_messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
+                    $up_messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :ueuseid {$blocked_accounts['sql']} ORDER BY datetime ASC LIMIT :offset, :itemsPerPage");
+                    foreach ($blocked_accounts['params'] as $ph => $val) {
+                        $up_messageQuery->bindValue($ph, $val, PDO::PARAM_STR);
+                    }
                     $up_messageQuery->bindValue(':ueuseid', $row["rpuniqid"]);
                     $up_messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
                     $up_messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);

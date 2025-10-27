@@ -2,7 +2,7 @@
 
 $banuseridfile = "../server/banuserid.txt";
 $banuserid_info = file_get_contents($banuseridfile);
-$banuserid = preg_split("/\r\n|\n|\r/", $banuserid_info);
+$banuserid = array_map('strtolower', preg_split("/\r\n|\n|\r/", $banuserid_info));
 
 $badpassfile = "../server/badpass.txt";
 $badpass_info = file_get_contents($badpassfile);
@@ -333,7 +333,7 @@ if( !empty($_POST['btn_submit']) ) {
                                         $error_message[] = 'IDは20文字以内で入力してください。(USERID_OVER_MAX_COUNT)';
                                     }
 
-                                    if(in_array($new_userid, $banuserid) === true ){
+                                    if(in_array(strtolower($userid), $banuserid) === true ){
                                         $error_message[] = 'そのIDは登録禁止になっています。(USERID_CONTAINS_PROHIBITED)';
                                     }
 
@@ -465,9 +465,11 @@ if( !empty($_POST['btn_submit']) ) {
                                             $done_data = json_decode($done_chk,true);
                                             if($done_data["done"] == "success"){
                                                 $_SESSION['userid'] = $new_userid;
+                                                $_SESSION['is_register_account'] = true;
                                                 $_SESSION['done'] = true;
                                             }else{
                                                 $_SESSION['userid'] = $new_userid;
+                                                $_SESSION['is_register_account'] = true;
                                                 $_SESSION['done'] = false;
                                             }
                                             $_SESSION['form_data'] = array();
@@ -477,6 +479,7 @@ if( !empty($_POST['btn_submit']) ) {
                                         }else{
                                             $_SESSION['userid'] = $new_userid;
                                             $_SESSION['done'] = false;
+                                            $_SESSION['is_register_account'] = true;
                                             $_SESSION['form_data'] = array();
                                             $url = '../success';
                                             header('Location: ' . $url, true, 303);

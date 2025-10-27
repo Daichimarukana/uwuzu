@@ -80,7 +80,6 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 $Follow_userdata = $DataQuery->fetch();
 
                 $userid = $userData["userid"];
-                $myfollowlist = $userData["follow"];
 
                 if(!(empty($Follow_userdata))){
                     if(!($userid == $Follow_userdata['userid'])){

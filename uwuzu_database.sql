@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-08-10 11:10:28
+-- 生成日時: 2025-10-27 15:05:57
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -124,6 +124,20 @@ CREATE TABLE `emoji` (
 -- --------------------------------------------------------
 
 --
+-- テーブルの構造 `follow`
+--
+
+CREATE TABLE `follow` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
+  `follower_id` varchar(512) NOT NULL,
+  `followee_id` varchar(512) NOT NULL,
+  `datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- テーブルの構造 `invitation`
 --
 
@@ -161,6 +175,23 @@ CREATE TABLE `jobs` (
   `job` varchar(1024) NOT NULL,
   `step` varchar(256) NOT NULL,
   `status` varchar(256) NOT NULL,
+  `datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- テーブルの構造 `loginlog`
+--
+
+CREATE TABLE `loginlog` (
+  `sysid` int(11) NOT NULL,
+  `uniqid` varchar(256) NOT NULL,
+  `attack_userid` varchar(512) NOT NULL,
+  `ip_hash` varchar(1024) NOT NULL,
+  `failure_count` int(11) NOT NULL,
+  `last_attack_datetime` datetime NOT NULL,
+  `blocked_until_datetime` datetime NOT NULL,
   `datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -309,6 +340,12 @@ ALTER TABLE `emoji`
   ADD PRIMARY KEY (`sysid`);
 
 --
+-- テーブルのインデックス `follow`
+--
+ALTER TABLE `follow`
+  ADD PRIMARY KEY (`sysid`);
+
+--
 -- テーブルのインデックス `invitation`
 --
 ALTER TABLE `invitation`
@@ -324,6 +361,12 @@ ALTER TABLE `ipblock`
 -- テーブルのインデックス `jobs`
 --
 ALTER TABLE `jobs`
+  ADD PRIMARY KEY (`sysid`);
+
+--
+-- テーブルのインデックス `loginlog`
+--
+ALTER TABLE `loginlog`
   ADD PRIMARY KEY (`sysid`);
 
 --
@@ -397,6 +440,12 @@ ALTER TABLE `emoji`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- テーブルの AUTO_INCREMENT `follow`
+--
+ALTER TABLE `follow`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- テーブルの AUTO_INCREMENT `invitation`
 --
 ALTER TABLE `invitation`
@@ -412,6 +461,12 @@ ALTER TABLE `ipblock`
 -- テーブルの AUTO_INCREMENT `jobs`
 --
 ALTER TABLE `jobs`
+  MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- テーブルの AUTO_INCREMENT `loginlog`
+--
+ALTER TABLE `loginlog`
   MODIFY `sysid` int(11) NOT NULL AUTO_INCREMENT;
 
 --

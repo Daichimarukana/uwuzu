@@ -62,7 +62,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 

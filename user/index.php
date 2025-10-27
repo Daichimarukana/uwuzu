@@ -60,7 +60,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
@@ -113,7 +112,7 @@ if (!empty($pdo)) {
 
 			$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings FROM account WHERE userid = :userid");
 
-			$rerole->bindValue(':userid', $uwuzuid);
+			$rerole->bindValue(':userid', $userData["userid"]);
 			// SQL実行
 			$rerole->execute();
 
@@ -131,13 +130,9 @@ if (!empty($pdo)) {
 			$isAIBlock = val_OtherSettings("isAIBlock", $userdata["other_settings"]);
 
 			//-------フォロー数---------
-			$follow = $userdata['follow']; // コンマで区切られたユーザーIDを含む変数
-
-			// コンマで区切って配列に分割し、要素数を数える
-			$followIds = array_reverse(array_values(array_filter(explode(',', $follow))));
-			$followCount = count($followIds);
-
-			$follow_on_me = array_search($userid, $followIds);
+			$follow = getFolloweeList($pdo, $userData["userid"]); // コンマで区切られたユーザーIDを含む変数
+			$followCount = count($follow);
+			$follow_on_me = isMeFollow($pdo, $userData["userid"], $userid);
 
 			if ($follow_on_me !== false) {
 				$follow_yes = "フォローされています"; // worldを含む:6
@@ -145,12 +140,11 @@ if (!empty($pdo)) {
 				$follow_yes = ""; // worldを含む:6
 			}
 
-			//-------フォロワー数---------
-			$follower = $userdata['follower']; // コンマで区切られたユーザーIDを含む変数
+			$follow_on_you = isMeFollow($pdo, $userid, $userData["userid"]);
 
-			// コンマで区切って配列に分割し、要素数を数える
-			$followerIds = array_reverse(array_values(array_filter(explode(',', $follower))));
-			$followerCount = count($followerIds);
+			//-------フォロワー数---------
+			$follower = getFollowerList($pdo, $userData["userid"]); // コンマで区切られたユーザーIDを含む変数
+			$followerCount = count($follower);
 
 			$profileText = safetext($userData['profile']);
 
@@ -163,22 +157,14 @@ if (!empty($pdo)) {
 			//-------フォロワー取得---------
 
 			$follower_userdata = array();
-			if(!(empty($followerIds))){
-				// フォロワーのユーザーIDを $follower_userids 配列に追加
-				foreach ($followerIds as $follower_userid) {
-					$follower_userids[] = $follower_userid;
-				}
-
-				// フォロワーのユーザー情報を取得
-
-				foreach ($follower_userids as $follower_userid) {
+			if(!(empty($follower))){
+				foreach ($follower as $follower_userid) {
 					$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
 					$follower_userQuery->bindValue(':userid', $follower_userid);
 					$follower_userQuery->execute();
 					$follower_userinfo = $follower_userQuery->fetch();
 
 					if ($follower_userinfo) {
-						// フォロワーのユーザー情報を $follower_userdata 配列に追加
 						$follower_userdata[] = $follower_userinfo;
 					}
 				}
@@ -187,20 +173,14 @@ if (!empty($pdo)) {
 			//-------フォロー取得---------
 
 			$follow_userdata = array();
-
-			if(!(empty($followIds))){
-				foreach ($followIds as $follow_userid) {
-					$follow_userids[] = $follow_userid;
-				}
-
-				foreach ($follow_userids as $follow_userid) {
+			if(!(empty($follow))){
+				foreach ($follow as $follow_userid) {
 					$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
 					$follow_userQuery->bindValue(':userid', $follow_userid);
 					$follow_userQuery->execute();
 					$follow_userinfo = $follow_userQuery->fetch();
 
 					if ($follow_userinfo) {
-						// フォロワーのユーザー情報を $follower_userdata 配列に追加
 						$follow_userdata[] = $follow_userinfo;
 					}
 				}
@@ -288,12 +268,6 @@ if (!empty($_POST['send_block_submit'])) {
 
 
 require('../logout/logout.php');
-
-
-
-// データベースの接続を閉じる
-$pdo = null;
-
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -477,8 +451,7 @@ $pdo = null;
 						<div class="follow">
 							<?php
 							if (!($role === "ice")) {
-								$followerList = explode(',', $userdata['follower']);
-								if (in_array($userid, $followerList)) {
+								if ($follow_on_you === true) {
 									// フォロー済みの場合はフォロー解除ボタンを表示
 									echo '<input type="button" id="openModalButton" class="fbtn_un" name="unfollow" value="フォロー解除">';
 								} else {
@@ -802,6 +775,7 @@ $pdo = null;
 		}
 
 		$("#all_ueuse_btn").on('click', function(event) {
+			if (isLoading) return;
 			$('#all_ueuse_btn').addClass('btmline');
 			$('#media_ueuse_btn').removeClass('btmline');
 			$('#like_ueuse_btn').removeClass('btmline');
@@ -814,6 +788,7 @@ $pdo = null;
 		});
 
 		$("#media_ueuse_btn").on('click', function(event) {
+			if (isLoading) return;
 			$('#media_ueuse_btn').addClass('btmline');
 			$('#like_ueuse_btn').removeClass('btmline');
 			$('#all_ueuse_btn').removeClass('btmline');
@@ -826,6 +801,7 @@ $pdo = null;
 		});
 
 		$("#like_ueuse_btn").on('click', function(event) {
+			if (isLoading) return;
 			$('#like_ueuse_btn').addClass('btmline');
 			$('#media_ueuse_btn').removeClass('btmline');
 			$('#all_ueuse_btn').removeClass('btmline');

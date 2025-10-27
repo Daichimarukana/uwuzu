@@ -1389,7 +1389,7 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                 $error_message[] = '内容を入力してください。(INPUT_PLEASE)';
             } else {
                 // 文字数を確認
-                if((int)safetext(file_get_contents($mojisizefile)) < mb_strlen($ueuse, 'UTF-8')) {
+                if((int)safetext(file_get_contents($mojisizefile)) < mb_strlen(str_replace("\r\n", "\n", $ueuse), 'UTF-8')) {
                     $error_message[] = '内容は'.safetext(file_get_contents($mojisizefile)).'文字以内で入力してください。(INPUT_OVER_MAX_COUNT)';
                 }
 
@@ -1709,6 +1709,8 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         $popularity = 0;
                         $mentionedUsers = array_unique(get_mentions_userid($ueuse));
                         $mentions = implode(",", $mentionedUsers);
+
+                        $res = false;
 
                         if(empty($rpUniqid) && empty($ruUniqid)){
                             //-----------通常ユーズ-----------
@@ -2115,40 +2117,34 @@ function follow_user($pdo, $to_userid, $userid){
             return false;
         }
 
-        $other_settings_me = is_OtherSettings($pdo, $userid);
-        $other_settings_user = is_OtherSettings($pdo, $to_userid);
-        if($other_settings_me === true && $other_settings_user === true){
-            // トランザクションを開始
-            $pdo->beginTransaction();
-            try {
-                // フォローボタンが押された場合の処理
-                $followerList = explode(',', $userData['follower'] ?? '');
-                if (!(in_array($userid, $followerList))) {
-                    // 自分が相手をフォローしていない場合、相手のfollowerカラムと自分のfollowカラムを更新
-                    $followerList[] = $userid;
-                    $followerList = array_values(array_unique(array_filter($followerList)));
-                    $newFollowerList = implode(',', $followerList);
+        if(isMeFollow($pdo, $userid, $to_userid)){
+            actionLog($userid, "error", "follow_user", $to_userid, "すでにフォローしています。", 3);
+            return false;
+        }
 
-                    // UPDATE文を実行してフォロー情報を更新
-                    $updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-                    $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-                    $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
-                    $res = $updateQuery->execute();
+        if((migrationFollowNetwork($pdo, $userid) === true) && (migrationFollowNetwork($pdo, $to_userid) === true)){
+            $other_settings_me = is_OtherSettings($pdo, $userid);
+            $other_settings_user = is_OtherSettings($pdo, $to_userid);
+            if($other_settings_me === true && $other_settings_user === true){
+                $uniqid = createUniqId();
+                $datetime = date("Y-m-d H:i:s");
+                // トランザクションを開始
+                $pdo->beginTransaction();
+                try {
+                    // SQL作成
+                    $stmt = $pdo->prepare("INSERT INTO follow (uniqid, follower_id, followee_id, datetime) VALUES (:uniqid, :follower_id, :followee_id, :datetime)");
 
-                    // 自分のfollowカラムを更新
-                    $myflwlist = explode(',', $myData["follow"]);
-                    $myflwlist[] = $userData['userid'];
-                    $myflwlist = array_values(array_unique(array_filter($myflwlist)));
-                    $newFollowList = implode(',', $myflwlist);
+                    $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                    $stmt->bindParam(':follower_id', $userid, PDO::PARAM_STR);
+                    $stmt->bindParam(':followee_id', $to_userid, PDO::PARAM_STR);
+                    $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
-                    $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-                    $updateQuery->bindValue(':follow', $newFollowList, PDO::PARAM_STR);
-                    $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-                    $res_follow = $updateQuery->execute();
+                    // SQLクエリの実行
+                    $res = $stmt->execute();
 
                     send_notification($userData["userid"], $userid, "🎉" . $userid . "さんにフォローされました！🎉", "" . $userid . "さんにフォローされました。", "/@" . $userid . "", "follow", $userid);
 
-                    if ($res && $res_follow) {
+                    if ($res) {
                         $pdo->commit();
                         return true;
                     } else {
@@ -2156,13 +2152,13 @@ function follow_user($pdo, $to_userid, $userid){
                         actionLog($userid, "error", "follow_user", $to_userid, "フォローに失敗", 3);
                         return false;
                     }
-                }else{
-                    $pdo->commit();
-                    return true;
+                } catch(Exception $e) {
+                    // エラーが発生した時はロールバック
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "follow_user", null, $e, 4);
+                    return false;
                 }
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                actionLog($userid, "error", "follow_user", $to_userid, $e, 4);
+            }else{
                 return false;
             }
         }else{
@@ -2174,58 +2170,34 @@ function follow_user($pdo, $to_userid, $userid){
 }
 function unfollow_user($pdo, $to_userid, $userid){
     if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
-        $myData = getUserData($pdo, $userid);
-        $userData = getUserData($pdo, $to_userid);
+        if((migrationFollowNetwork($pdo, $userid) === true) && (migrationFollowNetwork($pdo, $to_userid) === true)){
+            $other_settings_me = is_OtherSettings($pdo, $userid);
+            $other_settings_user = is_OtherSettings($pdo, $to_userid);
+            if($other_settings_me === true && $other_settings_user === true){
+                // トランザクション開始
+                $pdo->beginTransaction();
+                try {
+                    // 削除クエリを実行
+                    $deleteQuery = $pdo->prepare("DELETE FROM follow WHERE follower_id = :follower_id AND followee_id = :followee_id");
+                    $deleteQuery->bindValue(':follower_id', $userid, PDO::PARAM_STR);
+                    $deleteQuery->bindValue(':followee_id', $to_userid, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
 
-        $other_settings_me = is_OtherSettings($pdo, $userid);
-        $other_settings_user = is_OtherSettings($pdo, $to_userid);
-        if($other_settings_me === true && $other_settings_user === true){
-            // トランザクションを開始
-            $pdo->beginTransaction();
-            try {
-                // フォロー解除ボタンが押された場合の処理
-                $followerList = explode(',', $userData['follower']);
-                if (in_array($userid, $followerList)) {
-                    // 自分が相手をフォローしている場合、相手のfollowerカラムと自分のfollowカラムを更新
-                    $followerList = array_diff($followerList, array($userid));
-                    $followerList = array_values(array_unique(array_filter($followerList)));
-                    $newFollowerList = implode(',', $followerList);
-
-                    // UPDATE文を実行してフォロー情報を更新
-                    $updateQuery = $pdo->prepare("UPDATE account SET follower = :follower WHERE userid = :userid");
-                    $updateQuery->bindValue(':follower', $newFollowerList, PDO::PARAM_STR);
-                    $updateQuery->bindValue(':userid', $userData['userid'], PDO::PARAM_STR);
-                    $res = $updateQuery->execute();
-
-                    $myflwlist = explode(',', $myData["follow"]);
-                    $delfollowList = array_diff($myflwlist, array($userData['userid']));
-                    $delfollowList = array_values(array_unique(array_filter($delfollowList)));
-                    $deluserid = implode(',', $delfollowList);
-
-                    // 自分のfollowカラムから相手のユーザーIDを削除
-                    $updateQuery = $pdo->prepare("UPDATE account SET follow = :follow WHERE userid = :userid");
-                    $updateQuery->bindValue(':follow', $deluserid, PDO::PARAM_STR);
-                    $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-                    $res_follow = $updateQuery->execute();
-
-                    if ($res && $res_follow) {
-                        // コミット
+                    if ($res) {
                         $pdo->commit();
                         return true;
                     } else {
-                        // ロールバック
                         $pdo->rollBack();
                         actionLog($userid, "error", "unfollow_user", $to_userid, "フォロー解除に失敗", 3);
                         return false;
                     }
-                }else{
-                    $pdo->commit();
-                    return true;
+                } catch(PDOException $e) {
+                    // ロールバック
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "unfollow_user", $to_userid, $e, 4);
+                    return false;
                 }
-            } catch (Exception $e) {
-                // ロールバック
-                $pdo->rollBack();
-                actionLog($userid, "error", "unfollow_user", $to_userid, $e, 4);
+            }else{
                 return false;
             }
         }else{
@@ -2235,6 +2207,232 @@ function unfollow_user($pdo, $to_userid, $userid){
         return false;
     }
 }
+
+function migrationFollowData($pdo, $userid){
+    if (!(empty($pdo)) && !(empty($userid))){
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("SELECT userid, follow FROM account WHERE userid = ?");
+            $stmt->execute([$userid]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!(empty($user['follow']))) {
+                $followerId = $user['userid'];
+                $follows = array_filter(explode(",", $user['follow']));
+
+                $insert = $pdo->prepare("INSERT IGNORE INTO follow (uniqid, follower_id, followee_id, datetime) VALUES (?, ?, ?, ?)");
+
+                foreach ($follows as $followeeId) {
+                    $uniqid = createUniqId();
+                    $datetime = date("Y-m-d H:i:s");
+
+                    $followeeId = trim($followeeId); // 数値にキャストせず文字列を保持
+                    if ($followeeId !== "" && $followerId !== $followeeId) {
+                        $insert->execute([$uniqid ,$followerId, $followeeId, $datetime]);
+                    }
+                }
+
+                $clear = $pdo->prepare("UPDATE account SET follow = '', follower = '' WHERE userid = ?");
+                $clear->execute([$userid]);
+
+                $pdo->commit();
+                actionLog($userid, "info", "migrationFollowData", $userid, "フォロー情報の移行に成功しました！", 0);
+                return true;
+            }else{
+                $pdo->commit();
+                return true;
+            }
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            actionLog($userid, "error", "migrationFollowData", $userid, $e, 4);
+            return false;
+        }
+    }else{
+        actionLog($userid, "error", "migrationFollowData", $userid, "フォロー情報の移行関数が呼び出されましたが値が不足しています。", 3);
+        return false;
+    }
+}
+
+function migrationFollowNetwork($pdo, $startUserId) {
+    if (empty($pdo) || empty($startUserId)) {
+        actionLog($startUserId, "error", "migrationFollowNetwork", $startUserId, "関数呼び出し時の値が不足しています。", 3);
+        return false;
+    }
+
+    $queue = [$startUserId];
+    $visited = [];
+
+    while (!empty($queue)) {
+        $userid = array_shift($queue);
+
+        if (isset($visited[$userid])) continue;
+
+        $stmt = $pdo->prepare("SELECT userid, follow, follower FROM account WHERE userid = ?");
+        $stmt->execute([$userid]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$user) continue;
+
+        $isMigrated =
+            (empty($user['follow']) || trim($user['follow']) === '') &&
+            (empty($user['follower']) || trim($user['follower']) === '');
+
+        if ($isMigrated) {
+            $visited[$userid] = true;
+            continue;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            $followerId = $user['userid'];
+            $follows = array_filter(array_map('trim', explode(",", $user['follow'] ?? '')));
+            $followers = array_filter(array_map('trim', explode(",", $user['follower'] ?? '')));
+
+            $relations = [];
+
+            foreach ($follows as $followeeId) {
+                if ($followeeId !== "" && $followerId !== $followeeId) {
+                    $relations[] = [$followerId, $followeeId];
+                    $queue[] = $followeeId;
+                }
+            }
+
+            foreach ($followers as $followerUserId) {
+                if ($followerUserId !== "" && $followerUserId !== $followerId) {
+                    $relations[] = [$followerUserId, $followerId];
+                    $queue[] = $followerUserId;
+                }
+            }
+
+
+            if (!empty($relations)) {
+                $insert = $pdo->prepare("
+                    INSERT IGNORE INTO follow (uniqid, follower_id, followee_id, datetime)
+                    VALUES (?, ?, ?, ?)
+                ");
+                $datetime = date("Y-m-d H:i:s");
+
+                $check = $pdo->prepare("SELECT 1 FROM follow WHERE follower_id = ? AND followee_id = ? LIMIT 1");
+
+                foreach ($relations as [$from, $to]) {
+                    $check->execute([$from, $to]);
+                    if ($check->fetchColumn()) {
+                        continue;
+                    }
+
+                    $uniqid = createUniqId();
+                    $insert->execute([$uniqid, $from, $to, $datetime]);
+                }
+            }
+
+            $clear = $pdo->prepare("UPDATE account SET follow = '', follower = '' WHERE userid = ?");
+            $clear->execute([$userid]);
+
+            $pdo->commit();
+
+            $visited[$userid] = true;
+            actionLog($userid, "info", "migrationFollowNetwork", $userid, "フォロー情報の移行に成功しました！", 0);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            actionLog($userid, "error", "migrationFollowNetwork", $userid, $e->getMessage(), 4);
+        }
+    }
+    return true;
+}
+
+function checkFollowMigrationProgress($pdo) {
+    if (!(empty($pdo))) {
+        $stmtTotal = $pdo->query("SELECT COUNT(*) FROM account");
+        $total = (int)$stmtTotal->fetchColumn();
+
+        $stmtPending = $pdo->query("
+            SELECT COUNT(*) 
+            FROM account 
+            WHERE (follow IS NOT NULL AND TRIM(follow) <> '') 
+            OR (follower IS NOT NULL AND TRIM(follower) <> '')
+        ");
+        $pending = (int)$stmtPending->fetchColumn();
+
+        $migrated = $total - $pending;
+
+        $progress = $total > 0 ? round(($migrated / $total) * 100, 2) : 0;
+
+        return [
+            'total' => $total,//総ユーザー数
+            'migrated' => $migrated,//移行済み
+            'pending' => $pending,//未移行
+            'progress' => $progress//％
+        ];
+    }
+}
+
+function getFolloweeList($pdo, $userid){
+    if (!(empty($pdo)) && !(empty($userid))){
+        $query = $pdo->prepare("SELECT followee_id FROM follow WHERE follower_id = :follower_id ORDER BY datetime DESC");
+        $query->bindValue(':follower_id', $userid, PDO::PARAM_STR);
+        $query->execute();
+        $all_followee = $query->fetchAll(PDO::FETCH_COLUMN);
+
+        if($all_followee){
+            return $all_followee;
+        }else{
+            $userdata = getUserData($pdo, $userid);
+            $followeeIds = array_filter(explode(',', $userdata['follow']));
+            if($followeeIds){
+                return $followeeIds;
+            }else{
+                return array();
+            }
+        }
+    }else{
+        return array();
+    }
+}
+function getFollowerList($pdo, $userid){
+    if (!(empty($pdo)) && !(empty($userid))){
+        $query = $pdo->prepare("SELECT follower_id FROM follow WHERE followee_id = :followee_id ORDER BY datetime DESC");
+        $query->bindValue(':followee_id', $userid, PDO::PARAM_STR);
+        $query->execute();
+        $all_follower = $query->fetchAll(PDO::FETCH_COLUMN);
+
+        if($all_follower){
+            return $all_follower;
+        }else{
+            $userdata = getUserData($pdo, $userid);
+            $followerIds = array_filter(explode(',', $userdata['follower']));
+            if($followerIds){
+                return $followerIds;
+            }else{
+                return array();
+            }
+        }
+    }else{
+        return array();
+    }
+}
+function isMeFollow($pdo, $userid, $to_userid){
+    if (!(empty($pdo)) && !(empty($userid)) && !(empty($to_userid))){
+        $query = $pdo->prepare("SELECT * FROM follow WHERE follower_id = :follower_id AND followee_id = :followee_id");
+        $query->bindValue(':follower_id', $userid, PDO::PARAM_STR);
+        $query->bindValue(':followee_id', $to_userid, PDO::PARAM_STR);
+        $query->execute();
+        $is_follower = $query->fetch(PDO::FETCH_ASSOC);
+
+        if($is_follower){
+            return true;
+        }else{
+            $is_inUserdata = getFolloweeList($pdo, $userid);
+            if(in_array($to_userid, $is_inUserdata)){
+                return true;
+            }else{
+                return false;
+            }
+        }
+    }else{
+        return false;
+    }
+}
+
 function block_user($pdo, $to_userid, $userid){
     if (!(empty($pdo)) && !(empty($to_userid)) && !(empty($userid))){
         $myData = getUserData($pdo, $userid);
@@ -2630,30 +2828,35 @@ function changePopularity($pdo, $uniqid, $userid, $change_range){
             $pdo->beginTransaction();
             try {
                 // 投稿のいいね情報を取得
-                $stmt = $pdo->prepare("SELECT popularity FROM ueuse WHERE uniqid = :uniqid");
+                $stmt = $pdo->prepare("SELECT account, popularity FROM ueuse WHERE uniqid = :uniqid");
                 $stmt->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
                 $stmt->execute();
                 $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
                 if (!(empty($post))) {
-                    $new_popularity = (int)$post['popularity'] + (int)$change_range;
-                    if($new_popularity >= 2147483647){
-                        $new_popularity = 2147483647;
-                    }
+                    if(!($post['account'] == $userid)){
+                        $new_popularity = (int)$post['popularity'] + (int)$change_range;
+                        if($new_popularity >= 2147483647){
+                            $new_popularity = 2147483647;
+                        }
 
-                    $updateQuery = $pdo->prepare("UPDATE ueuse SET popularity = :popularity WHERE uniqid = :uniqid");
-                    $updateQuery->bindValue(':popularity', $new_popularity, PDO::PARAM_INT);
-                    $updateQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
-                    $res = $updateQuery->execute();
+                        $updateQuery = $pdo->prepare("UPDATE ueuse SET popularity = :popularity WHERE uniqid = :uniqid");
+                        $updateQuery->bindValue(':popularity', $new_popularity, PDO::PARAM_INT);
+                        $updateQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
+                        $res = $updateQuery->execute();
 
-                    if ($res) {
-                        $pdo->commit();
-                        return true;
-                    } else {
+                        if ($res) {
+                            $pdo->commit();
+                            return true;
+                        } else {
+                            $pdo->rollBack();
+                            actionLog($userid, "error", "changePopularity", $uniqid, "いいねに失敗しました", 3);
+                            return false;
+                        }
+                    }else{
                         $pdo->rollBack();
-                        actionLog($userid, "error", "changePopularity", $uniqid, "いいねに失敗しました", 3);
-                        return false;
-                    }
+                        return true;
+                    }                    
                 } else {
                     $pdo->rollBack();
                     return false;
@@ -2758,8 +2961,16 @@ function getUserDataForUpdate($pdo, $userid) {
     return $query->fetch();
 }
 
-function getUeuseData($pdo, $uniqid) {
-    $query = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid");
+function getUeuseData($pdo, $uniqid, $myblocklist = null) {
+    if(!(empty($myblocklist))){
+        $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
+        $query = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid {$blocked_accounts['sql']}");
+        foreach ($blocked_accounts['params'] as $ph => $val) {
+            $query->bindValue($ph, $val, PDO::PARAM_STR);
+        }
+    }else{
+        $query = $pdo->prepare("SELECT * FROM ueuse WHERE uniqid = :uniqid");
+    }
     $query->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
     $query->execute();
     $ueuseDatas = $query->fetch();
@@ -2902,6 +3113,194 @@ function actionLog($userid, $type, $place, $target, $content, $importance){
         }
     }
 }
+
+function secondsToHms($seconds){
+    if ($seconds < 0) {
+        $seconds = 0;
+    }
+    $date = new DateTimeImmutable('@0', new DateTimeZone('UTC'));
+    $futureDate = $date->modify("+{$seconds} seconds");
+    $interval = $date->diff($futureDate);
+    return $interval->format('%H時間%I分%S秒');
+}
+
+function createServerHashedParam($param){
+    return hash('sha3-512', ENC_KEY . $param);
+}
+
+function cleanupOldLoginLogs($pdo) {
+    try {
+        $threshold = date('Y-m-d H:i:s', strtotime('-7 days'));
+
+        $stmt = $pdo->prepare("
+            DELETE FROM loginlog
+            WHERE last_attack_datetime < :threshold
+        ");
+        $stmt->bindValue(':threshold', $threshold, PDO::PARAM_STR);
+        $stmt->execute();
+
+        actionLog(null, "info", "cleanupOldLoginLogs", null, "".$stmt->rowCount()."件の古いログイン失敗履歴を削除しました！", 0);
+        return true;
+    } catch (Exception $e) {
+        actionLog(null, "error", "cleanupOldLoginLogs", null, $e->getMessage(), 4);
+        return false;
+    }
+}
+
+function isUserLockedByloginLog($pdo, $userid, $ip_addr) {
+    $log = getloginLog($pdo, $userid, $ip_addr);
+    if (empty($log)) {
+        return [false, 0];
+    }
+
+    $now = time();
+    $blocked_until = strtotime($log['blocked_until_datetime']);
+
+    if ($blocked_until <= $now && $log['failure_count'] > 0) {
+        $stmt = $pdo->prepare("
+            UPDATE loginlog
+            SET failure_count = 0
+            WHERE uniqid = :uniqid
+        ");
+        $stmt->bindValue(':uniqid', $log['uniqid'], PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+    if ($blocked_until > $now) {
+        $remaining = $blocked_until - $now;
+        return [true, $remaining];
+    } else {
+        return [false, 0];
+    }
+}
+
+function getloginLog($pdo, $userid, $ip_addr){
+    if(empty($pdo) ||empty($userid) || empty($ip_addr)){
+        actionLog(null, "error", "getloginLog", null, "パラメータが不足しています。", 3);
+        return false;
+    }
+
+    $hash_ip_addr = createServerHashedParam($ip_addr);
+
+    if(!(empty($pdo))){
+        $query = $pdo->prepare("SELECT * FROM loginlog WHERE attack_userid = :userid AND ip_hash = :ip_hash ORDER BY datetime ASC LIMIT 1");
+        $query->bindParam(':userid', $userid, PDO::PARAM_STR);
+        $query->bindParam(':ip_hash', $hash_ip_addr, PDO::PARAM_STR);
+        $query->execute();
+        $log = $query->fetch(PDO::FETCH_ASSOC);
+
+        if($log){
+            return $log;
+        }else{
+            return false;
+        }
+    }
+}
+
+function addloginLog($pdo, $userid, $ip_addr){
+    //基本的にログイン失敗時のみ呼び出す
+    if(empty($pdo) ||empty($userid) || empty($ip_addr)){
+        actionLog(null, "error", "addloginLog", null, "パラメータが不足しています。", 3);
+        return false;
+    }
+
+    $hash_ip_addr = createServerHashedParam($ip_addr);
+
+    if(!(empty($pdo))){
+        $alreadyloginlog = getloginLog($pdo, $userid, $ip_addr);
+        $datetime = date('Y-m-d H:i:s');
+        $max_block_seconds = 86400;
+
+        if (!empty($alreadyloginlog)) {
+            $failure_count = $alreadyloginlog["failure_count"] + 1;
+
+            if ($failure_count <= 5) {
+                $block_seconds = $failure_count * 2;
+            } else {
+                $block_seconds = pow(2, $failure_count - 2);
+            }
+
+            if ($block_seconds > $max_block_seconds) {
+                $block_seconds = $max_block_seconds;
+            }
+
+            $blocked_until_datetime = date('Y-m-d H:i:s', strtotime($datetime) + $block_seconds);
+
+            $pdo->beginTransaction();
+            try {
+                $updateQuery = $pdo->prepare("
+                    UPDATE loginlog 
+                    SET failure_count = :failure_count,
+                        last_attack_datetime = :last_attack_datetime,
+                        blocked_until_datetime = :blocked_until_datetime
+                    WHERE uniqid = :uniqid
+                ");
+                $updateQuery->bindValue(':failure_count', $failure_count, PDO::PARAM_INT);
+                $updateQuery->bindValue(':last_attack_datetime', $datetime, PDO::PARAM_STR);
+                $updateQuery->bindValue(':blocked_until_datetime', $blocked_until_datetime, PDO::PARAM_STR);
+                $updateQuery->bindValue(':uniqid', $alreadyloginlog['uniqid'], PDO::PARAM_STR);
+
+                $res = $updateQuery->execute();
+
+                if ($res) {
+                    $pdo->commit();
+                    return true;
+                } else {
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "addLoginLog(Update)", null, "ログイン失敗ログの更新に失敗しました", 3);
+                    return false;
+                }
+            } catch (Exception $e) {
+                actionLog($userid, "error", "addLoginLog(Update)", null, $e->getMessage(), 4);
+                $pdo->rollBack();
+                return false;
+            }
+
+        } else {
+            $uniqid = createUniqId();
+            $failure_count = 1;
+            $block_seconds = 2;
+            $blocked_until_datetime = date('Y-m-d H:i:s', strtotime($datetime) + $block_seconds);
+
+            $pdo->beginTransaction();
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO loginlog (
+                        uniqid, attack_userid, ip_hash, failure_count, 
+                        last_attack_datetime, blocked_until_datetime, datetime
+                    ) VALUES (
+                        :uniqid, :attack_userid, :ip_hash, :failure_count, 
+                        :last_attack_datetime, :blocked_until_datetime, :datetime
+                    )
+                ");
+
+                $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
+                $stmt->bindParam(':attack_userid', $userid, PDO::PARAM_STR);
+                $stmt->bindParam(':ip_hash', $hash_ip_addr, PDO::PARAM_STR);
+                $stmt->bindParam(':failure_count', $failure_count, PDO::PARAM_INT);
+                $stmt->bindParam(':last_attack_datetime', $datetime, PDO::PARAM_STR);
+                $stmt->bindParam(':blocked_until_datetime', $blocked_until_datetime, PDO::PARAM_STR);
+                $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
+
+                $res = $stmt->execute();
+
+                if ($res) {
+                    $pdo->commit();
+                    return true;
+                } else {
+                    $pdo->rollBack();
+                    return false;
+                }
+            } catch (Exception $e) {
+                actionLog(null, "error", "addLoginLog", null, $e->getMessage(), 3);
+                $pdo->rollBack();
+                return false;
+            }
+        }
+
+    }
+}
+
 
 function addJob($pdo, $userid, $job, $step){
     $userid = getUserData($pdo, $userid)["userid"];
@@ -3306,7 +3705,6 @@ function GetActivityPubUser($userid, $domain) {
 }
 
 function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, $pdo, string $userId): ?array {
-    if (in_array(safetext($value['account']), explode(",", $myblocklist))) return null;
     if ($value["role"] === "ice") return null;
 
     $value['iconname'] = filter_var($value['iconname'], FILTER_VALIDATE_URL)
@@ -3334,7 +3732,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
     } elseif (!empty($value['ruuniqid'])) {
         $value["type"] = "Reuse";
 
-        $reused = getUeuseData($pdo, $value['ruuniqid']);
+        $reused = getUeuseData($pdo, $value['ruuniqid'], $myblocklist);
         if ($reused) {
             $reusedUserData = getUserData($pdo, $reused['account']);
             $reusedUserData["role"] = explode(',', $reusedUserData["role"]);
@@ -3687,5 +4085,29 @@ function getDatasUeuse(PDO $pdo, array $messages): array {
 
     return $messages;
 }
+
+function sqlBlockAccountList($column, $myblocklist){
+    if (is_string($myblocklist)) {
+        $myblocklist = array_filter(array_map('trim', explode(',', $myblocklist)));
+    }
+
+    if (empty($myblocklist)) {
+        return ['sql' => '', 'params' => []]; // 条件なし
+    }
+
+    $placeholders = [];
+    $params = [];
+    foreach ($myblocklist as $i => $id) {
+        $ph = ":block_$i";
+        $placeholders[] = $ph;
+        $params[$ph] = $id;
+    }
+
+    return [
+        'sql' => "AND {$column} NOT IN (" . implode(',', $placeholders) . ")",
+        'params' => $params
+    ];
+}
+
 
 ?>

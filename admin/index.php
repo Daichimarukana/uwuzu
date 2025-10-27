@@ -98,37 +98,24 @@ if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
     $db_php = false;
 }
 
-if (in_array("gd", get_loaded_extensions())) {
-    $check_gd = true;
-} else {
-    $check_gd = false;
+$extensions_to_check = [
+    "gd" => "GD",
+    "fileinfo" => "Fileinfo",
+    "mbstring" => "mbstring",
+    "pdo_mysql" => "pdo_mysql",
+    "mysqli" => "mysqli",
+    "zip" => "ZipArchive",
+    "curl" => "cURL"
+];
+
+$loaded_extensions = get_loaded_extensions();
+$extension_status = [];
+
+foreach ($extensions_to_check as $extension_id => $display_name){
+    $is_loaded = in_array($extension_id, $loaded_extensions);
+    $extension_status[$display_name] = $is_loaded;
 }
-if (in_array("fileinfo", get_loaded_extensions())) {
-    $check_fileinfo = true;
-} else {
-    $check_fileinfo = false;
-}
-if (in_array("mbstring", get_loaded_extensions())) {
-    $check_mbstring = true;
-} else {
-    $check_mbstring = false;
-}
-if (in_array("pdo_mysql", get_loaded_extensions())) {
-    $check_pdo_mysql = true;
-} else {
-    $check_pdo_mysql = false;
-}
-if (in_array("mysqli", get_loaded_extensions())) {
-    $check_mysqli = true;
-} else {
-    $check_mysqli = false;
-}
-if (in_array("zip", get_loaded_extensions())) {
-    $check_zip = true;
-} else {
-    $check_zip = false;
-}
-// データベースの接続を閉じる
+
 $pdo = null;
 
 ?>
@@ -186,17 +173,20 @@ $pdo = null;
                 これらのデータをあなたが知っているのであれば早速セットアップを開始しましょう！<br>
             <?php }?>
             <br>
-            セットアップ中にエラーに遭遇した場合はdocs.uwuzu.xyzを確認し、解消に向けて取り組みましょう！</p>
+            セットアップ中にエラーに遭遇した場合はdocs.uwuzu.comを確認し、解消に向けて取り組みましょう！</p>
         
-        <div class="module_chk">
-            <div class="p2">Already setが設定済みでNot setが未設定です。</div>
-            <p>GD : <?php if($check_gd == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
-            <p>Fileinfo : <?php if($check_fileinfo == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
-            <p>mbstring : <?php if($check_mbstring == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
-            <p>pdo_mysql : <?php if($check_pdo_mysql == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
-            <p>mysqli : <?php if($check_mysqli == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
-            <p>ZipArchive : <?php if($check_zip == true){echo "Already set✅";}else{echo "Not set🟥";}?></p>
-        </div>
+            <div class="module_chk">
+                <div class="p2">Already setが設定済みでNot setが未設定です。</div>
+                <div class="p2">PHPの必須モジュールの確認は全ての必須モジュールを対象に行われるものではありません。php側にてデフォルトでインストール・有効になっているものはチェック・表示しない場合がございます。</div>
+                <?php foreach ($extension_status as $name => $status): ?>
+                    <p>
+                        <?php echo htmlspecialchars($name); ?> :
+                        <?php
+                            echo $status ? "Already set✅" : "Not set🟥";
+                        ?>
+                    </p>
+                <?php endforeach; ?>
+            </div>
 
 
         <p>uwuzu<br>Version : <?php echo $uwuzuinfo[1]?></p>

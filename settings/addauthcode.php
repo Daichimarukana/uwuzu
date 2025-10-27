@@ -67,7 +67,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 $notiQuery = $pdo->prepare("SELECT COUNT(*) as notification_count FROM notification WHERE touserid = :userid AND userchk = 'none'");
@@ -208,10 +207,12 @@ $pdo = null;
         ?>
                 
         <form class="formarea" enctype="multipart/form-data" method="post">
-        <p>以下の二次元コードより二段階認証をセットアップしてください。</p>
-        <p>セットアップが完了したら入力ボックスにコードを入力して「次へ」ボタンを押してください！<br>注意:まだ二段階認証の設定は終わっていません。次へを押すと設定が完了します。</p>
+        <p id="setup_text">以下の二次元コードを読み込むか、二次元コードの下の秘密鍵を認証アプリに入力して二段階認証をセットアップしてください。</p>
+        <p>セットアップが完了したら入力ボックスにコードを入力して「次へ」ボタンを押してください！</p>
+        <div class="p2">まだ二段階認証の設定は終わっていません。次へを押すと設定が完了します。</div>
         <div class="authzone">
-            <img src="../qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>">
+            <a href="<?php echo safetext(urldecode($qrCodeUrl));?>"><img src="../qr/php/qr_img.php?d=<?php echo $qrCodeUrl?>"></a>
+            <div class="p2"><?php echo safetext($secret);?></div>
         </div>
             <div>
                 <p>二段階認証コード</p>
@@ -228,5 +229,12 @@ $pdo = null;
 <?php require('../require/botbox.php');?>
 <?php require('../require/noscript_modal.php');?>
 </body>
+
+<script>
+//unsupported.jsでuaは取得済み↓
+if (user_agent_os == "Android" || user_agent_os == "iOS_6_Over" || user_agent_os == "iPad") {
+    $("#setup_text").text("以下の二次元コードをタップするか、二次元コードを読み込んで二段階認証をセットアップしてください。");
+}
+</script>
 
 </html>

@@ -27,17 +27,7 @@ $stmt = null;
 $res = null;
 $option = null;
 
-
-if( !empty($_SESSION['userid']) ) {
-    $userid = $_SESSION['userid'];
-}else{
-    header("Location: login.php");
-	exit;
-}
-
-
 // データベースに接続
-
 try {
 
     $option = array(
@@ -52,42 +42,60 @@ try {
     $error_message[] = $e->getMessage();
 }
 
-//ログイン認証---------------------------------------------------
-blockedIP($_SERVER['REMOTE_ADDR']);
-$is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
-if(!($is_login === false)){
-	header("Location: /home/");
-	exit;
-}
-//-------------------------------------------------------------
+if( !empty($pdo) ) {
+    $userData = getUserData($pdo, $_SESSION['userid']);
+    if(!(empty($userData))){
+        if($_SESSION['is_register_account'] === true){
+            $userid = $userData["userid"];
+        }else{
+            header("Location: login.php");
+            exit;
+        }
+    }else{
+        $_SESSION = array();
+        header("Location: index.php");
+        exit;
+    }
+    
+    //ログイン認証---------------------------------------------------
+    blockedIP($_SERVER['REMOTE_ADDR']);
+    $is_login = uwuzuUserLogin($_SESSION, $_COOKIE, $_SERVER['REMOTE_ADDR'], "user");
+    if(!($is_login === false)){
+        header("Location: /home/");
+        exit;
+    }
+    //-------------------------------------------------------------
 
-if( !empty($_POST['btn_submit']) ) {
-    $_SESSION['userid'] = $userid;
-    // リダイレクト先のURLへ転送する
-    $url = 'addauthcode.php';
-    header('Location: ' . $url, true, 303);
+    if( !empty($_POST['btn_submit']) ) {
+        $_SESSION['userid'] = $userid;
+        $_SESSION['is_register_account'] = true;
+        // リダイレクト先のURLへ転送する
+        $url = 'addauthcode.php';
+        header('Location: ' . $url, true, 303);
 
-    // すべての出力を終了
-    exit;
-}
+        // すべての出力を終了
+        exit;
+    }
 
-if( !empty($_POST['skip_submit']) ) {
-    if (isset($_SERVER['HTTP_COOKIE'])) {
-		$cookies = explode(';', $_SERVER['HTTP_COOKIE']);
-		foreach($cookies as $cookie) {
-			$parts = explode('=', $cookie);
-			$name = trim($parts[0]);
-			setcookie($name, '', time()-1000);
-			setcookie($name, '', time()-1000, '/');
-		}
-	}
-    $userid = "";
-    // リダイレクト先のURLへ転送する
-    $url = 'success.php';
-    header('Location: ' . $url, true, 303);
+    if( !empty($_POST['skip_submit']) ) {
+        if (isset($_SERVER['HTTP_COOKIE'])) {
+            $cookies = explode(';', $_SERVER['HTTP_COOKIE']);
+            foreach($cookies as $cookie) {
+                $parts = explode('=', $cookie);
+                $name = trim($parts[0]);
+                setcookie($name, '', time()-1000);
+                setcookie($name, '', time()-1000, '/');
+            }
+        }
+        $userid = "";
+        $_SESSION['is_register_account'] = true;
+        // リダイレクト先のURLへ転送する
+        $url = 'success.php';
+        header('Location: ' . $url, true, 303);
 
-    // すべての出力を終了
-    exit;
+        // すべての出力を終了
+        exit;
+    }
 }
 
 // データベースの接続を閉じる

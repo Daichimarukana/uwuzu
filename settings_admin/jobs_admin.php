@@ -60,7 +60,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 
@@ -94,7 +93,7 @@ if (!empty($pdo)) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="apple-touch-icon" type="image/png" href="../favicon/apple-touch-icon-180x180.png">
 <link rel="icon" type="image/png" href="../favicon/icon-192x192.png">
-<title>ログ - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
+<title>ジョブ - <?php echo safetext($serversettings["serverinfo"]["server_name"]);?></title>
 
 </head>
 

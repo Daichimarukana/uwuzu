@@ -40,13 +40,7 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         }
         $offset = ($pageNumber - 1) * $itemsPerPage;
 
-        $followQuery = $pdo->prepare("SELECT follow FROM account WHERE userid = :userid");
-        $followQuery->bindValue(':userid', $userId);
-        $followQuery->execute();
-        $followData = $followQuery->fetch();
-        $follow = $followData['follow']/*.",".$userid*/;
-        $followList = explode(',', $follow);
-
+        $followList = getFolloweeList($pdo, $userId);
         $messages = array(); // 初期化
 
         // 空ならエラー回避

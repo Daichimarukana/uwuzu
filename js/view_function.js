@@ -23,7 +23,9 @@ async function replaceMentions(text) {
         return placeholder;
     });
 
-    const mentionMatches = [...text.matchAll(/@([a-zA-Z0-9_]+)/g)];
+    const mentionRegex = /@([a-zA-Z0-9_]+)(?:@([a-zA-Z0-9_.-]+))?/g;
+    const mentionMatches = [...text.matchAll(mentionRegex)];
+
     if (mentionMatches.length === 0) {
         placeholders.forEach((original, i) => {
             text = text.replace(`\u2063{{PLACEHOLDER${i}}}\u2063`, original);
@@ -31,17 +33,33 @@ async function replaceMentions(text) {
         return text;
     }
 
-    // ユーザーIDを小文字に正規化
-    const uniqueMentions = [...new Set(mentionMatches.map(match => match[1]))];
-    const mentionsToFetch = uniqueMentions.filter(userID => !mentionCache[userID]);
+    const localMentionsToFetch = [];
+    const localMentionSet = new Set();
 
-    if (mentionsToFetch.length > 0) {
+    for (const match of mentionMatches) {
+        const userid = match[1];
+        const domain = match[2];
+
+        if (domain) {
+            const cacheKey = `${userid}@${domain}`;
+            if (!mentionCache[cacheKey]) {
+                mentionCache[cacheKey] = `<a href="/@${userid}@${domain}" class="mta">@${userid}@${domain}</a>`;
+            }
+        } else {
+            if (!mentionCache[userid] && !localMentionSet.has(userid)) {
+                localMentionsToFetch.push(userid);
+                localMentionSet.add(userid);
+            }
+        }
+    }
+
+    if (localMentionsToFetch.length > 0) {
         await new Promise((resolve) => {
             $.ajax({
                 url: '../function/get_userid.php',
                 method: 'POST',
                 data: {
-                    get_account: mentionsToFetch.join(','),
+                    get_account: localMentionsToFetch.join(','),
                     userid: global_userid,
                     account_id: global_account_id
                 },
@@ -60,7 +78,7 @@ async function replaceMentions(text) {
                     resolve();
                 },
                 error: function () {
-                    for (const name of mentionsToFetch) {
+                    for (const name of localMentionsToFetch) {
                         mentionCache[name] = `@${name}`;
                     }
                     resolve();
@@ -69,10 +87,13 @@ async function replaceMentions(text) {
         });
     }
 
-    // 元のtextに適用（小文字で照合）
-    text = text.replace(/@([a-zA-Z0-9_]+)/g, (_, id) => {
-        const lower = id;
-        return mentionCache[lower] || `@${id}`; // 表示は元の大文字小文字を保持
+    text = text.replace(mentionRegex, (match, userid, domain) => {
+        if (domain) {
+            const cacheKey = `${userid}@${domain}`;
+            return mentionCache[cacheKey] || match; 
+        } else {
+            return mentionCache[userid] || match;
+        }
     });
 
     // aタグ戻す
@@ -181,6 +202,67 @@ async function replaceCustomEmojis(text) {
     });
 
     return text;
+}
+
+function saveLocalstorage(key, value, pagepath){
+    try {
+        const valueToSave = value;
+        const now = new Date();
+        
+        const expirationTime = now.getTime() + (180 * 24 * 60 * 60 * 1000);
+
+        const dataToStore = {
+            value: valueToSave,
+            expiresAt: expirationTime
+        };
+
+        if(pagepath === true){
+            key = key + "_" + location.pathname;
+        }
+
+        localStorage.setItem(key, JSON.stringify(dataToStore));
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function getLocalstorage(key, pagepath) {
+    try {
+        if(pagepath === true){
+            key = key + "_" + location.pathname;
+        }
+
+        const storedDataString = localStorage.getItem(key);
+        if (!storedDataString) {
+            return null; // データが存在しない
+        }
+
+        const storedData = JSON.parse(storedDataString);
+        const now = new Date().getTime();
+
+        if (now > storedData.expiresAt) {
+            localStorage.removeItem(key);
+            return null;
+        }
+
+        return storedData.value;
+    } catch (e) {
+        return null;
+    }
+}
+
+function deleteLocalstorage(key, pagepath) {
+    try {
+        if(pagepath === true){
+            key = key + "_" + location.pathname;
+        }
+        
+        localStorage.removeItem(key);
+        return true;
+    } catch (e) {
+        return false;
+    }
 }
 
 function a_link(text) {
@@ -432,6 +514,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     var is_favorite = false;
     var is_bookmark = false;
     var is_nsfw = false;
+    var is_reuse_getted = false;
     var abi = "";
     var abi_date = "";
     var abi_html = "";
@@ -553,9 +636,14 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                                 <p>`+ await replaceCustomEmojis(ueuse["userdata"]["username"]) + `さんがリユーズ</p>
                             </a>
                         </div>`;
-                inyo = ``;
-                contentHtml = "リユーズ元のユーズは削除されました。";
+                inyo = `<div class="reuse_box" id="quote_reuse">
+                            <p>
+                                リユーズ元のユーズは削除されました。
+                            </p>
+                        </div>`;
+                contentHtml = "";
 
+                is_reuse_getted = true;
                 uniqid = ueuse["uniqid"];
                 userid = ueuse["userdata"]["userid"];
                 username = ueuse["userdata"]["username"];
@@ -812,9 +900,12 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                 contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["ueuse"]);
             }
         } else {
-            if (YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"])) {
-                contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"]);
+            if (ueuse["reuse"] != null) {
+                if (YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"])) {
+                    contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"]);
+                }
             }
+
         }
 
     } else {
@@ -839,30 +930,40 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         favbox = "";
     }
 
-    html = `
-        <div class="ueuse" id="ueuse-`+ ueuse["uniqid"] + `">
-            `+ reuse + `
-            <div class="flebox">
-                <a href="/@`+ userid + `"><img src="` + iconurl + `"></a>
-                <a href="/@`+ userid + `"><div class="u_name">` + await replaceCustomEmojis(username) + `</div></a>
-                <div class="idbox">
-                    <a href="/@`+ userid + `">@` + userid + `</a>
+    if (is_reuse_getted != true) {
+        html = `
+            <div class="ueuse" id="ueuse-`+ ueuse["uniqid"] + `">
+                `+ reuse + `
+                <div class="flebox">
+                    <a href="/@`+ userid + `"><img src="` + iconurl + `"></a>
+                    <a href="/@`+ userid + `"><div class="u_name">` + await replaceCustomEmojis(username) + `</div></a>
+                    <div class="idbox">
+                        <a href="/@`+ userid + `">@` + userid + `</a>
+                    </div>
+                    `+ bot + `
+                    `+ check + `
+                    <div class="time">`+ formatSmartDate(datetime) + `</div>
                 </div>
-                `+ bot + `
-                `+ check + `
-                <div class="time">`+ formatSmartDate(datetime) + `</div>
+                `+ nsfw_html + `
+                `+ nsfw_start_html + `
+                <div class="content">`+ contentHtml + `</div>
+                `+ img_html + `
+                `+ vid_html + `
+                `+ inyo + `
+                `+ abi_html + `
+                `+ nsfw_end_html + `
+                `+ favbox + `
             </div>
-            `+ nsfw_html + `
-            `+ nsfw_start_html + `
-            <div class="content">`+ contentHtml + `</div>
-            `+ img_html + `
-            `+ vid_html + `
-            `+ inyo + `
-            `+ abi_html + `
-            `+ nsfw_end_html + `
-            `+ favbox + `
-        </div>
-    `;
+        `;
+    } else {
+        html = `
+            <div class="ueuse" id="ueuse-`+ ueuse["uniqid"] + `">
+                `+ reuse + `
+                `+ inyo + `
+            </div>
+        `;
+    }
+
     return html;
 }
 function createAdsHtml(ads) {
@@ -925,28 +1026,28 @@ async function createNotificationHtml(notification) {
 
     let url = notification["url"];
 
-    if(notification["is_read"] == false) {
+    if (notification["is_read"] == false) {
         is_readclass = "this";
     }
 
     html = `
-        <div class="notification `+is_readclass+`">
+        <div class="notification `+ is_readclass + `">
             <div class="flebox">
-                <div class="time">`+formatSmartDate(datetime)+`</div>
+                <div class="time">`+ formatSmartDate(datetime) + `</div>
             </div>
             <div class="flebox">
                 <div class="icon">
-                    <a href="/@`+userid+`">
-                        <img src="`+iconurl+`">
+                    <a href="/@`+ userid + `">
+                        <img src="`+ iconurl + `">
                     </a>
                 </div>
                 <div class="username">
-                    <a href="/@`+userid+`">`+await replaceCustomEmojis(username)+`</a>
+                    <a href="/@`+ userid + `">` + await replaceCustomEmojis(username) + `</a>
                 </div>
             </div>
-            <h3>`+await replaceCustomEmojis(title)+`</h3>
-            <p>`+content+`</p>
-            <a href="`+url+`">詳細をみる</a>
+            <h3>`+ await replaceCustomEmojis(title) + `</h3>
+            <p>`+ content + `</p>
+            <a href="`+ url + `">詳細をみる</a>
         </div>
     `;
     return html;

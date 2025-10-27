@@ -183,15 +183,22 @@ if( !empty($_POST['btn_submit']) ) {
         if( empty($password) ) {
             $error_message[] = 'パスワードを入力してください。(PASSWORD_INPUT_PLEASE)';
         }
+        
+        if ($_SESSION["login_passtry"] <= 5) {
+            $delay = $_SESSION["login_passtry"] * 2;
+        } else {
+            $delay = min(pow(2, $_SESSION["login_passtry"] - 2), 60);
+        }
+        sleep($delay);
+
+        $locknow_loginLog = isUserLockedByloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
+        if($locknow_loginLog[0] === true){
+            $_SESSION["login_passtry"]++;
+            addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
+            $error_message[] = '現在あなたのアカウントは保護のためロックされています。しばらく時間を開けてから再度お試しください。';
+        }
 
         if(empty($error_message)){
-            if ($_SESSION["login_passtry"] <= 5) {
-                $delay = $_SESSION["login_passtry"] * 2;
-            } else {
-                $delay = min(pow(2, $_SESSION["login_passtry"] - 2), 60);
-            }
-            sleep($delay);
-
             if($result->rowCount() > 0) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
 
@@ -200,6 +207,7 @@ if( !empty($_POST['btn_submit']) ) {
                         if(empty($row["authcode"])){
                             $_SESSION['userid'] = $userid;
                             $_SESSION["login_passtry"] = 0;
+                            $_SESSION['auth_status'] = 'authenticated';
 
                             $_SESSION['form_data'] = array();//フォーム初期化
                             // リダイレクト先のURLへ転送する
@@ -211,6 +219,7 @@ if( !empty($_POST['btn_submit']) ) {
                         }else{
                             $_SESSION['userid'] = $userid;
                             $_SESSION["login_passtry"] = 0;
+                            $_SESSION['auth_status'] = '2fa_required';
                             
                             $_SESSION['form_data'] = array();//フォーム初期化
                             $url = 'authlogin.php';
@@ -221,14 +230,17 @@ if( !empty($_POST['btn_submit']) ) {
                         }
                     }else{
                         $_SESSION["login_passtry"]++;
+                        addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
                         $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)'; 
                     }
                 }else{
                     $_SESSION["login_passtry"]++;
+                    addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
                     $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)'; 
                 }
             }else {
                 $_SESSION["login_passtry"]++;
+                addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
                 $error_message[] = 'IDまたはパスワードが違います(PASS_AND_ID_CHIGAUYANKE)';
             }
         }

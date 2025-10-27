@@ -66,7 +66,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 
@@ -76,13 +75,6 @@ $notiQuery->execute();
 $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 
 $notificationcount = $notiData['notification_count'];
-
-//-----------------URLから取得----------------
-if(isset($_GET['text'])) { 
-    $ueuse = safetext(urldecode($_GET['text']));
-}elseif(isset($_COOKIE['ueuse'])) { 
-    $ueuse = safetext($_COOKIE['ueuse']);
-}
 
 require('../logout/logout.php');
 
@@ -188,7 +180,7 @@ if ("serviceWorker" in navigator) {
 					<div class="per"></div>
 				</div>
 				<div class="sendbox">
-					<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo safetext($ueuse); } ?></textarea>
+					<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"></textarea>
 
 					<div class="fxbox">
 						<label for="upload_images" id="images" title="画像1">
@@ -328,6 +320,15 @@ $(document).ready(function() {
 
 	var pageNumber = 1;
 	var isLoading = false;
+
+	const queryString = window.location.search;
+	const text_params = new URLSearchParams(queryString);
+	const text_Value = text_params.get('text');
+	if(text_Value != null){
+		$("#ueuse").text(text_Value);
+	}else{
+		$("#ueuse").text(getLocalstorage("ueuse", true));
+	}
 
 	var mode = getCookie('mode') || "local";
 
@@ -560,7 +561,7 @@ $(document).ready(function() {
 					scaledPercent = 100;
 					$(".send_progress").children(".per").css("width", scaledPercent + "%");
 
-					document.cookie = "ueuse=; Secure; SameSite=Lax; path=/home;";
+					deleteLocalstorage("ueuse", true);
 					isSending = false;
 					window.location.href = "<?php echo $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];?>";
 				}else{
@@ -1086,7 +1087,7 @@ $(document).ready(function() {
 			$('#harmful_ueuse_warn').hide();
 		}
 		var mojisize = '<?php echo $mojisize; ?>';
-		var mojicount = Number(mojisize) - $(this).val().length;
+		var mojicount = Number(mojisize) - [...$(this).val()].length;
 		if(mojicount >= 0){
 			$('#moji_cnt').removeClass('red');
 			$('#moji_cnt').html(mojicount);
@@ -1096,7 +1097,7 @@ $(document).ready(function() {
 			$('#moji_cnt').html(mojicount);
 			$('#ueusebtn').prop('disabled', true);
 		}
-		document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/home;";
+		saveLocalstorage("ueuse", $(this).val(), true);
 	});
 	loadEmojis();
 

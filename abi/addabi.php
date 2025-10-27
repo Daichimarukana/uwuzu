@@ -57,7 +57,7 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['abitext'])) && s
         if($result2["loginid"] === $loginid){
             if($result["abi"] == "none" && (!($result2["role"] == "ice"))){
                 // 文字数を確認
-                if( (int)safetext(file_get_contents($mojisizefile)) < mb_strlen($abitext, 'UTF-8') ) {
+                if( (int)safetext(file_get_contents($mojisizefile)) < mb_strlen(str_replace("\r\n", "\n", $abitext), 'UTF-8') ) {
                     $err = "content_to_".safetext(file_get_contents($mojisizefile))."_characters";
                     $response = array(
                         'error_code' => $err,

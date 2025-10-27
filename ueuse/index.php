@@ -69,7 +69,6 @@ if($is_login === false){
 	$role = safetext($is_login["role"]);
 	$sacinfo = safetext($is_login["sacinfo"]);
 	$myblocklist = safetext($is_login["blocklist"]);
-	$myfollowlist = safetext($is_login["follow"]);
 	$is_Admin = safetext($is_login["admin"]);
 }
 
@@ -83,6 +82,8 @@ if (!(empty($pdo))) {
 
 	if(isset($_GET['ueuseid'])) {
 		$ueuseid = safetext(str_replace('!', '', $_GET['ueuseid']));
+	}else{
+		$ueuseid = null;
 	}
 }
 
@@ -99,14 +100,6 @@ if (!(empty($pdo))) {
 		$touserid = null;
 	}
 }
-
-//-----------------URLから取得----------------
-if(isset($_GET['text'])) { 
-    $ueuse = safetext(urldecode($_GET['text']));
-}elseif(isset($_COOKIE['ueuse'])) { 
-    $ueuse = safetext($_COOKIE['ueuse']);
-}
-
 
 if( !empty($_POST['logout']) ) {
 	if (isset($_SERVER['HTTP_COOKIE'])) {
@@ -188,7 +181,7 @@ $pdo = null;
 						<div class="per"></div>
 					</div>
 					<div class="sendbox">
-						<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"><?php if( !empty($ueuse) ){ echo safetext($ueuse); } ?></textarea>
+						<textarea id="ueuse" placeholder="いまどうしてる？" name="ueuse"></textarea>
 
 						<div class="fxbox">
 							<label for="upload_images" id="images" title="画像1">
@@ -330,6 +323,15 @@ $(document).ready(function() {
 	var ueuseid = "<?php echo safetext($ueuseid);?>";
 	view_ueuse_init(userid, account_id);
 
+	const queryString = window.location.search;
+	const text_params = new URLSearchParams(queryString);
+	const text_Value = text_params.get('text');
+	if(text_Value != null){
+		$("#ueuse").text(text_Value);
+	}else{
+		$("#ueuse").text(getLocalstorage("ueuse", true));
+	}
+
 	var pageNumber = 1;
     var isLoading = false;
 	loadPosts();
@@ -344,7 +346,7 @@ $(document).ready(function() {
 			dataType: 'json',
 			timeout: 300000,
 			success: function(response) {
-				if(renderUeuses(response)){
+				if(renderUeuses(response, ueuseid)){
 					pageNumber++;
 					isLoading = false;
 					$("#loading").hide();
@@ -433,7 +435,7 @@ $(document).ready(function() {
 					scaledPercent = 100;
 					$(".send_progress").children(".per").css("width", scaledPercent + "%");
 
-					document.cookie = "ueuse=; Secure; SameSite=Lax; path=/!" + ueuseid + ";";
+					deleteLocalstorage("ueuse", true);
 					isSending = false;
 					window.location.href = "<?php echo $url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];?>";
 				}else{
@@ -922,7 +924,7 @@ $(document).ready(function() {
 			$('#moji_cnt').html(mojicount);
 			$('#ueusebtn').prop('disabled', true);
 		}
-		document.cookie = "ueuse=" + encodeURIComponent($(this).val()) + "; Secure; SameSite=Lax; path=/!" + ueuseid + ";";
+		saveLocalstorage("ueuse", $(this).val(), true);
 	});
 	loadEmojis();
 	$("#emoji_picker_btn").click(function () {

@@ -53,6 +53,8 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $list_Page = max(0, (int)$pageNumber - 1);
         $messages = [];
 
+        $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
+
         if (!empty($bookmarkList[$list_Page])) {
             $currentPageUniqIds = $bookmarkList[$list_Page];
 
@@ -69,12 +71,15 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
             $sql = "SELECT ueuse.*
                     FROM ueuse
                     LEFT JOIN account ON ueuse.account = account.userid
-                    WHERE ueuse.uniqid IN ($placeholderStr) AND account.role != 'ice'
+                    WHERE ueuse.uniqid IN ($placeholderStr) AND account.role != 'ice' {$blocked_accounts['sql']} 
                     ORDER BY FIELD(ueuse.uniqid, $placeholderStr)";
 
             $stmt = $pdo->prepare($sql);
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key, $val, PDO::PARAM_STR);
+            }
+            foreach ($blocked_accounts['params'] as $ph => $val) {
+                $stmt->bindValue($ph, $val, PDO::PARAM_STR);
             }
             $stmt->execute();
             $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);

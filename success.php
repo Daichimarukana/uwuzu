@@ -1,19 +1,59 @@
 <?php 
 require('db.php');
 require("function/function.php");
-blockedIP($_SERVER['REMOTE_ADDR']);
 $serversettings_file = "server/serversettings.ini";
 $serversettings = parse_ini_file($serversettings_file, true);
 
+session_name('uwuzu_s_id');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_start();
+session_regenerate_id(true);
 
-if(!(empty($_SESSION['backupcode']))){
-    $backupcode = $_SESSION['backupcode'];
-}else{
-    $backupcode = null;
+// データベースに接続
+try {
+    $option = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+    );
+    $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
+} catch(PDOException $e) {
+
+    // 接続エラーのときエラー内容を取得する
+    $error_message[] = $e->getMessage();
 }
-if(!(empty($_SESSION['done']))){
-    if($_SESSION['done'] == false){
-        $error_message[] = "アカウント移行の終了処理が完了できていません。\n前使用していたサーバーでアカウントの移行を取り消してください。";
+
+if( !empty($pdo) ) {
+    $userData = getUserData($pdo, $_SESSION['userid']);
+    if(!(empty($userData))){
+        if($_SESSION['is_register_account'] === true){
+            $userid = $userData["userid"];
+            $_SESSION['is_register_account'] = false;
+        }else{
+            header("Location: login.php");
+            exit;
+        }
+    }else{
+        $_SESSION = array();
+        header("Location: index.php");
+        exit;
+    }
+
+    if(!(empty($_SESSION['backupcode']))){
+        $backupcode = $_SESSION['backupcode'];
+    }else{
+        $backupcode = null;
+    }
+    if(!(empty($_SESSION['done']))){
+        if($_SESSION['done'] == false){
+            $error_message[] = "アカウント移行の終了処理が完了できていません。\n前使用していたサーバーでアカウントの移行を取り消してください。";
+        }
     }
 }
 ?>

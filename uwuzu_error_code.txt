@@ -60,6 +60,7 @@ PASSWORD_ZEIJAKU - パスワードが弱く、uwuzu側で受け入れられな�
 PASSWORD_CHIGAUYANKE - 入力されたパスワードと再確認用のパスワードが違う時に表示されます。
 PASSWORD_TODOITENAI_MIN_COUNT - パスワードの最低文字数に届いておらず、uwuzu側で受け入れられない場合に表示されます。
 PASSWORD_OVER_MAX_COUNT - パスワードの最大文字数を超過している時に表示されます。
+PASSWORD_ATTACK_PROTECTION - ブルートフォースアタックからアカウントを保護するためにログインを一時的に規制している際に表示されます。
 
 PASS_AND_ID_CHIGAUYANKE - パスワードまたはユーザーIDが間違っている場合、もしくはその両方が間違っている場合に表示されます。
 

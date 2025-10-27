@@ -40,16 +40,23 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         }
         $offset = ($pageNumber - 1) * $itemsPerPage;
 
+        $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
+
         $messages = array();
         
         $sql = "SELECT ueuse.* 
                 FROM ueuse 
                 LEFT JOIN account ON ueuse.account = account.userid 
-                WHERE ueuse.rpuniqid = '' AND account.role != 'ice'
+                WHERE ueuse.rpuniqid = '' AND account.role != 'ice' {$blocked_accounts['sql']} 
                 ORDER BY ueuse.datetime DESC 
                 LIMIT :offset, :itemsPerPage";
 
         $stmt = $pdo->prepare($sql);
+        
+        foreach ($blocked_accounts['params'] as $ph => $val) {
+            $stmt->bindValue($ph, $val, PDO::PARAM_STR);
+        }
+
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
         $stmt->execute();

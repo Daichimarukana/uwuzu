@@ -41,16 +41,21 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $offset = ($pageNumber - 1) * $itemsPerPage;
 
         $messages = array();
+
+        $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
         
         //------------------------------------------すべてのユーズを取得----------------------------------------------
         $all_sql = "SELECT ueuse.* 
                 FROM ueuse 
                 LEFT JOIN account ON ueuse.account = account.userid 
-                WHERE ueuse.rpuniqid = '' AND account.role != 'ice'
+                WHERE ueuse.rpuniqid = '' AND account.role != 'ice' {$blocked_accounts['sql']} 
                 ORDER BY ueuse.datetime DESC 
                 LIMIT :offset, :itemsPerPage";
 
         $all_stmt = $pdo->prepare($all_sql);
+        foreach ($blocked_accounts['params'] as $ph => $val) {
+            $all_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+        }
         $all_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $all_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
         $all_stmt->execute();
@@ -64,11 +69,10 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $day_count_sql = "SELECT ueuse.* 
                 FROM ueuse 
                 LEFT JOIN account ON ueuse.account = account.userid 
-                WHERE ueuse.datetime >= NOW() - INTERVAL 7 DAY AND ueuse.rpuniqid = '' AND account.role != 'ice'
+                WHERE ueuse.datetime >= NOW() - INTERVAL 7 DAY AND ueuse.rpuniqid = '' AND account.role != 'ice' 
                 ORDER BY ueuse.datetime DESC 
                 LIMIT 1000";
         $cnt_stmt = $pdo->prepare($day_count_sql);
-        $cnt_stmt->execute();
         $Before7daysPosts = $cnt_stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // 結果が15件に満たない場合
@@ -98,12 +102,16 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
                     ueuse.rpuniqid = '' 
                 AND 
                     account.role != 'ice' 
+                {$blocked_accounts['sql']} 
                 ORDER BY 
                     ueuse.popularity DESC
                 LIMIT :offset, :itemsPerPage;
             ";
 
         $pop_stmt = $pdo->prepare($pop_sql);
+        foreach ($blocked_accounts['params'] as $ph => $val) {
+            $pop_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+        }
         $pop_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
         $pop_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $pop_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
@@ -115,17 +123,20 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         }
 
         //------------------------------------------フォローしているユーザーから取得----------------------------------------------
-        $followList = explode(',', getUserData($pdo, $userId)["follow"]);
+        $followList = getFolloweeList($pdo, $userId);
 
         foreach ($followList as $followUserId) {
             $flw_sql = "SELECT ueuse.* 
                     FROM ueuse 
                     LEFT JOIN account ON ueuse.account = account.userid 
-                    WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :follow_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY 
+                    WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :follow_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY {$blocked_accounts['sql']} 
                     ORDER BY ueuse.datetime DESC 
                     LIMIT :offset, :itemsPerPage";
 
             $flw_stmt = $pdo->prepare($flw_sql);
+            foreach ($blocked_accounts['params'] as $ph => $val) {
+                $flw_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+            }
             $flw_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
             $flw_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $flw_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
@@ -148,7 +159,7 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
         $fav_sql = "SELECT ueuse.*,
                             (LENGTH(ueuse.favorite) - LENGTH(REPLACE(ueuse.favorite, ',', '')) - 1) AS favorite_count
                         FROM ueuse
-                        WHERE FIND_IN_SET(:userid, ueuse.favorite) > 0
+                        WHERE FIND_IN_SET(:userid, ueuse.favorite) > 0 
                         ORDER BY ueuse.datetime DESC
                         LIMIT 100
                     ";
@@ -167,11 +178,14 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
             $favget_sql = "SELECT ueuse.* 
                         FROM ueuse 
                         LEFT JOIN account ON ueuse.account = account.userid 
-                        WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :fav_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY 
+                        WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :fav_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY {$blocked_accounts['sql']} 
                         ORDER BY ueuse.datetime DESC 
                         LIMIT :offset, :itemsPerPage";
 
             $favget_stmt = $pdo->prepare($favget_sql);
+            foreach ($blocked_accounts['params'] as $ph => $val) {
+                $favget_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+            }
             $favget_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
             $favget_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
             $favget_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
