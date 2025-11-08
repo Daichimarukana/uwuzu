@@ -2374,12 +2374,31 @@ function getFolloweeList($pdo, $userid){
         $all_followee = $query->fetchAll(PDO::FETCH_COLUMN);
 
         if($all_followee){
-            return $all_followee;
+            $valid_followees = [];
+            foreach ($all_followee as $followee_id){
+                $userData = getUserData($pdo, $followee_id);
+                if($userData){ 
+                    $valid_followees[] = $followee_id;
+                } else {
+                    unfollow_user($pdo, $followee_id, $userid);
+                }
+            }
+            return $valid_followees;
         }else{
             $userdata = getUserData($pdo, $userid);
             $followeeIds = array_filter(explode(',', $userdata['follow']));
             if($followeeIds){
-                return $followeeIds;
+                $valid_followees = [];
+                foreach ($followeeIds as $followee_id){
+                    $userData = getUserData($pdo, $followee_id);
+
+                    if($userData){
+                        $valid_followees[] = $followee_id;
+                    } else {
+                        unfollow_user($pdo, $followee_id, $userid);
+                    }
+                }
+                return $valid_followees;
             }else{
                 return array();
             }
@@ -2396,12 +2415,32 @@ function getFollowerList($pdo, $userid){
         $all_follower = $query->fetchAll(PDO::FETCH_COLUMN);
 
         if($all_follower){
-            return $all_follower;
+            $valid_followers = [];
+            foreach ($all_follower as $follower_id){
+                $userData = getUserData($pdo, $follower_id);
+
+                if($userData){
+                    $valid_followers[] = $follower_id;
+                } else {
+                    unfollow_user($pdo, $userid, $follower_id);
+                }
+            }
+            return $valid_followers;
         }else{
             $userdata = getUserData($pdo, $userid);
             $followerIds = array_filter(explode(',', $userdata['follower']));
             if($followerIds){
-                return $followerIds;
+                $valid_followers = [];
+                foreach ($followerIds as $follower_id){
+                    $userData = getUserData($pdo, $follower_id);
+
+                    if($userData){
+                        $valid_followers[] = $follower_id;
+                    } else {
+                        unfollow_user($pdo, $userid, $follower_id);
+                    }
+                }
+                return $valid_followers;
             }else{
                 return array();
             }
@@ -2672,19 +2711,11 @@ function deleteUser($pdo, $userid, $step, $job_uniqid){
 
         if($step == "delete_follow"){
             if(changeJob($pdo, $userid, $job_uniqid, "delete_follow", "running")){
-                // フォロー・フォロワー情報を削除したい全てのアカウントを取得
-                    $flw_query = $pdo->prepare("SELECT * 
-                    FROM account 
-                    WHERE FIND_IN_SET(:userid, follow) > 0
-                    OR FIND_IN_SET(:userid, follower) > 0;
-                "); 				
-                $flw_query->bindValue(':userid', $userid, PDO::PARAM_STR);
-                $flw_query->execute();
-                $flw_accounts = $flw_query->fetchAll();
+                $flw_accounts = array_merge(getFolloweeList($pdo, $userid),getFollowerList($pdo, $userid));
 
                 foreach ($flw_accounts as $account) {
-                    unfollow_user($pdo, $account['userid'], $userid);
-                    unfollow_user($pdo, $userid, $account['userid']);
+                    unfollow_user($pdo, $account, $userid);
+                    unfollow_user($pdo, $userid, $account);
                 }
 
                 // ユーザーIDを削除したい全てのアカウントを取得
@@ -3585,39 +3616,44 @@ function val_AddOtherSettings($dataname, $data, $jsontext){
 }
 //ユーザーのOther_Settingsが既にあるかないか(なければ空のJSONを追加)
 function is_OtherSettings($pdo, $userid, $add = true){
-    $other_settings = getUserData($pdo, $userid)["other_settings"];
-    if(empty($other_settings)){
-        if($add === true){
-            $new_data = [];
-            $new_json = json_encode($new_data);
+    $other_settings = getUserData($pdo, $userid);
+    if($other_settings){
+        if(empty($other_settings["other_settings"])){
+            if($add === true){
+                $new_data = [];
+                $new_json = json_encode($new_data);
 
-            $pdo->beginTransaction();
-            try {
-                // UPDATE文を実行してフォロー情報を更新
-                $updateQuery = $pdo->prepare("UPDATE account SET other_settings = :other_settings WHERE userid = :userid");
-                $updateQuery->bindValue(':other_settings', $new_json, PDO::PARAM_STR);
-                $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
-                $res = $updateQuery->execute();
+                $pdo->beginTransaction();
+                try {
+                    // UPDATE文を実行してフォロー情報を更新
+                    $updateQuery = $pdo->prepare("UPDATE account SET other_settings = :other_settings WHERE userid = :userid");
+                    $updateQuery->bindValue(':other_settings', $new_json, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
 
-                if($res){
-                    $pdo->commit();
-                    return true;
-                }else{
+                    if($res){
+                        $pdo->commit();
+                        return true;
+                    }else{
+                        // ロールバック
+                        $pdo->rollBack();
+                        actionLog($userid, "error", "is_OtherSettings", null, "空のOtherSettingsを追加できませんでした", 3);
+                        return false;
+                    }
+                } catch (Exception $e) {
                     // ロールバック
                     $pdo->rollBack();
-                    actionLog($userid, "error", "is_OtherSettings", null, "空のOtherSettingsを追加できませんでした", 3);
+                    actionLog($userid, "error", "is_OtherSettings", null, $e, 4);
                     return false;
                 }
-            } catch (Exception $e) {
-                // ロールバック
-                $pdo->rollBack();
-                actionLog($userid, "error", "is_OtherSettings", null, $e, 4);
+            }else{
                 return false;
             }
         }else{
-            return false;
+            return true;
         }
     }else{
+        //unfollow_userの救済だーー！！！
         return true;
     }
 }

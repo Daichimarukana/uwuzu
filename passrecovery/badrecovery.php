@@ -1,4 +1,15 @@
 <?php 
+session_name('uwuzu_s_id');
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => true,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_start();
+
 require('../db.php');
 require("../function/function.php");
 

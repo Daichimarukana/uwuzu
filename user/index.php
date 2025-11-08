@@ -155,35 +155,27 @@ if (!empty($pdo)) {
 			$ueuse_cnt = $allueuse->rowCount();
 
 			//-------フォロワー取得---------
-
 			$follower_userdata = array();
-			if(!(empty($follower))){
-				foreach ($follower as $follower_userid) {
-					$follower_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-					$follower_userQuery->bindValue(':userid', $follower_userid);
-					$follower_userQuery->execute();
-					$follower_userinfo = $follower_userQuery->fetch();
 
-					if ($follower_userinfo) {
-						$follower_userdata[] = $follower_userinfo;
-					}
-				}
+			if ($follower != false) {
+				$placeholders_follower = str_repeat('?,', count($follower) - 1) . '?';
+				$get_follower_sql = "SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid IN ($placeholders_follower)";
+				$follower_userQuery = $pdo->prepare($get_follower_sql);
+				$follower_userQuery->execute($follower);
+
+				$follower_userdata = $follower_userQuery->fetchAll(PDO::FETCH_ASSOC);
 			}
 
 			//-------フォロー取得---------
-
 			$follow_userdata = array();
-			if(!(empty($follow))){
-				foreach ($follow as $follow_userid) {
-					$follow_userQuery = $pdo->prepare("SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid = :userid");
-					$follow_userQuery->bindValue(':userid', $follow_userid);
-					$follow_userQuery->execute();
-					$follow_userinfo = $follow_userQuery->fetch();
 
-					if ($follow_userinfo) {
-						$follow_userdata[] = $follow_userinfo;
-					}
-				}
+			if ($follow != false) {
+				$placeholders_follow = str_repeat('?,', count($follow) - 1) . '?';
+				$get_follow_sql = "SELECT username, userid, iconname, headname, sacinfo FROM account WHERE userid IN ($placeholders_follow)";
+				$follow_userQuery = $pdo->prepare($get_follow_sql);
+				$follow_userQuery->execute($follow);
+
+				$follow_userdata = $follow_userQuery->fetchAll(PDO::FETCH_ASSOC);
 			}
 
 			if(filter_var($userdata['iconname'], FILTER_VALIDATE_URL)){
