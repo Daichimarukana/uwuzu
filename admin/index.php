@@ -33,8 +33,36 @@ $pdo = null;
 $stmt = null;
 $res = null;
 $option = null;
+$db_error = false;
 
-if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
+if(!(defined("DB_NAME")) || !(defined("DB_HOST")) || !(defined("DB_USER")) || !(defined("DB_PASS"))){
+    $db_new_settings = "
+        <?php // データベースの接続情報
+        define( 'DB_HOST', '');
+        define( 'DB_USER', '');
+        define( 'DB_PASS', '');
+        define( 'DB_NAME', '');
+
+        // ENC_KEYは操作しないでください。ユーザーデータを使用できなくなるおそれがあります。
+        define( 'ENC_KEY', '');
+
+        define( 'RATE_LM', ''); // レートリミット(ユーズ/分)
+        define( 'STOP_LA', ''); // 自動停止ロードアベレージ上限
+        // タイムゾーン設定
+        date_default_timezone_set('Asia/Tokyo');
+        ?>
+	";
+
+	//サーバー設定上書き
+	$file = fopen("../db.php", 'w');
+	$data = $db_new_settings;
+	fputs($file, $data);
+	fclose($file);
+
+    $error_message[] = "db.phpを初期化しました。ページを再読込してください。";
+    $db_error = true;
+    $db_php = false;
+}else if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
     try {
 
         $option = array(
@@ -44,9 +72,8 @@ if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
         $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
     
     } catch(PDOException $e) {
-    
-        // 接続エラーのときエラー内容を取得する
         $error_message[] = $e->getMessage();
+        $db_error = true;
     }
 
     if(empty($error_message)){
@@ -66,34 +93,24 @@ if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
         if ($exists) {
             blockedIP($_SERVER['REMOTE_ADDR']);
         }
+    
+        $aduser = "yes";
+        
+        $query = $pdo->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
+        
+        $query->execute(array(':adminuser' => $aduser));
+        
+        $result2 = $query->fetch();
+        
+        if($result2 > 0){
+            header("Location: ../login.php");
+            exit;
+        }
+        
+        $db_php = true;
+    }else{
+        $db_php = false;
     }
-    
-    $aduser = "yes";
-    
-    $options = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-    
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    
-    $query = $dbh->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
-    
-    $query->execute(array(':adminuser' => $aduser));
-    
-    $result2 = $query->fetch();
-    
-    if($result2 > 0){
-        header("Location: ../login.php");
-        exit;
-    }
-    
-    $db_php = true;
 }else{
     $db_php = false;
 }
@@ -156,11 +173,22 @@ $pdo = null;
 
         <p>おめでとうございます！！！</p>
         <p>uwuzuの導入が完了しました！</p>
+
+        <?php if($db_error === true){?>
+            <p>uwuzuのセットアップをしたいところですが...<br>
+                データベースの接続にエラーが発生しているようです。<br>
+                上の赤枠のエラーコードへの対応をお願いします。<br>
+                <br>
+                なお、データベースの接続設定をやり直す場合は、db.phpを空欄のファイルにしてください。
+            </p>
+            <div class="p2">正常動作中のuwuzuのdb.phpを空欄のファイルにすると、これまで正常にデータベースに接続できていてデータを既に保存していた場合に、データの復号に問題が発生してしまい、uwuzuを使用できなくなるおそれがございます。<br>
+                操作は慎重に...！</div>
+        <?php }else{?>
         <p>これよりuwuzuのセットアップを開始します！<br>
             セットアップを始める前に、PHPの必須モジュールがインストールされているか、以下の欄をみてご確認ください。<br>
             Not setが一つでもある場合は再度モジュールの設定を行ってください！<br>
             <br>
-            <?php if($db_php == true){?>
+            <?php if($db_php === true){?>
                 db.phpの設定は済んでいるようですね、それでは早速セットアップを開始しましょう！
             <?php }else{?>
                 また、uwuzuのセットアップを始める前に、以下の情報をあなたが知っている必要があります！<br>
@@ -194,6 +222,8 @@ $pdo = null;
                 <a href="setup_db_php.php" class="irobutton">セットアップ開始！</a>
             </div>
         </div>
+
+        <?php }?>
         
     </div>
 </div>

@@ -24,6 +24,20 @@ if(!($is_login === false)){
 	exit;
 }
 //-------------------------------------------------------------
+if(isset($_SESSION['auth_status'])){
+    if(!($_SESSION['auth_status'] === "done_recovery")){
+        if($_SESSION['auth_status'] === "bad_recovery"){
+            $_SESSION = array();
+            header("Location: badrecovery.php");
+            exit;
+        }else{
+            $_SESSION = array();
+            header("Location: index.php");
+            exit;
+        }   
+    }
+}
+
 ?>
 
 <!DOCTYPE html>

@@ -347,10 +347,10 @@ require('../logout/logout.php');
 		<!--ここまで！--->
 	<?php } else { ?>
 		<div class="hed">
-			<img src="<?php echo safetext($userdata['headname']); ?>">
+			<img src="<?php echo safetext($userdata['headname']); ?>" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
 		</div>
 		<div class="icon">
-			<img src="<?php echo safetext($userdata['iconname']); ?>">
+			<img src="<?php echo safetext($userdata['iconname']); ?>" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
 			<h2><?php echo replaceProfileEmojiImages(safetext($userData['username'])); ?></h2>
 			<p>@<?php echo safetext($userData['userid']); ?><?php if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){echo "<span>@".safetext($activity_domain)."</span>";} ?></p>
 		</div>
@@ -917,11 +917,12 @@ require('../logout/logout.php');
 				dataType: 'json',
 				success: function(response) {
 					if (response.success) {
-						// いいね成功時の処理
 						if (isLiked) {
 							$this.removeClass('bookmark_after'); // クラスを削除していいねを取り消す
+							view_notify("ブックマークを解除しました");
 						} else {
 							$this.addClass('bookmark_after'); // クラスを追加していいねを追加する
+							view_notify("ユーズをブックマークしました！");
 						}
 					} else {
 						// いいね失敗時の処理

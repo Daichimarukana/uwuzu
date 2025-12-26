@@ -512,11 +512,12 @@ $(document).ready(function() {
 			dataType: 'json',
 			success: function(response) {
 				if (response.success) {
-					// いいね成功時の処理
 					if (isLiked) {
 						$this.removeClass('bookmark_after'); // クラスを削除していいねを取り消す
+						view_notify("ブックマークを解除しました");
 					} else {
 						$this.addClass('bookmark_after'); // クラスを追加していいねを追加する
+						view_notify("ユーズをブックマークしました！");
 					}
 				} else {
 					// いいね失敗時の処理

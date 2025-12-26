@@ -24,6 +24,12 @@ if(!($is_login === false)){
 	exit;
 }
 //-------------------------------------------------------------
+if(isset($_SESSION['auth_status'])){
+    if($_SESSION['auth_status'] === "go_recovery"){
+        header("Location: startrecovery.php");
+        exit;
+    }
+}
 ?>
 
 <!DOCTYPE html>

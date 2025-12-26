@@ -73,6 +73,25 @@ if(!($is_login === false)){
 //-------------------------------------------------------------
 
 if(!($userid == null)){
+    if($_SESSION['auth_status'] === "go_recovery"){
+        $userData = getUserData($pdo, $_SESSION['userid']);
+        if(!(empty($userData))){
+            $userid = $userData["userid"];
+        }else{
+            $_SESSION = array();
+            header("Location: badrecovery.php");
+            exit;
+        }
+    }elseif($_SESSION['auth_status'] === "bad_recovery"){
+        $_SESSION = array();
+        header("Location: badrecovery.php");
+        exit;
+    }else{
+        $_SESSION = array();
+        header("Location: badrecovery.php");
+        exit;
+    }
+
     if( !empty($_SESSION['mailadds']) ) {
         $result = $pdo->prepare("SELECT userid, username, mailadds, loginid, authcode, encryption_ivkey, datetime FROM account WHERE userid = :userid");
         $result->bindValue(':userid', $userid);
@@ -157,6 +176,7 @@ if(!($userid == null)){
                                             send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others", "system");
                     
                                             $_SESSION['userid'] = "";
+                                            $_SESSION['auth_status'] = 'done_recovery';
                                             $url = 'donerecovery.php';
                                             header('Location: ' . $url, true, 303);
                     
@@ -258,6 +278,7 @@ if(!($userid == null)){
                                         send_notification($userid,"uwuzu-fromsys","🔴アカウントのパスワードが復元により変更されました。🔴",$msg,"/others", "system");
                 
                                         $_SESSION['userid'] = "";
+                                        $_SESSION['auth_status'] = 'done_recovery';
                                         $url = 'donerecovery.php';
                                         header('Location: ' . $url, true, 303);
                 
@@ -306,6 +327,7 @@ if(!($userid == null)){
 }else{
     $_SESSION['mailadds'] = "";
     $_SESSION['userid'] = "";
+    $_SESSION['auth_status'] = 'bad_recovery';
     $url = 'badrecovery.php';
     header('Location: ' . $url, true, 303);
     exit;
@@ -346,7 +368,8 @@ $pdo = null;
     <div class="textbox">
         <h1>二段階認証</h1>
 
-        <p>二段階認証コードと新しいパスワードを入力してください。</p>
+        <p>二段階認証コードと新しいパスワードを入力してください。<br>メールで認証することも可能です。</p>
+        <div class="p2">二段階認証コードを設定していない場合、メールで認証をしてください。</div>
 
             <?php if( !empty($error_message) ): ?>
                 <ul class="errmsg">

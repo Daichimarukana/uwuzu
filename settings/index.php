@@ -545,7 +545,7 @@ $pdo = null;
 					<!--ユーザーネーム関係-->
 					<div>
 						<p>ユーザーネーム</p>
-						<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userData['username']) ){ echo safetext( $userData['username']); } ?>">
+						<input id="username" placeholder="" class="inbox" type="text" name="username" value="<?php if( !empty($userData['username']) ){ echo safetext( $userData['username']); } ?>" autocomplete="off">
 					</div>
 					<div>
 						<p>メールアドレス</p>
@@ -621,11 +621,11 @@ $pdo = null;
 			<h1>パスワード</h1>
 			<div>
                 <p>ユーザーid</p>
-                <input id="passchk_userid" type="text" class="inbox" name="passchk_userid" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="">
+                <input id="passchk_userid" type="text" class="inbox" name="passchk_userid" value="">
             </div>
 			<div>
                 <p>新しいパスワード</p>
-                <input id="password" type="password" class="inbox" name="password" oncopy="return false" onpaste="return false" oncontextmenu="return false" value="" autocomplete="new-password">
+                <input id="password" type="password" class="inbox" name="password" value="" autocomplete="new-password">
 				<div id="password_zxcvbn" class="p2" style="display: none;"></div>
 				<p>パスワードを表示する</p>
 				<div class="switch_button">

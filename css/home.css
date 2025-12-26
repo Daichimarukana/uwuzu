@@ -4459,7 +4459,7 @@ label>input {
 .notification .flebox .username img {
     margin-left: 6px;
     margin-right: 6px;
-    width: 14px;
+    width: fit-content;
     height: 14px;
 }
 

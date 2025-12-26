@@ -65,28 +65,18 @@ if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
         if ($exists) {
             blockedIP($_SERVER['REMOTE_ADDR']);
         }
+    }else{
+        header("Location: index.php");
+        exit;
     }
     
     $aduser = "yes";
     
-    $options = array(
-        // SQL実行失敗時に例外をスルー
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // デフォルトフェッチモードを連想配列形式に設定
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-        // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-    );
-    
-    $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-    
     try{
-        $table_query = $dbh->prepare('SELECT 1 FROM role LIMIT 1;');
-        $table_query->execute();
+        $table_query = $pdo->query("SHOW TABLES LIKE 'account'");
         $table_result = $table_query->fetch();
-        if($table_result > 0){
-            $query = $dbh->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
+        if($table_result){
+            $query = $pdo->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
     
             $query->execute(array(':adminuser' => $aduser));
             
@@ -100,7 +90,7 @@ if(!(empty(DB_NAME) && empty(DB_HOST) && empty(DB_USER) && empty(DB_PASS))){
             exit;
         }
     } catch(PDOException $e) {
-        
+        $error_message[] = "データベースの操作に失敗しました。(".$e.")";
     }
     
     $db_php = true;

@@ -198,7 +198,7 @@ async function replaceCustomEmojis(text) {
         if (url === undefined) return `:${name}:`; // 未取得
         if (url === null) return `:${name}:`;       // 存在しない
 
-        return `<img src="${url}" alt=":${name}:">`; // ここで生成
+        return `<img src="${url}" alt=":${name}:" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/emoji_404.png'">`; // ここで生成
     });
 
     return text;
@@ -265,6 +265,7 @@ function deleteLocalstorage(key, pagepath) {
     }
 }
 
+/*
 function a_link(text) {
     const placeholders = {};
     let placeholderIndex = 0;
@@ -298,54 +299,74 @@ function a_link(text) {
 
     return text;
 }
+*/
 
 function formatMarkdown(text) {
     const placeholders = {};
     let placeholderIndex = 0;
 
-    // URLをプレースホルダーに退避
-    text = text.replace(/<a\b[^>]*>[\s\S]*?<\/a>/g, (match) => {
+    // ヘルパー関数: プレースホルダーを作成して保存
+    function createPlaceholder(content) {
         const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
-        placeholders[key] = match; // 元の文字列を保存
+        placeholders[key] = content;
         return key;
-    });
+    }
 
-    // 複数行インラインコード（バッククォート3つ）を検出して、<pre><code>で囲む
+    // 複数行コードブロック (```)
     text = text.replace(/```([\s\S]+?)```/g, (match, code) => {
-        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
-        placeholders[key] = `<pre class="codeblock"><code>${code.replace(/^\s*\n/, '')}</code></pre>`;
-        return key;
+        // 先頭の改行のみ削除
+        const cleanCode = code.replace(/^\s*\n/, '');
+        // <pre><code> で包んで退避
+        return createPlaceholder(`<pre class="codeblock"><code>${cleanCode}</code></pre>`);
     });
 
-    // コードブロックの退避
+    // インラインコード (`)
     text = text.replace(/`([^`\n]+)`/g, (_, code) => {
-        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
-        placeholders[key] = `<span class="inline">${code}</span>`;
-        return key;
+        return createPlaceholder(`<span class="inline">${code}</span>`);
     });
 
-    // コロンで囲まれた絵文字をプレースホルダーに退避
+    // 既存のaタグ
+    text = text.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, (match) => {
+        return createPlaceholder(match);
+    });
+
+    // ユーザーメンション (@user)
+    text = text.replace(/@([a-zA-Z0-9_]+)(?:@([a-zA-Z0-9_.-]+))?/g, (match) => {
+        return createPlaceholder(match);
+    });
+    
+    // カスタム絵文字 (:emoji:)
     text = text.replace(/:([a-zA-Z0-9_]+):/g, (match) => {
-        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
-        placeholders[key] = match; // 元の文字列を保存
-        return key;
+        return createPlaceholder(match);
     });
 
-    // ユーザーIDをプレースホルダーに退避
-    text = text.replace(/@([a-zA-Z0-9_]+)/g, (match) => {
-        const key = `\u2063{{PLACEHOLDER${placeholderIndex++}}}\u2063`;
-        placeholders[key] = match; // 元の文字列を保存
-        return key;
+    // a_link
+    text = text.replace(/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一ー-龠々\w\-\/?=&%.]+)/g, function (url) {
+        const escapedUrl = url;
+        const no_https_link = escapedUrl.replace("https://", "");
+        let linkText = no_https_link;
+        
+        if (no_https_link.length > 48) {
+            linkText = no_https_link.substring(0, 48) + '...';
+        }
+        
+        return `<a href="${escapedUrl}" target="_blank" rel="noopener">${linkText}</a>`;
     });
 
-    // 独自構文などの装飾
+    // ハッシュタグ
+    text = text.replace(/(^|[^a-zA-Z0-9_])#([a-zA-Z0-9ぁ-んァ-ン一-龥ー_]+)/gu, function (match, before, tag) {
+        const encodedTag = encodeURIComponent("#" + tag);
+        return `${before}<a href="/search?q=${encodedTag}" class="hashtags">#${tag}</a>`;
+    });
+
+    // 独自構文
     text = text.replace(/\[\[buruburu (.+?)\]\]/g, '<span class="buruburu">$1</span>');
     text = text.replace(/\[\[time (\d+)\]\]/g, (_, ts) => {
         const d = new Date(parseInt(ts, 10) * 1000);
         return `<span class="unixtime" title="${d.toLocaleString()}">${d.toLocaleString()}</span>`;
     });
 
-    // マークダウン風装飾
+    // 文字装飾
     text = text
         .replace(/\*\*\*(.+?)\*\*\*/g, '<b><i>$1</i></b>')
         .replace(/___(.+?)___/g, '<b><i>$1</i></b>')
@@ -354,7 +375,7 @@ function formatMarkdown(text) {
         .replace(/\*(.+?)\*/g, '<i>$1</i>')
         .replace(/_(.+?)_/g, '<i>$1</i>')
         .replace(/~~(.+?)~~/g, '<s>$1</s>')
-        .replace(/^&gt;&gt;&gt; ?(.*)$/gm, '<span class="quote">$1</span>')  // ここを修正
+        .replace(/^&gt;&gt;&gt; ?(.*)$/gm, '<span class="quote">$1</span>')
         .replace(/\|\|(.+?)\|\|/g, '<span class="blur">$1</span>')
         .replace(/^# (.+)/gm, '<h1>$1</h1>')
         .replace(/^## (.+)/gm, '<h2>$1</h2>')
@@ -366,10 +387,11 @@ function formatMarkdown(text) {
         line = line.trim();
         return line === '' ? '<br>' : `<p>${line}</p>`;
     });
-
-    // プレースホルダーを戻す
+    
     let final = lines.join('');
+
     for (const key in placeholders) {
+        // キー自体に正規表現の特殊文字が含まれるためエスケープ
         const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         final = final.replace(new RegExp(escapedKey, 'g'), placeholders[key]);
     }
@@ -541,14 +563,14 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             reuse = ``;
             if (!(ueuse["reuse"] == null)) {
                 // カスタム絵文字を非同期に差し替え
-                var inyoreuseHtml = formatMarkdown(a_link(ueuse["reuse"]["ueuse"]));
+                var inyoreuseHtml = formatMarkdown(ueuse["reuse"]["ueuse"]);
                 inyoreuseHtml = await replaceMentions(inyoreuseHtml);
                 inyoreuseHtml = await replaceCustomEmojis(inyoreuseHtml);
 
                 inyo = `<div class="reuse_box" data-uniqid="` + ueuse["reuse"]["uniqid"] + `" id="quote_reuse">
                             <div class="reuse_flebox">
                                 <a href="/!`+ ueuse["reuse"]["uniqid"] + `">
-                                    <img src="`+ ueuse["reuse"]["userdata"]["iconurl"] + `">
+                                    <img src="`+ ueuse["reuse"]["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
                                 </a>
                                 <a href="/!`+ ueuse["reuse"]["uniqid"] + `">
                                     <div class="u_name">
@@ -574,7 +596,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                         </div>`;
             }
 
-            contentHtml = formatMarkdown(a_link(ueuse["ueuse"]));
+            contentHtml = formatMarkdown(ueuse["ueuse"]);
 
             uniqid = ueuse["uniqid"];
             userid = ueuse["userdata"]["userid"];
@@ -601,12 +623,12 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             if (!(ueuse["reuse"] == null)) {
                 reuse = `<div class="ru">
                             <a href="/@`+ ueuse["userdata"]["userid"] + `">
-                                <img src="`+ ueuse["userdata"]["iconurl"] + `">
+                                <img src="`+ ueuse["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
                                 <p>`+ await replaceCustomEmojis(ueuse["userdata"]["username"]) + `さんがリユーズ</p>
                             </a>
                         </div>`;
                 inyo = ``;
-                contentHtml = formatMarkdown(a_link(ueuse["reuse"]["ueuse"]));
+                contentHtml = formatMarkdown(ueuse["reuse"]["ueuse"]);
 
                 uniqid = ueuse["reuse"]["uniqid"];
                 userid = ueuse["reuse"]["userdata"]["userid"];
@@ -632,7 +654,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             } else {
                 reuse = `<div class="ru">
                             <a href="/@`+ ueuse["userdata"]["userid"] + `">
-                                <img src="`+ ueuse["userdata"]["iconurl"] + `">
+                                <img src="`+ ueuse["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
                                 <p>`+ await replaceCustomEmojis(ueuse["userdata"]["username"]) + `さんがリユーズ</p>
                             </a>
                         </div>`;
@@ -679,7 +701,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         }
 
         inyo = ``;
-        contentHtml = formatMarkdown(a_link(ueuse["ueuse"]));
+        contentHtml = formatMarkdown(ueuse["ueuse"]);
 
         uniqid = ueuse["uniqid"];
         userid = ueuse["userdata"]["userid"];
@@ -707,13 +729,13 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             <div class="ueuse">
                 <div class="headbox">
                     <a href="/@`+ ueuse["userdata"]["userid"] + `">
-                        <img src="`+ ueuse["userdata"]["headurl"] + `">
+                        <img src="`+ ueuse["userdata"]["headurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                     </a>
                 </div>
                 <div class="flebox">
                     <div class="user">
                         <a href="/@`+ ueuse["userdata"]["userid"] + `">
-                            <img src="`+ ueuse["userdata"]["iconurl"] + `">
+                            <img src="`+ ueuse["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
                         </a>
                         <div class="u_name">
                             <a href="/@`+ ueuse["userdata"]["userid"] + `">` + ueuse["userdata"]["username"] + `</a>
@@ -738,7 +760,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
 
         reuse = ``;
         inyo = ``;
-        contentHtml = formatMarkdown(a_link(ueuse["ueuse"]));
+        contentHtml = formatMarkdown(ueuse["ueuse"]);
 
         uniqid = ueuse["uniqid"];
         userid = ueuse["userdata"]["userid"];
@@ -764,7 +786,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     }
 
     if (abi != "" && typeof abi === "string") {
-        abi = formatMarkdown(a_link(abi));
+        abi = formatMarkdown(abi);
         abi = await replaceMentions(abi);
         abi = await replaceCustomEmojis(abi);
 
@@ -935,7 +957,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             <div class="ueuse" id="ueuse-`+ ueuse["uniqid"] + `">
                 `+ reuse + `
                 <div class="flebox">
-                    <a href="/@`+ userid + `"><img src="` + iconurl + `"></a>
+                    <a href="/@`+ userid + `"><img src="` + iconurl + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'"></a>
                     <a href="/@`+ userid + `"><div class="u_name">` + await replaceCustomEmojis(username) + `</div></a>
                     <div class="idbox">
                         <a href="/@`+ userid + `">@` + userid + `</a>
@@ -970,7 +992,7 @@ function createAdsHtml(ads) {
     if (!(ads == null || ads == "")) {
         var ads_html = `<div class="ads">
                             <a href="`+ ads["url"] + `" target="_blank">
-                                <img src="`+ ads["imgurl"] + `" title="` + ads["memo"] + `">
+                                <img src="`+ ads["imgurl"] + `" title="` + ads["memo"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                             </a>
                         </div>`;
         return ads_html;
@@ -1017,10 +1039,18 @@ async function createNotificationHtml(notification) {
     let is_readclass = "";
     let datetime = notification["datetime"];
     let userid = notification["userdata"]["userid"];
+
+    let userid_url = "";
+    if(userid == "uwuzu-fromsys"){
+        userid_url = "/rule/serverabout";
+    }else{
+        userid_url = "/@"+userid;
+    }
+
     let username = notification["userdata"]["username"];
     let iconurl = notification["userdata"]["iconurl"];
     let title = notification["title"];
-    let content = formatMarkdown(a_link(notification["message"]));
+    let content = formatMarkdown(notification["message"]);
     content = await replaceMentions(content);
     content = await replaceCustomEmojis(content);
 
@@ -1037,12 +1067,12 @@ async function createNotificationHtml(notification) {
             </div>
             <div class="flebox">
                 <div class="icon">
-                    <a href="/@`+ userid + `">
-                        <img src="`+ iconurl + `">
+                    <a href="`+ userid_url + `">
+                        <img src="`+ iconurl + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
                     </a>
                 </div>
                 <div class="username">
-                    <a href="/@`+ userid + `">` + await replaceCustomEmojis(username) + `</a>
+                    <a href="`+ userid_url + `">` + await replaceCustomEmojis(username) + `</a>
                 </div>
             </div>
             <h3>`+ await replaceCustomEmojis(title) + `</h3>

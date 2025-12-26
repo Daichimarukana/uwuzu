@@ -69,16 +69,21 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
 
                         // 新しいいいね情報を更新
                         $newbookmark = implode(',', $bookmarkList);
-                        $updateQuery = $pdo->prepare("UPDATE account SET bookmark = :bookmark WHERE userid = :userid");
-                        $updateQuery->bindValue(':bookmark', $newbookmark, PDO::PARAM_STR);
-                        $updateQuery->bindValue(':userid', $userId, PDO::PARAM_STR);
-                        $res = $updateQuery->execute();
+                        if(!(mb_strlen($newbookmark) >= 16777215)){
+                            $updateQuery = $pdo->prepare("UPDATE account SET bookmark = :bookmark WHERE userid = :userid");
+                            $updateQuery->bindValue(':bookmark', $newbookmark, PDO::PARAM_STR);
+                            $updateQuery->bindValue(':userid', $userId, PDO::PARAM_STR);
+                            $res = $updateQuery->execute();
 
-                        if ($res) {
-                            echo json_encode(['success' => true, 'newbookmark' => 'success']);
-                            exit;
-                        } else {
-                            echo json_encode(['success' => false, 'error' => 'ブックマークの更新に失敗しました。']);
+                            if ($res) {
+                                echo json_encode(['success' => true, 'newbookmark' => 'success']);
+                                exit;
+                            } else {
+                                echo json_encode(['success' => false, 'error' => 'ブックマークの更新に失敗しました。']);
+                                exit;
+                            }
+                        }else{
+                            echo json_encode(['success' => false, 'error' => 'ブックマーク数が多すぎます。']);
                             exit;
                         }
                     } else {

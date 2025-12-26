@@ -56,23 +56,14 @@ if(empty($error_message)){
     if ($exists) {
         blockedIP($_SERVER['REMOTE_ADDR']);
     }
+}else{
+    header("Location: index.php");
+    exit;
 }
 
 $aduser = "yes";
 
-$options = array(
-    // SQL実行失敗時に例外をスルー
-    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-    // デフォルトフェッチモードを連想配列形式に設定
-    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    // バッファードクエリを使う（一度に結果セットを全て取得し、サーバー負荷を軽減）
-    // SELECTで得た結果に対してもrowCountメソッドを使えるようにする
-    PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-);
-
-$dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
-
-$query = $dbh->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
+$query = $pdo->prepare('SELECT * FROM account WHERE admin = :adminuser limit 1');
 
 $query->execute(array(':adminuser' => $aduser));
 

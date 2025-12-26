@@ -78,8 +78,13 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
                             $value['fromusername'] = "でふぉると";
                         }
                     }else{
-                        $value['fromusericon'] = safetext($value["servericon"]);
-                        $value['fromusername'] = "uwuzu";
+                        if(!empty($value["servericon"])){
+                            $value['fromusericon'] = safetext($value["servericon"]);
+                            $value['fromusername'] = "uwuzu";
+                        }else{
+                            $value['fromusericon'] = "../img/uwuzuicon.png";
+                            $value['fromusername'] = "uwuzu";
+                        }
                     }
                 }
 

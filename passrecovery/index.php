@@ -73,6 +73,10 @@ if(!($is_login === false)){
 	header("Location: ../home/");
 	exit;
 }
+//パスワード試行回数制限-------------------------------------------
+if (!isset($_SESSION['login_passtry'])) {
+    $_SESSION['login_passtry'] = 0;
+}
 //-------------------------------------------------------------
 
 if( !empty($_POST['btn_submit']) ) {
@@ -153,10 +157,6 @@ if( !empty($_POST['btn_submit']) ) {
     // SQL実行
     $result->execute();
 
-
-
-    // ... (前略)
-        // IDの入力チェック
 	if( empty($userid) ) {
 		$error_message[] = 'ユーザーIDを入力してください。(USERID_INPUT_PLEASE)';
 	} else {
@@ -167,6 +167,21 @@ if( !empty($_POST['btn_submit']) ) {
         if(!(preg_match("/^[a-zA-Z0-9_]+$/", $userid))){
             $error_message[] = "IDは半角英数字で入力してください。(「_」は使用可能です。)(USERID_DONT_USE_WORD)";
         }
+
+        if ($_SESSION["login_passtry"] <= 5) {
+            $delay = $_SESSION["login_passtry"] * 2;
+        } else {
+            $delay = min(pow(2, $_SESSION["login_passtry"] - 2), 60);
+        }
+        sleep($delay);
+
+        $locknow_loginLog = isUserLockedByloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
+        if($locknow_loginLog[0] === true){
+            $_SESSION["login_passtry"]++;
+            addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
+            $error_message[] = '現在あなたのアカウントは保護のためロックされています。しばらく時間を開けてから再度お試しください。';
+        }
+
         if(empty($error_message)){
             if($result->rowCount() > 0) {
                 $row = $result->fetch(); // ここでデータベースから取得した値を $row に代入する
@@ -184,40 +199,44 @@ if( !empty($_POST['btn_submit']) ) {
                             if(MAIL_CHKS == "true"){
                                 $_SESSION['userid'] = $userid;
                                 $_SESSION['mailadds'] = $dec_mailadds;
+                                $_SESSION['auth_status'] = 'go_recovery';
                                 $url = 'startrecovery.php';
                                 header('Location: ' . $url, true, 303);
 
-                                // すべての出力を終了
                                 exit;
                             }
                         }
 
                         if(empty($row["authcode"])){
-
                             $_SESSION['userid'] = "";
+                            $_SESSION['auth_status'] = 'bad_recovery';
                             $url = 'badrecovery.php';
                             header('Location: ' . $url, true, 303);
 
-                            // すべての出力を終了
                             exit;
                         }else{
                             $_SESSION['userid'] = $userid;
                             $_SESSION['mailadds'] = $dec_mailadds;
+                            $_SESSION['auth_status'] = 'go_recovery';
                             $url = 'startrecovery.php';
                             header('Location: ' . $url, true, 303);
 
-                            // すべての出力を終了
                             exit;
                         }
-                    }
-                    else{
+                    }else{
+                        $_SESSION["login_passtry"]++;
+                        addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
                         $error_message[] = 'IDまたはメールアドレスが違います(ID_OR_MAILADDS_CHIGAUYANKE)'; 
                     }
                 }else{
+                    $_SESSION["login_passtry"]++;
+                    addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
                     $error_message[] = 'IDまたはメールアドレスが違います(ID_OR_MAILADDS_CHIGAUYANKE)'; 
                 }
             }
             else {
+                $_SESSION["login_passtry"]++;
+                addloginLog($pdo, $userid, $_SERVER['REMOTE_ADDR']);
                 $error_message[] = 'IDまたはメールアドレスが違います(ID_OR_MAILADDS_CHIGAUYANKE)';
             }
         }
