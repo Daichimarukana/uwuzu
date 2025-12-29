@@ -16,12 +16,12 @@
     background: var(--main-color);
 }
 
-.flexbox{
+.flexbox {
     display: flex;
-    
+
 }
 
-.btnbox{
+.btnbox {
     width: auto;
     margin: 0px auto;
 }
@@ -176,7 +176,8 @@ textarea {
     line-height: 20px;
     border: 1px solid var(--error);
 }
-.justfit{
+
+.justfit {
     margin: 16px 0px;
 }
 
@@ -588,7 +589,6 @@ main h1 {
     width: 148px;
     height: 148px;
     border-radius: 50%;
-    box-shadow: 0 0px 48px 0 rgba(0, 0, 0, .05);
 }
 
 .userheader .icon h2 img {
@@ -600,6 +600,29 @@ main h1 {
     width: auto;
     vertical-align: text-top;
     border-radius: 0px;
+}
+
+.userheader .icon .status {
+    position: relative;
+    left: calc(-24px + -8px);
+    top: calc(32px - 4px);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #CCC;
+    border: solid 4px var(--tl-color);
+}
+
+.userheader .icon .green {
+    background-color: #00cc4e;
+}
+
+.userheader .icon .yellow {
+    background-color: #ffc400;
+}
+
+.userheader .icon .gray {
+    background-color: #CCC;
 }
 
 .userheader h2 {
@@ -1257,6 +1280,7 @@ main h1 {
     transition: 0.5s;
     opacity: 0;
 }
+
 .ueuse .blur:hover * {
     opacity: 1;
 }
@@ -2436,7 +2460,7 @@ main h1 {
     margin-top: auto;
     margin-bottom: auto;
     margin-left: 6px;
-    border-radius: 6px;
+    border-radius: 16px;
     background-color: var(--background-color);
     border: 1px solid var(--border-color);
 }
@@ -2444,8 +2468,8 @@ main h1 {
 .ueuse .reuse_box .reuse_flebox .idbox a {
     margin-top: 3px;
     margin-bottom: 3px;
-    margin-left: 4px;
-    margin-right: 4px;
+    margin-left: 8px;
+    margin-right: 8px;
     text-align: center;
     font-size: 12px;
     text-decoration: none;
@@ -2851,6 +2875,85 @@ main h1 {
     font-family: var(--Text-fonts), sans-serif;
     font-weight: normal;
 }
+
+/*
+.sendbox #preview_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.sendbox .preview-item {
+    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
+        linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+    background-color: #FFF;
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+
+    border: 1px solid #ccc;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.sendbox .img-preview img {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    display: block;
+}
+
+.sendbox .video-preview {
+    width: 128px;
+    height: 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+.sendbox .video-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.sendbox .video-preview.simple {
+    background: #333;
+}
+.sendbox .video-preview.simple .video-label {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+.sendbox .video-preview.simple .video-size {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.sendbox .remove-preview {
+    opacity: 0.5;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #000;
+    color: #FFF;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    line-height: 22px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 10;
+    transition: all ease-out 250ms;
+    border: solid 1px transparent;
+}
+.sendbox .remove-preview:hover {
+    opacity: 1;
+    background-color: var(--error);
+    border: solid 1px #FFF;
+}
+*/
 
 .ueusebtn {
     cursor: pointer;
@@ -3535,7 +3638,7 @@ label>input {
     animation: SlideDown .15s ease-in-out forwards;
 }
 
-.modal-content .scope_desc{
+.modal-content .scope_desc {
     margin-left: 8px;
     line-height: 24px;
     overflow-wrap: break-word;
@@ -3591,6 +3694,18 @@ label>input {
     z-index: 9999;
     transition: all 250ms ease-out;
 }
+.Image_modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    transition: all 250ms ease-out;
+}
 
 .Image_modal .modal-content {
     padding: 0px;
@@ -3608,19 +3723,43 @@ label>input {
     box-shadow: 0 0px 48px 0 rgba(0, 0, 0, .15);
     overflow: hidden;
     cursor: zoom-out;
+    background-color: #fff;
+    
+    display: flex;
+    flex-direction: column;
 }
 
 .Image_modal .modal-content img {
-    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%),
-        linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
+    background: linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%), linear-gradient(45deg, #CCC 25%, transparent 25%, transparent 75%, #CCC 75%);
     background-color: #FFF;
     background-size: 20px 20px;
     background-position: 0 0, 10px 10px;
     width: 100%;
-    height: 80dvh;
+    max-height: 80dvh;
     margin: 0px;
     vertical-align: top;
     object-fit: contain;
+}
+
+.warning-footer {
+    padding: 4px 20px;
+    background-color: var(--error);
+    color: var(--dark-text-color);
+    line-height: 22px;
+    font-size: 16px;
+    font-family: var(--Text-fonts);
+    font-weight: bold;
+    text-align: center;
+    border-top: 1px solid #FFFFFF;
+    font-weight: bold;
+    display: none;
+}
+.warning-footer span{
+    margin-right: 16px;
+    color: var(--dark-text-color);
+    font-size: 18px;
+    font-family: var(--Mono-fonts);
+    font-weight: bold;
 }
 
 .topbox {
@@ -4550,10 +4689,12 @@ label>input {
     background-color: var(--notification-color);
     color: var(--text-color);
 }
+
 .notification .blur * {
     transition: 0.5s;
     opacity: 0;
 }
+
 .notification .blur:hover * {
     opacity: 1;
 }
@@ -4992,6 +5133,45 @@ hr {
     margin-bottom: 6px;
 }
 
+.hny .done_button {
+    cursor: pointer;
+    border: none;
+    display: block;
+    width: 20%;
+    padding: 8px auto;
+    margin-left: auto;
+    margin-right: 0px;
+
+    padding-top: 6px;
+    padding-bottom: 6px;
+
+
+    background-color: var(--main-color);
+
+    border-radius: 50px;
+    color: var(--sub-color);
+    font-size: 16px;
+    font-family: var(--Head-fonts), sans-serif;
+    font-weight: normal;
+    text-decoration: none;
+    text-align: center;
+    transition: box-shadow 250ms ease-in-out;
+    transition: width 250ms ease-out;
+    transition: all 250ms ease-out;
+}
+
+.hny .done_button:hover {
+    background-color: var(--main-color);
+    color: var(--sub-color);
+    box-shadow: 0 0px 48px 0 rgba(0, 0, 0, .2);
+    width: 21%;
+}
+
+.hny .done_button:active {
+    box-shadow: 0 0px 48px 0 rgba(0, 0, 0, .0);
+    width: 19%;
+}
+
 .switch_input {
     position: absolute;
     width: 50px;
@@ -5146,14 +5326,14 @@ summary {
     list-style: none;
 }
 
-.report_summary{
-    display:flex; 
-    justify-content:space-between; 
-    align-items:center; 
-    width:100%;
+.report_summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 }
 
-.report_summary .count{
+.report_summary .count {
     font-size: 16px;
     color: var(--subtext-color);
     padding: 2px 8px;
@@ -5170,7 +5350,8 @@ summary {
     padding-bottom: 0px;
     border-radius: 8px;
 }
-.report-entry .p2{
+
+.report-entry .p2 {
     margin: 0px;
 }
 
@@ -5387,6 +5568,44 @@ summary {
     font-family: var(--Text-fonts), sans-serif;
     font-weight: 900;
 }
+
+.admin_userinfo .icon .tatext .status {
+    display: flex;
+    vertical-align: top;
+    margin-left: 12px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: 0px;
+}
+
+.admin_userinfo .icon .tatext .status p {
+    margin: 2px 0px 0px 8px;
+    vertical-align: middle;
+    line-height: 14px;
+    color: var(--subtext-color);
+    font-size: 14px;
+    font-family: var(--Mono-fonts), sans-serif;
+}
+
+.admin_userinfo .icon .tatext .circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #CCC;
+}
+
+.admin_userinfo .icon .tatext .green {
+    background-color: #00cc4e;
+}
+
+.admin_userinfo .icon .tatext .yellow {
+    background-color: #ffc400;
+}
+
+.admin_userinfo .icon .tatext .gray {
+    background-color: #CCC;
+}
+
 
 .admin_userinfo .profile p {
     text-align: left;
@@ -6387,26 +6606,29 @@ noscript .noscript_modal .inner .center_text p {
     font-weight: normal;
 }
 
-.auth_clientbox{
+.auth_clientbox {
     width: 100%;
     height: fit-content;
     background-color: var(--background-color);
     border: solid 1px var(--border-color);
     border-radius: 10px;
 }
-.auth_clientbox .flexbox{
+
+.auth_clientbox .flexbox {
     margin: 16px;
     display: flex;
     width: 100%;
     height: fit-content;
 }
-.auth_clientbox .flexbox img{
+
+.auth_clientbox .flexbox img {
     width: 64px;
     height: 64px;
     object-fit: cover;
     border-radius: 8px;
 }
-.auth_clientbox .flexbox p{
+
+.auth_clientbox .flexbox p {
     width: calc(100% - 24px);
     margin: auto auto auto 16px;
     font-weight: bold;
@@ -6414,35 +6636,41 @@ noscript .noscript_modal .inner .center_text p {
     line-height: 24px;
     color: var(--text-color);
 }
-.auth_clientbox .about{
+
+.auth_clientbox .about {
     margin: 16px;
     width: calc(100% - 32px);
 }
-.auth_clientbox .about .scopebox{
+
+.auth_clientbox .about .scopebox {
     width: calc(100% - 32px);
     border: solid 1px var(--border-color);
     background-color: var(--tl-color);
     border-radius: 8px;
     padding: 2px 16px;
 }
-.auth_clientbox .accountbox{
+
+.auth_clientbox .accountbox {
     width: calc(100% - 32px);
     height: fit-content;
     margin: 16px;
 }
-.auth_clientbox .accountbox .flexbox{
+
+.auth_clientbox .accountbox .flexbox {
     margin: 0px;
     display: flex;
     width: 100%;
     height: fit-content;
 }
-.auth_clientbox .accountbox .flexbox img{
+
+.auth_clientbox .accountbox .flexbox img {
     width: 32px;
     height: 32px;
     object-fit: cover;
     border-radius: 16px;
 }
-.auth_clientbox .accountbox .flexbox p{
+
+.auth_clientbox .accountbox .flexbox p {
     width: calc(100% - 8px);
     margin: auto auto auto 8px;
     font-weight: normal;
@@ -6450,12 +6678,14 @@ noscript .noscript_modal .inner .center_text p {
     line-height: 16px;
     color: var(--text-color);
 }
-.auth_clientbox .callbackbox{
+
+.auth_clientbox .callbackbox {
     width: calc(100% - 32px);
     height: fit-content;
     margin: 16px;
 }
-.auth_clientbox .callbackbox p{
+
+.auth_clientbox .callbackbox p {
     font-family: var(--Mono-fonts), sans-serif;
     font-weight: normal;
     font-size: 14px;
@@ -6533,6 +6763,15 @@ noscript .noscript_modal .inner .center_text p {
         display: flex;
         padding: 0px;
         flex-wrap: wrap;
+    }
+
+    .userheader .icon .status {
+        position: relative;
+        left: calc(148px - (24px + 8px));
+        top: -37px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
     }
 
     .userheader .profile p {
@@ -8478,6 +8717,10 @@ noscript .noscript_modal .inner .center_text p {
         border: 1px solid var(--main-color);
     }
 
+    .userheader .icon .status {
+        border: solid 4px var(--dark-sub-color);
+    }
+
     .fzone .follow .fbtn {
         background-color: var(--main-color);
         color: var(--sub-color);
@@ -8785,7 +9028,7 @@ noscript .noscript_modal .inner .center_text p {
         color: var(--dark-subtext-color);
     }
 
-    .modal-content .scope_desc{
+    .modal-content .scope_desc {
         color: var(--dark-text-color);
     }
 
@@ -8845,7 +9088,7 @@ noscript .noscript_modal .inner .center_text p {
         color: var(--dark-subtext-color);
     }
 
-    .report_summary .count{
+    .report_summary .count {
         color: var(--subtext-color);
         background-color: var(--dark-sub-color);
         border: solid 1px var(--dark-border-color);
@@ -9347,21 +9590,25 @@ noscript .noscript_modal .inner .center_text p {
         border: solid 1px var(--dark-border-color);
     }
 
-    .auth_clientbox{
+    .auth_clientbox {
         background-color: var(--dark-background-color);
         border: solid 1px var(--dark-border-color);
     }
-    .auth_clientbox .flexbox p{
+
+    .auth_clientbox .flexbox p {
         color: var(--dark-text-color);
     }
-    .auth_clientbox .about .scopebox{
+
+    .auth_clientbox .about .scopebox {
         border: solid 1px var(--dark-border-color);
         background-color: var(--dark-sub-color);
     }
-    .auth_clientbox .accountbox .flexbox p{
+
+    .auth_clientbox .accountbox .flexbox p {
         color: var(--dark-text-color);
     }
-    .auth_clientbox .callbackbox p{
+
+    .auth_clientbox .callbackbox p {
         color: var(--dark-text-color);
     }
 }

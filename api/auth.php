@@ -96,6 +96,13 @@ $is_trueclient = false;
 if(!(empty($_GET["session"])) && !(empty($_GET["client"])) && !(empty($_GET["scope"]))){
     $is_trueclient = true;
     $session_code = safetext($_GET["session"]);
+
+    if($is_Admin == "yes"){
+        $admin_permission = true;
+    }else{
+        $admin_permission = false;
+    }
+    
     if(strlen($session_code) > 512){
         $is_trueclient = false;
     }
@@ -114,8 +121,8 @@ if(!(empty($_GET["session"])) && !(empty($_GET["client"])) && !(empty($_GET["sco
         $securityScopesView = false;
 
         foreach ($client_scope_base as $scope) {
-            if (GetAPIScopes($scope)) {
-                $client_scope[] = GetAPIScopes($scope);
+            if (GetAPIScopes($scope, $admin_permission)) {
+                $client_scope[] = GetAPIScopes($scope, $admin_permission);
                 if($securityScopesView === false && in_array($scope, $securityScopes)){
                     $securityScopesView = true;
                 }
@@ -156,7 +163,7 @@ if($is_trueclient === true){
         }
 
         foreach ($client_scope_base as $scope) {
-            if (GetAPIScopes($scope)) {
+            if (GetAPIScopes($scope, $admin_permission)) {
                 $client_scope_done[] = $scope;
             }else{
                 $client_scope_done = array();
@@ -196,6 +203,10 @@ if($is_trueclient === true){
                 $pdo->rollBack();
             }
             if($res) {
+                if($admin_permission === true){
+                    actionLog($userid, "info", "api/auth", $client_name, "管理者のアカウントでAPIトークンが発行されました。\n".$client_scope_done, 4);
+                }
+                
                 if(!(empty($client_callback))){
                     header("Location: ".$client_callback."");
                     exit; 

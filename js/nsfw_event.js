@@ -12,6 +12,7 @@ $(document).on('click', '.mini_irobtn', function (event) {
 
 $(document).on('click', '#ueuse_image', function (event) {
     var imgLink = $(this).attr('src');
+    var imgAIBlock = $(this).attr('data-aiblock');
 
     var modal = $('#Big_ImageModal');
     var modalMain = $('.modal-content');
@@ -19,6 +20,12 @@ $(document).on('click', '#ueuse_image', function (event) {
 
     $(modalimg_zone).attr('src',imgLink);
 
+    if(imgAIBlock == "true"){
+        $("#NoAI_Footer").show();
+    }else{
+        $("#NoAI_Footer").hide();
+    }
+    
     modal.show();
     modalMain.addClass("slideUp");
     modalMain.removeClass("slideDown");

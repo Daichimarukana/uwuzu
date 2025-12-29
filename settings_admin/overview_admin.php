@@ -84,21 +84,29 @@ $notiData = $notiQuery->fetch(PDO::FETCH_ASSOC);
 $notificationcount = $notiData['notification_count'];
 
 if(!empty($pdo)){
-	mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-	$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-	//User
-	$result = $mysqli->query("SELECT userid FROM account");
-	$count1 = $result->num_rows;
-	//ueuse
-	$result2 = $mysqli->query("SELECT uniqid FROM ueuse");
-	$count2 = $result2->num_rows;
-	//emoji
-	$result3 = $mysqli->query("SELECT sysid FROM emoji");
-	$count3 = $result3->num_rows;
-	//bot
-	$result4 = $mysqli->query("SELECT userid FROM account WHERE sacinfo = 'bot'");
-	$count4 = $result4->num_rows;
+	try {
+		//User
+		$count1 = $pdo->query("SELECT userid FROM account")->rowCount();
+		//Ueuse
+		$count2 = $pdo->query("SELECT uniqid FROM ueuse")->rowCount();
+		//Emoji
+		$count3 = $pdo->query("SELECT sysid FROM emoji")->rowCount();
+		// bot
+		$count4 = $pdo->query("SELECT userid FROM account WHERE sacinfo = 'bot'")->rowCount();
+		// ActiveUsers
+		$count5 = $pdo->query("SELECT userid FROM account WHERE last_login_datetime > NOW() - INTERVAL 5 MINUTE")->rowCount();
+		// AwayUsers
+		$count6 = $pdo->query("SELECT userid FROM account WHERE last_login_datetime < NOW() - INTERVAL 5 MINUTE AND last_login_datetime >= NOW() - INTERVAL 15 MINUTE")->rowCount();
+	} catch (PDOException $e) {
+		$count1 = 0;
+		$count2 = 0;
+		$count3 = 0;
+		$count4 = 0;
+		$count5 = 0;
+		$count6 = 0;
+		$error_message[] = $e->getMessage();
+		actionLog($userid, "error", "overview_admin", null, "統計情報の取得に失敗しました！", 4);
+	}
 
 	$migrationUserFollow = checkFollowMigrationProgress($pdo);
 
@@ -162,45 +170,50 @@ if(!empty($pdo)){
 
 
 if(function_exists("disk_free_space")){
-	if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-		$disk = true;
-		$diskFree = (int) disk_free_space('C:') / 1024 / 1024;
-		$diskTotal = (int) disk_total_space('C:') / 1024 / 1024;
-		$diskUmari = $diskTotal - $diskFree;
-		if ($diskFree / $diskTotal < 0.1) {
-			$disk_over90p = true;
-		}else{
-			$disk_over90p = false;
-		}
-	
-		$loadAve = null;
-	} else {
-		$disk = true;
-		$diskFree = (int) disk_free_space('/') / 1024 / 1024;
-		$diskTotal = (int) disk_total_space('/') / 1024 / 1024;
-		$diskUmari = $diskTotal - $diskFree;
-		if ($diskFree / $diskTotal < 0.1) {
-			$disk_over90p = true;
-		}else{
-			$disk_over90p = false;
-		}
-		if(function_exists("sys_getloadavg")){
-			$loadAve = sys_getloadavg()[0];
-		}else{
-			$loadAve = null;
-		}
-	}
-}else{
-	$disk = false;
-	$diskFree = 5000;
-	$diskUmari = 5000;
-	$diskTotal = 10000;
-	$disk_over90p = false;
-	if(function_exists("sys_getloadavg")){
-		$loadAve = sys_getloadavg()[0];
-	}else{
-		$loadAve = null;
-	}
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        $disk = true;
+        $totalRaw = disk_total_space('C:');
+        $diskTotal = ($totalRaw > 0) ? (int)$totalRaw / 1024 / 1024 : 0;
+        $diskFree = (int)disk_free_space('C:') / 1024 / 1024;
+        $diskUmari = $diskTotal - $diskFree;
+
+        if ($diskTotal > 0 && ($diskFree / $diskTotal < 0.1)) {
+            $disk_over90p = true;
+        } else {
+            $disk_over90p = false;
+        }
+    
+        $loadAve = null;
+    } else {
+        $disk = true;
+        $totalRaw = disk_total_space('/');
+        $diskTotal = ($totalRaw > 0) ? (int)$totalRaw / 1024 / 1024 : 0;
+        $diskFree = (int)disk_free_space('/') / 1024 / 1024;
+        $diskUmari = $diskTotal - $diskFree;
+
+        if ($diskTotal > 0 && ($diskFree / $diskTotal < 0.1)) {
+            $disk_over90p = true;
+        } else {
+            $disk_over90p = false;
+        }
+
+        if(function_exists("sys_getloadavg")){
+            $loadAve = sys_getloadavg()[0];
+        } else {
+            $loadAve = null;
+        }
+    }
+} else {
+    $disk = false;
+    $diskFree = 5000;
+    $diskUmari = 5000;
+    $diskTotal = 10000;
+    $disk_over90p = false;
+    if(function_exists("sys_getloadavg")){
+        $loadAve = sys_getloadavg()[0];
+    }else{
+        $loadAve = null;
+    }
 }
 
 
@@ -289,6 +302,16 @@ require('../logout/logout.php');
 							<p><?php echo safetext($count4);?></p>
 						</div>
 					</div>
+					<div class="overview">
+						<div class="overview_cnt_l">
+							<div class="p2">アクティブユーザー数<br>(過去5分間)</div>
+							<p><?php echo safetext($count5);?></p>
+						</div>
+						<div class="overview_cnt_r">
+							<div class="p2">離席中のユーザー数<br>(過去5分～15分間)</div>
+							<p><?php echo safetext($count6);?></p>
+						</div>
+					</div>
 					<hr>
 					<p>ディスク空き容量</p>
 					<?php if($disk == true){?>
@@ -297,10 +320,17 @@ require('../logout/logout.php');
 						<?php }else{?>
 							<p>ディスク空き容量には余裕があります。</p>
 						<?php };?>
+						
 						<div class="graph">
-							<div class="per" style="width:calc(<?php echo round((int)mb_to_gb($diskUmari) / (int)mb_to_gb($diskTotal) * 100, 1);?>% - 8px);">
+							<?php 
+								$totalGB = (int)mb_to_gb($diskTotal);
+								$usedGB  = (int)mb_to_gb($diskUmari);
+								$percent = ($totalGB > 0) ? round($usedGB / $totalGB * 100, 1) : 0;
+							?>
+							<div class="per" style="width:calc(<?php echo $percent; ?>% - 8px);">
 							</div>
 						</div>
+						
 						<p>使用済み : <?php echo mb_to_gb($diskUmari)."GB/".mb_to_gb($diskTotal);?>GB<br>
 						空き容量 : <?php echo mb_to_gb($diskFree);?>GB</p>
 					<?php }else{?>

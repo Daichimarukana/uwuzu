@@ -243,6 +243,28 @@ function uwuzuUserLogin($session, $cookie, $ip_addr, $operation_permission = "us
                 }
             }
 
+            //ログイン日時を記録---------------------------------------------------------
+            $last_login_datetime = date("Y-m-d H:i:s", time());
+            $pdo->beginTransaction();
+            try {
+                $updateQuery = $pdo->prepare("UPDATE account SET last_login_datetime = :last_login_datetime WHERE userid = :userid");
+                $updateQuery->bindValue(':last_login_datetime', $last_login_datetime, PDO::PARAM_STR);
+                $updateQuery->bindValue(':userid', $userid, PDO::PARAM_STR);
+                $res = $updateQuery->execute();
+
+                if($res){
+                    $pdo->commit();
+                }else{
+                    // ロールバック
+                    $pdo->rollBack();
+                    actionLog($userid, "error", "uwuzuUserLogin", null, "最終ログイン日時を記録できませんでした！", 3);
+                }
+            } catch (Exception $e) {
+                // ロールバック
+                $pdo->rollBack();
+                actionLog($userid, "error", "uwuzuUserLogin", null, $e, 4);
+            }
+
             //JobがあればJobを実行する---------------------------------------------------
             $job = getJob($pdo, $userid);
             if(!(empty($job))){
@@ -3746,6 +3768,12 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
         ? $value['iconname']
         : "../" . $value['iconname'];
 
+    if(isset($value["other_settings"])) {
+        $value["isAIBlock"] = val_OtherSettings("isAIBlock", $value["other_settings"]);
+    } else {
+        $value["isAIBlock"] = false;
+    }
+
     $value = to_null($value);
     $value = to_array_safetext($value);
     $value["role"] = explode(',', $value["role"]);
@@ -3772,6 +3800,12 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
             $reusedUserData = getUserData($pdo, $reused['account']);
             $reusedUserData["role"] = explode(',', $reusedUserData["role"]);
 
+            if(isset($reusedUserData["other_settings"])) {
+                $reusedUserData["isAIBlock"] = val_OtherSettings("isAIBlock", $reusedUserData["other_settings"]);
+            } else {
+                $reusedUserData["isAIBlock"] = false;
+            }
+
             $reused = to_null($reused);
             $reused = to_array_safetext($reused);
 
@@ -3794,6 +3828,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
                         : "../" . $reusedUserData['iconname'],
                     "role" => $reusedUserData["role"],
                     "is_bot" => $reusedUserData["is_bot"],
+                    "is_aiblock" => (bool)$reusedUserData["isAIBlock"],
                 ],
                 "ueuse" => $reused["ueuse"],
                 "photo1" => $reused["photo1"],
@@ -3833,6 +3868,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
             "iconurl" => $value['iconname'],
             "role" => $value["role"],
             "is_bot" => $value["is_bot"],
+            "is_aiblock" => (bool)$value["isAIBlock"],
         ],
         "ueuse" => $value["ueuse"],
         "photo1" => $value["photo1"],
@@ -3862,7 +3898,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
     return $ueuse;
 }
 
-function GetAPIScopes($scope){
+function GetAPIScopes($scope, $is_admin = false){
     $scopelist = [
         "read:me" => "重要な情報以外の自分のアカウントの情報を見る",
         "write:me" => "重要な情報以外の自分のアカウントの情報を変更する",
@@ -3876,15 +3912,37 @@ function GetAPIScopes($scope){
         "write:bookmark" => "ブックマークにユーズを追加・削除する",
         "read:bookmark" => "ブックマークを見る"
     ];
-    if(empty($scope)){
-        return $scopelist;
-    }else{
-        if(array_key_exists($scope, $scopelist)){
-            return $scopelist[$scope];
+
+    $admin_scopelist = [
+        'read:admin:users' => '[Admin] 重要な情報を含めたユーザーのアカウント情報を見る',
+        'write:admin:user-sanction' => '[Admin] ユーザーに通知・凍結/凍結解除・BANする',
+        'read:admin:reports' => '[Admin] 通報を取得する',
+        'write:admin:reports' => '[Admin] 通報を解決する'
+    ];
+
+    if($is_admin === false){
+        if(empty($scope)){
+            return $scopelist;
         }else{
-            return false;
+            if(array_key_exists($scope, $scopelist)){
+                return $scopelist[$scope];
+            }else{
+                return false;
+            }
+        }
+    }else{
+        $admin_all_scopes = array_merge($scopelist, $admin_scopelist);
+        if(empty($scope)){
+            return $admin_all_scopes;
+        }else{
+            if(array_key_exists($scope, $admin_all_scopes)){
+                return $admin_all_scopes[$scope];
+            }else{
+                return false;
+            }
         }
     }
+    
 }
 
 function MinimumHash($text) {
@@ -4021,7 +4079,19 @@ function APIAuth($pdo, $token, $scope){
         $allow_scope = array_unique(array_map('trim', explode(",", $tokenData["scope"])));
         if(in_array($scope, $allow_scope)){
             $userdata = getUserData($pdo, $tokenData["userid"]);
+
             if(!(empty($userdata))){
+                if($userdata["admin"] == "yes"){
+                    $admin_permission = true;
+                }else{
+                    $admin_permission = false;
+                }
+                foreach ($allow_scope as $scope) {
+                    $description = GetAPIScopes($scope, $admin_permission);
+                    if ($description === false) {
+                        return [false, "token_invalid_scope", null];
+                    }
+                }
                 if($userdata["role"] === "ice"){
                     return [false, "this_account_has_been_frozen", null];
                 }else{
@@ -4059,7 +4129,7 @@ function getDatasUeuse(PDO $pdo, array $messages): array {
     $users = [];
     if (!empty($userIds)) {
         $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-        $stmt = $pdo->prepare("SELECT userid, username, profile, role, iconname, headname, sacinfo FROM account WHERE userid IN ($placeholders)");
+        $stmt = $pdo->prepare("SELECT userid, username, profile, role, iconname, headname, sacinfo, other_settings FROM account WHERE userid IN ($placeholders)");
         $stmt->execute($userIds);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $users[$row['userid']] = $row;
@@ -4096,6 +4166,7 @@ function getDatasUeuse(PDO $pdo, array $messages): array {
             $message['iconname'] = $userRow['iconname'] ?? ($message['iconname'] ?? null);
             $message['headname'] = $userRow['headname'] ?? ($message['headname'] ?? null);
             $message['sacinfo']  = $userRow['sacinfo']  ?? ($message['sacinfo']  ?? null);
+            $message['other_settings']  = $userRow['other_settings']  ?? ($message['other_settings']  ?? null);
         }
 
         // reply / reuse

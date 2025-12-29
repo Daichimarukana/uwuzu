@@ -110,7 +110,7 @@ if (!empty($pdo)) {
 		if($is_local == true){
 			$roles = array_filter(explode(',', $userData["role"])); // カンマで区切られたロールを配列に分割
 
-			$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings FROM account WHERE userid = :userid");
+			$rerole = $pdo->prepare("SELECT  follow, follower,blocklist, username, userid, password, mailadds, profile, iconname, headname, role, datetime, other_settings, last_login_datetime FROM account WHERE userid = :userid");
 
 			$rerole->bindValue(':userid', $userData["userid"]);
 			// SQL実行
@@ -128,6 +128,37 @@ if (!empty($pdo)) {
 			}
 
 			$isAIBlock = val_OtherSettings("isAIBlock", $userdata["other_settings"]);
+
+			$isPublicOnlineStatus = val_OtherSettings("isPublicOnlineStatus", $userdata["other_settings"]);
+			if($isPublicOnlineStatus === true){
+				if (!(empty($userdata["last_login_datetime"]))) {
+					$lastLogin = new DateTime($userdata["last_login_datetime"]);
+					$now = new DateTime();
+					
+					$interval = $now->diff($lastLogin);
+					
+					$minutesPast = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
+
+					$status_datetime = $userdata["last_login_datetime"];
+
+					if ($minutesPast <= 5) {
+						$status_color = "green";
+						$status = "オンライン";
+					} elseif ($minutesPast <= 15) {
+						$status_color = "yellow";
+						$status = "離席中";
+					} else {
+						$status_color = "gray";
+						$status = "オフライン";
+					}
+				} else {
+					$status_color = "gray";
+					$status = "オフライン";
+				}
+			}else{
+				$status = null;
+			}
+			
 
 			//-------フォロー数---------
 			$follow = getFolloweeList($pdo, $userData["userid"]); // コンマで区切られたユーザーIDを含む変数
@@ -203,6 +234,8 @@ if (!empty($pdo)) {
 			$ueuse_cnt = "zero";
 			$followCount = "zero";
 			$followerCount = "zero";
+
+			$status = null;
 		}
 		
 	} else {
@@ -213,50 +246,52 @@ if (!empty($pdo)) {
 		$ueuse_cnt = "zero";
 		$followCount = "zero";
 		$followerCount = "zero";
+
+		$status = null;
 	}
 }
 
-if (!empty($_POST['follow'])) {
-	$res_follow = follow_user($pdo, $userData['userid'], $userid);
-	if($res_follow === false){
-		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-	}else{
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:" . $url);
-		exit;
+if($is_local == true){
+	if (!empty($_POST['follow'])) {
+		$res_follow = follow_user($pdo, $userData['userid'], $userid);
+		if($res_follow === false){
+			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+		}else{
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:" . $url);
+			exit;
+		}
+	} elseif (!empty($_POST['unfollow'])) {
+		$res_unfollow = unfollow_user($pdo, $userData['userid'], $userid);
+		if($res_unfollow === false){
+			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+		}else{
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:" . $url);
+			exit;
+		}
 	}
-} elseif (!empty($_POST['unfollow'])) {
-	$res_unfollow = unfollow_user($pdo, $userData['userid'], $userid);
-	if($res_unfollow === false){
-		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-	}else{
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:" . $url);
-		exit;
+
+	if (!empty($_POST['send_block_submit'])) {
+		$res_block = block_user($pdo, $userData['userid'], $userid);
+		if($res_block === false){
+			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+		}else{
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:" . $url);
+			exit;
+		}
+	} elseif (!empty($_POST['send_un_block_submit'])) {
+		$res_unblock = unblock_user($pdo, $userData['userid'], $userid);
+		if($res_unblock === false){
+			$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
+		}else{
+			$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+			header("Location:" . $url);
+			exit;
+		}
 	}
 }
-
-
-if (!empty($_POST['send_block_submit'])) {
-	$res_block = block_user($pdo, $userData['userid'], $userid);
-	if($res_block === false){
-		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-	}else{
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:" . $url);
-		exit;
-	}
-} elseif (!empty($_POST['send_un_block_submit'])) {
-	$res_unblock = unblock_user($pdo, $userData['userid'], $userid);
-	if($res_unblock === false){
-		$error_message[] = '更新に失敗しました。(REGISTERED_DAME)';
-	}else{
-		$url = (empty($_SERVER['HTTPS']) ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-		header("Location:" . $url);
-		exit;
-	}
-}
-
 
 
 require('../logout/logout.php');
@@ -265,7 +300,6 @@ require('../logout/logout.php');
 <html lang="ja">
 
 <head>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"></script>
 	<script src="../js/jquery-min.js"></script>
 	<script src="../js/unsupported.js"></script>
 	<script src="../js/console_notice.js"></script>
@@ -351,6 +385,9 @@ require('../logout/logout.php');
 		</div>
 		<div class="icon">
 			<img src="<?php echo safetext($userdata['iconname']); ?>" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
+			<?php if($status !== null){?>
+				<div class="status <?php echo safetext($status_color); ?>" title = "<?php echo safetext($status); ?>"></div>
+			<?php }?>
 			<h2><?php echo replaceProfileEmojiImages(safetext($userData['username'])); ?></h2>
 			<p>@<?php echo safetext($userData['userid']); ?><?php if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){echo "<span>@".safetext($activity_domain)."</span>";} ?></p>
 		</div>
@@ -647,6 +684,7 @@ require('../logout/logout.php');
 		<div id="Big_ImageModal" class="Image_modal">
 			<div class="modal-content">
 				<img id="Big_ImageMain" href="">
+				<div id="NoAI_Footer" class="warning-footer"><span>No AI</span>機械学習への利用を一切拒否します。</div>
 			</div>
 		</div>
 

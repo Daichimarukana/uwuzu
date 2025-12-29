@@ -95,6 +95,31 @@ if (!empty($pdo)) {
 		$view_ip_addr = $userdata["last_ip"];
 	}
 
+	if (!(empty($userdata["last_login_datetime"]))) {
+		$lastLogin = new DateTime($userdata["last_login_datetime"]);
+		$now = new DateTime();
+		
+		$interval = $now->diff($lastLogin);
+		
+		$minutesPast = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
+
+		$status_datetime = $userdata["last_login_datetime"];
+
+		if ($minutesPast <= 5) {
+			$status_color = "green";
+			$status = "Online";
+		} elseif ($minutesPast <= 15) {
+			$status_color = "yellow";
+			$status = "Away";
+		} else {
+			$status_color = "gray";
+			$status = "Offline";
+		}
+	} else {
+		$status_color = "gray";
+		$status = "Offline";
+	}
+
 	$roles = array_filter(explode(',', $userdata["role"]));
 
 	$roleDataArray = array();
@@ -123,7 +148,7 @@ if( !empty($_POST['send_notification_submit']) ) {
 	$notice_msg = safetext($_POST['notice_msg']);
 	if(empty($notice_title)){
 		$error_message[] = "通知のタイトルを空欄にすることはできません。(INPUT_PLEASE)";
-	}elseif(mb_strlen($notice_title) > 128){
+	}elseif(mb_strlen($notice_title) > 512){
 		$error_message[] = "通知のタイトルを512文字以上にすることはできません。(INPUT_OVER_MAX_COUNT)";
 	}
 	if(empty($notice_msg)){
@@ -283,7 +308,7 @@ if( !empty($_POST['send_water_submit']) ) {
 				if( !empty($view_mailadds) ){
 					if(filter_var($view_mailadds, FILTER_VALIDATE_EMAIL)){
 						$mail_title = "お使いの".safetext($serversettings["serverinfo"]["server_name"])."アカウントは解凍されました！";
-						$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が解凍されたためお知らせいたします。  今後、ご利用のuwuzuアカウントは今まで通りご利用いただけます。  また、APIを使用している方はAPIのトークンがリセットされているため再度トークンを発行してご利用ください。";
+						$mail_text = "".$userdata["username"]."(".$userdata["userid"].")さん    いつもuwuzuをご利用いただきありがとうございます。  ご利用のアカウント(".$userdata["userid"].")が解凍されたためお知らせいたします。  今後、ご利用のuwuzuアカウントは今まで通りご利用いただけます。";
 
 						$error_message[] = send_html_mail($view_mailadds,$mail_title,$mail_text,"../");
 					}
@@ -298,7 +323,7 @@ if( !empty($_POST['send_water_submit']) ) {
 		try {
 			$touserid = safetext($userdata['userid']);
 			$datetime = safetext(date("Y-m-d H:i:s"));
-			$msg = safetext("サービス管理者によりお使いのアカウントは解凍されました！\n今まで通りご利用いただけます。\nなお、APIを使用している方はAPIのトークンがリセットされているため再度トークンを発行してご利用ください。");
+			$msg = safetext("サービス管理者によりお使いのアカウントは解凍されました！\n今まで通りご利用いただけます。");
 			$title = safetext("🫗お使いのアカウントが解凍されました！🫗");
 			$url = safetext("/home");
 			$userchk = 'none';
@@ -420,6 +445,11 @@ require('../logout/logout.php');
 					<div class="tatext">
 						<h2><?php echo safetext($userdata['username']); ?></h2>
 						<p>@<?php echo safetext($userdata['userid']); ?></p>
+						<div class="status">
+							<div class="circle <?php echo safetext($status_color);?>"></div>
+							<p><?php echo safetext($status);?></p>
+							<p><?php echo safetext($status_datetime);?></p>
+						</div>
 					</div>
 				</div>
 

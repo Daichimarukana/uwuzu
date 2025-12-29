@@ -68,6 +68,11 @@ $notificationcount = $notiData['notification_count'];
 
 if (!empty($pdo)) {
 	$userData = getUserData($pdo, $userid);
+	if($is_Admin == "yes"){
+        $admin_permission = true;
+    }else{
+        $admin_permission = false;
+    }
 
 	$apitokenQuery = $pdo->prepare("SELECT * FROM api WHERE userid = :userid ORDER BY datetime DESC");
 	$apitokenQuery->bindValue(':userid', $userid);
@@ -309,8 +314,8 @@ require('../logout/logout.php');
 							$client_scope_base = array_unique(array_map('trim', explode(",", $value["scope"])));
 							$client_scope = [];
 							foreach ($client_scope_base as $scope) {
-								if (GetAPIScopes($scope)) {
-									$client_scope[] = GetAPIScopes($scope);
+								if (GetAPIScopes($scope, $admin_permission)) {
+									$client_scope[] = GetAPIScopes($scope, $admin_permission);
 								} else {
 									$client_scope[] = "未知のスコープ ($scope)";
 								}
@@ -372,7 +377,7 @@ require('../logout/logout.php');
 					<input type="text" id="client_name" class="inbox" placeholder="appname" value="">
 					<div class="p2">許可する権限</div>
 					<?php
-					$scopes = GetAPIScopes(null);
+					$scopes = GetAPIScopes(null, $admin_permission);
 					foreach ($scopes as $key => $label) { ?>
 						<div class="flexbox">
 							<div class="scope-item">

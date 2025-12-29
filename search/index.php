@@ -204,6 +204,7 @@ $pdo = null;
 	<div id="Big_ImageModal" class="Image_modal">
 		<div class="modal-content">
 			<img id="Big_ImageMain" href="">
+			<div id="NoAI_Footer" class="warning-footer"><span>No AI</span>機械学習への利用を一切拒否します。</div>
 		</div>
 	</div>
 
@@ -367,8 +368,10 @@ $(document).ready(function() {
 					// いいね成功時の処理
 					if (isLiked) {
 						$this.removeClass('bookmark_after'); // クラスを削除していいねを取り消す
+						view_notify("ブックマークを解除しました");
 					} else {
 						$this.addClass('bookmark_after'); // クラスを追加していいねを追加する
+						view_notify("ユーズをブックマークしました！");
 					}
 				} else {
 					// いいね失敗時の処理

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-10-27 15:05:57
+-- 生成日時: 2025-12-29 19:07:06
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -52,7 +52,8 @@ CREATE TABLE `account` (
   `mail_settings` mediumtext NOT NULL,
   `encryption_ivkey` varchar(256) NOT NULL,
   `other_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`other_settings`)),
-  `last_ip` varchar(1024) NOT NULL
+  `last_ip` varchar(1024) NOT NULL,
+  `last_login_datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

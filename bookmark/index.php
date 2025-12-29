@@ -206,6 +206,7 @@ $pdo = null;
         <div id="Big_ImageModal" class="Image_modal">
             <div class="modal-content">
                 <img id="Big_ImageMain" href="">
+                <div id="NoAI_Footer" class="warning-footer"><span>No AI</span>機械学習への利用を一切拒否します。</div>
             </div>
         </div>
 

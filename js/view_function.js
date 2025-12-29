@@ -312,6 +312,8 @@ function formatMarkdown(text) {
         return key;
     }
 
+    text = text.replaceAll('&#039;', "'");
+
     // 複数行コードブロック (```)
     text = text.replace(/```([\s\S]+?)```/g, (match, code) => {
         // 先頭の改行のみ削除
@@ -518,10 +520,19 @@ function getBotIcon(userdata) {
     return "";
 }
 
+function getAIBlockFlag(userdata) {
+    if (userdata["is_aiblock"] && userdata["is_aiblock"] == true) {
+        return `data-aiblock = "true"`;
+    }else{
+        return `data-aiblock = "false"`;
+    }
+}
+
 async function createUeuseHtml(ueuse, selectedUniqid = null) {
     let html = "";
     let check = "";
     let bot = "";
+    let AIBlock = "";
     var reuse = "";
     let contentHtml = "";
 
@@ -557,6 +568,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         if (ueuse["reuse"]) {
             check = getCheckIcon(ueuse["userdata"]);
             bot = getBotIcon(ueuse["userdata"]);
+            AIBlock = getAIBlockFlag(ueuse["userdata"]);
         }
 
         if (ueuse["ueuse"].length > 0) {
@@ -621,6 +633,9 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             abi_date = ueuse["abi"]["abi_date"];
         } else {
             if (!(ueuse["reuse"] == null)) {
+                check = getCheckIcon(ueuse["reuse"]["userdata"]);
+                bot = getBotIcon(ueuse["reuse"]["userdata"]);
+                AIBlock = getAIBlockFlag(ueuse["reuse"]["userdata"]);
                 reuse = `<div class="ru">
                             <a href="/@`+ ueuse["userdata"]["userid"] + `">
                                 <img src="`+ ueuse["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
@@ -693,6 +708,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     } else if (ueuse["type"] == "Reply") {
         check = getCheckIcon(ueuse["userdata"]);
         bot = getBotIcon(ueuse["userdata"]);
+        AIBlock = getAIBlockFlag(ueuse["userdata"]);
 
         if (selectedUniqid != null && selectedUniqid == ueuse["uniqid"]) {
             reuse = `<div class="rp"><div class="here"></div><div class="totop"></div><p>一番上のユーズに返信</p></div>`;
@@ -757,6 +773,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     } else {
         check = getCheckIcon(ueuse["userdata"]);
         bot = getBotIcon(ueuse["userdata"]);
+        AIBlock = getAIBlockFlag(ueuse["userdata"]);
 
         reuse = ``;
         inyo = ``;
@@ -858,29 +875,29 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                 if (img4.length > 0) {
                     img_html = `<div class="photo4">
                         <a>
-                            <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                         <a>
-                            <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                         <a>
-                            <img src="`+ img3 + `" alt="画像3" title="画像3" data-id="3" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img3 + `" alt="画像3" title="画像3" data-id="3" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                         <a>
-                            <img src="`+ img4 + `" alt="画像4" title="画像4" data-id="4" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                            <img src="`+ img4 + `" alt="画像4" title="画像4" data-id="4" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                         </a>
                     </div>`;
                 } else {
                     img_html = `<div class="photo3">
                                     <a>
-                                        <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                        <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                     </a>
                                     <a>
-                                        <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                        <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                     </a>
                                     <div class="photo3_btm">
                                         <a>
-                                            <img src="`+ img3 + `" alt="画像3" title="画像3" data-id="3" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                            <img src="`+ img3 + `" alt="画像3" title="画像3" data-id="3" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                         </a>
                                     </div>
                                 </div>`;
@@ -888,17 +905,17 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             } else {
                 img_html = `<div class="photo2">
                                 <a>
-                                    <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                    <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                 </a>
                                 <a>
-                                    <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                    <img src="`+ img2 + `" alt="画像2" title="画像2" data-id="2" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                                 </a>
                             </div>`;
             }
         } else {
             img_html = `<div class="photo1">
                             <a>
-                                <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
+                                <img src="`+ img1 + `" alt="画像1" title="画像1" data-id="1" `+ AIBlock + ` id="ueuse_image" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/image_404.png'">
                             </a>
                         </div>`;
         }

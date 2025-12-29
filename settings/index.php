@@ -88,6 +88,7 @@ if( !empty($pdo) ) {
 
 	$isAIBlock = val_OtherSettings("isAIBlock", $userData["other_settings"]);
 	$isAIBWM = val_OtherSettings("isAIBlockWaterMark", $userData["other_settings"]);
+	$isPublicOnlineStatus = val_OtherSettings("isPublicOnlineStatus", $userData["other_settings"]);
 
 	if(!(empty($userData["encryption_ivkey"]))){
 		$view_mailadds = DecryptionUseEncrKey($userData["mailadds"], GenUserEnckey($userData["datetime"]), $userData["encryption_ivkey"]);
@@ -146,30 +147,16 @@ if( !empty($_POST['btn_submit']) ) {
 
 		$mailadds = safetext($_POST['mailadds']);
 
-		if( !empty($_POST['isAIBlock']) ) {
-			$new_isAIBlock = safetext($_POST['isAIBlock']);
-		}else{
-			$new_isAIBlock = "false";
+		$targets = [
+			'isAIBlock'            => 'isAIBlock',
+			'isAIBMW'              => 'isAIBlockWaterMark',
+			'isPublicOnlineStatus' => 'isPublicOnlineStatus'
+		];
+		$other_settings_json = $userData["other_settings"];
+		foreach ($targets as $post_key => $save_key) {
+			$is_true = (!empty($_POST[$post_key]) && safetext($_POST[$post_key]) === "true");
+			$other_settings_json = val_AddOtherSettings($save_key, $is_true, $other_settings_json);
 		}
-
-		if($new_isAIBlock === "true"){
-			$save_isAIBlock = true;
-		}else{
-			$save_isAIBlock = false;
-		}
-		$other_settings_json = val_AddOtherSettings("isAIBlock", $save_isAIBlock, $userData["other_settings"]);
-
-		if( !empty($_POST['isAIBMW']) ) {
-			$new_isAIBMW = safetext($_POST['isAIBMW']);
-		}else{
-			$new_isAIBMW = "false";
-		}
-		if($new_isAIBMW === "true"){
-			$save_isAIBMW = true;
-		}else{
-			$save_isAIBMW = false;
-		}
-		$other_settings_json = val_AddOtherSettings("isAIBlockWaterMark", $save_isAIBMW, $other_settings_json);
 
 		if( !empty($_POST['mail_important']) ) {
 			$mail_important = safetext($_POST['mail_important']);
@@ -612,6 +599,19 @@ $pdo = null;
 							<?php }?>
 						</div>
 					<?php }?>
+
+					<p>オンラインステータスを公開する</p>
+					<div class="p2">プロフィール画面にあなたのオンラインステータスを表示するかを選択できます。<br>
+						この設定はAPIにも反映されます。</div>
+					<div class="switch_button">
+						<?php if($isPublicOnlineStatus == true){?>
+							<input id="isPublicOnlineStatus" class="switch_input" type='checkbox' name="isPublicOnlineStatus" value="true" checked/>
+							<label for="isPublicOnlineStatus" class="switch_label"></label>
+						<?php }else{?>
+							<input id="isPublicOnlineStatus" class="switch_input" type='checkbox' name="isPublicOnlineStatus" value="true" />
+							<label for="isPublicOnlineStatus" class="switch_label"></label>
+						<?php }?>
+					</div>
 								
 					<input type="submit" class = "irobutton" name="btn_submit" value="保存">
 
