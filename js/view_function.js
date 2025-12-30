@@ -16,7 +16,8 @@ async function replaceMentions(text) {
     let index = 0;
 
     // aタグの一時置き換え
-    text = text.replace(/<a\b[^>]*>.*?<\/a>/gi, (match) => {
+    const ignoreRegex = /<a\b[^>]*>.*?<\/a>|<span class="inline">.*?<\/span>|<pre class="codeblock"><code>.*?<\/code><\/pre>/gis;
+    text = text.replace(ignoreRegex, (match) => {
         const placeholder = `\u2063{{PLACEHOLDER${index}}}\u2063`;
         placeholders.push(match);
         index++;
@@ -134,71 +135,81 @@ function saveEmojiCache() {
 }
 
 async function replaceCustomEmojis(text) {
+    const placeholders = [];
+    let index = 0;
+
+    const ignoreRegex = /<a\b[^>]*>.*?<\/a>|<span class="inline">.*?<\/span>|<pre class="codeblock"><code>.*?<\/code><\/pre>/gis;
+    text = text.replace(ignoreRegex, (match) => {
+        const placeholder = `\u2063{{PLACEHOLDER_EMOJI_${index}}}\u2063`;
+        placeholders.push(match);
+        index++;
+        return placeholder;
+    });
+
     const emojiMatches = [...text.matchAll(/:([a-zA-Z0-9_]+):/g)];
-    if (emojiMatches.length === 0) return text;
 
-    const uniqueEmojis = [...new Set(emojiMatches.map(match => match[1]))];
-    const emojisToFetch = uniqueEmojis.filter(name => !emojiCache[name] && !fetchingEmojis[name]);
+    if (emojiMatches.length > 0) {
+        const uniqueEmojis = [...new Set(emojiMatches.map(match => match[1]))];
+        const emojisToFetch = uniqueEmojis.filter(name => !emojiCache[name] && !fetchingEmojis[name]);
 
-    if (emojisToFetch.length > 0) {
-        const fetchPromise = new Promise((resolve) => {
-            $.ajax({
-                url: '../function/get_customemoji.php',
-                method: 'POST',
-                data: {
-                    emoji: emojisToFetch.join(','),
-                    userid: global_userid,
-                    account_id: global_account_id
-                },
-                dataType: 'json',
-                timeout: 30000,
-                success: function (response) {
-                    if (response.success && response.emojis) {
-                        for (const name of emojisToFetch) {
-                            if (response.success && response.emojis) {
-                                for (const name of emojisToFetch) {
-                                    if (response.emojis[name]) {
-                                        const emoji = response.emojis[name];
-                                        emojiCache[name] = emoji.emojipath;
-                                    } else {
-                                        emojiCache[name] = null;
-                                    }
+        if (emojisToFetch.length > 0) {
+            const fetchPromise = new Promise((resolve) => {
+                $.ajax({
+                    url: '../function/get_customemoji.php',
+                    method: 'POST',
+                    data: {
+                        emoji: emojisToFetch.join(','),
+                        userid: global_userid,
+                        account_id: global_account_id
+                    },
+                    dataType: 'json',
+                    timeout: 30000,
+                    success: function (response) {
+                        if (response.success && response.emojis) {
+                            for (const name of emojisToFetch) {
+                                if (response.emojis[name]) {
+                                    const emoji = response.emojis[name];
+                                    emojiCache[name] = emoji.emojipath;
+                                } else {
+                                    emojiCache[name] = null;
                                 }
                             }
+                        } else {
+                            for (const name of emojisToFetch) {
+                                emojiCache[name] = null;
+                            }
                         }
-                    } else {
+                        saveEmojiCache();
+                        resolve();
+                    },
+                    error: function () {
                         for (const name of emojisToFetch) {
                             emojiCache[name] = null;
                         }
+                        saveEmojiCache();
+                        resolve();
                     }
-                    saveEmojiCache();
-                    resolve();
-                },
-                error: function () {
-                    for (const name of emojisToFetch) {
-                        emojiCache[name] = null;
-                    }
-                    saveEmojiCache();
-                    resolve();
-                }
+                });
             });
-        });
 
-        emojisToFetch.forEach(name => {
-            fetchingEmojis[name] = fetchPromise;
-        });
+            emojisToFetch.forEach(name => {
+                fetchingEmojis[name] = fetchPromise;
+            });
 
-        await fetchPromise;
+            await fetchPromise;
+        }
+
+        await Promise.all(uniqueEmojis.map(name => fetchingEmojis[name]));
+
+        text = text.replace(/:([a-zA-Z0-9_]+):/g, (_, name) => {
+            const url = emojiCache[name];
+            if (url === undefined || url === null) return `:${name}:`;
+            return `<img src="${url}" alt=":${name}:" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/emoji_404.png'">`;
+        });
     }
 
-    await Promise.all(uniqueEmojis.map(name => fetchingEmojis[name]));
-
-    text = text.replace(/:([a-zA-Z0-9_]+):/g, (_, name) => {
-        const url = emojiCache[name];
-        if (url === undefined) return `:${name}:`; // 未取得
-        if (url === null) return `:${name}:`;       // 存在しない
-
-        return `<img src="${url}" alt=":${name}:" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/emoji_404.png'">`; // ここで生成
+    placeholders.forEach((original, i) => {
+        text = text.replace(`\u2063{{PLACEHOLDER_EMOJI_${i}}}\u2063`, original);
     });
 
     return text;

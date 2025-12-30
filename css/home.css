@@ -576,6 +576,7 @@ main h1 {
 }
 
 .userheader .icon {
+    position: relative;
     margin-left: 24px;
     margin-right: 24px;
     display: flex;
@@ -603,8 +604,8 @@ main h1 {
 }
 
 .userheader .icon .status {
-    position: relative;
-    left: calc(-24px + -8px);
+    position: absolute;
+    left: calc(148px - 32px);
     top: calc(32px - 4px);
     width: 24px;
     height: 24px;
