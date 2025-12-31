@@ -130,6 +130,32 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                 }else{
                     $isAdmin = false;
                 }
+
+                $isPublicOnlineStatus = val_OtherSettings("isPublicOnlineStatus", $userdata["other_settings"]);
+                if($isPublicOnlineStatus === true){
+                    if (!(empty($userdata["last_login_datetime"]))) {
+                        $lastLogin = new DateTime($userdata["last_login_datetime"]);
+                        $now = new DateTime();
+                        
+                        $interval = $now->diff($lastLogin);
+                        
+                        $minutesPast = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
+
+                        $status_datetime = $userdata["last_login_datetime"];
+
+                        if ($minutesPast <= 5) {
+                            $online_status = "Online";
+                        } elseif ($minutesPast <= 15) {
+                            $online_status = "Away";
+                        } else {
+                            $online_status = "Offline";
+                        }
+                    } else {
+                        $online_status = "Offline";
+                    }
+                }else{
+                    $online_status = null;
+                }
                 
                 $followee = getFolloweeList($pdo, $userdata["userid"]);
                 if($followee === false){
@@ -164,6 +190,7 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                     'isBot' => $isBot,
                     'isAdmin' => $isAdmin,
                     'role' => $role,
+                    'online_status' => $online_status,
                     'language' => "ja-JP",
                 );
             }

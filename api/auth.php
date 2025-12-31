@@ -139,7 +139,7 @@ if(!(empty($_GET["session"])) && !(empty($_GET["client"])) && !(empty($_GET["sco
         $client_about = "クライアントによる説明はありません。";
     }
     if(isset($_GET["callback"])){
-        $client_callback = safetext(urldecode($_GET["callback"]));
+        $client_callback = urldecode($_GET["callback"]);
     }else{
         $client_callback = null;
     }
