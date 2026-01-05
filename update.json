@@ -1,14 +1,12 @@
 {
     "software": "uwuzu",
-    "version": "1.6.10",
-    "release_date": "2025/12/31",
-    "release_notes": "このアップデートには、APIに関する一部バグと更新忘れの修正が含まれます！\n詳細はリリースノートをご確認ください。",
+    "version": "1.6.11",
+    "release_date": "2026/01/05",
+    "release_notes": "このアップデートには、背景透過画像が投稿できないバグの修正が含まれます！\n詳細はリリースノートをご確認ください。",
     "notices": "アップデート前にデータのバックアップを行うことをおすすめします！",
     "files": {
         "overwrite": [
-            "/api/me/index.php",
-            "/api/users/index.php",
-            "/api/auth.php",
+            "/function/function.php",
             "/server/uwuzuabout.txt",
             "/server/uwuzuinfo.txt",
             "/server/uwuzurelease.txt"

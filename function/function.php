@@ -589,8 +589,10 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
 
         if ($originalWidth <= $maxWidth && $originalHeight <= $maxHeight) {
             $originalImage_webp = imagecreatetruecolor($originalWidth, $originalHeight);
-            imagecopyresampled($originalImage_webp, $originalImage, 0, 0, 0, 0, $originalWidth, $originalHeight, $originalWidth, $originalHeight);
+            imagealphablending($originalImage_webp, false);
+            imagesavealpha($originalImage_webp, true);
 
+            imagecopyresampled($originalImage_webp, $originalImage, 0, 0, 0, 0, $originalWidth, $originalHeight, $originalWidth, $originalHeight);
             imagewebp($originalImage_webp, $filePath, 90); 
             return true;
         }
@@ -609,6 +611,8 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
 
         // 新しい画像リソースを作成
         $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+        imagealphablending($resizedImage, false);
+        imagesavealpha($resizedImage, true);
         // 画像をリサイズ
         imagecopyresampled($resizedImage, $originalImage, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
         // リサイズされた画像を表示
