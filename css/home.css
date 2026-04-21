@@ -1395,6 +1395,19 @@ main h1 {
     font-weight: bold;
 }
 
+.ueuse .chotto_small {
+    line-height: 16px;
+    overflow-wrap: break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 12px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--Text-fonts), sans-serif;
+    font-weight: normal;
+}
+
 .ueuse p img {
     margin-top: auto;
     margin-bottom: auto;
@@ -4700,6 +4713,48 @@ label>input {
     opacity: 1;
 }
 
+.notification .codeblock {
+    width: calc(100% - 12px);
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    background-color: #DDDDDD;
+    color: #323232;
+    border-radius: 5px;
+    font-size: calc(100% - 2px);
+    text-decoration: none;
+    font-family: var(--Mono-fonts), sans-serif;
+    font-weight: bold;
+    vertical-align: top;
+}
+
+.notification .codeblock code {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.notification .unixtime {
+    width: fit-content;
+    margin-left: 4px;
+    margin-right: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    background-color: #F5F5F5;
+    border: solid 1px #CCC;
+    color: #323232;
+    border-radius: 25px;
+    font-size: calc(100% - 2px);
+    text-decoration: none;
+    font-family: var(--Mono-fonts), sans-serif;
+    font-weight: bold;
+    vertical-align: top;
+}
+
 .notification h1 {
     overflow-wrap: break-word;
     margin-top: auto;
@@ -4789,6 +4844,19 @@ label>input {
     text-decoration: none;
     font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
+}
+
+.notification .chotto_small {
+    line-height: 16px;
+    overflow-wrap: break-word;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 0px;
+    font-size: 12px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: var(--Text-fonts), sans-serif;
+    font-weight: normal;
 }
 
 .notification p img {
@@ -8410,11 +8478,11 @@ noscript .noscript_modal .inner .center_text p {
     }
 
     .ueuse p {
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .ru a p {
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .ueuse .inline {
@@ -8444,23 +8512,27 @@ noscript .noscript_modal .inner .center_text p {
 
 
     .ueuse h1 {
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .ueuse h2 {
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .ueuse h3 {
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .ueuse center {
-        color: var(--background-color);
+        color: var(--dark-text-color);
     }
 
     .ueuse a {
         color: var(--main-color);
+    }
+
+    .ueuse .chotto_small {
+        color: var(--dark-text-color);
     }
 
     .ueuse .flebox .time {
@@ -9188,21 +9260,8 @@ noscript .noscript_modal .inner .center_text p {
     }
 
     .notification .inline {
-        width: fit-content;
-        margin-left: 4px;
-        margin-right: 4px;
-        padding-left: 6px;
-        padding-right: 6px;
-        padding-top: 3px;
-        padding-bottom: 3px;
-        background-color: #DDDDDD;
-        color: #323232;
-        border-radius: 5px;
-        font-size: calc(100% - 2px);
-        text-decoration: none;
-        font-family: var(--Mono-fonts), sans-serif;
-        font-weight: bold;
-        vertical-align: top;
+        background-color: #323232;
+        color: #F5F5F5;
     }
 
     .notification h1 {
@@ -9261,6 +9320,16 @@ noscript .noscript_modal .inner .center_text p {
 
     .notification a {
         color: var(--main-color);
+    }
+
+    .notification .chotto_small {
+        color: var(--dark-text-color);
+    }
+
+    .notification .unixtime {
+        background-color: #323232;
+        border: solid 1px #CCC;
+        color: #F5F5F5;
     }
 
     .tokonone p {

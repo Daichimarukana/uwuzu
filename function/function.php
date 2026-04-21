@@ -320,12 +320,14 @@ function uwuzuUserLoginCheck($loginid, $loginkey, $operation_permission = "user"
             if(hash_equals($loginkey, $userLoginKey)){
                 if($operation_permission == "admin"){
                     if($loginResponse["admin"] == "yes"){
-                        $is_login = true;
+                        // true
+                        $is_login = $loginResponse;
                     }else{
                         $is_login = false;
                     }
                 }else{
-                    $is_login = true;
+                    // true
+                    $is_login = $loginResponse;
                 }
             }else{
                 $is_login = false;
@@ -338,6 +340,9 @@ function uwuzuUserLoginCheck($loginid, $loginkey, $operation_permission = "user"
     }else{
         return false;
     }
+}
+function is_sameUserid($userid_a, $userid_b){
+    return strtolower($userid_a) == strtolower($userid_b);
 }
 //---------UNIQID-MAKER---------
 function Legacy_createUniqId(){ 
@@ -424,6 +429,51 @@ function delete_exif($extension, $path){
 }
 //----------EXIF_Delete----------
 //----------Check_Extension------
+// アップロードエラーチェッカー
+function check_upload_error($uploadedFile, $saveFolder){
+    $saveFolder = realpath($saveFolder);
+    $errcode = null;
+    $errnum = $uploadedFile["error"];
+    switch ($errnum) {
+        case 1:
+            $errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";
+            break;
+        case 2:
+            $errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";
+            break;
+        case 3:
+            $errcode = "FILE_SUKOSHIDAKE_UPLOAD";
+            break;
+        case 4:
+            $errcode = "FILE_UPLOAD_DEKINAKATTA";
+            break;
+        case 6:
+            $errcode = "TMP_FOLDER_NAI";
+            break;
+        case 7:
+            $errcode = "FILE_KAKIKOMI_SIPPAI";
+            break;
+        case 8:
+            $errcode = "PHPINFO()_KAKUNIN";
+            break;
+        case 0:
+            if(empty($uploadedFile['name'])){
+                $errcode = "FILE_NAME_NAI";
+            }elseif(empty($uploadedFile['size']) || $uploadedFile['size'] == 0){
+                $errcode = "FILE_SIZE_NAI";
+            }else{
+                if (!file_exists($uploadedFile['tmp_name'])) {
+                    $errcode = "TMP_FILE_NAI";
+                } elseif (!is_writable($saveFolder)) {
+                    $errcode = "SAVE_FOLDER_KAKIKOMI_KENNAI";
+                } else {
+                    $errcode = null;
+                }
+            }
+            break;
+        }
+    return $errcode;
+}
 //ファイル形式チェック(画像かどうか)
 function check_mime($tmp_name){
     $finfo = new finfo();
@@ -1450,56 +1500,53 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     } else {
                         // アップロードされたファイル情報
                         $uploadedFile = $photo1;
+                        $beforeUploadError = check_upload_error($uploadedFile,  __DIR__."/../ueuseimages/");
+                        if($beforeUploadError === null){
+                            if(!(empty($uploadedFile['tmp_name']))){
+                                if(check_mime($uploadedFile['tmp_name'])){
+                                    // アップロードされたファイルの拡張子を取得
+                                    $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
+                                    delete_exif($extension, $uploadedFile['tmp_name']);
+                                    resizeImage($uploadedFile['tmp_name'], 8192, 8192);
 
-                        if(!(empty($uploadedFile['tmp_name']))){
-                            if(check_mime($uploadedFile['tmp_name'])){
-                                // アップロードされたファイルの拡張子を取得
-                                $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
-                                delete_exif($extension, $uploadedFile['tmp_name']);
-                                resizeImage($uploadedFile['tmp_name'], 8192, 8192);
-
-                                if($aibwm === true){
-                                    AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
-                                }
-                                if(AMS3_CHKS == "true"){
-                                    $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
-                                }else{
-                                    if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
-                                        $extension = 'webp';
+                                    if($aibwm === true){
+                                        AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
                                     }
-                                    // 新しいファイル名を生成（uniqid + 拡張子）
-                                    $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-                                    // 保存先のパスを生成
-                                    $uploadedPath = '../ueuseimages/' . $newFilename;
-                                    // ファイルを移動
-                                    $result = move_uploaded_file($uploadedFile['tmp_name'], __DIR__."/".$uploadedPath);
-                                    
-                                    if ($result) {
-                                        $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedFile['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(1)エラーコード：' .$errcode.'';
-                                    }
-                                }
-                                if(isset($s3result)){
-                                    if($s3result == false){
-                                        $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                    if(AMS3_CHKS == "true"){
+                                        $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
                                     }else{
-                                        $save_photo1 = $s3result; // S3に保存されたファイルのパスを使用
+                                        if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
+                                            $extension = 'webp';
+                                        }
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
+                                        // 保存先のパスを生成
+                                        $uploadedPath = '../ueuseimages/' . $newFilename;
+                                        // ファイルを移動
+                                        $result = rename($uploadedFile['tmp_name'], __DIR__."/".$uploadedPath);
+                                        
+                                        if ($result) {
+                                            $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $beforeUploadError = check_upload_error($uploadedFile, __DIR__."/../ueuseimages/") ?? "ERROR";
+                                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
+                                        }
                                     }
+                                    if(isset($s3result)){
+                                        if($s3result == false){
+                                            $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                        }else{
+                                            $save_photo1 = $s3result; // S3に保存されたファイルのパスを使用
+                                        }
+                                    }
+                                }else{
+                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
                                 }
                             }else{
-                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
                             }
                         }else{
-                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
                         }
                     }
 
@@ -1511,54 +1558,51 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         }
                         // アップロードされたファイル情報
                         $uploadedFile2 = $photo2;
-
-                        if(!(empty($uploadedFile2['tmp_name']))){
-                            if(check_mime($uploadedFile2['tmp_name'])){
-                                // アップロードされたファイルの拡張子を取得
-                                $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
-                                delete_exif($extension2, $uploadedFile2['tmp_name']);
-                                resizeImage($uploadedFile2['tmp_name'], 8192, 8192);
-                                if($aibwm === true){
-                                    AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
-                                }
-                                if(AMS3_CHKS == "true"){
-                                    $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
-                                }else{
-                                    if(check_mime($uploadedFile2['tmp_name']) == "image/webp"){
-                                        $extension2 = 'webp';
+                        $beforeUploadError = check_upload_error($uploadedFile2,  __DIR__."/../ueuseimages/");
+                        if($beforeUploadError === null){
+                            if(!(empty($uploadedFile2['tmp_name']))){
+                                if(check_mime($uploadedFile2['tmp_name'])){
+                                    // アップロードされたファイルの拡張子を取得
+                                    $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
+                                    delete_exif($extension2, $uploadedFile2['tmp_name']);
+                                    resizeImage($uploadedFile2['tmp_name'], 8192, 8192);
+                                    if($aibwm === true){
+                                        AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
                                     }
-                                    // 新しいファイル名を生成（uniqid + 拡張子）
-                                    $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
-                                    // 保存先のパスを生成
-                                    $uploadedPath2 = '../ueuseimages/' . $newFilename2;
-                                    // ファイルを移動
-                                    $result2 = move_uploaded_file($uploadedFile2['tmp_name'], __DIR__."/".$uploadedPath2);
-                                    if ($result2) {
-                                        $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedFile2['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(2)エラーコード：' .$errcode.'';
-                                    }
-                                }
-                                if(isset($s3result)){
-                                    if($s3result == false){
-                                        $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
+                                    if(AMS3_CHKS == "true"){
+                                        $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
                                     }else{
-                                        $save_photo2 = $s3result; // S3に保存されたファイルのパスを使用
+                                        if(check_mime($uploadedFile2['tmp_name']) == "image/webp"){
+                                            $extension2 = 'webp';
+                                        }
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
+                                        // 保存先のパスを生成
+                                        $uploadedPath2 = '../ueuseimages/' . $newFilename2;
+                                        // ファイルを移動
+                                        $result2 = rename($uploadedFile2['tmp_name'], __DIR__."/".$uploadedPath2);
+                                        if ($result2) {
+                                            $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $beforeUploadError = check_upload_error($uploadedFile2, __DIR__."/../ueuseimages/") ?? "ERROR";
+                                            $error_message[] = 'アップロード失敗！(2)エラーコード：' .$beforeUploadError.'';
+                                        }
                                     }
+                                    if(isset($s3result)){
+                                        if($s3result == false){
+                                            $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
+                                        }else{
+                                            $save_photo2 = $s3result; // S3に保存されたファイルのパスを使用
+                                        }
+                                    }
+                                }else{
+                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
                                 }
                             }else{
-                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
                             }
                         }else{
-                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                            $error_message[] = 'アップロード失敗！(2)エラーコード：' .$beforeUploadError.'';
                         }
                     }
 
@@ -1570,54 +1614,51 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         }
                         // アップロードされたファイル情報
                         $uploadedFile3 = $photo3;
-
-                        if(!(empty($uploadedFile3['tmp_name']))){
-                            if(check_mime($uploadedFile3['tmp_name'])){
-                                // アップロードされたファイルの拡張子を取得
-                                $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
-                                delete_exif($extension3, $uploadedFile3['tmp_name']);
-                                resizeImage($uploadedFile3['tmp_name'], 8192, 8192);
-                                if($aibwm === true){
-                                    AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
-                                }
-                                if(AMS3_CHKS == "true"){
-                                    $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
-                                }else{
-                                    if(check_mime($uploadedFile3['tmp_name']) == "image/webp"){
-                                        $extension3 = 'webp';
+                        $beforeUploadError = check_upload_error($uploadedFile3,  __DIR__."/../ueuseimages/");
+                        if($beforeUploadError === null){
+                            if(!(empty($uploadedFile3['tmp_name']))){
+                                if(check_mime($uploadedFile3['tmp_name'])){
+                                    // アップロードされたファイルの拡張子を取得
+                                    $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
+                                    delete_exif($extension3, $uploadedFile3['tmp_name']);
+                                    resizeImage($uploadedFile3['tmp_name'], 8192, 8192);
+                                    if($aibwm === true){
+                                        AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
                                     }
-                                    // 新しいファイル名を生成（uniqid + 拡張子）
-                                    $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
-                                    // 保存先のパスを生成
-                                    $uploadedPath3 = '../ueuseimages/' . $newFilename3;
-                                    // ファイルを移動
-                                    $result3 = move_uploaded_file($uploadedFile3['tmp_name'], __DIR__."/".$uploadedPath3);
-                                    if ($result3) {
-                                        $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedFile3['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(3)エラーコード：' .$errcode.'';
-                                    }
-                                }
-                                if(isset($s3result)){
-                                    if($s3result == false){
-                                        $error_message[] = 'アップロード失敗！(3)エラーコード： S3ERROR';
+                                    if(AMS3_CHKS == "true"){
+                                        $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
                                     }else{
-                                        $save_photo3 = $s3result; // S3に保存されたファイルのパスを使用
+                                        if(check_mime($uploadedFile3['tmp_name']) == "image/webp"){
+                                            $extension3 = 'webp';
+                                        }
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
+                                        // 保存先のパスを生成
+                                        $uploadedPath3 = '../ueuseimages/' . $newFilename3;
+                                        // ファイルを移動
+                                        $result3 = rename($uploadedFile3['tmp_name'], __DIR__."/".$uploadedPath3);
+                                        if ($result3) {
+                                            $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $beforeUploadError = check_upload_error($uploadedFile3, __DIR__."/../ueuseimages/") ?? "ERROR";
+                                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
+                                        }
                                     }
+                                    if(isset($s3result)){
+                                        if($s3result == false){
+                                            $error_message[] = 'アップロード失敗！(3)エラーコード： S3ERROR';
+                                        }else{
+                                            $save_photo3 = $s3result; // S3に保存されたファイルのパスを使用
+                                        }
+                                    }
+                                }else{
+                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
                                 }
                             }else{
-                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
                             }
                         }else{
-                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
                         }
                     }
 
@@ -1629,53 +1670,51 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                         }
                         // アップロードされたファイル情報
                         $uploadedFile4 = $photo4;
-                        if(!(empty($uploadedFile4['tmp_name']))){
-                            if(check_mime($uploadedFile4['tmp_name'])){
-                                // アップロードされたファイルの拡張子を取得
-                                $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
-                                delete_exif($extension4, $uploadedFile4['tmp_name']);
-                                resizeImage($uploadedFile4['tmp_name'], 8192, 8192);
-                                if($aibwm === true){
-                                    AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
-                                }
-                                if(AMS3_CHKS == "true"){
-                                    $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
-                                }else{
-                                    if(check_mime($uploadedFile4['tmp_name']) == "image/webp"){
-                                        $extension4 = 'webp';
+                        $beforeUploadError = check_upload_error($uploadedFile4,  __DIR__."/../ueuseimages/");
+                        if($beforeUploadError === null){
+                            if(!(empty($uploadedFile4['tmp_name']))){
+                                if(check_mime($uploadedFile4['tmp_name'])){
+                                    // アップロードされたファイルの拡張子を取得
+                                    $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
+                                    delete_exif($extension4, $uploadedFile4['tmp_name']);
+                                    resizeImage($uploadedFile4['tmp_name'], 8192, 8192);
+                                    if($aibwm === true){
+                                        AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
                                     }
-                                    // 新しいファイル名を生成（uniqid + 拡張子）
-                                    $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
-                                    // 保存先のパスを生成
-                                    $uploadedPath4 = '../ueuseimages/' . $newFilename4;
-                                    // ファイルを移動
-                                    $result4 = move_uploaded_file($uploadedFile4['tmp_name'], __DIR__."/".$uploadedPath4);  
-                                    if ($result4) {
-                                        $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedFile4['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(4)エラーコード：' .$errcode.'';
-                                    }
-                                }
-                                if(isset($s3result)){
-                                    if($s3result == false){
-                                        $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                    if(AMS3_CHKS == "true"){
+                                        $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
                                     }else{
-                                        $save_photo4 = $s3result; // S3に保存されたファイルのパスを使用
+                                        if(check_mime($uploadedFile4['tmp_name']) == "image/webp"){
+                                            $extension4 = 'webp';
+                                        }
+                                        // 新しいファイル名を生成（uniqid + 拡張子）
+                                        $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
+                                        // 保存先のパスを生成
+                                        $uploadedPath4 = '../ueuseimages/' . $newFilename4;
+                                        // ファイルを移動
+                                        $result4 = rename($uploadedFile4['tmp_name'], __DIR__."/".$uploadedPath4);  
+                                        if ($result4) {
+                                            $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $beforeUploadError = check_upload_error($uploadedFile4, __DIR__."/../ueuseimages/") ?? "ERROR";
+                                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
+                                        }
                                     }
+                                    if(isset($s3result)){
+                                        if($s3result == false){
+                                            $error_message[] = 'アップロード失敗！(4)エラーコード： S3ERROR';
+                                        }else{
+                                            $save_photo4 = $s3result; // S3に保存されたファイルのパスを使用
+                                        }
+                                    }
+                                }else{
+                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
                                 }
                             }else{
-                                $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
                             }
                         }else{
-                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                            $error_message[] = 'アップロード失敗！(4)エラーコード：' .$beforeUploadError.'';
                         }
                     }
 
@@ -1684,46 +1723,43 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
                     } else {
                         // アップロードされたファイル情報
                         $uploadedVideo = $video1;
-
-                        if(!(empty($uploadedVideo['tmp_name']))){
-                            if(check_mime_video($uploadedVideo['tmp_name'])){
-                                if(AMS3_CHKS == "true"){
-                                    $s3result = uploadAmazonS3($uploadedVideo['tmp_name']);
-                                }else{
-                                    // アップロードされたファイルの拡張子を取得
-                                    $extensionVideo = convert_mime(check_mime_video($uploadedVideo['tmp_name']));
-                                    // 正しい拡張子の場合、新しいファイル名を生成
-                                    $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
-                                    // 保存先のパスを生成
-                                    $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
-                                    // ファイルを移動
-                                    $resultVideo = move_uploaded_file($uploadedVideo['tmp_name'], __DIR__."/".$uploadedPathVideo);
-                                    if ($resultVideo) {
-                                        $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedVideo['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(5)エラーコード：' .$errcode.'';
-                                    }
-                                }
-                                if(isset($s3result)){
-                                    if($s3result == false){
-                                        $error_message[] = 'アップロード失敗！(5)エラーコード： S3ERROR';
+                        $beforeUploadError = check_upload_error($uploadedVideo, __DIR__.'/../ueusevideos/');
+                        if($beforeUploadError === null){
+                            if(!(empty($uploadedVideo['tmp_name']))){
+                                if(check_mime_video($uploadedVideo['tmp_name'])){
+                                    if(AMS3_CHKS == "true"){
+                                        $s3result = uploadAmazonS3($uploadedVideo['tmp_name']);
                                     }else{
-                                        $save_video1 = $s3result; // S3に保存されたファイルのパスを使用
+                                        // アップロードされたファイルの拡張子を取得
+                                        $extensionVideo = convert_mime(check_mime_video($uploadedVideo['tmp_name']));
+                                        // 正しい拡張子の場合、新しいファイル名を生成
+                                        $newFilenameVideo = createUniqId() . '-'.$userid.'.' . $extensionVideo;
+                                        // 保存先のパスを生成
+                                        $uploadedPathVideo = '../ueusevideos/' . $newFilenameVideo;
+                                        // ファイルを移動
+                                        $resultVideo = rename($uploadedVideo['tmp_name'], __DIR__."/".$uploadedPathVideo);
+                                        if ($resultVideo) {
+                                            $save_video1 = $uploadedPathVideo; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $beforeUploadError = check_upload_error($uploadedVideo, __DIR__."/../ueusevideos/") ?? "ERROR";
+                                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
+                                        }
                                     }
+                                    if(isset($s3result)){
+                                        if($s3result == false){
+                                            $error_message[] = 'アップロード失敗！(5)エラーコード： S3ERROR';
+                                        }else{
+                                            $save_video1 = $s3result; // S3に保存されたファイルのパスを使用
+                                        }
+                                    }
+                                } else {
+                                    $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
                                 }
-                            } else {
-                                $error_message[] = '対応していないファイル形式です！(SORRY_FILE_HITAIOU)';
+                            }else{
+                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
                             }
                         }else{
-                            $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+                            $error_message[] = 'アップロード失敗！(5)エラーコード：' .$beforeUploadError.'';
                         }
                     }
 
@@ -3716,53 +3752,73 @@ function GetActivityPubJson($url) {
 }
 
 function GetActivityPubUser($userid, $domain) {
-    $webfingerUrl = "https://$domain/.well-known/webfinger?resource=acct:$userid@$domain";
+    if (is_not_private_url("https://".$domain."/")) {
+        $webfingerUrl = "https://$domain/.well-known/webfinger?resource=acct:$userid@$domain";
 
-    $webfingerJson = GetActivityPubJson($webfingerUrl);
+        $webfingerJson = GetActivityPubJson($webfingerUrl);
 
-    if (!$webfingerJson || empty($webfingerJson['links'])) {
-        return ['error' => 'Failed to fetch WebFinger'];
-    }
-
-    $actorUrl = null;
-    foreach ($webfingerJson['links'] as $link) {
-        if ($link['rel'] === 'self' && $link['type'] === 'application/activity+json') {
-            $actorUrl = $link['href'];
-            break;
+        if (!$webfingerJson || empty($webfingerJson['links'])) {
+            return ['error' => 'Failed to fetch WebFinger'];
         }
+
+        $actorUrl = null;
+        foreach ($webfingerJson['links'] as $link) {
+            if ($link['rel'] === 'self' && $link['type'] === 'application/activity+json') {
+                $actorUrl = $link['href'];
+                break;
+            }
+        }
+
+        if (!$actorUrl) {
+            return ['error' => 'Actor URL not found'];
+        }
+
+        $actorJson = GetActivityPubJson($actorUrl);
+        if (!$actorJson) {
+            return ['error' => 'Failed to fetch actor'];
+        }
+
+        $summaryHtml = $actorJson['summary'] ?? '';
+        $withNewlines = preg_replace('/<br\s*\/?>/i', "\n", $summaryHtml);
+        $plainText = strip_tags($withNewlines);
+
+
+        return [
+            'userid' => $actorJson['preferredUsername'] ?? null,
+            'username' => $actorJson['name'] ?? null,
+            'profile' => $plainText ?? null,
+            'id' => $actorJson['id'] ?? null,
+            'inbox' => $actorJson['inbox'] ?? null,
+            'outbox' => $actorJson['outbox'] ?? null,
+            'followers' => $actorJson['followers'] ?? null,
+            'iconname' => $actorJson['icon']['url'] ?? "../img/deficon/icon.png",
+            'headname' => $actorJson['image']['url'] ?? "../img/defhead/head.png",
+            'datetime' => $actorJson['published'] ?? null,
+            'role' => 'user',
+            'other_settings' => '{}',
+            'follow' => '',
+            'follower' => '',
+            'raw' => $actorJson
+        ];
+    }else{
+        return [
+            'userid' => null,
+            'username' => null,
+            'profile' => null,
+            'id' => null,
+            'inbox' => null,
+            'outbox' => null,
+            'followers' => null,
+            'iconname' => "../img/deficon/icon.png",
+            'headname' => "../img/defhead/head.png",
+            'datetime' => null,
+            'role' => 'user',
+            'other_settings' => '{}',
+            'follow' => '',
+            'follower' => '',
+            'raw' => ''
+        ];
     }
-
-    if (!$actorUrl) {
-        return ['error' => 'Actor URL not found'];
-    }
-
-    $actorJson = GetActivityPubJson($actorUrl);
-    if (!$actorJson) {
-        return ['error' => 'Failed to fetch actor'];
-    }
-
-    $summaryHtml = $actorJson['summary'] ?? '';
-    $withNewlines = preg_replace('/<br\s*\/?>/i', "\n", $summaryHtml);
-    $plainText = strip_tags($withNewlines);
-
-
-    return [
-        'userid' => $actorJson['preferredUsername'] ?? null,
-        'username' => $actorJson['name'] ?? null,
-        'profile' => $plainText ?? null,
-        'id' => $actorJson['id'] ?? null,
-        'inbox' => $actorJson['inbox'] ?? null,
-        'outbox' => $actorJson['outbox'] ?? null,
-        'followers' => $actorJson['followers'] ?? null,
-        'iconname' => $actorJson['icon']['url'] ?? "../img/deficon/icon.png",
-        'headname' => $actorJson['image']['url'] ?? "../img/defhead/head.png",
-        'datetime' => $actorJson['published'] ?? null,
-        'role' => 'user',
-        'other_settings' => '{}',
-        'follow' => '',
-        'follower' => '',
-        'raw' => $actorJson
-    ];
 }
 
 function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, $pdo, string $userId): ?array {
@@ -4219,5 +4275,15 @@ function sqlBlockAccountList($column, $myblocklist){
     ];
 }
 
+function is_not_private_url($url) {
+    $parts = parse_url($url);
+    if (!isset($parts['host'])) return false;
+    
+    $ip = gethostbyname($parts['host']);
+    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+        return false; 
+    }
+    return true;
+}
 
 ?>

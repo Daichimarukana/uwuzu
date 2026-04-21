@@ -14,259 +14,262 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => 'bad_request']);
         exit;
-    }
-
-    // データベースに接続
-    try {
-        $option = array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
-        );
-        $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
-    } catch (PDOException $e) {
-        // 接続エラーのときエラー内容を取得する
-        $error_message[] = $e->getMessage();
-    }
-
-    if (!empty($pdo)) {
-        $myUserData = getUserData($pdo, $userId);
-        $myblocklist = safetext($myUserData["blocklist"]);
-        $mybookmark = safetext($myUserData["bookmark"]);
-
-        $itemsPerPage = 15; // 1ページあたりのユーズ数
-        $pageNumber = $page;
-        if($pageNumber <= 0 || (!(is_numeric($pageNumber)))){
-            $pageNumber = 1;
-        }
-        $offset = ($pageNumber - 1) * $itemsPerPage;
-
-        $messages = array();
-
-        $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
-        
-        //------------------------------------------すべてのユーズを取得----------------------------------------------
-        $all_sql = "SELECT ueuse.* 
-                FROM ueuse 
-                LEFT JOIN account ON ueuse.account = account.userid 
-                WHERE ueuse.rpuniqid = '' AND account.role != 'ice' {$blocked_accounts['sql']} 
-                ORDER BY ueuse.datetime DESC 
-                LIMIT :offset, :itemsPerPage";
-
-        $all_stmt = $pdo->prepare($all_sql);
-        foreach ($blocked_accounts['params'] as $ph => $val) {
-            $all_stmt->bindValue($ph, $val, PDO::PARAM_STR);
-        }
-        $all_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $all_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-        $all_stmt->execute();
-
-        $all_messages = $all_stmt->fetchAll(PDO::FETCH_ASSOC);
-        if(empty($all_messages)){
-            $all_messages = [];
+    }elseif(is_sameUserid($userId, $is_login["userid"]) === true){
+        // データベースに接続
+        try {
+            $option = array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+            );
+            $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
+        } catch (PDOException $e) {
+            // 接続エラーのときエラー内容を取得する
+            $error_message[] = $e->getMessage();
         }
 
-        //------------------------------------------人気なユーズを取得(バズってるやつ)----------------------------------------------
-        $day_count_sql = "SELECT ueuse.* 
-                FROM ueuse 
-                LEFT JOIN account ON ueuse.account = account.userid 
-                WHERE ueuse.datetime >= NOW() - INTERVAL 7 DAY AND ueuse.rpuniqid = '' AND account.role != 'ice' 
-                ORDER BY ueuse.datetime DESC 
-                LIMIT 1000";
-        $cnt_stmt = $pdo->prepare($day_count_sql);
-        $Before7daysPosts = $cnt_stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($pdo)) {
+            $myUserData = getUserData($pdo, $userId);
+            $myblocklist = safetext($myUserData["blocklist"]);
+            $mybookmark = safetext($myUserData["bookmark"]);
 
-        // 結果が15件に満たない場合
-        $postCount = count($Before7daysPosts);
-        if($postCount < 15){
-            $get_day = 90;
-        }elseif($postCount > 15 && $postCount < 150){
-            $get_day = 31;
-        }elseif($postCount > 150 && $postCount < 750){
-            $get_day = 7;
-        }elseif($postCount > 750){
-            $get_day = 5;
-        }else{
-            $get_day = 2;
-        }
+            $itemsPerPage = 15; // 1ページあたりのユーズ数
+            $pageNumber = $page;
+            if($pageNumber <= 0 || (!(is_numeric($pageNumber)))){
+                $pageNumber = 1;
+            }
+            $offset = ($pageNumber - 1) * $itemsPerPage;
 
-        $get_day = $get_day * (2 ** floor($pageNumber / 3));
+            $messages = array();
 
-        $pop_sql = "SELECT 
-                    ueuse.*
-                FROM 
-                    ueuse
-                LEFT JOIN account ON ueuse.account = account.userid 
-                WHERE 
-                    ueuse.datetime >= NOW() - INTERVAL :getday DAY 
-                AND 
-                    ueuse.rpuniqid = '' 
-                AND 
-                    account.role != 'ice' 
-                {$blocked_accounts['sql']} 
-                ORDER BY 
-                    ueuse.popularity DESC
-                LIMIT :offset, :itemsPerPage;
-            ";
-
-        $pop_stmt = $pdo->prepare($pop_sql);
-        foreach ($blocked_accounts['params'] as $ph => $val) {
-            $pop_stmt->bindValue($ph, $val, PDO::PARAM_STR);
-        }
-        $pop_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
-        $pop_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $pop_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-        $pop_stmt->execute();
-
-        $pop_messages = $pop_stmt->fetchAll(PDO::FETCH_ASSOC);
-        if(empty($pop_messages)){
-            $pop_messages = [];
-        }
-
-        //------------------------------------------フォローしているユーザーから取得----------------------------------------------
-        $followList = getFolloweeList($pdo, $userId);
-
-        foreach ($followList as $followUserId) {
-            $flw_sql = "SELECT ueuse.* 
+            $blocked_accounts = sqlBlockAccountList('account', $myblocklist);
+            
+            //------------------------------------------すべてのユーズを取得----------------------------------------------
+            $all_sql = "SELECT ueuse.* 
                     FROM ueuse 
                     LEFT JOIN account ON ueuse.account = account.userid 
-                    WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :follow_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY {$blocked_accounts['sql']} 
+                    WHERE ueuse.rpuniqid = '' AND account.role != 'ice' {$blocked_accounts['sql']} 
                     ORDER BY ueuse.datetime DESC 
                     LIMIT :offset, :itemsPerPage";
 
-            $flw_stmt = $pdo->prepare($flw_sql);
+            $all_stmt = $pdo->prepare($all_sql);
             foreach ($blocked_accounts['params'] as $ph => $val) {
-                $flw_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+                $all_stmt->bindValue($ph, $val, PDO::PARAM_STR);
             }
-            $flw_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
-            $flw_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $flw_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-            $flw_stmt->bindValue(':follow_account', $followUserId, PDO::PARAM_STR);
-            $flw_stmt->execute();
+            $all_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $all_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+            $all_stmt->execute();
 
-            while ($row = $flw_stmt->fetch(PDO::FETCH_ASSOC)) {
-                $flw_messages[] = $row;
+            $all_messages = $all_stmt->fetchAll(PDO::FETCH_ASSOC);
+            if(empty($all_messages)){
+                $all_messages = [];
             }
-        }
-        if(!(empty($flw_messages))){
-            usort($flw_messages, function($a, $b) {
-                return strtotime($b['datetime']) - strtotime($a['datetime']);
-            });
-        }else{
-            $flw_messages = [];
-        }
 
-        //------------------------------------------いいねやリユーズを頻繁にするような好きっぽそうなユーザーの投稿を取得--------------------------------------
-        $fav_sql = "SELECT ueuse.*,
-                            (LENGTH(ueuse.favorite) - LENGTH(REPLACE(ueuse.favorite, ',', '')) - 1) AS favorite_count
-                        FROM ueuse
-                        WHERE FIND_IN_SET(:userid, ueuse.favorite) > 0 
-                        ORDER BY ueuse.datetime DESC
-                        LIMIT 100
-                    ";
-        $fav_stmt = $pdo->prepare($fav_sql);
-        $fav_stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
-        $fav_stmt->execute();
-        $fav_ueuse_lists = $fav_stmt->fetchAll(PDO::FETCH_ASSOC);
+            //------------------------------------------人気なユーズを取得(バズってるやつ)----------------------------------------------
+            $day_count_sql = "SELECT ueuse.* 
+                    FROM ueuse 
+                    LEFT JOIN account ON ueuse.account = account.userid 
+                    WHERE ueuse.datetime >= NOW() - INTERVAL 7 DAY AND ueuse.rpuniqid = '' AND account.role != 'ice' 
+                    ORDER BY ueuse.datetime DESC 
+                    LIMIT 1000";
+            $cnt_stmt = $pdo->prepare($day_count_sql);
+            $Before7daysPosts = $cnt_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!empty($fav_ueuse_lists)) {
-            $many_fav_accounts = array_column($fav_ueuse_lists, 'account');
-            $many_fav_account_counts = array_count_values($many_fav_accounts);
-            arsort($many_fav_account_counts);
-            $top_fav_accounts = array_slice($many_fav_account_counts, 0, 15, true);
+            // 結果が15件に満たない場合
+            $postCount = count($Before7daysPosts);
+            if($postCount < 15){
+                $get_day = 90;
+            }elseif($postCount > 15 && $postCount < 150){
+                $get_day = 31;
+            }elseif($postCount > 150 && $postCount < 750){
+                $get_day = 7;
+            }elseif($postCount > 750){
+                $get_day = 5;
+            }else{
+                $get_day = 2;
+            }
 
-            $favget_messages = [];
-            $favget_sql = "SELECT ueuse.* 
+            $get_day = $get_day * (2 ** floor($pageNumber / 3));
+
+            $pop_sql = "SELECT 
+                        ueuse.*
+                    FROM 
+                        ueuse
+                    LEFT JOIN account ON ueuse.account = account.userid 
+                    WHERE 
+                        ueuse.datetime >= NOW() - INTERVAL :getday DAY 
+                    AND 
+                        ueuse.rpuniqid = '' 
+                    AND 
+                        account.role != 'ice' 
+                    {$blocked_accounts['sql']} 
+                    ORDER BY 
+                        ueuse.popularity DESC
+                    LIMIT :offset, :itemsPerPage;
+                ";
+
+            $pop_stmt = $pdo->prepare($pop_sql);
+            foreach ($blocked_accounts['params'] as $ph => $val) {
+                $pop_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+            }
+            $pop_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
+            $pop_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $pop_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+            $pop_stmt->execute();
+
+            $pop_messages = $pop_stmt->fetchAll(PDO::FETCH_ASSOC);
+            if(empty($pop_messages)){
+                $pop_messages = [];
+            }
+
+            //------------------------------------------フォローしているユーザーから取得----------------------------------------------
+            $followList = getFolloweeList($pdo, $userId);
+
+            foreach ($followList as $followUserId) {
+                $flw_sql = "SELECT ueuse.* 
                         FROM ueuse 
                         LEFT JOIN account ON ueuse.account = account.userid 
-                        WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :fav_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY {$blocked_accounts['sql']} 
+                        WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :follow_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY {$blocked_accounts['sql']} 
                         ORDER BY ueuse.datetime DESC 
                         LIMIT :offset, :itemsPerPage";
 
-            $favget_stmt = $pdo->prepare($favget_sql);
-            foreach ($blocked_accounts['params'] as $ph => $val) {
-                $favget_stmt->bindValue($ph, $val, PDO::PARAM_STR);
-            }
-            $favget_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
-            $favget_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $favget_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                $flw_stmt = $pdo->prepare($flw_sql);
+                foreach ($blocked_accounts['params'] as $ph => $val) {
+                    $flw_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+                }
+                $flw_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
+                $flw_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $flw_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                $flw_stmt->bindValue(':follow_account', $followUserId, PDO::PARAM_STR);
+                $flw_stmt->execute();
 
-            foreach ($top_fav_accounts as $favUserId => $count) {
-                $favget_stmt->bindValue(':fav_account', $favUserId, PDO::PARAM_STR);
-                $favget_stmt->execute();
-                $favget_messages = array_merge($favget_messages, $favget_stmt->fetchAll(PDO::FETCH_ASSOC));
-            }
-        } else {
-            $favget_messages = [];
-        }
-
-        // 基本的には人気・フォロー中・いいねする事が多いユーザーのユーズでTLを構成するけど全部出きったらLTLと同じにする
-        $messages = array_merge($pop_messages, $flw_messages, $favget_messages);
-        if (empty($messages)) {
-            $messages = $all_messages;
-        } elseif (count($messages) < 15) {
-            $messages = array_merge($messages, $all_messages);
-        }
-        $messages = array_slice(array_unique($messages, SORT_REGULAR), 0, 15);
-        shuffle($messages);
-
-        // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
-        $messages = getDatasUeuse($pdo, $messages);
-        //adsystem------------------
-
-        $message['ads'] = "false";
-
-        $today = date("Y-m-d H:i:s");
-
-        $adsQuery = $pdo->prepare("SELECT * FROM ads WHERE start_date < :today AND limit_date > :today ORDER BY rand()");
-        $adsQuery->bindValue(':today', $today);
-        $adsQuery->execute();
-        $adsresult = $adsQuery->fetch();
-        if(!(empty($adsresult))){
-            $message['ads'] = "true";
-            $message['ads_url'] = $adsresult["url"];
-            $message['ads_img_url'] = $adsresult["image_url"];
-            $message['ads_memo'] = $adsresult["memo"];
-        }
-        //--------------------------
-
-        $ueuseItems = array();
-        if(!empty($messages)){
-            foreach ($messages as $value) {
-                $formatted = FormatUeuseItem($value, $myblocklist, $mybookmark, $pdo, $userId);
-                if ($formatted !== null) {
-                    $ueuseItems[] = $formatted;
+                while ($row = $flw_stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $flw_messages[] = $row;
                 }
             }
-
-            if($message['ads'] === "true"){
-                $adsystem = array(
-                    "type" => "Ads",
-                    "url" => $message['ads_url'],
-                    "imgurl" => $message['ads_img_url'],
-                    "memo" => $message['ads_memo'],
-                );
+            if(!(empty($flw_messages))){
+                usort($flw_messages, function($a, $b) {
+                    return strtotime($b['datetime']) - strtotime($a['datetime']);
+                });
             }else{
-                $adsystem = null;
+                $flw_messages = [];
             }
 
-            $item = array(
-                "success" => true,
-                "ueuses" => $ueuseItems,
-                "ads" => $adsystem,
-            );
-    
-            echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        }else{
-            $item = array(
-                "success" => false,
-                "ueuses" => null,
-                "ads" => null,
-                "error" => "no_ueuse",
-            );
-            echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        }
+            //------------------------------------------いいねやリユーズを頻繁にするような好きっぽそうなユーザーの投稿を取得--------------------------------------
+            $fav_sql = "SELECT ueuse.*,
+                                (LENGTH(ueuse.favorite) - LENGTH(REPLACE(ueuse.favorite, ',', '')) - 1) AS favorite_count
+                            FROM ueuse
+                            WHERE FIND_IN_SET(:userid, ueuse.favorite) > 0 
+                            ORDER BY ueuse.datetime DESC
+                            LIMIT 100
+                        ";
+            $fav_stmt = $pdo->prepare($fav_sql);
+            $fav_stmt->bindValue(':userid', $userId, PDO::PARAM_STR);
+            $fav_stmt->execute();
+            $fav_ueuse_lists = $fav_stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($fav_ueuse_lists)) {
+                $many_fav_accounts = array_column($fav_ueuse_lists, 'account');
+                $many_fav_account_counts = array_count_values($many_fav_accounts);
+                arsort($many_fav_account_counts);
+                $top_fav_accounts = array_slice($many_fav_account_counts, 0, 15, true);
+
+                $favget_messages = [];
+                $favget_sql = "SELECT ueuse.* 
+                            FROM ueuse 
+                            LEFT JOIN account ON ueuse.account = account.userid 
+                            WHERE ueuse.rpuniqid = '' AND account.role != 'ice' AND ueuse.account = :fav_account AND ueuse.datetime >= NOW() - INTERVAL :getday DAY {$blocked_accounts['sql']} 
+                            ORDER BY ueuse.datetime DESC 
+                            LIMIT :offset, :itemsPerPage";
+
+                $favget_stmt = $pdo->prepare($favget_sql);
+                foreach ($blocked_accounts['params'] as $ph => $val) {
+                    $favget_stmt->bindValue($ph, $val, PDO::PARAM_STR);
+                }
+                $favget_stmt->bindValue(':getday', $get_day, PDO::PARAM_INT);
+                $favget_stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $favget_stmt->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+
+                foreach ($top_fav_accounts as $favUserId => $count) {
+                    $favget_stmt->bindValue(':fav_account', $favUserId, PDO::PARAM_STR);
+                    $favget_stmt->execute();
+                    $favget_messages = array_merge($favget_messages, $favget_stmt->fetchAll(PDO::FETCH_ASSOC));
+                }
+            } else {
+                $favget_messages = [];
+            }
+
+            // 基本的には人気・フォロー中・いいねする事が多いユーザーのユーズでTLを構成するけど全部出きったらLTLと同じにする
+            $messages = array_merge($pop_messages, $flw_messages, $favget_messages);
+            if (empty($messages)) {
+                $messages = $all_messages;
+            } elseif (count($messages) < 15) {
+                $messages = array_merge($messages, $all_messages);
+            }
+            $messages = array_slice(array_unique($messages, SORT_REGULAR), 0, 15);
+            shuffle($messages);
+
+            // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
+            $messages = getDatasUeuse($pdo, $messages);
+            //adsystem------------------
+
+            $message['ads'] = "false";
+
+            $today = date("Y-m-d H:i:s");
+
+            $adsQuery = $pdo->prepare("SELECT * FROM ads WHERE start_date < :today AND limit_date > :today ORDER BY rand()");
+            $adsQuery->bindValue(':today', $today);
+            $adsQuery->execute();
+            $adsresult = $adsQuery->fetch();
+            if(!(empty($adsresult))){
+                $message['ads'] = "true";
+                $message['ads_url'] = $adsresult["url"];
+                $message['ads_img_url'] = $adsresult["image_url"];
+                $message['ads_memo'] = $adsresult["memo"];
+            }
+            //--------------------------
+
+            $ueuseItems = array();
+            if(!empty($messages)){
+                foreach ($messages as $value) {
+                    $formatted = FormatUeuseItem($value, $myblocklist, $mybookmark, $pdo, $userId);
+                    if ($formatted !== null) {
+                        $ueuseItems[] = $formatted;
+                    }
+                }
+
+                if($message['ads'] === "true"){
+                    $adsystem = array(
+                        "type" => "Ads",
+                        "url" => $message['ads_url'],
+                        "imgurl" => $message['ads_img_url'],
+                        "memo" => $message['ads_memo'],
+                    );
+                }else{
+                    $adsystem = null;
+                }
+
+                $item = array(
+                    "success" => true,
+                    "ueuses" => $ueuseItems,
+                    "ads" => $adsystem,
+                );
         
-        $pdo = null;
+                echo json_encode($item, JSON_UNESCAPED_UNICODE);
+            }else{
+                $item = array(
+                    "success" => false,
+                    "ueuses" => null,
+                    "ads" => null,
+                    "error" => "no_ueuse",
+                );
+                echo json_encode($item, JSON_UNESCAPED_UNICODE);
+            }
+            
+            $pdo = null;
+        }
+    }else{
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
     }
 }else{
     $item = array(

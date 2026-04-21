@@ -26,13 +26,16 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }
-
-    if(DelAPIToken($pdo, $uniqid)){
-        echo json_encode(['success' => true, 'message' => 'アクセストークンが削除されました。']);
-        exit;
-    } else {
-        echo json_encode(['success' => false, 'error' => 'アクセストークンの削除に失敗しました。']);
+    }elseif(is_sameUserid($userid, $is_login["userid"]) === true){
+        if(DelAPIToken($pdo, $uniqid)){
+            echo json_encode(['success' => true, 'message' => 'アクセストークンが削除されました。']);
+            exit;
+        } else {
+            echo json_encode(['success' => false, 'error' => 'アクセストークンの削除に失敗しました。']);
+            exit;
+        }
+    }else{
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
     }
 } else {

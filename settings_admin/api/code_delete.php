@@ -16,45 +16,48 @@ if (safetext(isset($_POST['code'])) && safetext(isset($_POST['userid'])) && safe
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }
+    }elseif(is_sameUserid($postUserid, $is_login["userid"]) === true){
+        try {
+            $option = array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+            );
+            $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
+        } catch (PDOException $e) {
+            // 接続エラーのときエラー内容を取得する
+            $error_message[] = $e->getMessage();
+        }
 
-    try {
-        $option = array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
-        );
-        $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
-    } catch (PDOException $e) {
-        // 接続エラーのときエラー内容を取得する
-        $error_message[] = $e->getMessage();
-    }
+        $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
 
-    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+        $query->execute(array(':userid' => $postUserid));
 
-    $query->execute(array(':userid' => $postUserid));
+        $result2 = $query->fetch();
 
-    $result2 = $query->fetch();
+        if($result2["loginid"] === $loginid){
+            if($result2["admin"] === "yes"){
+                try {
+                    // 削除クエリを実行
+                    $deleteQuery = $pdo->prepare("DELETE FROM invitation WHERE code = :code");
+                    $deleteQuery->bindValue(':code', $postCode, PDO::PARAM_STR);
+                    $res = $deleteQuery->execute();
 
-    if($result2["loginid"] === $loginid){
-        if($result2["admin"] === "yes"){
-            try {
-                // 削除クエリを実行
-                $deleteQuery = $pdo->prepare("DELETE FROM invitation WHERE code = :code");
-                $deleteQuery->bindValue(':code', $postCode, PDO::PARAM_STR);
-                $res = $deleteQuery->execute();
-
-                if ($res) {
-                    echo json_encode(['success' => true]);
-                    exit;
-                } else {
-                    echo json_encode(['success' => false, 'error' => '削除に失敗しました。']);
+                    if ($res) {
+                        echo json_encode(['success' => true]);
+                        exit;
+                    } else {
+                        echo json_encode(['success' => false, 'error' => '削除に失敗しました。']);
+                        exit;
+                    }
+                } catch(PDOException $e) {
+                    echo json_encode(['success' => false, 'error' => 'データベースエラー：' . $e->getMessage()]);
                     exit;
                 }
-            } catch(PDOException $e) {
-                echo json_encode(['success' => false, 'error' => 'データベースエラー：' . $e->getMessage()]);
-                exit;
             }
         }
+    }else{
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
     }
 }else{
     echo json_encode(['success' => false, 'error' => '削除に失敗しました。(sess_err)']);

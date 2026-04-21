@@ -78,9 +78,13 @@ if( !empty($_POST['btn_submit']) ) {
         if(empty($domain)) {
             $error_message[] = '移行元のサーバードメインを入力してください。(INPUT_PLEASE)';
         }else{
-            $domain_response = @file_get_contents("https://".$domain."/");
-            if (empty($domain_response)) {
-                $error_message[] = '入力されたドメインに接続できませんでした。(INPUT_PLEASE)';
+            if (is_not_private_url("https://".$domain."/")) {
+                $domain_response = @file_get_contents("https://".$domain."/");
+                if (empty($domain_response)) {
+                    $error_message[] = '入力されたドメインに接続できませんでした。(INPUT_PLEASE)';
+                }
+            }else{
+                $error_message[] = '入力されたドメインに接続できませんでした。(BAD_REQUEST)';
             }
         }
         
@@ -203,110 +207,118 @@ if( !empty($_POST['btn_submit']) ) {
                             if($json_account_data == false){
                                 $error_message[] = "アカウントの移行を最初からやり直してください。(MIGRATION_SORRY)";
                             }else{
-                                
                                 //アイコン&ヘッダー
-                                $icondata = file_get_contents($json_account_data["userdata"]["user_icon"]);
-                                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                                $mime_type = finfo_buffer($finfo, $icondata);
-                                $safe_img_mime = [
-                                    "image/gif" => 'gif',
-                                    "image/jpeg" => 'jpg',
-                                    "image/png" => 'png',
-                                    "image/svg+xml" => 'svg',
-                                    "image/webp" => 'webp',
-                                    "image/bmp" => 'bmp',
-                                    "image/x-icon" => 'ico',
-                                    "image/tiff" => 'tiff'
-                                ];
-                                if(isset($safe_img_mime[$mime_type])){
-                                    $extension = $safe_img_mime[$mime_type];
-                                    $temp_file = tempnam(sys_get_temp_dir(), 'img');
-                                    file_put_contents($temp_file, $icondata);
+                                if (is_not_private_url("https://".$json_account_data["userdata"]["user_icon"]."/")) {
+                                    $icondata = file_get_contents($json_account_data["userdata"]["user_icon"]);
+                                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                                    $mime_type = finfo_buffer($finfo, $icondata);
+                                    $safe_img_mime = [
+                                        "image/gif" => 'gif',
+                                        "image/jpeg" => 'jpg',
+                                        "image/png" => 'png',
+                                        "image/svg+xml" => 'svg',
+                                        "image/webp" => 'webp',
+                                        "image/bmp" => 'bmp',
+                                        "image/x-icon" => 'ico',
+                                        "image/tiff" => 'tiff'
+                                    ];
+                                    if(isset($safe_img_mime[$mime_type])){
+                                        $extension = $safe_img_mime[$mime_type];
+                                        $temp_file = tempnam(sys_get_temp_dir(), 'img');
+                                        file_put_contents($temp_file, $icondata);
 
-                                    delete_exif($extension, $temp_file);
+                                        delete_exif($extension, $temp_file);
 
-                                    // リサイズ
-                                    resizeImage($temp_file, 512, 512);
+                                        // リサイズ
+                                        resizeImage($temp_file, 512, 512);
 
-                                    if(check_mime($temp_file) == "image/webp"){
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = createUniqId() . '-'.$new_userid.'.webp';
-                                    }else{
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = createUniqId() . '-'.$new_userid.'.' . $extension;
+                                        if(check_mime($temp_file) == "image/webp"){
+                                            // 新しいファイル名を生成（uniqid + 拡張子）
+                                            $newFilename = createUniqId() . '-'.$new_userid.'.webp';
+                                        }else{
+                                            // 新しいファイル名を生成（uniqid + 拡張子）
+                                            $newFilename = createUniqId() . '-'.$new_userid.'.' . $extension;
+                                        }
+                                        
+                                        // 保存先のパスを生成
+                                        $uploadedPath = 'usericons/' . $newFilename;
+                                        
+                                        // ファイルを移動
+                                        $result = copy($temp_file, "../".$uploadedPath);
+                                        
+                                        if ($result) {
+                                            $iconName = $uploadedPath; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $errnum = $uploadedFile['error'];
+                                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$uploadedFile['error'].'';
+                                        }
                                     }
-                                    
-                                    // 保存先のパスを生成
-                                    $uploadedPath = 'usericons/' . $newFilename;
-                                    
-                                    // ファイルを移動
-                                    $result = copy($temp_file, "../".$uploadedPath);
-                                    
-                                    if ($result) {
-                                        $iconName = $uploadedPath; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedFile['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(1)エラーコード：' .$uploadedFile['error'].'';
-                                    }
+                                }else{
+                                    $error_message[] = '入力されたドメインに接続できませんでした。(BAD_REQUEST)';
                                 }
+                                
                                 //------------------
-                                $headdata = file_get_contents($json_account_data["userdata"]["user_header"]);
-                                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                                $mime_type = finfo_buffer($finfo, $headdata);
-                                $safe_img_mime = [
-                                    "image/gif" => 'gif',
-                                    "image/jpeg" => 'jpg',
-                                    "image/png" => 'png',
-                                    "image/svg+xml" => 'svg',
-                                    "image/webp" => 'webp',
-                                    "image/bmp" => 'bmp',
-                                    "image/x-icon" => 'ico',
-                                    "image/tiff" => 'tiff'
-                                ];
-                                if(isset($safe_img_mime[$mime_type])){
-                                    $extension = $safe_img_mime[$mime_type];
-                                    $temp_file = tempnam(sys_get_temp_dir(), 'img');
-                                    file_put_contents($temp_file, $headdata);
+                                if (is_not_private_url("https://".$json_account_data["userdata"]["user_header"]."/")) {
+                                    $headdata = file_get_contents($json_account_data["userdata"]["user_header"]);
+                                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                                    $mime_type = finfo_buffer($finfo, $headdata);
+                                    $safe_img_mime = [
+                                        "image/gif" => 'gif',
+                                        "image/jpeg" => 'jpg',
+                                        "image/png" => 'png',
+                                        "image/svg+xml" => 'svg',
+                                        "image/webp" => 'webp',
+                                        "image/bmp" => 'bmp',
+                                        "image/x-icon" => 'ico',
+                                        "image/tiff" => 'tiff'
+                                    ];
+                                    if(isset($safe_img_mime[$mime_type])){
+                                        $extension = $safe_img_mime[$mime_type];
+                                        $temp_file = tempnam(sys_get_temp_dir(), 'img');
+                                        file_put_contents($temp_file, $headdata);
 
-                                    delete_exif($extension, $temp_file);
+                                        delete_exif($extension, $temp_file);
 
-                                    // リサイズ
-                                    resizeImage($temp_file, 2048, 1024);
+                                        // リサイズ
+                                        resizeImage($temp_file, 2048, 1024);
 
-                                    if(check_mime($temp_file) == "image/webp"){
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = createUniqId() . '-'.$new_userid.'.webp';
-                                    }else{
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = createUniqId() . '-'.$new_userid.'.' . $extension;
+                                        if(check_mime($temp_file) == "image/webp"){
+                                            // 新しいファイル名を生成（uniqid + 拡張子）
+                                            $newFilename = createUniqId() . '-'.$new_userid.'.webp';
+                                        }else{
+                                            // 新しいファイル名を生成（uniqid + 拡張子）
+                                            $newFilename = createUniqId() . '-'.$new_userid.'.' . $extension;
+                                        }
+                                        
+                                        // 保存先のパスを生成
+                                        $uploadedPath = 'userheads/' . $newFilename;
+                                        
+                                        // ファイルを移動
+                                        $result = copy($temp_file, "../".$uploadedPath);
+                                        
+                                        if ($result) {
+                                            $headName = $uploadedPath; // 保存されたファイルのパスを使用
+                                        } else {
+                                            $errnum = $uploadedFile['error'];
+                                            if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
+                                            if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
+                                            if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
+                                            if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
+                                            if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
+                                            if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
+                                            if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
+                                            $error_message[] = 'アップロード失敗！(2)エラーコード：' .$uploadedFile['error'].'';
+                                        }
                                     }
-                                    
-                                    // 保存先のパスを生成
-                                    $uploadedPath = 'userheads/' . $newFilename;
-                                    
-                                    // ファイルを移動
-                                    $result = copy($temp_file, "../".$uploadedPath);
-                                    
-                                    if ($result) {
-                                        $headName = $uploadedPath; // 保存されたファイルのパスを使用
-                                    } else {
-                                        $errnum = $uploadedFile['error'];
-                                        if($errnum === 1){$errcode = "FILE_DEKASUGUI_PHP_INI_KAKUNIN";}
-                                        if($errnum === 2){$errcode = "FILE_DEKASUGUI_HTML_KAKUNIN";}
-                                        if($errnum === 3){$errcode = "FILE_SUKOSHIDAKE_UPLOAD";}
-                                        if($errnum === 4){$errcode = "FILE_UPLOAD_DEKINAKATTA";}
-                                        if($errnum === 6){$errcode = "TMP_FOLDER_NAI";}
-                                        if($errnum === 7){$errcode = "FILE_KAKIKOMI_SIPPAI";}
-                                        if($errnum === 8){$errcode = "PHPINFO()_KAKUNIN";}
-                                        $error_message[] = 'アップロード失敗！(2)エラーコード：' .$uploadedFile['error'].'';
-                                    }
+                                }else{
+                                    $error_message[] = '入力されたドメインに接続できませんでした。(BAD_REQUEST)';
                                 }
 
                                 $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');

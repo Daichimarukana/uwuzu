@@ -14,15 +14,17 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }
-
-    
-    $result = delete_ueuse($postUniqid, $postUserid, $loginid);
-    if($result[0] === true){
-        echo json_encode(['success' => true]);
-        exit;
+    }elseif(is_sameUserid($postUserid, $is_login["userid"]) === true){
+        $result = delete_ueuse($postUniqid, $postUserid, $loginid);
+        if($result[0] === true){
+            echo json_encode(['success' => true]);
+            exit;
+        }else{
+            echo json_encode(['success' => false, 'error' => '削除に失敗しました。']);
+            exit;
+        }
     }else{
-        echo json_encode(['success' => false, 'error' => '削除に失敗しました。']);
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
     }
 }else{

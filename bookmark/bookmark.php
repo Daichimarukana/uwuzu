@@ -14,27 +14,19 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }
+    }elseif(is_sameUserid($userId, $is_login["userid"]) === true){
+        try {
+            $option = array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+            );
+            $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
+        } catch (PDOException $e) {
+            // 接続エラーのときエラー内容を取得する
+            $error_message[] = $e->getMessage();
+        }
 
-    try {
-        $option = array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
-        );
-        $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
-    } catch (PDOException $e) {
-        // 接続エラーのときエラー内容を取得する
-        $error_message[] = $e->getMessage();
-    }
-
-        // データベース接続の設定
-        $dbh = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST, DB_USER, DB_PASS, array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-        ));
-
-        $query = $dbh->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+        $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
 
         $query->execute(array(':userid' => $userId));
 
@@ -99,6 +91,11 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
                 exit;
             }
         }
+    }else{
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
+    }
+
     } else {
         echo json_encode(['success' => false, 'error' => '必要なパラメータが提供されていません。']);
         exit;

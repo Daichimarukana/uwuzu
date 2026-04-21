@@ -171,37 +171,59 @@ if(!empty($pdo)){
 
 if(function_exists("disk_free_space")){
     if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-        $disk = true;
-        $totalRaw = disk_total_space('C:');
-        $diskTotal = ($totalRaw > 0) ? (int)$totalRaw / 1024 / 1024 : 0;
-        $diskFree = (int)disk_free_space('C:') / 1024 / 1024;
-        $diskUmari = $diskTotal - $diskFree;
+		$totalRaw = @disk_total_space('C:');
+		if($totalRaw !== false){
+			$disk = true;
+			$diskTotal = ($totalRaw > 0) ? (int)$totalRaw / 1024 / 1024 : 0;
+			$diskFree = (int)disk_free_space('C:') / 1024 / 1024;
+			$diskUmari = $diskTotal - $diskFree;
 
-        if ($diskTotal > 0 && ($diskFree / $diskTotal < 0.1)) {
-            $disk_over90p = true;
-        } else {
-            $disk_over90p = false;
-        }
-    
-        $loadAve = null;
+			if ($diskTotal > 0 && ($diskFree / $diskTotal < 0.1)) {
+				$disk_over90p = true;
+			} else {
+				$disk_over90p = false;
+			}
+		
+			$loadAve = null;
+		}else{
+			$disk = false;
+			$diskFree = 5000;
+			$diskUmari = 5000;
+			$diskTotal = 10000;
+			$disk_over90p = false;
+			$loadAve = null;
+		}
     } else {
-        $disk = true;
-        $totalRaw = disk_total_space('/');
-        $diskTotal = ($totalRaw > 0) ? (int)$totalRaw / 1024 / 1024 : 0;
-        $diskFree = (int)disk_free_space('/') / 1024 / 1024;
-        $diskUmari = $diskTotal - $diskFree;
+		$totalRaw = @disk_total_space('/');
+		if($totalRaw !== false){
+			$disk = true;
+			$diskTotal = ($totalRaw > 0) ? (int)$totalRaw / 1024 / 1024 : 0;
+			$diskFree = (int)disk_free_space('/') / 1024 / 1024;
+			$diskUmari = $diskTotal - $diskFree;
 
-        if ($diskTotal > 0 && ($diskFree / $diskTotal < 0.1)) {
-            $disk_over90p = true;
-        } else {
-            $disk_over90p = false;
-        }
+			if ($diskTotal > 0 && ($diskFree / $diskTotal < 0.1)) {
+				$disk_over90p = true;
+			} else {
+				$disk_over90p = false;
+			}
 
-        if(function_exists("sys_getloadavg")){
-            $loadAve = sys_getloadavg()[0];
-        } else {
-            $loadAve = null;
-        }
+			if(function_exists("sys_getloadavg")){
+				$loadAve = sys_getloadavg()[0];
+			} else {
+				$loadAve = null;
+			}
+		}else{
+			$disk = false;
+			$diskFree = 5000;
+			$diskUmari = 5000;
+			$diskTotal = 10000;
+			$disk_over90p = false;
+			if(function_exists("sys_getloadavg")){
+				$loadAve = sys_getloadavg()[0];
+			}else{
+				$loadAve = null;
+			}
+		}
     }
 } else {
     $disk = false;

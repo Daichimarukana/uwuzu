@@ -355,21 +355,20 @@ function formatMarkdown(text) {
 
     // a_link
     text = text.replace(/(https:\/\/[\w!?\/+\-_~;.,*&@#$%()+|https:\/\/[ぁ-んァ-ヶ一ー-龠々\w\-\/?=&%.]+)/g, function (url) {
-        const escapedUrl = url;
-        const no_https_link = escapedUrl.replace("https://", "");
+        const no_https_link = url.replace("https://", "");
         let linkText = no_https_link;
-        
         if (no_https_link.length > 48) {
             linkText = no_https_link.substring(0, 48) + '...';
         }
-        
-        return `<a href="${escapedUrl}" target="_blank" rel="noopener">${linkText}</a>`;
+        const html = `<a href="${url}" target="_blank" rel="noopener">${linkText}</a>`;
+        return createPlaceholder(html);
     });
 
     // ハッシュタグ
     text = text.replace(/(^|[^a-zA-Z0-9_])#([a-zA-Z0-9ぁ-んァ-ン一-龥ー_]+)/gu, function (match, before, tag) {
         const encodedTag = encodeURIComponent("#" + tag);
-        return `${before}<a href="/search?q=${encodedTag}" class="hashtags">#${tag}</a>`;
+        const html = `${before}<a href="/search?q=${encodedTag}" class="hashtags">#${tag}</a>`;
+        return createPlaceholder(html);
     });
 
     // 独自構文
@@ -390,6 +389,7 @@ function formatMarkdown(text) {
         .replace(/~~(.+?)~~/g, '<s>$1</s>')
         .replace(/^&gt;&gt;&gt; ?(.*)$/gm, '<span class="quote">$1</span>')
         .replace(/\|\|(.+?)\|\|/g, '<span class="blur">$1</span>')
+        .replace(/^-# (.+)/gm, '<p class="chotto_small">$1</p>')
         .replace(/^# (.+)/gm, '<h1>$1</h1>')
         .replace(/^## (.+)/gm, '<h2>$1</h2>')
         .replace(/^### (.+)/gm, '<h3>$1</h3>')
@@ -412,17 +412,17 @@ function formatMarkdown(text) {
     return final;
 }
 
-function YouTube_and_nicovideo_Links(postText) {
+async function YouTube_and_nicovideo_Links(postText) {
     const urlPattern = /(https:\/\/[^\s<>\[\]'"“”]+)/g;
     const urls = postText.match(urlPattern);
     let embedCode = '';
 
     if (!urls) return null;
 
-    let embeddedOnce = false; // ← 埋め込みが1回されたかどうか
+    let embeddedOnce = false;
 
-    urls.forEach(url => {
-        if (embeddedOnce) return; // ← すでに埋め込みしたらスキップ
+    for (const url of urls) {
+        if (embeddedOnce) return;
 
         try {
             const parsed = new URL(url);
@@ -452,7 +452,6 @@ function YouTube_and_nicovideo_Links(postText) {
                     embedCode = `<div class="youtube_and_nicovideo_player"><iframe src="https://www.youtube-nocookie.com/embed/${videoId}?start=${videoTime}" rel="0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>`;
                     embeddedOnce = true;
                 }
-
             } else if (['nicovideo.jp', 'nico.ms'].includes(host)) {
                 if (parsed.pathname.includes('/watch/')) {
                     videoId = parsed.pathname.split('/watch/')[1];
@@ -471,13 +470,24 @@ function YouTube_and_nicovideo_Links(postText) {
                     embedCode = `<div class="youtube_and_nicovideo_player"><iframe src="https://embed.nicovideo.jp/watch/${videoId}?from=${videoTime}" frameborder="0" allowfullscreen></iframe></div>`;
                     embeddedOnce = true;
                 }
-            } else {
-                embedCode = null
+            }else if (['soundcloud.com', 'on.soundcloud.com'].includes(host)) {
+                const oembedUrl = `https://soundcloud.com/oembed?format=json&maxheight=400&url=${encodeURIComponent(url)}`;
+                
+                const response = await $.ajax({
+                    url: oembedUrl,
+                    method: 'GET',
+                    dataType: 'json'
+                });
+
+                if (response && response.html) {
+                    embedCode = `<div class="youtube_and_nicovideo_player">${response.html}</div>`;
+                    embeddedOnce = true;
+                }
             }
         } catch (e) {
             // 無視
         }
-    });
+    };
 
     return embedCode;
 }
@@ -946,23 +956,25 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
 
     if (ueuse["type"] == "Reuse") {
         if (ueuse["ueuse"].length > 0) {
-            if (YouTube_and_nicovideo_Links(ueuse["ueuse"])) {
-                contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["ueuse"]);
+            const embed = await YouTube_and_nicovideo_Links(ueuse["ueuse"]);
+            if (embed) {
+                contentHtml = contentHtml + embed;
             }
         } else {
             if (ueuse["reuse"] != null) {
-                if (YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"])) {
-                    contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"]);
+                const embed = await YouTube_and_nicovideo_Links(ueuse["reuse"]["ueuse"]);
+                if (embed) {
+                    contentHtml = contentHtml + embed;
                 }
             }
-
         }
-
     } else {
-        if (YouTube_and_nicovideo_Links(ueuse["ueuse"])) {
-            contentHtml = contentHtml + YouTube_and_nicovideo_Links(ueuse["ueuse"]);
+        const embed = await YouTube_and_nicovideo_Links(ueuse["ueuse"]);
+        if (embed) {
+            contentHtml = contentHtml + embed;
         }
     }
+
     var favbox = `
         <hr>
         <div class="favbox">

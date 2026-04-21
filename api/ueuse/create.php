@@ -117,69 +117,117 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
             }
             
             if(!(empty($post_json["image1"]))){
-                $imageData = base64_decode($post_json["image1"],true);
-            
-                $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_'.createUniqId());
-                file_put_contents($tmpFilePath, $imageData);
-            
-                $Img1Files = [
-                    'name' => 'upload.png',
-                    'type' => check_mime($tmpFilePath),
-                    'tmp_name' => $tmpFilePath,
-                    'error' => UPLOAD_ERR_OK,
-                    'size' => strlen($imageData),
-                ];
+                $imageBase64 = $post_json["image1"];
+
+                if (strpos($imageBase64, ',') !== false) {
+                    $imageBase64 = explode(',', $imageBase64)[1];
+                }
+
+                $imageData = base64_decode($imageBase64, true);
+
+                if ($imageData === false) {
+                    $error_message[] = 'Base64のデコードに失敗しました！(base64_decode_failed)';
+                } else {
+                    $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_' . createUniqId());
+                    file_put_contents($tmpFilePath, $imageData);
+
+                    clearstatcache(true, $tmpFilePath);
+
+                    $Img1Files = [
+                        'name' => 'upload.png',
+                        'type' => check_mime($tmpFilePath),
+                        'tmp_name' => $tmpFilePath,
+                        'error' => UPLOAD_ERR_OK,
+                        'size' => filesize($tmpFilePath),
+                    ];
+                }
             } else {
                 $Img1Files = array();
             }
 
             if(!(empty($post_json["image2"]))){
-                $imageData = base64_decode($post_json["image2"],true);
-            
-                $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_'.createUniqId());
-                file_put_contents($tmpFilePath, $imageData);
-            
-                $Img2Files = [
-                    'name' => 'upload.png',
-                    'type' => check_mime($tmpFilePath),
-                    'tmp_name' => $tmpFilePath,
-                    'error' => UPLOAD_ERR_OK,
-                    'size' => strlen($imageData),
-                ];
+                $imageBase64 = $post_json["image2"];
+
+                if (strpos($imageBase64, ',') !== false) {
+                    $imageBase64 = explode(',', $imageBase64)[1];
+                }
+
+                $imageData = base64_decode($imageBase64, true);
+
+                if ($imageData === false) {
+                    $error_message[] = 'Base64のデコードに失敗しました！(base64_decode_failed)';
+                } else {
+                    $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_' . createUniqId());
+                    file_put_contents($tmpFilePath, $imageData);
+
+                    clearstatcache(true, $tmpFilePath);
+
+                    $Img2Files = [
+                        'name' => 'upload.png',
+                        'type' => check_mime($tmpFilePath),
+                        'tmp_name' => $tmpFilePath,
+                        'error' => UPLOAD_ERR_OK,
+                        'size' => filesize($tmpFilePath),
+                    ];
+                }
             } else {
                 $Img2Files = array();
             }
 
             if(!(empty($post_json["image3"]))){
-                $imageData = base64_decode($post_json["image3"],true);
-            
-                $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_'.createUniqId());
-                file_put_contents($tmpFilePath, $imageData);
-            
-                $Img3Files = [
-                    'name' => 'upload.png',
-                    'type' => check_mime($tmpFilePath),
-                    'tmp_name' => $tmpFilePath,
-                    'error' => UPLOAD_ERR_OK,
-                    'size' => strlen($imageData),
-                ];
+                $imageBase64 = $post_json["image3"];
+
+                if (strpos($imageBase64, ',') !== false) {
+                    $imageBase64 = explode(',', $imageBase64)[1];
+                }
+
+                $imageData = base64_decode($imageBase64, true);
+
+                if ($imageData === false) {
+                    $error_message[] = 'Base64のデコードに失敗しました！(base64_decode_failed)';
+                } else {
+                    $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_' . createUniqId());
+                    file_put_contents($tmpFilePath, $imageData);
+
+                    clearstatcache(true, $tmpFilePath);
+
+                    $Img3Files = [
+                        'name' => 'upload.png',
+                        'type' => check_mime($tmpFilePath),
+                        'tmp_name' => $tmpFilePath,
+                        'error' => UPLOAD_ERR_OK,
+                        'size' => filesize($tmpFilePath),
+                    ];
+                }
             } else {
                 $Img3Files = array();
             }
 
             if(!(empty($post_json["image4"]))){
-                $imageData = base64_decode($post_json["image4"],true);
-            
-                $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_'.createUniqId());
-                file_put_contents($tmpFilePath, $imageData);
-            
-                $Img4Files = [
-                    'name' => 'upload.png',
-                    'type' => check_mime($tmpFilePath),
-                    'tmp_name' => $tmpFilePath,
-                    'error' => UPLOAD_ERR_OK,
-                    'size' => strlen($imageData),
-                ];
+                $imageBase64 = $post_json["image4"];
+
+                if (strpos($imageBase64, ',') !== false) {
+                    $imageBase64 = explode(',', $imageBase64)[1];
+                }
+
+                $imageData = base64_decode($imageBase64, true);
+
+                if ($imageData === false) {
+                    $error_message[] = 'Base64のデコードに失敗しました！(base64_decode_failed)';
+                } else {
+                    $tmpFilePath = tempnam(sys_get_temp_dir(), 'upload_' . createUniqId());
+                    file_put_contents($tmpFilePath, $imageData);
+
+                    clearstatcache(true, $tmpFilePath);
+
+                    $Img4Files = [
+                        'name' => 'upload.png',
+                        'type' => check_mime($tmpFilePath),
+                        'tmp_name' => $tmpFilePath,
+                        'error' => UPLOAD_ERR_OK,
+                        'size' => filesize($tmpFilePath),
+                    ];
+                }
             } else {
                 $Img4Files = array();
             }
@@ -193,8 +241,18 @@ if(isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
 
             $video1 = array();
 
-            $ueuse_result = send_ueuse($userData["userid"],$replyid,$reuseid,$ueuse,$Img1Files,$Img2Files,$Img3Files,$Img4Files,$video1,$nsfw,$isAIBWM, "../");
-
+            if(empty($error_message)){
+                $ueuse_result = send_ueuse($userData["userid"],$replyid,$reuseid,$ueuse,$Img1Files,$Img2Files,$Img3Files,$Img4Files,$video1,$nsfw,$isAIBWM, "../");
+            }else{
+                $err = $error_message;
+                $response = array(
+                    'error_code' => $err,
+                    'success' => false
+                );
+                
+                echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                exit;
+            }
 
             if($ueuse_result[0] == true){
                 $response = array(

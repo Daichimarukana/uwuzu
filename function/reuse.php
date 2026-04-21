@@ -27,54 +27,57 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['reusetext'])) &&
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }
+    }elseif(is_sameUserid($userid, $is_login["userid"]) === true){
+        $reusedate = date("Y-m-d H:i:s");
 
-    $reusedate = date("Y-m-d H:i:s");
+        //ユーズの情報を取得
+        $query = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :uniqid limit 1');
+        $query->execute(array(':uniqid' => $postUniqid));
+        $result = $query->fetch();
 
-    //ユーズの情報を取得
-    $query = $pdo->prepare('SELECT * FROM ueuse WHERE uniqid = :uniqid limit 1');
-    $query->execute(array(':uniqid' => $postUniqid));
-    $result = $query->fetch();
+        //ユーザーの認証情報を取得
+        $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
+        $query->execute(array(':userid' => $userid));
+        $result2 = $query->fetch();
+        if($result2["loginid"] === $loginid){
+            if(!($result2["role"] == "ice")){
+                $nsfw_chk = "false";
+            
+                $photo1 = "";
+                $photo2 = "";
+                $photo3 = "";
+                $photo4 = "";
+                $video1 = "";
+            
+                $rpUniqid = "";
 
-    //ユーザーの認証情報を取得
-    $query = $pdo->prepare('SELECT * FROM account WHERE userid = :userid limit 1');
-    $query->execute(array(':userid' => $userid));
-    $result2 = $query->fetch();
-    if($result2["loginid"] === $loginid){
-        if(!($result2["role"] == "ice")){
-            $nsfw_chk = "false";
-        
-            $photo1 = "";
-            $photo2 = "";
-            $photo3 = "";
-            $photo4 = "";
-            $video1 = "";
-        
-            $rpUniqid = "";
+                $AIBWM = false;
+                if(!(empty($result["ueuse"]))){
+                    $ruUniqid = $postUniqid;
+                }else{
+                    $ruUniqid = $result["ruuniqid"];
+                }
+                $ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$reusetext,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk,$AIBWM);
 
-            $AIBWM = false;
-            if(!(empty($result["ueuse"]))){
-                $ruUniqid = $postUniqid;
+                if($ueuse_result[0] == true){
+                    echo json_encode(['success' => true]);
+                    exit;
+                }else{
+                    echo json_encode(['success' => false, 'error' => $ueuse_result[1]]);
+                    exit;
+                }
             }else{
-                $ruUniqid = $result["ruuniqid"];
-            }
-            $ueuse_result = send_ueuse($userid,$rpUniqid,$ruUniqid,$reusetext,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw_chk,$AIBWM);
-
-            if($ueuse_result[0] == true){
-                echo json_encode(['success' => true]);
-                exit;
-            }else{
-                echo json_encode(['success' => false, 'error' => $ueuse_result[1]]);
-                exit;
+                echo json_encode(['success' => false, 'error' => 'お使いのアカウントではリユーズができません。']);
+                exit; 
             }
         }else{
-            echo json_encode(['success' => false, 'error' => 'お使いのアカウントではリユーズができません。']);
-            exit; 
+            echo json_encode(['success' => false, 'error' => 'リユーズに失敗しました。']);
+            exit;
         }
     }else{
-        echo json_encode(['success' => false, 'error' => 'リユーズに失敗しました。']);
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }
+    }  
 } else {
     echo json_encode(['success' => false, 'error' => '必要なパラメータが提供されていません。']);
     exit;

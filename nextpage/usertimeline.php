@@ -41,208 +41,212 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => 'bad_request']);
         exit;
-    }
-
-    // データベースに接続
-    try {
-        $option = array(
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
-        );
-        $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
-    } catch (PDOException $e) {
-        // 接続エラーのときエラー内容を取得する
-        $error_message[] = $e->getMessage();
-    }
-
-    if (!empty($pdo)) {
-        $myUserData = getUserData($pdo, $userId);
-        $myblocklist = safetext($myUserData["blocklist"]);
-        $mybookmark = safetext($myUserData["bookmark"]);
-
-        $itemsPerPage = 15; // 1ページあたりのユーズ数
-        $pageNumber = $page;
-        if ($pageNumber <= 0 || (!(is_numeric($pageNumber)))) {
-            $pageNumber = 1;
+    }elseif(is_sameUserid($userId, $is_login["userid"]) === true){
+        // データベースに接続
+        try {
+            $option = array(
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::MYSQL_ATTR_MULTI_STATEMENTS => false
+            );
+            $pdo = new PDO('mysql:charset=utf8mb4;dbname=' . DB_NAME . ';host=' . DB_HOST, DB_USER, DB_PASS, $option);
+        } catch (PDOException $e) {
+            // 接続エラーのときエラー内容を取得する
+            $error_message[] = $e->getMessage();
         }
-        $offset = ($pageNumber - 1) * $itemsPerPage;
 
-        $messages = array();
+        if (!empty($pdo)) {
+            $myUserData = getUserData($pdo, $userId);
+            $myblocklist = safetext($myUserData["blocklist"]);
+            $mybookmark = safetext($myUserData["bookmark"]);
 
-        if ($is_local === true) {
-            $userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower FROM account WHERE userid = :userid");
-            $userQuery->bindValue(':userid', $uwuzuid);
-            $userQuery->execute();
-            $userData = $userQuery->fetch();
-
-            $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = ''ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
-            $messageQuery->bindValue(':userid', $uwuzuid);
-            $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
-            $messageQuery->execute();
-            $message_array = $messageQuery->fetchAll();
-
-            foreach ($message_array as $row) {
-                $messages[] = $row;
+            $itemsPerPage = 15; // 1ページあたりのユーズ数
+            $pageNumber = $page;
+            if ($pageNumber <= 0 || (!(is_numeric($pageNumber)))) {
+                $pageNumber = 1;
             }
+            $offset = ($pageNumber - 1) * $itemsPerPage;
 
-            // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
-            $messages = getDatasUeuse($pdo, $messages);
-        } elseif($userData != null) {
-            $activity_base = GetActivityPubJson($userData['outbox']);
-            $pageUrl = $activity_base['first'] ?? null;
+            $messages = array();
 
-            $pageNumber = max(1, (int)$page); // 1ページ目以上に固定
-            $currentPageData = null;
+            if ($is_local === true) {
+                $userQuery = $pdo->prepare("SELECT username, userid, profile, role, follower FROM account WHERE userid = :userid");
+                $userQuery->bindValue(':userid', $uwuzuid);
+                $userQuery->execute();
+                $userData = $userQuery->fetch();
 
-            for ($i = 1; $i <= $pageNumber; $i++) {
-                if (!$pageUrl) break;
+                $messageQuery = $pdo->prepare("SELECT * FROM ueuse WHERE account = :userid AND rpuniqid = ''ORDER BY datetime DESC LIMIT :offset, :itemsPerPage");
+                $messageQuery->bindValue(':userid', $uwuzuid);
+                $messageQuery->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $messageQuery->bindValue(':itemsPerPage', $itemsPerPage, PDO::PARAM_INT);
+                $messageQuery->execute();
+                $message_array = $messageQuery->fetchAll();
 
-                $currentPageData = GetActivityPubJson($pageUrl);
-
-                // 目的のページに達していなければ next をたどる
-                if ($i < $pageNumber) {
-                    $pageUrl = $currentPageData['next'] ?? null;
-                }
-            }
-            $orderedItems = $currentPageData['orderedItems'] ?? [];
-
-            $createItems = array_filter($orderedItems, function ($item) {
-                return isset($item['type']) && $item['type'] === 'Create';
-            });
-            $createItems = array_values($createItems);
-
-            foreach ($createItems as $item) {
-                // object がURLなら取得
-                $object = $item['object'] ?? null;
-                if (is_string($object)) {
-                    $object = GetActivityPubJson($object);
+                foreach ($message_array as $row) {
+                    $messages[] = $row;
                 }
 
-                // nullや不正なobjectはスキップ
-                if (!is_array($object)) continue;
+                // ユーザー情報を取得して、$messages内のusernameをuserDataのusernameに置き換える
+                $messages = getDatasUeuse($pdo, $messages);
+            } elseif($userData != null) {
+                $activity_base = GetActivityPubJson($userData['outbox']);
+                $pageUrl = $activity_base['first'] ?? null;
 
-                $contentHtml = $object['content'] ?? '';
-                $withNewlines = preg_replace('/<br\s*\/?>/i', "\n", $contentHtml);
-                $plainContent = strip_tags($withNewlines);
+                $pageNumber = max(1, (int)$page); // 1ページ目以上に固定
+                $currentPageData = null;
 
-                $photos = [];
-                $video = null;
+                for ($i = 1; $i <= $pageNumber; $i++) {
+                    if (!$pageUrl) break;
 
-                if (!empty($object['attachment'])) {
-                    $attachments = is_array($object['attachment']) ? $object['attachment'] : [$object['attachment']];
+                    $currentPageData = GetActivityPubJson($pageUrl);
 
-                    foreach ($attachments as $att) {
-                        if (!is_array($att)) continue;
+                    // 目的のページに達していなければ next をたどる
+                    if ($i < $pageNumber) {
+                        $pageUrl = $currentPageData['next'] ?? null;
+                    }
+                }
+                $orderedItems = $currentPageData['orderedItems'] ?? [];
 
-                        $mediaType = $att['mediaType'] ?? '';
-                        $url = $att['url'] ?? ($att['href'] ?? null);
+                $createItems = array_filter($orderedItems, function ($item) {
+                    return isset($item['type']) && $item['type'] === 'Create';
+                });
+                $createItems = array_values($createItems);
 
-                        if (!$url) continue;
+                foreach ($createItems as $item) {
+                    // object がURLなら取得
+                    $object = $item['object'] ?? null;
+                    if (is_string($object)) {
+                        $object = GetActivityPubJson($object);
+                    }
 
-                        // 画像（mediaTypeで判定）
-                        if (str_starts_with($mediaType, 'image/')) {
-                            if (count($photos) < 4) {
-                                $photos[] = $url;
+                    // nullや不正なobjectはスキップ
+                    if (!is_array($object)) continue;
+
+                    $contentHtml = $object['content'] ?? '';
+                    $withNewlines = preg_replace('/<br\s*\/?>/i', "\n", $contentHtml);
+                    $plainContent = strip_tags($withNewlines);
+
+                    $photos = [];
+                    $video = null;
+
+                    if (!empty($object['attachment'])) {
+                        $attachments = is_array($object['attachment']) ? $object['attachment'] : [$object['attachment']];
+
+                        foreach ($attachments as $att) {
+                            if (!is_array($att)) continue;
+
+                            $mediaType = $att['mediaType'] ?? '';
+                            $url = $att['url'] ?? ($att['href'] ?? null);
+
+                            if (!$url) continue;
+
+                            // 画像（mediaTypeで判定）
+                            if (str_starts_with($mediaType, 'image/')) {
+                                if (count($photos) < 4) {
+                                    $photos[] = $url;
+                                }
+                            }
+
+                            // 動画（mediaTypeで判定）
+                            if (str_starts_with($mediaType, 'video/') && !$video) {
+                                $video = $url;
                             }
                         }
+                    }
 
-                        // 動画（mediaTypeで判定）
-                        if (str_starts_with($mediaType, 'video/') && !$video) {
-                            $video = $url;
-                        }
+                    $messages[] = [
+                        "rpuniqid" => "",
+                        "ruuniqid" => "",
+                        "uniqid" => "",
+                        "datetime" => date("Y-m-d H:i:s", strtotime($object["published"] ?? "now")),
+                        "account" => $userData["userid"] . "@" . $activity_domain,
+                        "username" => $userData["username"],
+                        "iconname" => $userData["iconname"],
+                        "headname" => $userData["headname"] ?? null,
+                        "role" => $userData["role"] ?? "user",
+                        "sacinfo" => "",
+                        "ueuse" => $plainContent,
+                        "photo1" => $photos[0] ?? null,
+                        "photo2" => $photos[1] ?? null,
+                        "photo3" => $photos[2] ?? null,
+                        "photo4" => $photos[3] ?? null,
+                        "video1" => $video,
+                        "nsfw" => $object["sensitive"] ?? false,
+                        "favorite" => "",
+                        "favorite_count" => 0,
+                        "reply_count" => 0,
+                        "reuse_count" => 0,
+                        "abi" => "",
+                        "abidate" => null,
+                        "activitypub" => true,
+                    ];
+                }
+            }else{
+                $message = array();
+            }
+
+
+            //adsystem------------------
+
+            $message['ads'] = "false";
+
+            $today = date("Y-m-d H:i:s");
+
+            $adsQuery = $pdo->prepare("SELECT * FROM ads WHERE start_date < :today AND limit_date > :today ORDER BY rand()");
+            $adsQuery->bindValue(':today', $today);
+            $adsQuery->execute();
+            $adsresult = $adsQuery->fetch();
+            if (!(empty($adsresult))) {
+                $message['ads'] = "true";
+                $message['ads_url'] = $adsresult["url"];
+                $message['ads_img_url'] = $adsresult["image_url"];
+                $message['ads_memo'] = $adsresult["memo"];
+            }
+            //--------------------------
+
+            $ueuseItems = array();
+            if (!empty($messages)) {
+                foreach ($messages as $value) {
+                    $formatted = FormatUeuseItem($value, $myblocklist, $mybookmark, $pdo, $userId);
+                    if ($formatted !== null) {
+                        $ueuseItems[] = $formatted;
                     }
                 }
 
-                $messages[] = [
-                    "rpuniqid" => "",
-                    "ruuniqid" => "",
-                    "uniqid" => "",
-                    "datetime" => date("Y-m-d H:i:s", strtotime($object["published"] ?? "now")),
-                    "account" => $userData["userid"] . "@" . $activity_domain,
-                    "username" => $userData["username"],
-                    "iconname" => $userData["iconname"],
-                    "headname" => $userData["headname"] ?? null,
-                    "role" => $userData["role"] ?? "user",
-                    "sacinfo" => "",
-                    "ueuse" => $plainContent,
-                    "photo1" => $photos[0] ?? null,
-                    "photo2" => $photos[1] ?? null,
-                    "photo3" => $photos[2] ?? null,
-                    "photo4" => $photos[3] ?? null,
-                    "video1" => $video,
-                    "nsfw" => $object["sensitive"] ?? false,
-                    "favorite" => "",
-                    "favorite_count" => 0,
-                    "reply_count" => 0,
-                    "reuse_count" => 0,
-                    "abi" => "",
-                    "abidate" => null,
-                    "activitypub" => true,
-                ];
-            }
-        }else{
-            $message = array();
-        }
-
-
-        //adsystem------------------
-
-        $message['ads'] = "false";
-
-        $today = date("Y-m-d H:i:s");
-
-        $adsQuery = $pdo->prepare("SELECT * FROM ads WHERE start_date < :today AND limit_date > :today ORDER BY rand()");
-        $adsQuery->bindValue(':today', $today);
-        $adsQuery->execute();
-        $adsresult = $adsQuery->fetch();
-        if (!(empty($adsresult))) {
-            $message['ads'] = "true";
-            $message['ads_url'] = $adsresult["url"];
-            $message['ads_img_url'] = $adsresult["image_url"];
-            $message['ads_memo'] = $adsresult["memo"];
-        }
-        //--------------------------
-
-        $ueuseItems = array();
-        if (!empty($messages)) {
-            foreach ($messages as $value) {
-                $formatted = FormatUeuseItem($value, $myblocklist, $mybookmark, $pdo, $userId);
-                if ($formatted !== null) {
-                    $ueuseItems[] = $formatted;
+                if ($message['ads'] === "true") {
+                    $adsystem = array(
+                        "type" => "Ads",
+                        "url" => $message['ads_url'],
+                        "imgurl" => $message['ads_img_url'],
+                        "memo" => $message['ads_memo'],
+                    );
+                } else {
+                    $adsystem = null;
                 }
-            }
 
-            if ($message['ads'] === "true") {
-                $adsystem = array(
-                    "type" => "Ads",
-                    "url" => $message['ads_url'],
-                    "imgurl" => $message['ads_img_url'],
-                    "memo" => $message['ads_memo'],
+                $item = array(
+                    "success" => true,
+                    "ueuses" => $ueuseItems,
+                    "ads" => $adsystem,
                 );
+
+                echo json_encode($item, JSON_UNESCAPED_UNICODE);
             } else {
-                $adsystem = null;
+                $item = array(
+                    "success" => false,
+                    "ueuses" => null,
+                    "ads" => null,
+                    "error" => "no_ueuse",
+                );
+                echo json_encode($item, JSON_UNESCAPED_UNICODE);
             }
 
-            $item = array(
-                "success" => true,
-                "ueuses" => $ueuseItems,
-                "ads" => $adsystem,
-            );
-
-            echo json_encode($item, JSON_UNESCAPED_UNICODE);
-        } else {
-            $item = array(
-                "success" => false,
-                "ueuses" => null,
-                "ads" => null,
-                "error" => "no_ueuse",
-            );
-            echo json_encode($item, JSON_UNESCAPED_UNICODE);
+            $pdo = null;
         }
-
-        $pdo = null;
+    }else{
+        echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
+        exit;
     }
+
 } else {
     $item = array(
         "success" => false,
