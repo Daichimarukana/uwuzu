@@ -15,7 +15,7 @@ if (safetext(isset($_POST['emoji'])) && safetext(isset($_POST['userid'])) && saf
     if ($is_login === false) {
         echo json_encode(['success' => false, 'error' => '認証に失敗しました。(AUTH_INVALID)']);
         exit;
-    }elseif(is_sameUserid($userid, $is_login["userid"]) === true){
+    }elseif(is_sameUserid($userId, $is_login["userid"]) === true){
         // データベースに接続
         try {
             $option = array(
