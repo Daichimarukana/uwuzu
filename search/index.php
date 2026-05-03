@@ -5,6 +5,7 @@ $serversettings = parse_ini_file($serversettings_file, true);
 require('../db.php');
 require("../function/function.php");
 
+$domain = $_SERVER['HTTP_HOST'];
 
 // 変数の初期化
 $datetime = array();

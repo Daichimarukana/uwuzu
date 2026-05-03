@@ -292,7 +292,7 @@ require('../logout/logout.php');
 
 			<hr>
 			<h1>API</h1>
-			<p>APIの使用方法はdocs.uwuzu.xyzよりAPIドキュメントをご確認ください。</p>
+			<p>APIの使用方法はdocs.uwuzu.comよりAPIドキュメントをご確認ください。</p>
 
 			<?php if (empty($userData['token'])) { ?>
 				<p>以下のボタンよりアクセストークンを取得すると使用できます。<br>アクセストークンは一度発行すると作り直すまで再度確認はできません。また、絶対に他人に知られないように保護してください。<br>

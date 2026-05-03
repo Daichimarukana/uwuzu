@@ -71,7 +71,7 @@ if(safetext($serversettings["serverinfo"]["server_activitypub"]) === "true"){
         "software" => array(
             "name" => "uwuzu",
             "version" => "".str_replace("\r", '', $uwuzuinfo[1])."",
-            "homepage" => "https://docs.uwuzu.xyz/",
+            "homepage" => "https://docs.uwuzu.com/",
             "repository" => "https://github.com/Daichimarukana/uwuzu",
         ),
         "protocols" => [

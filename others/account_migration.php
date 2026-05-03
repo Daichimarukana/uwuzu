@@ -130,21 +130,21 @@ if( !empty($_POST['migration_submit']) ) {
 					if($Check_result["server_info"]["account_migration"] == "true"){
 						$pdo->beginTransaction();
 						try {
-							$account = $userid;
-							$migration_code = createUniqId();
+							$account = safetext($userid);
+							$migration_code = safetext(createUniqId());
 							$encryption_key = random(32);
 							$encryption_ivkey = random(16);
 							$datetime = date("Y-m-d H:i:s");
-							$domain = $server_domain;
+							$domain = safetext($server_domain);
 
 							$stmt = $pdo->prepare("INSERT INTO migration (account, domain, migration_code, encryption_key, encryption_ivkey, datetime) VALUES (:account, :domain, :migration_code, :encryption_key, :encryption_ivkey, :datetime)");
 
-							$stmt->bindParam(':account', safetext($account), PDO::PARAM_STR);
-							$stmt->bindParam(':domain', safetext($domain), PDO::PARAM_STR);
-							$stmt->bindParam(':migration_code', safetext($migration_code), PDO::PARAM_STR);
-							$stmt->bindParam(':encryption_key', safetext($encryption_key), PDO::PARAM_STR);
-							$stmt->bindParam(':encryption_ivkey', safetext($encryption_ivkey), PDO::PARAM_STR);
-							$stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
+							$stmt->bindParam(':account', $account, PDO::PARAM_STR);
+							$stmt->bindParam(':domain', $domain, PDO::PARAM_STR);
+							$stmt->bindParam(':migration_code', $migration_code, PDO::PARAM_STR);
+							$stmt->bindParam(':encryption_key', $encryption_key, PDO::PARAM_STR);
+							$stmt->bindParam(':encryption_ivkey', $encryption_ivkey, PDO::PARAM_STR);
+							$stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
 
 							$res = $stmt->execute();
 

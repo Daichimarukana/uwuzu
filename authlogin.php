@@ -132,39 +132,9 @@ if( !empty($pdo) ) {
                 $backuplogin = false;
             }
             
-            if($backuplogin === true || uwuzu_password_verify($userbackupcode,$row["backupcode"])){
-                $pdo->beginTransaction();
-                
-                try {
-                    $touserid = $userid;
-                    $datetime = date("Y-m-d H:i:s");
-                    $msg = "バックアップコードを使用しログインされました！\nバックアップコード変更のために二段階認証を再設定することを強くおすすめします。\nまた、もしバックアップコードを利用してログインした覚えがない場合は「その他」よりセッショントークンを再生成し、設定画面よりパスワードを変更し、二段階認証を再設定してください！\n\nログインした端末 : ".$device;
-                    $title = '🔴バックアップコード使用のお知らせ🔴';
-                    $url = '/settings';
-                    $userchk = 'none';
-                    // 通知用SQL作成
-                    $stmt = $pdo->prepare("INSERT INTO notification (fromuserid, touserid, msg, url, datetime, userchk, title) VALUES (:fromuserid, :touserid, :msg, :url, :datetime, :userchk, :title)");
-            
-                    $stmt->bindParam(':fromuserid', safetext("uwuzu-fromsys"), PDO::PARAM_STR);
-                    $stmt->bindParam(':touserid', safetext($touserid), PDO::PARAM_STR);
-                    $stmt->bindParam(':msg', safetext($msg), PDO::PARAM_STR);
-                    $stmt->bindParam(':url', safetext($url), PDO::PARAM_STR);
-                    $stmt->bindParam(':userchk', safetext($userchk), PDO::PARAM_STR);
-                    $stmt->bindParam(':title', safetext($title), PDO::PARAM_STR);
-
-                    $stmt->bindParam(':datetime', safetext($datetime), PDO::PARAM_STR);
-
-                    // SQLクエリの実行
-                    $res = $stmt->execute();
-
-                    // コミット
-                    $res = $pdo->commit();
-
-                } catch(Exception $e) {
-
-                    // エラーが発生した時はロールバック
-                    $pdo->rollBack();
-                }
+            if($backuplogin === true || uwuzu_password_verify($userbackupcode,$row["backupcode"])){        
+                $msg = "バックアップコードを使用しログインされました！\nバックアップコード変更のために二段階認証を再設定することを強くおすすめします。\nまた、もしバックアップコードを利用してログインした覚えがない場合は「その他」よりセッショントークンを再生成し、設定画面よりパスワードを変更し、二段階認証を再設定してください！\n\nログインした端末 : ".$device;
+                send_notification($userid,"uwuzu-fromsys","🔴バックアップコード使用のお知らせ🔴",$msg,"/settings", "login");
 
                 clearstatcache();
                                             
@@ -199,7 +169,7 @@ if( !empty($pdo) ) {
                 $_SESSION['loginid'] = $userData["loginid"];
                 $_SESSION['loginkey'] = $userLoginKey;
             
-                $_SESSION['username'] = $username;
+                $_SESSION['username'] = $userData["username"];
                 $_SESSION['password'] = null;
                 $_SESSION["login_passtry"] = 0;
 
@@ -276,7 +246,7 @@ if( !empty($pdo) ) {
                         $_SESSION['loginid'] = $userData["loginid"];
                         $_SESSION['loginkey'] = $userLoginKey;
                     
-                        $_SESSION['username'] = $username;
+                        $_SESSION['username'] = $userData["username"];
                         $_SESSION['password'] = null; 
                         $_SESSION["login_passtry"] = 0;
 

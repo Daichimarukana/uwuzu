@@ -1179,6 +1179,7 @@ function x1024($byte){
 }
 function uwuzu_ver($select,$path){
     $softwaredata = file_get_contents($path);
+    $software_info = array();
 
     $softwaredata = explode( "\n", $softwaredata );
     $cnt = count( $softwaredata );
@@ -3633,6 +3634,7 @@ function uwuzu_password_verify($password, $hash){
 //ユーザーのOther_Settings読み取り関数
 function val_OtherSettings($dataname, $jsontext){
     $other_settings = json_decode($jsontext, true);
+    $ret = false;
     if(!(empty($other_settings[$dataname]))) {
         if(is_bool($other_settings[$dataname]) === true){
             if($other_settings[$dataname] == true){
@@ -3653,6 +3655,7 @@ function val_OtherSettings($dataname, $jsontext){
 //ユーザーのOther_Settings追加関数
 function val_AddOtherSettings($dataname, $data, $jsontext){
     $other_settings = json_decode($jsontext, true);
+    $ret = false;
     if(empty($other_settings)){
         $new_data = [$dataname=>$data];
         $ret = json_encode($new_data);
@@ -3717,6 +3720,33 @@ function is_OtherSettings($pdo, $userid, $add = true){
         //unfollow_userの救済だーー！！！
         return true;
     }
+}
+
+function getUserOnlineStatus(string $last_login_datetime, string $other_settings){
+    $isPublicOnlineStatus = val_OtherSettings("isPublicOnlineStatus", $other_settings);
+    if($isPublicOnlineStatus === true){
+        if (!(empty($last_login_datetime))) {
+            $lastLogin = new DateTime($last_login_datetime);
+            $now = new DateTime();
+            
+            $interval = $now->diff($lastLogin);
+            
+            $minutesPast = ($interval->days * 24 * 60) + ($interval->h * 60) + $interval->i;
+
+            if ($minutesPast <= 5) {
+                $OnlineStatus = "Online";
+            } elseif ($minutesPast <= 15) {
+                $OnlineStatus = "Away";
+            } else {
+                $OnlineStatus = "Offline";
+            }
+        } else {
+            $OnlineStatus = "Offline";
+        }
+    }else{
+        $OnlineStatus = "Private";
+    }
+    return $OnlineStatus;
 }
 
 function GetActivityPubJson($url) {
@@ -3824,15 +3854,17 @@ function GetActivityPubUser($userid, $domain) {
 function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, $pdo, string $userId): ?array {
     if ($value["role"] === "ice") return null;
 
+    if(isset($value["other_settings"])) {
+        $value["isAIBlock"] = val_OtherSettings("isAIBlock", $value["other_settings"]);
+        $value["OnlineStatus"] = getUserOnlineStatus($value["last_login_datetime"], $value["other_settings"]);
+    } else {
+        $value["isAIBlock"] = false;
+        $value["OnlineStatus"] = null;
+    }
+
     $value['iconname'] = filter_var($value['iconname'], FILTER_VALIDATE_URL)
         ? $value['iconname']
         : "../" . $value['iconname'];
-
-    if(isset($value["other_settings"])) {
-        $value["isAIBlock"] = val_OtherSettings("isAIBlock", $value["other_settings"]);
-    } else {
-        $value["isAIBlock"] = false;
-    }
 
     $value = to_null($value);
     $value = to_array_safetext($value);
@@ -3862,8 +3894,10 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
 
             if(isset($reusedUserData["other_settings"])) {
                 $reusedUserData["isAIBlock"] = val_OtherSettings("isAIBlock", $reusedUserData["other_settings"]);
+                $reusedUserData["OnlineStatus"] = getUserOnlineStatus($reusedUserData["last_login_datetime"], $reusedUserData["other_settings"]);
             } else {
                 $reusedUserData["isAIBlock"] = false;
+                $reusedUserData["OnlineStatus"] = null;
             }
 
             $reused = to_null($reused);
@@ -3889,6 +3923,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
                     "role" => $reusedUserData["role"],
                     "is_bot" => $reusedUserData["is_bot"],
                     "is_aiblock" => (bool)$reusedUserData["isAIBlock"],
+                    "online_status" => $reusedUserData["OnlineStatus"],
                 ],
                 "ueuse" => $reused["ueuse"],
                 "photo1" => $reused["photo1"],
@@ -3929,6 +3964,7 @@ function FormatUeuseItem(array $value, string $myblocklist, string $mybookmark, 
             "role" => $value["role"],
             "is_bot" => $value["is_bot"],
             "is_aiblock" => (bool)$value["isAIBlock"],
+            "online_status" => $value["OnlineStatus"],
         ],
         "ueuse" => $value["ueuse"],
         "photo1" => $value["photo1"],
@@ -4189,7 +4225,7 @@ function getDatasUeuse(PDO $pdo, array $messages): array {
     $users = [];
     if (!empty($userIds)) {
         $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-        $stmt = $pdo->prepare("SELECT userid, username, profile, role, iconname, headname, sacinfo, other_settings FROM account WHERE userid IN ($placeholders)");
+        $stmt = $pdo->prepare("SELECT userid, username, profile, role, iconname, headname, sacinfo, other_settings, last_login_datetime FROM account WHERE userid IN ($placeholders)");
         $stmt->execute($userIds);
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $users[$row['userid']] = $row;
@@ -4226,6 +4262,7 @@ function getDatasUeuse(PDO $pdo, array $messages): array {
             $message['iconname'] = $userRow['iconname'] ?? ($message['iconname'] ?? null);
             $message['headname'] = $userRow['headname'] ?? ($message['headname'] ?? null);
             $message['sacinfo']  = $userRow['sacinfo']  ?? ($message['sacinfo']  ?? null);
+            $message['last_login_datetime']  = $userRow['last_login_datetime']  ?? ($message['last_login_datetime']  ?? null);
             $message['other_settings']  = $userRow['other_settings']  ?? ($message['other_settings']  ?? null);
         }
 

@@ -421,6 +421,20 @@ async function YouTube_and_nicovideo_Links(postText) {
 
     let embeddedOnce = false;
 
+    const fetchOEmbed = (url, providerName, placeholderId, endpoint) => {
+        $.ajax({
+            url: `${endpoint}?url=${encodeURIComponent(url)}&format=json`,
+            method: 'GET',
+            dataType: 'json'
+        }).then(response => {
+            if (response && response.html) {
+                $(`#${placeholderId}`).html(response.html);
+            }
+        }).catch(() => {
+            $(`#${placeholderId}`).html(`<p style="font-size: 0.8rem;">Failed to load ${providerName}.</p>`);
+        });
+    };
+
     for (const url of urls) {
         if (embeddedOnce) return;
 
@@ -470,17 +484,19 @@ async function YouTube_and_nicovideo_Links(postText) {
                     embedCode = `<div class="youtube_and_nicovideo_player"><iframe src="https://embed.nicovideo.jp/watch/${videoId}?from=${videoTime}" frameborder="0" allowfullscreen></iframe></div>`;
                     embeddedOnce = true;
                 }
-            }else if (['soundcloud.com', 'on.soundcloud.com'].includes(host)) {
-                const oembedUrl = `https://soundcloud.com/oembed?format=json&maxheight=400&url=${encodeURIComponent(url)}`;
-                
-                const response = await $.ajax({
-                    url: oembedUrl,
-                    method: 'GET',
-                    dataType: 'json'
-                });
+            } else {
+                const isSoundCloud = ['soundcloud.com', 'on.soundcloud.com'].includes(host);
+                const isSpotify = host === 'open.spotify.com';
 
-                if (response && response.html) {
-                    embedCode = `<div class="youtube_and_nicovideo_player">${response.html}</div>`;
+                if (isSoundCloud || isSpotify) {
+                    const provider = isSoundCloud ? { name: 'SoundCloud', api: 'https://soundcloud.com/oembed' } : { name: 'Spotify', api: 'https://open.spotify.com/oembed' };
+                    const placeholderId = `embed-${Math.random().toString(36).substring(2, 9)}`;
+
+                    embedCode = `<div id="${placeholderId}" class="youtube_and_nicovideo_player">
+                                    <p>Loading ${provider.name}...</p>
+                                 </div>`;
+                    
+                    fetchOEmbed(url, provider.name, placeholderId, provider.api);
                     embeddedOnce = true;
                 }
             }
@@ -527,6 +543,22 @@ function formatSmartDate(datetimeStr) {
     return `${y}/${pad(m + 1)}/${pad(d)} ${hhmm}`;
 }
 
+function getOnlineStatus(userdata) {
+    if (userdata["online_status"]){
+        if(userdata["online_status"] == "Online") {
+            return `<div class="status green" title="オンライン"></div>`;
+        }else if(userdata["online_status"] == "Away"){
+            return `<div class="status yellow" title="離席中"></div>`;
+        }else if(userdata["online_status"] == "Offline"){
+            return `<div class="status gray" title="オフライン"></div>`;
+        }else{
+            return "";
+        }
+    }else{
+        return "";
+    }
+}
+
 function getCheckIcon(userdata) {
     if (userdata["role"] && userdata["role"].includes("official")) {
         return `<div class="checkicon"><div class="check"></div></div>`;
@@ -554,6 +586,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
     let check = "";
     let bot = "";
     let AIBlock = "";
+    var online_status = "";
     var reuse = "";
     let contentHtml = "";
 
@@ -590,6 +623,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             check = getCheckIcon(ueuse["userdata"]);
             bot = getBotIcon(ueuse["userdata"]);
             AIBlock = getAIBlockFlag(ueuse["userdata"]);
+            online_status = getOnlineStatus(ueuse["userdata"]);
         }
 
         if (ueuse["ueuse"].length > 0) {
@@ -657,6 +691,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                 check = getCheckIcon(ueuse["reuse"]["userdata"]);
                 bot = getBotIcon(ueuse["reuse"]["userdata"]);
                 AIBlock = getAIBlockFlag(ueuse["reuse"]["userdata"]);
+                online_status = getOnlineStatus(ueuse["reuse"]["userdata"]);
                 reuse = `<div class="ru">
                             <a href="/@`+ ueuse["userdata"]["userid"] + `">
                                 <img src="`+ ueuse["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
@@ -730,6 +765,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         check = getCheckIcon(ueuse["userdata"]);
         bot = getBotIcon(ueuse["userdata"]);
         AIBlock = getAIBlockFlag(ueuse["userdata"]);
+        online_status = getOnlineStatus(ueuse["userdata"]);
 
         if (selectedUniqid != null && selectedUniqid == ueuse["uniqid"]) {
             reuse = `<div class="rp"><div class="here"></div><div class="totop"></div><p>一番上のユーズに返信</p></div>`;
@@ -775,7 +811,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
                             <img src="`+ ueuse["userdata"]["iconurl"] + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
                         </a>
                         <div class="u_name">
-                            <a href="/@`+ ueuse["userdata"]["userid"] + `">` + ueuse["userdata"]["username"] + `</a>
+                            <a href="/@`+ ueuse["userdata"]["userid"] + `">` + await replaceCustomEmojis(ueuse["userdata"]["username"]) + `</a>
                         </div>
                         <div class="idbox">
                             <a href="/@`+ ueuse["userdata"]["userid"] + `">@` + ueuse["userdata"]["userid"] + `</a>
@@ -795,6 +831,7 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
         check = getCheckIcon(ueuse["userdata"]);
         bot = getBotIcon(ueuse["userdata"]);
         AIBlock = getAIBlockFlag(ueuse["userdata"]);
+        online_status = getOnlineStatus(ueuse["userdata"]);
 
         reuse = ``;
         inyo = ``;
@@ -997,7 +1034,10 @@ async function createUeuseHtml(ueuse, selectedUniqid = null) {
             <div class="ueuse" id="ueuse-`+ ueuse["uniqid"] + `">
                 `+ reuse + `
                 <div class="flebox">
-                    <a href="/@`+ userid + `"><img src="` + iconurl + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'"></a>
+                    <a href="/@`+ userid + `">
+                        <img src="` + iconurl + `" onerror="this.onerror=null;this.src='../img/sysimage/errorimage/icon_404.png'">
+                        `+ online_status +`
+                    </a>
                     <a href="/@`+ userid + `"><div class="u_name">` + await replaceCustomEmojis(username) + `</div></a>
                     <div class="idbox">
                         <a href="/@`+ userid + `">@` + userid + `</a>

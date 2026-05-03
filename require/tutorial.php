@@ -117,7 +117,7 @@
             <div class="page" id="page8" style="display:none;">
                 <h1>お疲れ様でした！</h1>
                 <p style="text-align: center;">チュートリアルは終了です！<br>
-                まだ、このチュートリアルで紹介できていないuwuzuの機能や使い方も多くあるので、もっとuwuzuについて知りたい方はぜひdocs.uwuzu.xyzをご覧ください。</p>
+                まだ、このチュートリアルで紹介できていないuwuzuの機能や使い方も多くあるので、もっとuwuzuについて知りたい方はぜひdocs.uwuzu.comをご覧ください。</p>
                 <div class="btm_area">
                     <div class="iro_btn backcolor" id="back">戻る</div>
                     <div class="iro_btn" id="end">閉じる</div>

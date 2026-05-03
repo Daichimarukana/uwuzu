@@ -14,6 +14,8 @@ $banurldomainfile = "../server/banurldomain.txt";
 $banurl_info = file_get_contents($banurldomainfile);
 $banurl = preg_split("/\r\n|\n|\r/", $banurl_info);
 
+$domain = $_SERVER['HTTP_HOST'];
+
 // 変数の初期化
 $datetime = array();
 $user_name = null;

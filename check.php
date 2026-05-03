@@ -133,7 +133,7 @@ if( !empty($pdo) ) {
         $_SESSION['loginid'] = $userData["loginid"];
         $_SESSION['loginkey'] = $userLoginKey;
 
-        $_SESSION['username'] = $username;
+        $_SESSION['username'] = $userData["username"];
         $_SESSION['password'] = null;
 
         //ログイン失敗履歴のお掃除

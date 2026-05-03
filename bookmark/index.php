@@ -17,6 +17,8 @@ $stmt = null;
 $res = null;
 $option = null;
 
+$domain = $_SERVER['HTTP_HOST'];
+
 session_name('uwuzu_s_id');
 session_set_cookie_params([
     'lifetime' => 0,

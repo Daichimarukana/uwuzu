@@ -42,6 +42,9 @@ $domain = $_SERVER['HTTP_HOST'];
 
 //------------------------
 
+$serverinfofile = 'server/info.txt';
+$serverinfo = file_get_contents($serverinfofile);
+
 // データベースに接続
 try {
     $option = array(

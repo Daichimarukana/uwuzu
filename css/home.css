@@ -36,16 +36,9 @@ body {
     margin-right: auto;
     padding-top: 12px;
     background-color: var(--background-color);
-    /* 画像を常に天地左右の中央に配置 */
     background-position: center center;
-
-    /* 画像をタイル状に繰り返し表示しない */
     background-repeat: no-repeat;
-
-    /* コンテンツの高さが画像の高さより大きい時、動かないように固定 */
     background-attachment: fixed;
-
-    /* 表示するコンテナの大きさに基づいて、背景画像を調整 */
     background-size: cover;
 }
 
@@ -1130,6 +1123,7 @@ main h1 {
     text-decoration: none;
     font-family: var(--Text-fonts), sans-serif;
     font-weight: bold;
+    position: relative;
 }
 
 .ueuse .flebox a .u_name img {
@@ -1143,7 +1137,28 @@ main h1 {
     border-radius: 0px;
 }
 
+.ueuse .flebox a .status {
+    position: absolute;
+    left: calc(48px - 28px);
+    top: calc(48px - 16px);
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #CCC;
+    border: solid 4px var(--tl-color);
+}
 
+.ueuse .flebox a .green {
+    background-color: #00cc4e;
+}
+
+.ueuse .flebox a .yellow {
+    background-color: #ffc400;
+}
+
+.ueuse .flebox a .gray {
+    background-color: #CCC;
+}
 
 
 .ueuse .flebox .idbox {
@@ -1601,16 +1616,34 @@ main h1 {
 
 .ueuse .youtube_and_nicovideo_player {
     margin-top: 12px;
-    width: 100%;
+    width: calc(100% - 2px);
     height: fit-content;
+    min-height: 152px;
+    background-color: var(--background-color);
+    text-align: center;
+    border-radius: 10px;
+    border: solid 1px var(--border-color);
+    overflow: hidden;
+    position: relative;
+}
+
+.ueuse .youtube_and_nicovideo_player p{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--Mono-fonts);
+    color: var(--text-color);
+    font-size: 14px;
 }
 
 .ueuse .youtube_and_nicovideo_player iframe {
     border: none;
     width: 100%;
+    max-height: 50dvh;
     aspect-ratio: 16 / 9;
     border-radius: 10px;
-    border: 1px solid var(--border-color);
+    vertical-align: bottom;
 }
 
 .ueuse .abi {
@@ -6792,6 +6825,7 @@ noscript .noscript_modal .inner .center_text p {
         margin-left: auto;
         margin-right: auto;
         padding-top: 0px;
+        overflow-x: hidden;
     }
 
     .userleftbox {
@@ -7329,6 +7363,13 @@ noscript .noscript_modal .inner .center_text p {
         font-weight: bold;
         text-align: center;
         font-size: 12px;
+    }
+
+    .ueuse .youtube_and_nicovideo_player iframe {
+        max-height: 25dvh;
+    }
+    .youtube_and_nicovideo_player iframe[src*="spotify.com"] {
+        height: 152px;
     }
 
     .leftbox {
@@ -8477,6 +8518,10 @@ noscript .noscript_modal .inner .center_text p {
         color: var(--main-color);
     }
 
+    .ueuse .flebox a .status {
+        border: solid 4px var(--dark-sub-color);
+    }
+
     .ueuse p {
         color: var(--dark-text-color);
     }
@@ -8765,8 +8810,13 @@ noscript .noscript_modal .inner .center_text p {
         background-color: var(--dark-sub-color);
     }
 
-    .ueuse .youtube_and_nicovideo_player iframe {
-        border: 1px solid var(--dark-border-color);
+    .ueuse .youtube_and_nicovideo_player p{
+        color: var(--dark-text-color);
+    }
+
+    .ueuse .youtube_and_nicovideo_player {
+        background-color: var(--dark-background-color);
+        border: solid 1px var(--dark-border-color);
     }
 
     .userheader h2 {

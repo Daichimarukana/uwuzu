@@ -394,7 +394,7 @@ if( !empty($_POST['send_ban_submit']) ) {
 			//------------
 		} else {
 			$error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
-			actionLog($userid, "error", "send_ban_submit", $userId2, $error_message[], 4);
+			actionLog($userid, "error", "send_ban_submit", $userId2, $error_message, 4);
 		}
 	} catch (Exception $e) {
 

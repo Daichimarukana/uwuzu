@@ -5,6 +5,7 @@ require('../db.php');
 require("function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey']))) {
+    $userid = safetext($_POST['userid']);
     try {
         $option = array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -15,8 +16,6 @@ if (safetext(isset($_POST['uniqid'])) && safetext(isset($_POST['userid'])) && sa
         // 接続エラーのときエラー内容を取得する
         actionLog($userid, "error", "ueuse", null, $e, 4);
     }
-    
-    $userid = safetext($_POST['userid']);
 
     $uniqid = safetext($_POST['uniqid']);
     $loginid = safetext($_POST['account_id']);

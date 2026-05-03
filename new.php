@@ -8,6 +8,11 @@ $badpassfile = "server/badpass.txt";
 $badpass_info = file_get_contents($badpassfile);
 $badpass = preg_split("/\r\n|\n|\r/", $badpass_info);
 
+$domain = $_SERVER['HTTP_HOST'];
+
+$serverinfofile = 'server/info.txt';
+$serverinfo = file_get_contents($serverinfofile);
+
 require('db.php');
 //関数呼び出し
 //- EXIF
