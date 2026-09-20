@@ -181,22 +181,23 @@ if($is_trueclient === true){
         if(empty($error_message)){
             $pdo->beginTransaction();
             try {
+                // 新規キー発行のタイミングで未移行キーがあれば移行処理を実行
+                MigrateLegacyAPITokens($pdo);
+
                 $uniqid = createUniqId();
-                $token = GenAPIToken();
                 $datetime = date("Y-m-d H:i:s");
 
-                $stmt = $pdo->prepare("INSERT INTO api (uniqid, userid, token, scope, datetime, clientname, sessionid) VALUES (:uniqid, :userid, :token, :scope, :datetime, :clientname, :sessionid)");
+                // トークン自体は get.php で生成するため、keyid と token は空で仮登録
+                $stmt = $pdo->prepare("INSERT INTO api (uniqid, userid, keyid, token, scope, datetime, clientname, sessionid) VALUES (:uniqid, :userid, '', '', :scope, :datetime, :clientname, :sessionid)");
                 
                 $stmt->bindParam(':uniqid', $uniqid, PDO::PARAM_STR);
                 $stmt->bindParam(':userid', $userid, PDO::PARAM_STR);
-                $stmt->bindParam(':token', $token, PDO::PARAM_STR);
                 $stmt->bindParam(':scope', $client_scope_done, PDO::PARAM_STR);
                 $stmt->bindParam(':datetime', $datetime, PDO::PARAM_STR);
                 $stmt->bindParam(':clientname', $client_name, PDO::PARAM_STR);
                 $stmt->bindParam(':sessionid', $session_code, PDO::PARAM_STR);
 
                 $res = $stmt->execute();
-
                 $res = $pdo->commit();
 
             } catch(Exception $e) {

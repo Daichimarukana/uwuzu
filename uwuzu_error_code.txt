@@ -87,6 +87,7 @@ INPUT_CONTAINS_PROHIBITED_URL - 入力すべき場所に入力された内容に
 
 PHOTO_SELECT_PLEASE - 正常に画像が選択されていない場合に表示されます。
 PHOTO_OVER_MAX_SIZE - 画像のファイルサイズが大きすぎる場合に表示されます。
+PHOTO_INVALID - 不正な画像が送られた場合に表示されます。
 
 SORRY_FILE_HITAIOU - 対応していないファイル形式のファイルが読み込まれた場合に表示されます。
 

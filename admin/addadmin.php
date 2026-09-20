@@ -160,33 +160,35 @@ if( !empty($_POST['btn_submit']) ) {
                 if(check_mime($uploadedFile['tmp_name'])){
                     $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
                     delete_exif($extension, $uploadedFile['tmp_name']);
-                    resizeImage($uploadedFile['tmp_name'], 512, 512);
-
-                    if(AMS3_CHKS == "true"){
-                        $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
+                    if(resizeImage($uploadedFile['tmp_name'], 512, 512) === true){
+                        if(AMS3_CHKS == "true"){
+                            $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
+                        }else{
+                            if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
+                                $newFilename = createUniqId() . '-'.$userid.'.webp';
+                            }else{
+                                $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
+                            }
+                            $uploadedPath = 'usericons/' . $newFilename;
+                            $result = move_uploaded_file($uploadedFile['tmp_name'], "../".$uploadedPath);
+                            
+                            if ($result) {
+                                $iconName = $uploadedPath; // 保存されたファイルのパスを使用
+                            } else {
+                                $beforeUploadError = check_upload_error($uploadedFile, __DIR__.'/../usericons/') ?? "ERROR";
+                                $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
+                            }
+                        }
+                        if(isset($s3result)){
+                            if($s3result == false){
+                                $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                            }else{
+                                $iconName = $s3result; // S3に保存されたファイルのパスを使用
+                            }
+                        }   
                     }else{
-                        if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
-                            $newFilename = createUniqId() . '-'.$userid.'.webp';
-                        }else{
-                            $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-                        }
-                        $uploadedPath = 'usericons/' . $newFilename;
-                        $result = move_uploaded_file($uploadedFile['tmp_name'], "../".$uploadedPath);
-                        
-                        if ($result) {
-                            $iconName = $uploadedPath; // 保存されたファイルのパスを使用
-                        } else {
-                            $beforeUploadError = check_upload_error($uploadedFile, __DIR__.'/../usericons/') ?? "ERROR";
-                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
-                        }
+                        $error_message[] = 'アップロード失敗！(1)エラーコード： PHOTO_INVALID';
                     }
-                    if(isset($s3result)){
-                        if($s3result == false){
-                            $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
-                        }else{
-                            $iconName = $s3result; // S3に保存されたファイルのパスを使用
-                        }
-                    }   
                 }else{
                     $error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
                 }

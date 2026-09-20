@@ -5,6 +5,8 @@ require('../db.php');
 require("function.php");
 blockedIP($_SERVER['REMOTE_ADDR']);
 if (safetext(isset($_POST['ueuse'])) && safetext(isset($_POST['userid'])) && safetext(isset($_POST['account_id'])) && safetext(isset($_COOKIE['loginkey']))) {
+    $userid = safetext($_POST['userid']);
+    
     try {
         $option = array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -16,8 +18,6 @@ if (safetext(isset($_POST['ueuse'])) && safetext(isset($_POST['userid'])) && saf
         actionLog($userid, "error", "ueuse", null, $e, 4);
     }
     
-    $userid = safetext($_POST['userid']);
-
     $ueuse = safetext($_POST['ueuse']);
     $nsfw_chk = safetext($_POST['nsfw_chk']);
     $loginid = safetext($_POST['account_id']);

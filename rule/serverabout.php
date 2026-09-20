@@ -31,6 +31,7 @@ $softwarefile = "../server/uwuzuinfo.txt";
 $softwaredata = file_get_contents($softwarefile);
 
 $softwaredata = explode( "\n", $softwaredata );
+$uwuzuinfo = array();
 $cnt = count( $softwaredata );
 for( $i=0;$i<$cnt;$i++ ){
     $uwuzuinfo[$i] = ($softwaredata[$i]);
@@ -39,6 +40,10 @@ for( $i=0;$i<$cnt;$i++ ){
 $serverinfofile = '../server/info.txt';
 $serverinfo = file_get_contents($serverinfofile);
 
+$is_can_upload_gif = false;
+if (extension_loaded('imagick')) {
+    $is_can_upload_gif = true;
+}
 
 // データベースに接続
 try {
@@ -133,6 +138,7 @@ $count4 = $result4->num_rows;
     <h4>制限</h4>
     <p>ファイルサイズの上限 : <?php echo x1024(x1024(File_MaxUploadSize()));?>MB</p>
     <p>ユーズの文字数の上限 : <?php echo $mojisize;?>文字</p>
+    <p>GIFアニメーション画像のアップロード : <?php if($is_can_upload_gif){echo "可能";}else{echo "不可";};?></p>
     <hr>
 
     <h4>管理者情報</h4>

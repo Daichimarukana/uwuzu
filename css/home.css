@@ -604,7 +604,7 @@ main h1 {
     height: 24px;
     border-radius: 50%;
     background-color: #CCC;
-    border: solid 4px var(--tl-color);
+    border: solid 4px var(--ueuse-color);
 }
 
 .userheader .icon .green {

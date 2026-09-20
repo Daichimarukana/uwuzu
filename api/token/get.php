@@ -8,8 +8,6 @@ blockedIP($_SERVER['REMOTE_ADDR']);
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Origin: *");
 
-
-
 $pdo = null;
 try {
     $option = array(
@@ -18,13 +16,11 @@ try {
     );
     $pdo = new PDO('mysql:charset=utf8mb4;dbname='.DB_NAME.';host='.DB_HOST , DB_USER, DB_PASS, $option);
 } catch(PDOException $e) {
-    // 接続エラーのときエラー内容を取得する
     $error_message[] = $e->getMessage();
 }
 
 $Get_Post_Json = file_get_contents("php://input");
 if(isset($_GET['session']) || (!(empty($Get_Post_Json)))) { 
-    //トークン取得
     if(!(empty($_GET['session']))){
         $session_id = safetext($_GET['session']);
     }else{
@@ -32,69 +28,75 @@ if(isset($_GET['session']) || (!(empty($Get_Post_Json)))) {
         if(isset($post_json["session"])){
             $session_id = safetext($post_json["session"]);
         }else{
-            $err = "input_not_found";
-            $response = array(
-                'error_code' => $err,
-                'success' => false
-            );
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            echo json_encode(['error_code' => "input_not_found", 'success' => false], JSON_UNESCAPED_UNICODE);
             exit;
         }
     }
     if($session_id == ""){
-        $err = "input_not_found";
-        $response = array(
-            'error_code' => $err,
-            'success' => false
-        );
-        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+        echo json_encode(['error_code' => "input_not_found", 'success' => false], JSON_UNESCAPED_UNICODE);
         exit;
     }
     
     session_start();
 
     if( !empty($pdo) ) {
-        $tokenQuery = $pdo->prepare("SELECT userid, token FROM api WHERE sessionid = :sessionid");
-        $tokenQuery->bindValue(':sessionid', $session_id);
+        MigrateLegacyAPITokens($pdo);
+
+        $tokenQuery = $pdo->prepare("SELECT uniqid, userid FROM api WHERE sessionid = :sessionid AND (token IS NULL OR token = '' OR keyid IS NULL OR keyid = '')");
+        $tokenQuery->bindValue(':sessionid', $session_id, PDO::PARAM_STR);
         $tokenQuery->execute();
         $tokenData = $tokenQuery->fetch();
 
         if(empty($tokenData["userid"])){
-            $err = "session_invalid";
-            $response = array(
-                'error_code' => $err,
-                'success' => false
-            );
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
+            echo json_encode(['error_code' => "session_invalid", 'success' => false], JSON_UNESCAPED_UNICODE);
             exit;
         }else{
             $userdata = getUserData($pdo, $tokenData["userid"]);
             
             if (empty($userdata)){
-                $response = array(
-                    'error_code' => "critical_error_userdata_not_found",
-                    'success' => false
-                );
+                echo json_encode(['error_code' => "critical_error_userdata_not_found", 'success' => false], JSON_UNESCAPED_UNICODE);
             }else{
-                DelSessionidAPIToken($pdo, $session_id);
+                // 新規トークンを生成
+                $tokenInfo = GenAPIToken();
+                $fullToken = $tokenInfo[0];
+                $keyId = $tokenInfo[1];
+                $tokenHash = $tokenInfo[2];
 
-                $response = array(
-                    'success' => true,
-                    'username' => decode_yajirushi(htmlspecialchars_decode($userdata["username"])),
-                    'userid' => decode_yajirushi(htmlspecialchars_decode($userdata["userid"])),
-                    'token' => decode_yajirushi(htmlspecialchars_decode($tokenData["token"]))
-                );
+                $pdo->beginTransaction();
+                try {
+                    // keyid と tokenHash を保存
+                    $updateQuery = $pdo->prepare("UPDATE api SET keyid = :keyid, token = :token WHERE uniqid = :uniqid");
+                    $updateQuery->bindValue(':keyid', $keyId, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':token', $tokenHash, PDO::PARAM_STR);
+                    $updateQuery->bindValue(':uniqid', $tokenData["uniqid"], PDO::PARAM_STR);
+                    $res = $updateQuery->execute();
+
+                    if($res){
+                        $pdo->commit();
+
+                        DelSessionidAPIToken($pdo, $session_id);
+
+                        // 生のトークン ($fullToken) をアプリへ一度だけ返却
+                        $response = array(
+                            'success' => true,
+                            'username' => decode_yajirushi(htmlspecialchars_decode($userdata["username"])),
+                            'userid' => decode_yajirushi(htmlspecialchars_decode($userdata["userid"])),
+                            'token' => $fullToken
+                        );
+                        echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    }else{
+                        $pdo->rollBack();
+                        echo json_encode(['error_code' => "token_issue_failed", 'success' => false], JSON_UNESCAPED_UNICODE);
+                    }
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    actionLog($tokenData["userid"], "error", "get_api_token", $tokenData["uniqid"], $e->getMessage(), 4);
+                    echo json_encode(['error_code' => "token_issue_error", 'success' => false], JSON_UNESCAPED_UNICODE);
+                }
             }
-            echo json_encode($response, JSON_UNESCAPED_UNICODE);
         }
     }
 }else{
-    $err = "input_not_found";
-    $response = array(
-        'error_code' => $err,
-        'success' => false
-    );
-     
-    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error_code' => "input_not_found", 'success' => false], JSON_UNESCAPED_UNICODE);
 }
 ?>

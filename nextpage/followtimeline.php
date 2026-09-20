@@ -48,7 +48,7 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
 
                 $sql = "SELECT ueuse.* 
                         FROM ueuse 
-                        LEFT JOIN account ON ueuse.account = account.userid 
+                        STRAIGHT_JOIN account ON ueuse.account = account.userid 
                         WHERE ueuse.rpuniqid = '' 
                         AND account.role != 'ice' 
                         AND ueuse.account IN ($placeholders)

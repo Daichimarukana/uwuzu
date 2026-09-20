@@ -617,6 +617,43 @@ function base64_to_files($Base64, $userid) {
     ];
 }
 
+function convertGifToAnimatedWebp(string $source, string $destination, int $quality = 90): bool
+{
+    if (extension_loaded('imagick')) {
+        try {
+            $gif = new Imagick();
+
+            if (!file_exists($source)) {
+                return false;
+            }
+            $fileData = file_get_contents($source);
+            $gif->readImageBlob($fileData);
+
+            $gif = $gif->coalesceImages();
+
+            foreach ($gif as $frame) {
+                $frame->setImageFormat('webp');
+                $frame->setImageCompressionQuality($quality);
+                $frame->stripImage();
+            }
+
+            $outputData = $gif->getImagesBlob();
+            file_put_contents($destination, $outputData);
+
+            $gif->clear();
+            $gif->destroy();
+
+            return true;
+
+        } catch (Throwable $e) {
+            actionLog(null, "error", "convertGifToAnimatedWebp", null, $e->getMessage(), 4);
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+
 function resizeImage($filePath, $maxWidth, $maxHeight) {
     if (file_exists($filePath)) {  
         // 元の画像タイプを取得
@@ -630,8 +667,14 @@ function resizeImage($filePath, $maxWidth, $maxHeight) {
             $originalImage = imagecreatefromwebp($filePath);
         } elseif($imageType == "image/bmp") {
             $originalImage = imagecreatefrombmp($filePath);
+        } elseif($imageType == "image/gif"){
+            if(convertGifToAnimatedWebp($filePath, $filePath)){
+                return true;
+            }else{
+                return false;
+            }
         } else {
-            return true;
+            return false;
         }
 
         // 元の画像のサイズを取得
@@ -1387,6 +1430,68 @@ function delete_notification($to,$from,$title,$message,$url,$category){
         return true;
     }
 }
+
+function UploadUeusePhoto($fileInfo, $userid, $aibwm, $error_message = []) {
+    if (empty($fileInfo['name'])) {
+        return "none";
+    }
+
+    $beforeUploadError = check_upload_error($fileInfo, __DIR__ . "/../ueuseimages/");
+    if ($beforeUploadError !== null) {
+        $error_message[] = 'アップロード失敗！エラーコード：' . $beforeUploadError;
+        return null;
+    }
+
+    if (empty($fileInfo['tmp_name'])) {
+        $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
+        return null;
+    }
+
+    $mimeType = check_mime($fileInfo['tmp_name']);
+    if (!$mimeType) {
+        $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
+        return null;
+    }
+
+    $extension = convert_mime($mimeType);
+    delete_exif($extension, $fileInfo['tmp_name']);
+
+    if (!resizeImage($fileInfo['tmp_name'], 8192, 8192)) {
+        $error_message[] = "画像の加工または安全性のチェックに失敗しました。(INVALID_IMAGE)";
+        return null;
+    }
+
+    if ($aibwm === true) {
+        AIBlockWaterMark($fileInfo['tmp_name'], $userid);
+    }
+
+    if (AMS3_CHKS == "true") {
+        $s3result = uploadAmazonS3($fileInfo['tmp_name']);
+        if ($s3result === false) {
+            $error_message[] = 'アップロード失敗！エラーコード： S3ERROR';
+            return null;
+        }
+        return $s3result;
+    } else {
+        if (check_mime($fileInfo['tmp_name']) == "image/webp") {
+            $extension = 'webp';
+        }
+
+        $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
+        $uploadedPath = '../ueuseimages/' . $newFilename;
+
+        $result = rename($fileInfo['tmp_name'], __DIR__ . "/" . $uploadedPath);
+        
+        if ($result) {
+            return $uploadedPath;
+        } else {
+            $beforeUploadError = check_upload_error($fileInfo, __DIR__ . "/../ueuseimages/") ?? "ERROR";
+            $error_message[] = 'アップロード失敗！エラーコード：' . $beforeUploadError;
+            return null;
+        }
+    }
+}
+
 // ユーズするとき全部この関数
 function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$photo4,$video1,$nsfw,$aibwm){
     // AIBlockWaterMark--------------------------------------------
@@ -1496,228 +1601,10 @@ function send_ueuse($userid,$rpUniqid,$ruUniqid,$ueuse,$photo1,$photo2,$photo3,$
             $rate_count = $rate_Query->rowCount();
             if(!($rate_count > $max_ueuse_rate_limit-1)){
                 if(empty($error_message)) {   
-                    if (empty($photo1['name'])) {
-                        $save_photo1 = "none";
-                    } else {
-                        // アップロードされたファイル情報
-                        $uploadedFile = $photo1;
-                        $beforeUploadError = check_upload_error($uploadedFile,  __DIR__."/../ueuseimages/");
-                        if($beforeUploadError === null){
-                            if(!(empty($uploadedFile['tmp_name']))){
-                                if(check_mime($uploadedFile['tmp_name'])){
-                                    // アップロードされたファイルの拡張子を取得
-                                    $extension = convert_mime(check_mime($uploadedFile['tmp_name']));
-                                    delete_exif($extension, $uploadedFile['tmp_name']);
-                                    resizeImage($uploadedFile['tmp_name'], 8192, 8192);
-
-                                    if($aibwm === true){
-                                        AIBlockWaterMark($uploadedFile['tmp_name'], $userid);
-                                    }
-                                    if(AMS3_CHKS == "true"){
-                                        $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
-                                    }else{
-                                        if(check_mime($uploadedFile['tmp_name']) == "image/webp"){
-                                            $extension = 'webp';
-                                        }
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename = createUniqId() . '-'.$userid.'.' . $extension;
-                                        // 保存先のパスを生成
-                                        $uploadedPath = '../ueuseimages/' . $newFilename;
-                                        // ファイルを移動
-                                        $result = rename($uploadedFile['tmp_name'], __DIR__."/".$uploadedPath);
-                                        
-                                        if ($result) {
-                                            $save_photo1 = $uploadedPath; // 保存されたファイルのパスを使用
-                                        } else {
-                                            $beforeUploadError = check_upload_error($uploadedFile, __DIR__."/../ueuseimages/") ?? "ERROR";
-                                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
-                                        }
-                                    }
-                                    if(isset($s3result)){
-                                        if($s3result == false){
-                                            $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
-                                        }else{
-                                            $save_photo1 = $s3result; // S3に保存されたファイルのパスを使用
-                                        }
-                                    }
-                                }else{
-                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                                }
-                            }else{
-                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                            }
-                        }else{
-                            $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
-                        }
-                    }
-
-                    if (empty($photo2['name'])) {
-                        $save_photo2 = "none";
-                    } else {
-                        if (empty($photo1['name'])){
-                            $error_message[] = '画像1から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                        }
-                        // アップロードされたファイル情報
-                        $uploadedFile2 = $photo2;
-                        $beforeUploadError = check_upload_error($uploadedFile2,  __DIR__."/../ueuseimages/");
-                        if($beforeUploadError === null){
-                            if(!(empty($uploadedFile2['tmp_name']))){
-                                if(check_mime($uploadedFile2['tmp_name'])){
-                                    // アップロードされたファイルの拡張子を取得
-                                    $extension2 = convert_mime(check_mime($uploadedFile2['tmp_name']));
-                                    delete_exif($extension2, $uploadedFile2['tmp_name']);
-                                    resizeImage($uploadedFile2['tmp_name'], 8192, 8192);
-                                    if($aibwm === true){
-                                        AIBlockWaterMark($uploadedFile2['tmp_name'], $userid);
-                                    }
-                                    if(AMS3_CHKS == "true"){
-                                        $s3result = uploadAmazonS3($uploadedFile2['tmp_name']);
-                                    }else{
-                                        if(check_mime($uploadedFile2['tmp_name']) == "image/webp"){
-                                            $extension2 = 'webp';
-                                        }
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename2 = createUniqId() . '-'.$userid.'.' . $extension2;
-                                        // 保存先のパスを生成
-                                        $uploadedPath2 = '../ueuseimages/' . $newFilename2;
-                                        // ファイルを移動
-                                        $result2 = rename($uploadedFile2['tmp_name'], __DIR__."/".$uploadedPath2);
-                                        if ($result2) {
-                                            $save_photo2 = $uploadedPath2; // 保存されたファイルのパスを使用
-                                        } else {
-                                            $beforeUploadError = check_upload_error($uploadedFile2, __DIR__."/../ueuseimages/") ?? "ERROR";
-                                            $error_message[] = 'アップロード失敗！(2)エラーコード：' .$beforeUploadError.'';
-                                        }
-                                    }
-                                    if(isset($s3result)){
-                                        if($s3result == false){
-                                            $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
-                                        }else{
-                                            $save_photo2 = $s3result; // S3に保存されたファイルのパスを使用
-                                        }
-                                    }
-                                }else{
-                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                                }
-                            }else{
-                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                            }
-                        }else{
-                            $error_message[] = 'アップロード失敗！(2)エラーコード：' .$beforeUploadError.'';
-                        }
-                    }
-
-                    if (empty($photo3['name'])) {
-                        $save_photo3 = "none";
-                    } else {
-                        if (empty($photo2['name'])){
-                            $error_message[] = '画像2から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                        }
-                        // アップロードされたファイル情報
-                        $uploadedFile3 = $photo3;
-                        $beforeUploadError = check_upload_error($uploadedFile3,  __DIR__."/../ueuseimages/");
-                        if($beforeUploadError === null){
-                            if(!(empty($uploadedFile3['tmp_name']))){
-                                if(check_mime($uploadedFile3['tmp_name'])){
-                                    // アップロードされたファイルの拡張子を取得
-                                    $extension3 = convert_mime(check_mime($uploadedFile3['tmp_name']));
-                                    delete_exif($extension3, $uploadedFile3['tmp_name']);
-                                    resizeImage($uploadedFile3['tmp_name'], 8192, 8192);
-                                    if($aibwm === true){
-                                        AIBlockWaterMark($uploadedFile3['tmp_name'], $userid);
-                                    }
-                                    if(AMS3_CHKS == "true"){
-                                        $s3result = uploadAmazonS3($uploadedFile3['tmp_name']);
-                                    }else{
-                                        if(check_mime($uploadedFile3['tmp_name']) == "image/webp"){
-                                            $extension3 = 'webp';
-                                        }
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename3 = createUniqId() . '-'.$userid.'.' . $extension3;
-                                        // 保存先のパスを生成
-                                        $uploadedPath3 = '../ueuseimages/' . $newFilename3;
-                                        // ファイルを移動
-                                        $result3 = rename($uploadedFile3['tmp_name'], __DIR__."/".$uploadedPath3);
-                                        if ($result3) {
-                                            $save_photo3 = $uploadedPath3; // 保存されたファイルのパスを使用
-                                        } else {
-                                            $beforeUploadError = check_upload_error($uploadedFile3, __DIR__."/../ueuseimages/") ?? "ERROR";
-                                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
-                                        }
-                                    }
-                                    if(isset($s3result)){
-                                        if($s3result == false){
-                                            $error_message[] = 'アップロード失敗！(3)エラーコード： S3ERROR';
-                                        }else{
-                                            $save_photo3 = $s3result; // S3に保存されたファイルのパスを使用
-                                        }
-                                    }
-                                }else{
-                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                                }
-                            }else{
-                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                            }
-                        }else{
-                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
-                        }
-                    }
-
-                    if (empty($photo4['name'])) {
-                        $save_photo4 = "none";
-                    } else {
-                        if (empty($photo3['name'])){
-                            $error_message[] = '画像3から画像を選択してください！！！(PHOTO_SELECT_PLEASE)';
-                        }
-                        // アップロードされたファイル情報
-                        $uploadedFile4 = $photo4;
-                        $beforeUploadError = check_upload_error($uploadedFile4,  __DIR__."/../ueuseimages/");
-                        if($beforeUploadError === null){
-                            if(!(empty($uploadedFile4['tmp_name']))){
-                                if(check_mime($uploadedFile4['tmp_name'])){
-                                    // アップロードされたファイルの拡張子を取得
-                                    $extension4 = convert_mime(check_mime($uploadedFile4['tmp_name']));
-                                    delete_exif($extension4, $uploadedFile4['tmp_name']);
-                                    resizeImage($uploadedFile4['tmp_name'], 8192, 8192);
-                                    if($aibwm === true){
-                                        AIBlockWaterMark($uploadedFile4['tmp_name'], $userid);
-                                    }
-                                    if(AMS3_CHKS == "true"){
-                                        $s3result = uploadAmazonS3($uploadedFile4['tmp_name']);
-                                    }else{
-                                        if(check_mime($uploadedFile4['tmp_name']) == "image/webp"){
-                                            $extension4 = 'webp';
-                                        }
-                                        // 新しいファイル名を生成（uniqid + 拡張子）
-                                        $newFilename4 = createUniqId() . '-'.$userid.'.' . $extension4;
-                                        // 保存先のパスを生成
-                                        $uploadedPath4 = '../ueuseimages/' . $newFilename4;
-                                        // ファイルを移動
-                                        $result4 = rename($uploadedFile4['tmp_name'], __DIR__."/".$uploadedPath4);  
-                                        if ($result4) {
-                                            $save_photo4 = $uploadedPath4; // 保存されたファイルのパスを使用
-                                        } else {
-                                            $beforeUploadError = check_upload_error($uploadedFile4, __DIR__."/../ueuseimages/") ?? "ERROR";
-                                            $error_message[] = 'アップロード失敗！(3)エラーコード：' .$beforeUploadError.'';
-                                        }
-                                    }
-                                    if(isset($s3result)){
-                                        if($s3result == false){
-                                            $error_message[] = 'アップロード失敗！(4)エラーコード： S3ERROR';
-                                        }else{
-                                            $save_photo4 = $s3result; // S3に保存されたファイルのパスを使用
-                                        }
-                                    }
-                                }else{
-                                    $error_message[] = "使用できない画像形式です。(SORRY_FILE_HITAIOU)";
-                                }
-                            }else{
-                                $error_message[] = "ファイルがアップロードできませんでした。(FILE_UPLOAD_DEKINAKATTA)";
-                            }
-                        }else{
-                            $error_message[] = 'アップロード失敗！(4)エラーコード：' .$beforeUploadError.'';
-                        }
-                    }
+                    $save_photo1 = UploadUeusePhoto($photo1, $userid, $aibwm, $error_message);
+                    $save_photo2 = UploadUeusePhoto($photo2, $userid, $aibwm, $error_message);
+                    $save_photo3 = UploadUeusePhoto($photo3, $userid, $aibwm, $error_message);
+                    $save_photo4 = UploadUeusePhoto($photo4, $userid, $aibwm, $error_message);
 
                     if (empty($video1['name'])) {
                         $save_video1 = "none";
@@ -4093,24 +3980,30 @@ function GenAPIToken(int $totalLength = 64){
         }
     }
 
-    return $prefix . $token;
+    $fullToken = $prefix . $token;
+    $keyId = substr($fullToken, 0, 16);
+    $secret = substr($fullToken, 16);
+
+    $tokenHash = hash_hmac('sha3-512', $secret, ENC_KEY);
+
+    return [$fullToken, $keyId, $tokenHash];
 }
 function DelAPIToken($pdo, $uniqid){
-    if(!(empty($uniqid))){
-        $tokenQuery = $pdo->prepare("SELECT token FROM api WHERE uniqid = :uniqid");
-        $tokenQuery->bindValue(':uniqid', $uniqid);
+    if (!empty($uniqid)) {
+        $tokenQuery = $pdo->prepare("SELECT uniqid FROM api WHERE uniqid = :uniqid");
+        $tokenQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
         $tokenQuery->execute();
         $tokenData = $tokenQuery->fetch();
-        if(!(empty($tokenData["token"]))){
+
+        if (!empty($tokenData["uniqid"])) {
             $pdo->beginTransaction();
             try {
-                // 削除クエリを実行
                 $deleteQuery = $pdo->prepare("DELETE FROM api WHERE uniqid = :uniqid");
                 $deleteQuery->bindValue(':uniqid', $uniqid, PDO::PARAM_STR);
                 $res = $deleteQuery->execute();
                 
                 if ($res) {
-                    $res = $pdo->commit();
+                    $pdo->commit();
                     return true;
                 } else {
                     $pdo->rollBack();
@@ -4119,99 +4012,153 @@ function DelAPIToken($pdo, $uniqid){
                 }
             } catch(PDOException $e) {
                 $pdo->rollBack();
-                actionLog($uniqid, "error", "delete_api_token", null, $e, 4);
+                actionLog($uniqid, "error", "delete_api_token", null, $e->getMessage(), 4);
                 return false;
             }
-        }else{
-            actionLog($uniqid, "error", "delete_api_token", null, "カラムは存在しますがAPIトークンが存在しません", 3);
+        } else {
+            actionLog($uniqid, "error", "delete_api_token", null, "削除対象のAPIトークンが見つかりません", 3);
             return false;
         }
-    }else{
+    } else {
         return false;
     }
 }
 function DelSessionidAPIToken($pdo, $session){
-    $tokenQuery = $pdo->prepare("SELECT uniqid, userid, token FROM api WHERE sessionid = :sessionid");
-    $tokenQuery->bindValue(':sessionid', $session);
+    if (empty($session)) {
+        return false;
+    }
+
+    $tokenQuery = $pdo->prepare("SELECT uniqid, userid FROM api WHERE sessionid = :sessionid");
+    $tokenQuery->bindValue(':sessionid', $session, PDO::PARAM_STR);
     $tokenQuery->execute();
     $tokenData = $tokenQuery->fetch();
 
-    $none = "";
-    if(!(empty($tokenData["userid"]))){
+    if (!empty($tokenData["userid"])) {
         $pdo->beginTransaction();
         try {
-            $updateQuery = $pdo->prepare("UPDATE api SET sessionid = :sessionid WHERE uniqid = :uniqid");
-            $updateQuery->bindValue(':sessionid', $none, PDO::PARAM_STR);
+            $updateQuery = $pdo->prepare("UPDATE api SET sessionid = '' WHERE uniqid = :uniqid");
             $updateQuery->bindValue(':uniqid', $tokenData["uniqid"], PDO::PARAM_STR);
             $res = $updateQuery->execute();
 
-            if($res){
+            if ($res) {
                 $pdo->commit();
                 return true;
-            }else{
-                // ロールバック
+            } else {
                 $pdo->rollBack();
                 actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], "セッションIDの無効化に失敗しました！", 3);
                 return false;
             }
         } catch (Exception $e) {
-            // ロールバック
             $pdo->rollBack();
-            actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], $e, 4);
+            actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], $e->getMessage(), 4);
             return false;
-        }   
-    }else{
-        actionLog($tokenData["userid"], "error", "DelSessionidAPIToken", $tokenData["uniqid"], "セッションIDが存在しません。", 3);
+        }    
+    } else {
+        actionLog(null, "notice", "DelSessionidAPIToken", null, "対象のセッションIDが存在しません: " . $session, 2);
         return false;
     }
 }
 function APIAuth($pdo, $token, $scope){
-    $tokenQuery = $pdo->prepare("SELECT userid, scope FROM api WHERE token = :token");
-    $tokenQuery->bindValue(':token', $token);
-    $tokenQuery->execute();
-    $tokenData = $tokenQuery->fetch();
+    if (empty($token)) {
+        return [false, "token_invalid", null];
+    }
 
-    if(!(empty($tokenData["userid"]))){
+    $tokenData = null;
+
+    if (strlen($token) >= 16) {
+        $keyId = substr($token, 0, 16);
+        $secret = substr($token, 16);
+        $incomingHash = hash_hmac('sha3-512', $secret, ENC_KEY);
+
+        $tokenQuery = $pdo->prepare("SELECT userid, scope, token FROM api WHERE keyid = :keyid");
+        $tokenQuery->bindValue(':keyid', $keyId, PDO::PARAM_STR);
+        $tokenQuery->execute();
+        $fetched = $tokenQuery->fetch();
+
+        if (!empty($fetched["userid"]) && !empty($fetched["token"])) {
+            if (hash_equals($fetched["token"], $incomingHash)) {
+                $tokenData = $fetched;
+            }
+        }
+    }
+
+    if (!$tokenData) {
+        $tokenQuery = $pdo->prepare("SELECT userid, scope FROM api WHERE token = :token");
+        $tokenQuery->bindValue(':token', $token, PDO::PARAM_STR);
+        $tokenQuery->execute();
+        $fetched = $tokenQuery->fetch();
+
+        if (!empty($fetched["userid"])) {
+            $tokenData = $fetched;
+        }
+    }
+
+    if (!empty($tokenData["userid"])) {
         $allow_scope = array_unique(array_map('trim', explode(",", $tokenData["scope"])));
-        if(in_array($scope, $allow_scope)){
+        
+        if (in_array($scope, $allow_scope)) {
             $userdata = getUserData($pdo, $tokenData["userid"]);
 
-            if(!(empty($userdata))){
-                if($userdata["admin"] == "yes"){
-                    $admin_permission = true;
-                }else{
-                    $admin_permission = false;
-                }
-                foreach ($allow_scope as $scope) {
-                    $description = GetAPIScopes($scope, $admin_permission);
+            if (!empty($userdata)) {
+                $admin_permission = ($userdata["admin"] === "yes");
+
+                foreach ($allow_scope as $sc) {
+                    $description = GetAPIScopes($sc, $admin_permission);
                     if ($description === false) {
                         return [false, "token_invalid_scope", null];
                     }
                 }
-                if($userdata["role"] === "ice"){
+
+                if ($userdata["role"] === "ice") {
                     return [false, "this_account_has_been_frozen", null];
-                }else{
+                } else {
                     return [true, "success", $userdata];
                 }
-            }else{
+            } else {
                 return [false, "token_invalid", null];
             }
-        }else{
+        } else {
             return [false, "not_allow_scope", null];
         }
-    }else{
-        $userQuery = $pdo->prepare("SELECT * FROM account WHERE token = :token");
-        $userQuery->bindValue(':token', $token);
-        $userQuery->execute();
-        $userData = $userQuery->fetch();
+    }
 
-        if(empty($userData["userid"])){
-            return [false, "token_invalid", null];
-        }elseif($userData["role"] === "ice"){
-            return [false, "this_account_has_been_frozen", null];
-        }else{
-            return [true, "success", $userData];
+    $userQuery = $pdo->prepare("SELECT * FROM account WHERE token = :token");
+    $userQuery->bindValue(':token', $token, PDO::PARAM_STR);
+    $userQuery->execute();
+    $userData = $userQuery->fetch();
+
+    if (empty($userData["userid"])) {
+        return [false, "token_invalid", null];
+    } elseif ($userData["role"] === "ice") {
+        return [false, "this_account_has_been_frozen", null];
+    } else {
+        return [true, "success", $userData];
+    }
+}
+
+function MigrateLegacyAPITokens($pdo) {
+    try {
+        $stmt = $pdo->query("SELECT uniqid, token FROM api WHERE (keyid IS NULL OR keyid = '') AND token IS NOT NULL AND token != ''");
+        $legacyTokens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($legacyTokens)) {
+            $updateStmt = $pdo->prepare("UPDATE api SET keyid = :keyid, token = :tokenHash WHERE uniqid = :uniqid");
+            foreach ($legacyTokens as $row) {
+                $legacyToken = $row['token'];
+                if (strlen($legacyToken) >= 16) {
+                    $keyId = substr($legacyToken, 0, 16);
+                    $secret = substr($legacyToken, 16);
+                    $tokenHash = hash_hmac('sha3-512', $secret, ENC_KEY);
+
+                    $updateStmt->bindValue(':keyid', $keyId, PDO::PARAM_STR);
+                    $updateStmt->bindValue(':tokenHash', $tokenHash, PDO::PARAM_STR);
+                    $updateStmt->bindValue(':uniqid', $row['uniqid'], PDO::PARAM_STR);
+                    $updateStmt->execute();
+                }
+            }
         }
+    } catch (Exception $e) {
+        actionLog(null, "error", "MigrateLegacyAPITokens", null, $e->getMessage(), 3);
     }
 }
 
@@ -4321,6 +4268,39 @@ function is_not_private_url($url) {
         return false; 
     }
     return true;
+}
+
+function AutoIndex($pdo,$table, $indexName,$columns) {
+    try {
+        // 1. 指定したインデックス名がすでに存在するかチェック
+        $stmt =$pdo->prepare("SHOW INDEX FROM `$table` WHERE Key_name = :index_name");
+        $stmt->execute(['index_name' =>$indexName]);
+        $indexExists =$stmt->fetch();
+
+        if (!$indexExists) {
+            $escapedColumns = array_map(function($col) {$parts = preg_split('/\s+/', trim($col));$columnName = "`" . trim($parts[0], '`') . "`";
+                $direction = (isset($parts[1]) && strtoupper($parts[1]) === 'DESC') ? ' DESC' : '';
+                return $columnName . $direction;
+            }, $columns);
+            
+            $columnList = implode(', ', $escapedColumns);
+
+            $sql = "ALTER TABLE `$table` ADD INDEX `$indexName` ($columnList)";
+            $pdo->exec($sql);
+
+            if (function_exists('actionLog')) {
+                actionLog(null, 'info', 'AutoIndex', $table, "インデックス {$indexName} を作成しました", 0);
+            }
+            
+            return true; 
+        }
+    } catch (PDOException $e) {
+        if (function_exists('actionLog')) {
+            actionLog(null, 'error', 'AutoIndex', $table, $e->getMessage(), 4);
+        }
+    }
+
+    return false; 
 }
 
 ?>

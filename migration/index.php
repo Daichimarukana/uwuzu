@@ -232,20 +232,25 @@ if (!empty($_POST['btn_submit'])) {
                                         $temp_file = tempnam(sys_get_temp_dir(), 'mig');
                                         file_put_contents($temp_file, $img_content);
 
-                                        // MIMEチェックと拡張子変換（後半のコードのスタイルに合わせる）
+                                        // MIMEチェックと拡張子変換
                                         $mime = check_mime($temp_file);
                                         if ($mime) {
                                             $extension = convert_mime($mime);
                                             delete_exif($extension, $temp_file);
-
-                                            // リサイズ（ヘッダーは 2048, アイコンは 512）
+                                            
                                             if ($key === 'user_header') {
-                                                resizeImage($temp_file, 2048, 1024);
+                                                $resizeResult = resizeImage($temp_file, 2048, 1024);
                                             } else {
-                                                resizeImage($temp_file, 512, 512);
+                                                $resizeResult = resizeImage($temp_file, 512, 512);
                                             }
 
-                                            // S3アップロード対応
+                                            if (!$resizeResult) {
+                                                $error_message[] = "アップロード失敗！($key) エラーコード： PHOTO_INVALID";
+                                                if (file_exists($temp_file)) unlink($temp_file);
+                                                continue;
+                                            }
+
+                                            // S3アップロード対応（リサイズが成功した場合のみここに来る）
                                             if (defined('AMS3_CHKS') && AMS3_CHKS == "true") {
                                                 $s3result = uploadAmazonS3($temp_file);
                                                 if ($s3result == false) {

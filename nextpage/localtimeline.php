@@ -45,7 +45,7 @@ if (safetext(isset($_POST['page'])) && safetext(isset($_POST['userid'])) && safe
             
             $sql = "SELECT ueuse.* 
                     FROM ueuse 
-                    LEFT JOIN account ON ueuse.account = account.userid 
+                    STRAIGHT_JOIN account ON ueuse.account = account.userid 
                     WHERE ueuse.rpuniqid = '' AND account.role != 'ice' {$blocked_accounts['sql']} 
                     ORDER BY ueuse.datetime DESC 
                     LIMIT :offset, :itemsPerPage";

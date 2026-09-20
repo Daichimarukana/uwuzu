@@ -20,6 +20,7 @@ $releasedata = file_get_contents($releasefile);
 $softwarefile = "../server/uwuzuinfo.txt";
 $softwaredata = file_get_contents($softwarefile);
 
+$uwuzuinfo = [];
 $softwaredata = explode( "\n", $softwaredata );
 $cnt = count( $softwaredata );
 for( $i=0;$i<$cnt;$i++ ){

@@ -148,44 +148,46 @@ if (isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         if (check_mime($uploadedFile['tmp_name'])) {
                             $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
                             delete_exif($extension, $uploadedFile['tmp_name']);
-                            resizeImage($uploadedFile['tmp_name'], 512, 512);
+                            if(resizeImage($uploadedFile['tmp_name'], 512, 512) === true){
+                                if (AMS3_CHKS == "true") {
+                                    $usericonurl = getUserData($pdo, $userid)["iconname"];
+                                    if (filter_var($usericonurl, FILTER_VALIDATE_URL)) {
+                                        $s3delresult = deleteAmazonS3($usericonurl);
+                                    } else {
+                                        $s3delresult = true;
+                                    }
+                                    if ($s3delresult == true) {
+                                        $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
+                                    } else {
+                                        $s3result = false;
+                                    }
+                                } else {
+                                    if (check_mime($uploadedFile['tmp_name']) == "image/webp") {
+                                        $newFilename = createUniqId() . '-' . $userid . '.webp';
+                                    } else {
+                                        $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
+                                    }
+                                    $uploadedPath = 'usericons/' . $newFilename;
+                                    $result = rename($uploadedFile['tmp_name'], __DIR__ . '/../../../' . $uploadedPath);
 
-                            if (AMS3_CHKS == "true") {
-                                $usericonurl = getUserData($pdo, $userid)["iconname"];
-                                if (filter_var($usericonurl, FILTER_VALIDATE_URL)) {
-                                    $s3delresult = deleteAmazonS3($usericonurl);
-                                } else {
-                                    $s3delresult = true;
+                                    if ($result) {
+                                        $iconName = $uploadedPath; // 保存されたファイルのパスを使用
+                                        $currentIconPath = getUserData($pdo, $userid)["iconname"];
+                                    } else {
+                                        $beforeUploadError = check_upload_error($uploadedFile, __DIR__.'/../../../usericons/') ?? "ERROR";
+                                        $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
+                                    }
                                 }
-                                if ($s3delresult == true) {
-                                    $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
-                                } else {
-                                    $s3result = false;
+                                if (isset($s3result)) {
+                                    if ($s3result == false) {
+                                        $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
+                                    } else {
+                                        $iconName = $s3result; // S3に保存されたファイルのパスを使用
+                                        $currentIconPath = getUserData($pdo, $userid)["iconname"];
+                                    }
                                 }
-                            } else {
-                                if (check_mime($uploadedFile['tmp_name']) == "image/webp") {
-                                    $newFilename = createUniqId() . '-' . $userid . '.webp';
-                                } else {
-                                    $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
-                                }
-                                $uploadedPath = 'usericons/' . $newFilename;
-                                $result = rename($uploadedFile['tmp_name'], __DIR__ . '/../../../' . $uploadedPath);
-
-                                if ($result) {
-                                    $iconName = $uploadedPath; // 保存されたファイルのパスを使用
-                                    $currentIconPath = getUserData($pdo, $userid)["iconname"];
-                                } else {
-                                    $beforeUploadError = check_upload_error($uploadedFile, __DIR__.'/../../../usericons/') ?? "ERROR";
-                                    $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
-                                }
-                            }
-                            if (isset($s3result)) {
-                                if ($s3result == false) {
-                                    $error_message[] = 'アップロード失敗！(1)エラーコード： S3ERROR';
-                                } else {
-                                    $iconName = $s3result; // S3に保存されたファイルのパスを使用
-                                    $currentIconPath = getUserData($pdo, $userid)["iconname"];
-                                }
+                            }else{
+                                $error_message[] = 'アップロード失敗！(1)エラーコード： PHOTO_INVALID';
                             }
                         } else {
                             $error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";
@@ -236,44 +238,46 @@ if (isset($_GET['token']) || (!(empty($Get_Post_Json)))) {
                         if (check_mime($uploadedFile['tmp_name'])) {
                             $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
                             delete_exif($extension, $uploadedFile['tmp_name']);
-                            resizeImage($uploadedFile['tmp_name'], 2048, 1024);
+                            if(resizeImage($uploadedFile['tmp_name'], 2048, 1024) === true){
+                                if (AMS3_CHKS == "true") {
+                                    $userheadurl = getUserData($pdo, $userid)["headname"];
+                                    if (filter_var($userheadurl, FILTER_VALIDATE_URL)) {
+                                        $s3delresult = deleteAmazonS3($userheadurl);
+                                    } else {
+                                        $s3delresult = true;
+                                    }
+                                    if ($s3delresult == true) {
+                                        $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
+                                    } else {
+                                        $s3result = false;
+                                    }
+                                } else {
+                                    if (check_mime($uploadedFile['tmp_name']) == "image/webp") {
+                                        $newFilename = createUniqId() . '-' . $userid . '.webp';
+                                    } else {
+                                        $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
+                                    }
+                                    $uploadedPath = 'userheads/' . $newFilename;
+                                    $result = rename($uploadedFile['tmp_name'], __DIR__ . '/../../../' . $uploadedPath);
 
-                            if (AMS3_CHKS == "true") {
-                                $userheadurl = getUserData($pdo, $userid)["headname"];
-                                if (filter_var($userheadurl, FILTER_VALIDATE_URL)) {
-                                    $s3delresult = deleteAmazonS3($userheadurl);
-                                } else {
-                                    $s3delresult = true;
+                                    if ($result) {
+                                        $headName = $uploadedPath; // 保存されたファイルのパスを使用
+                                        $currentHeadPath = getUserData($pdo, $userid)["headname"];
+                                    } else {
+                                        $beforeUploadError = check_upload_error($uploadedFile, __DIR__.'/../../../userheads/') ?? "ERROR";
+                                        $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
+                                    }
                                 }
-                                if ($s3delresult == true) {
-                                    $s3result = uploadAmazonS3($uploadedFile['tmp_name']);
-                                } else {
-                                    $s3result = false;
+                                if (isset($s3result)) {
+                                    if ($s3result == false) {
+                                        $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
+                                    } else {
+                                        $headName = $s3result; // S3に保存されたファイルのパスを使用
+                                        $currentHeadPath = getUserData($pdo, $userid)["headname"];
+                                    }
                                 }
-                            } else {
-                                if (check_mime($uploadedFile['tmp_name']) == "image/webp") {
-                                    $newFilename = createUniqId() . '-' . $userid . '.webp';
-                                } else {
-                                    $newFilename = createUniqId() . '-' . $userid . '.' . $extension;
-                                }
-                                $uploadedPath = 'userheads/' . $newFilename;
-                                $result = rename($uploadedFile['tmp_name'], __DIR__ . '/../../../' . $uploadedPath);
-
-                                if ($result) {
-                                    $headName = $uploadedPath; // 保存されたファイルのパスを使用
-                                    $currentHeadPath = getUserData($pdo, $userid)["headname"];
-                                } else {
-                                    $beforeUploadError = check_upload_error($uploadedFile, __DIR__.'/../../../userheads/') ?? "ERROR";
-                                    $error_message[] = 'アップロード失敗！(1)エラーコード：' .$beforeUploadError.'';
-                                }
-                            }
-                            if (isset($s3result)) {
-                                if ($s3result == false) {
-                                    $error_message[] = 'アップロード失敗！(2)エラーコード： S3ERROR';
-                                } else {
-                                    $headName = $s3result; // S3に保存されたファイルのパスを使用
-                                    $currentHeadPath = getUserData($pdo, $userid)["headname"];
-                                }
+                            }else{
+                                $error_message[] = 'アップロード失敗！(1)エラーコード： PHOTO_INVALID';
                             }
                         } else {
                             $error_message[] = "使用できない画像形式です。(FILE_UPLOAD_DEKINAKATTA)";

@@ -362,7 +362,7 @@ if ((!(empty($Get_Post_Json)))) {
                                     //------------
                                 } else {
                                     $error_message[] = 'アカウント削除に失敗しました。(ACCOUNT_DELETE_DAME)';
-                                    actionLog($AuthData[2]["userid"], "error", "admin-user-sanction-api-ban", $userdata['userid'], $error_message[], 4);
+                                    actionLog($AuthData[2]["userid"], "error", "admin-user-sanction-api-ban", $userdata['userid'], $error_message, 4);
                                 }
                             } catch (Exception $e) {
                                 $pdo->rollBack();

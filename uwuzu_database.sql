@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: 127.0.0.1
--- 生成日時: 2025-12-29 19:07:06
+-- 生成日時: 2026-09-20 16:41:22
 -- サーバのバージョン： 10.4.32-MariaDB
 -- PHP のバージョン: 8.2.12
 
@@ -101,6 +101,7 @@ CREATE TABLE `api` (
   `sysid` int(11) NOT NULL,
   `uniqid` varchar(256) NOT NULL,
   `userid` varchar(512) NOT NULL,
+  `keyid` varchar(256) NOT NULL,
   `token` varchar(1024) NOT NULL,
   `scope` mediumtext NOT NULL,
   `datetime` datetime NOT NULL,
